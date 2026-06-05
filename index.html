@@ -1,21 +1,892 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirect Page</title>
-    <script type="text/javascript">
-        // This function will redirect to the specified URL after the page loads
-        function redirectToWebsite() {
-            window.location.href = "https://elanthirayan.my.canva.site"; // Replace with your target URL
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        // Trigger the redirect when the page fully loads
-        window.onload = redirectToWebsite;
-    </script>
+  <!-- SEO Meta Tags -->
+  <title>Elanthirayan Madhavan | Full-Stack Software Engineer</title>
+  <meta name="description" content="Elanthirayan Madhavan – Full-Stack Software Engineer specialising in cloud-native applications, AI/Generative AI, XR/Spatial Computing, Digital Twins, IoT, and Platform Engineering." />
+  <meta name="keywords" content="Elanthirayan Madhavan, Full-Stack Software Engineer, Python, FastAPI, Azure, Cloud, AI, Generative AI, XR, Spatial Computing, Digital Twins, IoT, Platform Engineering, Software Architecture" />
+  <meta name="author" content="Elanthirayan Madhavan" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://elanthirayan.github.io/" />
+  <meta property="og:title" content="Elanthirayan Madhavan | Full-Stack Software Engineer" />
+  <meta property="og:description" content="Building scalable software across cloud, AI, and immersive technology." />
+  <meta property="og:image" content="assets/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Elanthirayan Madhavan | Full-Stack Software Engineer" />
+  <meta name="twitter:description" content="Building scalable software across cloud, AI, and immersive technology." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Custom Config -->
+  <script src="assets/js/tailwind.config.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
-    <h1>Redirecting...</h1>
-    <p>If you are not redirected automatically, <a href="https://elanthirayan.my.canva.site">click here</a>.</p>
+
+<body class="relative">
+
+  <!-- ════════════════════════════════════════════
+       NAVIGATION
+  ════════════════════════════════════════════ -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="glass border-b border-white/5">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+
+          <!-- Logo -->
+          <a href="#home" class="flex items-center gap-2 group" aria-label="Home">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-400 flex items-center justify-center text-white font-bold text-sm select-none group-hover:scale-110 transition-transform">EM</div>
+            <span class="font-semibold text-slate-200 hidden sm:block">Elanthirayan<span class="text-brand-400"> M</span></span>
+          </a>
+
+          <!-- Desktop Nav -->
+          <ul class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-400">
+            <li><a href="#home"       class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Home</a></li>
+            <li><a href="#about"      class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">About</a></li>
+            <li><a href="#skills"     class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Skills</a></li>
+            <li><a href="#blog"       class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Blog</a></li>
+            <li><a href="#media"      class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Media</a></li>
+            <li><a href="#experience" class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Experience</a></li>
+            <li><a href="#contact"    class="nav-link px-3 py-1.5 rounded-md hover:text-slate-200 transition-colors">Contact</a></li>
+          </ul>
+
+          <!-- CTA + Hamburger -->
+          <div class="flex items-center gap-3">
+            <a href="assets/resume.pdf" download class="hidden sm:inline-flex btn-outline text-xs px-4 py-2" aria-label="Download Resume">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v-8m0 8l-3-3m3 3l3-3"/></svg>
+              Resume
+            </a>
+            <button id="menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false" class="md:hidden p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+              <svg id="menu-icon-open"  xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <svg id="menu-icon-close" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+          <div class="pb-4 pt-1 flex flex-col gap-1 text-sm font-medium text-slate-400">
+            <a href="#home"       class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Home</a>
+            <a href="#about"      class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">About</a>
+            <a href="#skills"     class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Skills</a>
+            <a href="#blog"       class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Blog</a>
+            <a href="#media"      class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Media</a>
+            <a href="#experience" class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Experience</a>
+            <a href="#contact"    class="mobile-nav-link px-4 py-2.5 rounded-lg hover:bg-white/5 hover:text-slate-200 transition-colors">Contact</a>
+            <a href="assets/resume.pdf" download class="mt-2 px-4 py-2.5 rounded-lg border border-brand-500/30 text-brand-400 hover:bg-brand-500/10 transition-colors text-center">Download Resume</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- ════════════════════════════════════════════
+       HERO SECTION
+  ════════════════════════════════════════════ -->
+  <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden bg-surface-900">
+
+    <!-- Ambient Glows -->
+    <div class="glow-orb w-96 h-96 bg-brand-600/20 top-1/4 -left-24"></div>
+    <div class="glow-orb w-80 h-80 bg-accent-500/15 bottom-1/4 -right-16"></div>
+    <div class="glow-orb w-64 h-64 bg-purple-600/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+
+    <!-- Grid texture -->
+    <div class="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-32">
+
+      <!-- Status pill -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-accent-400/20 text-accent-400 text-xs font-semibold mb-8 tracking-wide">
+        <span class="relative flex w-2 h-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-accent-400"></span>
+        </span>
+        Available for New Opportunities
+      </div>
+
+      <!-- Name -->
+      <p class="text-sm sm:text-base font-mono text-brand-400 tracking-widest uppercase mb-4 opacity-80">Hi, I'm</p>
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-4 leading-tight">
+        Elanthirayan<br />
+        <span class="gradient-text">Madhavan</span>
+      </h1>
+
+      <!-- Title -->
+      <h2 class="text-xl sm:text-2xl font-semibold text-slate-300 mb-4">Full-Stack Software Engineer</h2>
+
+      <!-- Subheadline -->
+      <p class="text-lg sm:text-xl font-medium text-brand-400/90 mb-6">
+        Building scalable software across cloud, AI, and immersive technology.
+      </p>
+
+      <!-- Description -->
+      <p class="max-w-2xl mx-auto text-slate-400 leading-relaxed text-base mb-10">
+        I design, develop, and deploy applications across frontend, backend, cloud, AI, and immersive technology domains, building scalable systems and integrated solutions that connect modern software engineering with emerging technologies.
+      </p>
+
+      <!-- Focus areas chips -->
+      <div class="flex flex-wrap justify-center gap-2 mb-12">
+        <span class="skill-badge">Frontend</span>
+        <span class="skill-badge">Backend</span>
+        <span class="skill-badge">Cloud</span>
+        <span class="skill-badge">AI / Gen AI</span>
+        <span class="skill-badge">XR / Spatial</span>
+        <span class="skill-badge">Digital Twins</span>
+        <span class="skill-badge">IoT</span>
+        <span class="skill-badge">Platform Engineering</span>
+        <span class="skill-badge">Architecture</span>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#blog" class="btn-primary w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0l-7-7m7 7l-7 7"/></svg>
+          Read Blog
+        </a>
+        <a href="#contact" class="btn-outline w-full sm:w-auto justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Contact Me
+        </a>
+        <a href="assets/resume.pdf" download class="btn-outline w-full sm:w-auto justify-center border-accent-400/30 text-accent-400 hover:bg-accent-400/10 hover:border-accent-400/60">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/></svg>
+          Download Resume
+        </a>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <a href="#about" aria-label="Scroll to About" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-slate-500 hover:text-brand-400 transition-colors group">
+      <span class="text-xs font-medium tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity">scroll</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+    </a>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       ABOUT SECTION
+  ════════════════════════════════════════════ -->
+  <section id="about" class="relative py-24 bg-surface-800">
+    <div class="glow-orb w-96 h-96 bg-brand-600/10 top-0 right-0 pointer-events-none"></div>
+    <div class="glow-orb w-64 h-64 bg-accent-500/8 bottom-0 left-0 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-14">
+        <span class="section-label justify-center">Who I Am</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">About <span class="gradient-text">Me</span></h2>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-12 items-start">
+
+        <!-- Left: Photo + identity card -->
+        <div class="flex flex-col items-center gap-6">
+
+          <!-- Animated ring photo -->
+          <div class="relative profile-ring-wrapper">
+            <div class="profile-ring"></div>
+            <div class="w-52 h-52 rounded-full overflow-hidden border-4 border-surface-800 relative z-10 shadow-2xl">
+              <img
+                src="assets/profile.jpeg"
+                alt="Elanthirayan Madhavan"
+                class="w-full h-full object-cover object-top"
+                onerror="this.closest('.profile-ring-wrapper').style.display='none'"
+              />
+            </div>
+            <span class="absolute bottom-3 right-3 z-20 w-5 h-5 rounded-full bg-accent-400 border-2 border-surface-800 shadow-lg"></span>
+          </div>
+
+          <!-- Domain icon strips -->
+          <div class="w-full glass rounded-2xl p-5 space-y-3">
+            <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">Focus Domains</h3>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-brand-500/15 border border-brand-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21a48.31 48.31 0 01-8.135-.687c-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">Generative AI &amp; Agentic Systems</span>
+            </div>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">Cloud-Native &amp; Platform Engineering</span>
+            </div>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-accent-500/15 border border-accent-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-accent-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">XR / Spatial Computing</span>
+            </div>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-violet-500/15 border border-violet-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">Software Architecture & System Design</span>
+            </div>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-amber-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">Full-Stack Web &amp; API Development</span>
+            </div>
+
+            <div class="flex items-center gap-3 group">
+              <div class="w-8 h-8 rounded-lg bg-rose-500/15 border border-rose-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-rose-500/25 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"/></svg>
+              </div>
+              <span class="text-sm text-slate-300">OpenUSD &amp; Omniverse Simulations</span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Right: Bio + buttons -->
+        <div class="flex flex-col justify-center">
+
+          <div class="space-y-4 text-slate-400 leading-relaxed">
+            <p>
+              I'm a Full-Stack Software Engineer with experience building and deploying applications across frontend, backend, cloud, AI, and immersive technology environments. My work centers on creating scalable, cloud-native solutions that combine strong software engineering principles with emerging technologies.
+            </p>
+            <p>
+              Over the years, I've developed APIs, backend services, web applications, and cloud-based platforms, with a particular focus on system design, software architecture, and platform engineering. I've also contributed to projects involving XR/Spatial Computing, Digital Twins, IoT, and AI, helping connect digital systems with real-world environments in meaningful ways.
+            </p>
+            <p>
+              My technical background includes Python, FastAPI, Azure, modern web technologies, cloud services, immersive technologies, visualizations and enterprise integration patterns. I enjoy working across the entire technology stack, partnering with cross-functional teams, and exploring new tools and frameworks that improve the way software is designed, built, and delivered.
+            </p>
+            <p>
+              What drives me most is solving complex problems with practical, reliable solutions. I'm passionate about building software that delivers measurable impact while maintaining strong engineering standards and long-term scalability.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-3 mt-8">
+            <a href="https://www.linkedin.com/in/elanthirayan/" target="_blank" rel="noopener noreferrer" class="btn-outline text-sm px-5 py-2.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              LinkedIn
+            </a>
+            <a href="#contact" class="btn-primary text-sm px-5 py-2.5">
+              Get In Touch
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SKILLS SECTION
+  ════════════════════════════════════════════ -->
+  <section id="skills" class="relative py-24 bg-surface-900">
+    <div class="glow-orb w-96 h-96 bg-accent-500/10 -bottom-20 -left-20 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-16">
+        <span class="section-label justify-center">What I Work With</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Technical <span class="gradient-text">Skills</span></h2>
+        <p class="mt-4 text-slate-400 max-w-xl mx-auto">A cross-domain toolkit spanning the full stack, from frontend interfaces to cloud infrastructure and emerging technologies.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-6 gap-6">
+
+        <!-- Frontend -->
+        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-200">Frontend</h3>
+              <p class="text-xs text-slate-500">User Interfaces & Experiences</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-badge">HTML5</span>
+            <span class="skill-badge">CSS3</span>
+            <span class="skill-badge">JavaScript (ES6+)</span>
+            <span class="skill-badge">TypeScript</span>
+            <span class="skill-badge">React</span>
+            <span class="skill-badge">Next.js</span>
+            <span class="skill-badge">Tailwind CSS</span>
+            <span class="skill-badge">Responsive Design</span>
+            <span class="skill-badge">UI/UX Implementation</span>
+            <span class="skill-badge">Accessibility</span>
+            <span class="skill-badge">Bootstrap</span>
+          </div>
+        </div>
+
+        <!-- Backend -->
+        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-green-500/15 border border-green-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-200">Backend</h3>
+              <p class="text-xs text-slate-500">APIs & Server-Side Logic</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-badge">Python</span>
+            <span class="skill-badge">FastAPI</span>
+            <span class="skill-badge">Node.js</span>
+            <span class="skill-badge">PHP</span>
+            <span class="skill-badge">REST APIs</span>
+            <span class="skill-badge">API Design</span>
+            <span class="skill-badge">OpenAPI / Swagger</span>
+            <span class="skill-badge">Authentication &amp; Authorization</span>
+            <span class="skill-badge">Backend Services</span>
+            <span class="skill-badge">Enterprise Integration</span>
+          </div>
+        </div>
+
+        <!-- Cloud & DevOps -->
+        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999A5.002 5.002 0 003 15z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-200">Cloud &amp; DevOps</h3>
+              <p class="text-xs text-slate-500">Infrastructure & Deployment</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-badge">Microsoft Azure</span>
+            <span class="skill-badge">Azure App Services</span>
+            <span class="skill-badge">Azure Functions</span>
+            <span class="skill-badge">Azure Storage</span>
+            <span class="skill-badge">Docker</span>
+            <span class="skill-badge">Git</span>
+            <span class="skill-badge">GitHub</span>
+            <span class="skill-badge">CI/CD</span>
+          </div>
+        </div>
+
+        <!-- AI & Generative AI -->
+        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-3">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-200">AI & Generative AI</h3>
+              <p class="text-xs text-slate-500">LLMs, RAG &amp; AI Services</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Generative AI</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Retrieval-Augmented Generation (RAG)</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Agentic AI</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Semantic Search</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">LangChain</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">LangGraph</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">OpenAI / Azure OpenAI</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Hugging Face</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Ollama</span>
+            <span class="skill-badge" style="background:rgba(251,191,36,0.12);border-color:rgba(251,191,36,0.25);color:#fde68a;">Milvus Vector Database</span>
+          </div>
+        </div>
+
+        <!-- Emerging Tech -->
+        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-3">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-slate-200">Emerging Technologies</h3>
+              <p class="text-xs text-slate-500">Next-Gen &amp; Immersive Domains</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">Digital Twins</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">NVIDIA Omniverse</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">OpenUSD</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">XR / Spatial Computing</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">IoT Integration</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">3D Visualization</span>
+            <span class="skill-badge" style="background:rgba(236,72,153,0.12);border-color:rgba(236,72,153,0.25);color:#f9a8d4;">Unity</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+
+
+  <!-- ════════════════════════════════════════════
+       BLOG SECTION
+  ════════════════════════════════════════════ -->
+  <section id="blog" class="relative py-24 bg-surface-800">
+    <div class="glow-orb w-96 h-96 bg-brand-600/10 top-0 right-0 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-16">
+        <span class="section-label justify-center">Thoughts &amp; Writing</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Latest <span class="gradient-text">Blog Posts</span></h2>
+        <p class="mt-4 text-slate-400 max-w-xl mx-auto">
+          Articles on software engineering, cloud, AI, XR, and emerging technology —
+          published on <a href="https://elanthirayan.medium.com/" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 transition-colors font-medium">Medium</a>.
+        </p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="blog-loading" class="flex flex-col items-center justify-center py-16 gap-4 text-slate-500">
+        <svg class="w-8 h-8 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-sm">Fetching latest articles…</span>
+      </div>
+
+      <!-- Error state (hidden by default) -->
+      <div id="blog-error" class="hidden text-center py-12">
+        <div class="inline-flex items-center gap-3 glass rounded-2xl px-6 py-4 text-slate-400 text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Could not load posts.
+          <a href="https://elanthirayan.medium.com/" target="_blank" rel="noopener noreferrer" class="text-brand-400 hover:text-brand-300 font-medium transition-colors">Read on Medium →</a>
+        </div>
+      </div>
+
+      <!-- Blog grid (populated by JS) -->
+      <div id="blog-grid" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <!-- View all -->
+      <div class="text-center mt-12">
+        <a href="https://elanthirayan.medium.com/" target="_blank" rel="noopener noreferrer" class="btn-outline inline-flex">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+          View All on Medium
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════
+       MEDIA SECTION (YouTube)
+  ════════════════════════════════════════════ -->
+  <section id="media" class="relative py-24 bg-surface-900">
+    <div class="glow-orb w-96 h-96 bg-red-600/8 top-0 left-0 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-16">
+        <span class="section-label justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+          YouTube Channel
+        </span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Latest <span class="gradient-text">Videos</span></h2>
+        <p class="mt-4 text-slate-400 max-w-xl mx-auto">
+          Demos, tutorials, and tech explorations —
+          published on <a href="https://www.youtube.com/@ElanthirayanMadhavan" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:text-red-300 transition-colors font-medium">YouTube</a>.
+        </p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="yt-loading" class="flex flex-col items-center justify-center py-16 gap-4 text-slate-500">
+        <svg class="w-8 h-8 animate-spin text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-sm">Fetching latest videos…</span>
+      </div>
+
+      <!-- Error state -->
+      <div id="yt-error" class="hidden text-center py-12">
+        <div class="inline-flex items-center gap-3 glass rounded-2xl px-6 py-4 text-slate-400 text-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          Could not load videos.
+          <a href="https://www.youtube.com/@ElanthirayanMadhavan" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:text-red-300 font-medium transition-colors">Watch on YouTube →</a>
+        </div>
+      </div>
+
+      <!-- Video grid (populated by JS) -->
+      <div id="yt-grid" class="hidden grid sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+      <!-- View all -->
+      <div class="text-center mt-12">
+        <a href="https://www.youtube.com/@ElanthirayanMadhavan" target="_blank" rel="noopener noreferrer"
+           class="btn-outline inline-flex items-center gap-2 border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-400/50 hover:text-red-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+          View All on YouTube
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════
+       EXPERIENCE SECTION
+  ════════════════════════════════════════════ -->
+  <section id="experience" class="relative py-24 bg-surface-900">
+    <div class="glow-orb w-80 h-80 bg-brand-600/10 bottom-0 left-0 pointer-events-none"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-16">
+        <span class="section-label justify-center">Career Journey</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Work <span class="gradient-text">Experience</span></h2>
+        <p class="mt-4 text-slate-400 max-w-xl mx-auto">
+          Professional experience across software engineering roles.
+          <span class="placeholder-note">Editable</span>
+        </p>
+      </div>
+
+      <!-- Timeline -->
+      <div class="relative">
+        <!-- Vertical line -->
+        <div class="absolute left-4 sm:left-6 top-0 bottom-0 w-px bg-gradient-to-b from-brand-500 via-accent-400 to-transparent"></div>
+
+        <div class="space-y-8">
+
+          <!-- Experience 1 -->
+          <div class="relative pl-12 sm:pl-16">
+            <!-- Dot -->
+            <div class="absolute left-2 sm:left-4 top-5 w-5 h-5 rounded-full bg-brand-500 border-4 border-surface-900 shadow-lg shadow-brand-500/30 -translate-x-1/2"></div>
+
+            <div class="glass glass-hover rounded-2xl p-6">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    Web Developer
+                  </h3>
+                  <p class="text-brand-400 font-medium text-sm mt-0.5">
+                    Axinovate Technologies LLP
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-slate-400 glass px-3 py-1.5 rounded-full flex-shrink-0">
+                  2015 – 2017
+                </span>
+              </div>
+              <ul class="space-y-2 text-sm text-slate-400">
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Contributed to the development of two web-based e-learning platforms, <strong class="text-slate-300">Skilladda</strong> and <strong class="text-slate-300">Xucore</strong>, integrating 3D gamification elements to boost learner engagement and create a more enjoyable learning experience.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Built end-to-end as the sole developer — from client requirements to deployment — a web and mobile event management application featuring a real-time multiplayer quiz game built with <strong class="text-slate-300">Node.js</strong>, <strong class="text-slate-300">WebRTC</strong>, and <strong class="text-slate-300">MySQL</strong>. Successfully deployed at a major tech event in Asia, achieving <strong class="text-slate-300">95% attendee participation</strong>, with the app available on iOS, Android, and web platforms.</span>
+                </li>
+              </ul>
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/5">
+                <span class="tech-badge">HTML/CSS</span>
+                <span class="tech-badge">JavaScript</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">WebRTC</span>
+                <span class="tech-badge">MySQL</span>
+                <span class="tech-badge">iOS</span>
+                <span class="tech-badge">Android</span>
+                <span class="tech-badge">PHP</span>
+                <span class="tech-badge">Apache Cordova</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experience 2 -->
+          <div class="relative pl-12 sm:pl-16">
+            <div class="absolute left-2 sm:left-4 top-5 w-5 h-5 rounded-full bg-accent-400 border-4 border-surface-900 shadow-lg shadow-accent-400/30 -translate-x-1/2"></div>
+
+            <div class="glass glass-hover rounded-2xl p-6">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-200">
+                    VR Developer
+                  </h3>
+                  <p class="text-accent-400 font-medium text-sm mt-0.5">
+                    ASM Technologies Ltd
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-slate-400 glass px-3 py-1.5 rounded-full flex-shrink-0">
+                  2017 – 2018
+                </span>
+              </div>
+              <ul class="space-y-2 text-sm text-slate-400">
+                <li class="flex gap-2">
+                  <span class="text-accent-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Developed and implemented a <strong class="text-slate-300">Virtual Reality</strong> training module for assembling and dismantling cars and semiconductor subsystems, improving learning efficiency by <strong class="text-slate-300">65%</strong> over traditional methods.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Simulated automobile <strong class="text-slate-300">ADAS technology</strong> in VR, enabling engineers to configure systems and assess user experience from multiple perspectives — improving engineers' understanding by <strong class="text-slate-300">40%</strong>.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-accent-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Built product showcases, brochures, and user manuals using <strong class="text-slate-300">Augmented Reality</strong> to enhance user understanding and engagement.</span>
+                </li>
+              </ul>
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/5">
+                <span class="tech-badge">Virtual Reality</span>
+                <span class="tech-badge">Augmented Reality</span>
+                <span class="tech-badge">3D Visualization</span>
+                <span class="tech-badge">Three.js</span>
+                <span class="tech-badge">Unity</span>
+                <span class="tech-badge">VR Simulation</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Experience 3 -->
+          <div class="relative pl-12 sm:pl-16">
+            <div class="absolute left-2 sm:left-4 top-5 w-5 h-5 rounded-full bg-brand-500 border-4 border-surface-900 shadow-lg shadow-brand-500/30 -translate-x-1/2"></div>
+
+            <div class="glass glass-hover rounded-2xl p-6">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-slate-200">
+                    XR Innovation Analyst
+                  </h3>
+                  <p class="text-brand-400 font-medium text-sm mt-0.5">
+                    Shell India Markets Pvt Ltd
+                  </p>
+                  <p class="text-slate-500 text-xs mt-1">
+                    via L&T Technology Services (2018–2023) · via Randstad India Pvt Ltd (2023–2025) · Direct (2025–Present)
+                  </p>
+                </div>
+                <span class="text-xs font-medium text-slate-400 glass px-3 py-1.5 rounded-full flex-shrink-0">
+                  2018 – Present
+                </span>
+              </div>
+              <ul class="space-y-2 text-sm text-slate-400">
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Led development of multiple <strong class="text-slate-300">XR Proof of Concepts</strong> and conducted in-depth evaluations of platforms including XR HUB, Pixyz Studio, CloudXR, and 8th Wall. Published research papers for each evaluation, with findings contributing to successful platform adoption across various initiatives.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Collaborated on a PoC integrating <strong class="text-slate-300">Machine Vision, generative AI, and cloud computing</strong> with XR, enabling 3D model creation via voice commands from a VR device.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Designed and deployed a <strong class="text-slate-300">spatial computing application for Apple Vision Pro</strong> using Unity3D and Xcode SwiftUI, enabling real-time alert identification through Digital Twin data integration.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Engineered a scientific visualization package transforming 2D application data into immersive <strong class="text-slate-300">3D experiences</strong>, enhancing situational awareness by <strong class="text-slate-300">72%</strong> and streamlining decision-making processes.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Designed and led comprehensive <strong class="text-slate-300">XR training programs</strong> for students at Universiti Teknologi Brunei, increasing knowledge retention by <strong class="text-slate-300">40%</strong>.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Managed multiple projects in collaboration with third-party vendors and partners, ensuring seamless integration and successful delivery.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Driving <strong class="text-slate-300">OpenUSD</strong> adoption across the organisation to standardise 3D asset formats into a single source of truth, improving interoperability across XR, simulation, and digital twin pipelines.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Building a <strong class="text-slate-300">RAG-based patent intelligence system</strong> using keyword-driven document ingestion, vector embeddings, and a Next.js chatbot UI — enabling semantic search over large technical document repositories, running on <strong class="text-slate-300">HPC infrastructure</strong>.</span>
+                </li>
+                <li class="flex gap-2">
+                  <span class="text-brand-400 flex-shrink-0 mt-0.5">▸</span>
+                  <span>Developing <strong class="text-slate-300">Omniverse simulations</strong> by integrating real-time operational data with OpenUSD-based 3D models, serving both as live digital twins and a structured 3D asset catalog.</span>
+                </li>
+              </ul>
+              <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/5">
+                <span class="tech-badge">OpenUSD</span>
+                <span class="tech-badge">RAG</span>
+                <span class="tech-badge">Next.js</span>
+                <span class="tech-badge">HPC</span>
+                <span class="tech-badge">Unity3D</span>
+                <span class="tech-badge">Apple Vision Pro</span>
+                <span class="tech-badge">Three.js</span>
+                <span class="tech-badge">A-Frame</span>
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">Azure</span>
+                <span class="tech-badge">Omniverse</span>
+                <span class="tech-badge">GenAI</span>
+                <span class="tech-badge">Reinforcement Learning</span>
+                <span class="tech-badge">Digital Twin</span>
+                <span class="tech-badge">Cloud Computing</span>
+                <span class="tech-badge">SwiftUI</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ════════════════════════════════════════════
+       CONTACT SECTION
+  ════════════════════════════════════════════ -->
+  <section id="contact" class="relative py-24 bg-surface-900">
+    <div class="glow-orb w-96 h-96 bg-brand-600/15 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+      <div class="text-center mb-16">
+        <span class="section-label justify-center">Let's Connect</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-white">Get In <span class="gradient-text">Touch</span></h2>
+        <p class="mt-4 text-slate-400 max-w-xl mx-auto">
+          Open to new opportunities, collaborations, and interesting conversations across software engineering, AI, cloud, and emerging technology.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <!-- Email -->
+        <a href="mailto:imelanthirayan@gmail.com" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-brand-500/15 border border-brand-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-brand-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">Email</p>
+            <p class="text-sm text-slate-300 font-medium truncate">
+              imelanthirayan@gmail.com <span class="placeholder-note">Placeholder</span>
+            </p>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://www.linkedin.com/in/elanthirayan/" target="_blank" rel="noopener noreferrer" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">LinkedIn</p>
+            <p class="text-sm text-slate-300 font-medium truncate">linkedin.com/in/elanthirayan</p>
+          </div>
+        </a>
+
+        <!-- GitHub -->
+        <a href="https://github.com/imelanthirayan" target="_blank" rel="noopener noreferrer" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-slate-500/15 border border-slate-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">GitHub</p>
+            <p class="text-sm text-slate-300 font-medium truncate">github.com/imelanthirayan</p>
+          </div>
+        </a>
+
+        <!-- YouTube -->
+        <a href="https://www.youtube.com/@ElanthirayanMadhavan" target="_blank" rel="noopener noreferrer" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-red-500/15 border border-red-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">YouTube</p>
+            <p class="text-sm text-slate-300 font-medium truncate">@ElanthirayanMadhavan</p>
+          </div>
+        </a>
+
+        <!-- Medium -->
+        <a href="https://elanthirayan.medium.com" target="_blank" rel="noopener noreferrer" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-slate-500/15 border border-slate-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-slate-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-300" fill="currentColor" viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">Medium</p>
+            <p class="text-sm text-slate-300 font-medium truncate">elanthirayan.medium.com</p>
+          </div>
+        </a>
+
+        <!-- Linktree -->
+        <a href="https://linktr.ee/elanthirayan" target="_blank" rel="noopener noreferrer" class="glass glass-hover rounded-2xl p-5 flex items-center gap-4 group">
+          <div class="w-11 h-11 rounded-xl bg-green-500/15 border border-green-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-green-500/25 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-500 uppercase tracking-wide font-medium mb-0.5">Linktree</p>
+            <p class="text-sm text-slate-300 font-medium truncate">linktr.ee/elanthirayan</p>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Resume download -->
+      <div class="mt-8 text-center">
+        <a href="assets/resume.pdf" download class="btn-primary inline-flex">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 8l-3-3m3 3l3-3"/></svg>
+          Download Resume
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════ -->
+  <footer class="relative bg-surface-900 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+
+        <!-- Branding -->
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-accent-400 flex items-center justify-center text-white font-bold text-sm select-none">EM</div>
+          <div>
+            <p class="font-semibold text-slate-200 text-sm">Elanthirayan Madhavan</p>
+            <p class="text-xs text-slate-500">Full-Stack Software Engineer</p>
+          </div>
+        </div>
+
+        <!-- Nav links -->
+        <nav aria-label="Footer navigation">
+          <ul class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-500">
+            <li><a href="#home"       class="hover:text-slate-300 transition-colors">Home</a></li>
+            <li><a href="#about"      class="hover:text-slate-300 transition-colors">About</a></li>
+            <li><a href="#skills"     class="hover:text-slate-300 transition-colors">Skills</a></li>
+            <li><a href="#blog"       class="hover:text-slate-300 transition-colors">Blog</a></li>
+            <li><a href="#media"      class="hover:text-slate-300 transition-colors">Media</a></li>
+            <li><a href="#experience" class="hover:text-slate-300 transition-colors">Experience</a></li>
+            <li><a href="#contact"    class="hover:text-slate-300 transition-colors">Contact</a></li>
+          </ul>
+        </nav>
+
+        <!-- Social icons -->
+        <div class="flex items-center gap-3">
+          <a href="https://www.linkedin.com/in/elanthirayan/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-sky-400 hover:border-sky-400/30 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          </a>
+          <a href="https://elanthirayan.medium.com" target="_blank" rel="noopener noreferrer" aria-label="Medium" class="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+          </a>
+          <a href="https://www.youtube.com/@ElanthirayanMadhavan" target="_blank" rel="noopener noreferrer" aria-label="YouTube" class="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+          </a>
+          <a href="https://github.com/imelanthirayan" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="w-9 h-9 rounded-lg glass flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="mt-8 pt-8 border-t border-white/5 text-center">
+        <p class="text-xs text-slate-600">
+          &copy; <span id="current-year"></span> Elanthirayan Madhavan. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="assets/js/main.js" defer></script>
+
 </body>
 </html>
