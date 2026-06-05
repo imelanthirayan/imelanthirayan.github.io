@@ -1,4 +1,5 @@
-# Website Redirect Repository
+# Elanthirayan Madhavan — Portfolio
 
-This repository contains the code for redirecting users to my personal website. It is designed to ensure a seamless transition from this repository to my portfolio site.
+🌐 **Live:** [imelanthirayan.github.io](https://imelanthirayan.github.io)
 
+Personal portfolio showcasing 11+ years of experience across Full-Stack Engineering, XR/Spatial Computing, Generative AI, Cloud, and Omniverse Simulations.
