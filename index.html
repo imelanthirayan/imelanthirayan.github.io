@@ -170,12 +170,11 @@
 
       <!-- Focus areas chips -->
       <div class="flex flex-wrap justify-center gap-2 mb-8">
-        <span class="skill-badge">Frontend</span>
-        <span class="skill-badge">Backend</span>
-        <span class="skill-badge">API Development</span>
-        <span class="skill-badge">AI / Gen AI</span>
-        <span class="skill-badge">XR / Spatial</span>
-        <span class="skill-badge">Architecture</span>
+        <a href="#skill-frontend"  class="skill-badge hover:border-brand-400/60 hover:text-brand-300 transition-colors cursor-pointer">Frontend</a>
+        <a href="#skill-backend"   class="skill-badge hover:border-brand-400/60 hover:text-brand-300 transition-colors cursor-pointer">Backend</a>
+        <a href="#skill-cloud"     class="skill-badge hover:border-brand-400/60 hover:text-brand-300 transition-colors cursor-pointer">Cloud &amp; DevOps</a>
+        <a href="#skill-ai"        class="skill-badge hover:border-brand-400/60 hover:text-brand-300 transition-colors cursor-pointer">AI &amp; Generative AI</a>
+        <a href="#skill-emerging"  class="skill-badge hover:border-brand-400/60 hover:text-brand-300 transition-colors cursor-pointer">Emerging Technologies</a>
       </div>
 
       <!-- Stats -->
@@ -300,7 +299,7 @@
         <!-- Right: Bio + buttons -->
         <div class="flex flex-col justify-center">
 
-          <div class="space-y-4 text-slate-400 leading-relaxed">
+          <div class="about-bio-wrap space-y-4 text-slate-400 leading-relaxed">
             <p>
               I'm a Full-Stack Developer with a strong foundation in building and deploying end-to-end applications, from frontend interfaces to backend services, cloud infrastructure, and AI integrations. My work centres on creating scalable, cloud-native solutions that solve real problems with clean, maintainable code.
             </p>
@@ -348,7 +347,7 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-6 gap-6">
 
         <!-- Frontend -->
-        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+        <div id="skill-frontend" class="scroll-mt-24 glass glass-hover rounded-2xl p-6 lg:col-span-2">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>
@@ -359,22 +358,22 @@
             </div>
           </div>
           <div class="skill-tags flex flex-wrap gap-2">
-            <span class="skill-badge">HTML5</span>
-            <span class="skill-badge">CSS3</span>
-            <span class="skill-badge">JavaScript (ES6+)</span>
-            <span class="skill-badge">TypeScript</span>
-            <span class="skill-badge">React</span>
-            <span class="skill-badge">Next.js</span>
-            <span class="skill-badge">Tailwind CSS</span>
-            <span class="skill-badge">Responsive Design</span>
-            <span class="skill-badge">UI/UX Implementation</span>
-            <span class="skill-badge">Accessibility</span>
-            <span class="skill-badge">Bootstrap</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">HTML5</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">CSS3</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">JavaScript (ES6+)</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">TypeScript</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">React</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">Next.js</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">Tailwind CSS</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">Responsive Design</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">UI/UX Implementation</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">Accessibility</span>
+            <span class="skill-badge" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd;">Bootstrap</span>
           </div>
         </div>
 
         <!-- Backend -->
-        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+        <div id="skill-backend" class="scroll-mt-24 glass glass-hover rounded-2xl p-6 lg:col-span-2">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-10 h-10 rounded-xl bg-green-500/15 border border-green-500/20 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -385,21 +384,21 @@
             </div>
           </div>
           <div class="skill-tags flex flex-wrap gap-2">
-            <span class="skill-badge">Python</span>
-            <span class="skill-badge">FastAPI</span>
-            <span class="skill-badge">Node.js</span>
-            <span class="skill-badge">PHP</span>
-            <span class="skill-badge">REST APIs</span>
-            <span class="skill-badge">API Design</span>
-            <span class="skill-badge">OpenAPI / Swagger</span>
-            <span class="skill-badge">Authentication &amp; Authorization</span>
-            <span class="skill-badge">Backend Services</span>
-            <span class="skill-badge">Enterprise Integration</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">Python</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">FastAPI</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">Node.js</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">PHP</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">REST APIs</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">API Design</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">OpenAPI / Swagger</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">Authentication &amp; Authorization</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">Backend Services</span>
+            <span class="skill-badge" style="background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.25);color:#86efac;">Enterprise Integration</span>
           </div>
         </div>
 
         <!-- Cloud & DevOps -->
-        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-2">
+        <div id="skill-cloud" class="scroll-mt-24 glass glass-hover rounded-2xl p-6 lg:col-span-2">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-10 h-10 rounded-xl bg-sky-500/15 border border-sky-500/20 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999A5.002 5.002 0 003 15z"/></svg>
@@ -410,19 +409,19 @@
             </div>
           </div>
           <div class="skill-tags flex flex-wrap gap-2">
-            <span class="skill-badge">Microsoft Azure</span>
-            <span class="skill-badge">Azure App Services</span>
-            <span class="skill-badge">Azure Functions</span>
-            <span class="skill-badge">Azure Storage</span>
-            <span class="skill-badge">Docker</span>
-            <span class="skill-badge">Git</span>
-            <span class="skill-badge">GitHub</span>
-            <span class="skill-badge">CI/CD</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Microsoft Azure</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Azure App Services</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Azure Functions</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Azure Storage</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Docker</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">Git</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">GitHub</span>
+            <span class="skill-badge" style="background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.25);color:#7dd3fc;">CI/CD</span>
           </div>
         </div>
 
         <!-- AI & Generative AI -->
-        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-3">
+        <div id="skill-ai" class="scroll-mt-24 glass glass-hover rounded-2xl p-6 lg:col-span-3">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/20 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
@@ -447,7 +446,7 @@
         </div>
 
         <!-- Emerging Tech -->
-        <div class="glass glass-hover rounded-2xl p-6 lg:col-span-3">
+        <div id="skill-emerging" class="scroll-mt-24 glass glass-hover rounded-2xl p-6 lg:col-span-3">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/20 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>

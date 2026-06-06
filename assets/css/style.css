@@ -310,3 +310,28 @@ body::before {
   .exp-read-more  { display: none !important; }
   .show-more-wrap { display: none !important; }
 }
+
+/* ── About bio read-more (mobile only) ── */
+@media (max-width: 639px) {
+  .about-bio-wrap {
+    position: relative;
+    max-height: 100px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .about-bio-wrap.expanded {
+    max-height: 1200px;
+  }
+  .about-bio-wrap:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, #0f0f1a);
+    pointer-events: none;
+  }
+  .about-read-more { display: inline-block; }
+}
+@media (min-width: 640px) {
+  .about-read-more { display: none !important; }
+}

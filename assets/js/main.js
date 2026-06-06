@@ -352,3 +352,16 @@ document.querySelectorAll('.skill-tags').forEach(wrap => {
   });
   wrap.parentNode.insertBefore(btn, wrap.nextSibling);
 });
+
+// ── About bio "Read more" toggle (CSS hides button on desktop) ──
+const aboutBio = document.querySelector('.about-bio-wrap');
+if (aboutBio) {
+  const btn = document.createElement('button');
+  btn.textContent = 'Read more';
+  btn.className = 'about-read-more text-xs text-brand-400 hover:text-brand-300 mt-3 transition-colors';
+  btn.addEventListener('click', () => {
+    aboutBio.classList.toggle('expanded');
+    btn.textContent = aboutBio.classList.contains('expanded') ? 'Show less' : 'Read more';
+  });
+  aboutBio.parentNode.insertBefore(btn, aboutBio.nextSibling);
+}
