@@ -194,12 +194,13 @@ fadeEls.forEach(el => {
       const posts = data.items.slice(0, 6);
       grid.innerHTML = posts.map((item, i) => buildCard(item, i)).join('');
       grid.classList.remove('hidden');
-      grid.querySelectorAll('article').forEach(el => {
+      grid.querySelectorAll('article').forEach((el) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
         fadeObserver.observe(el);
       });
+      document.getElementById('blog-show-more').style.display = 'block';
     })
     .catch(() => {
       loading.classList.add('hidden');
@@ -277,12 +278,13 @@ fadeEls.forEach(el => {
       if (data.status !== 'ok' || !data.items || data.items.length === 0) throw new Error('No items');
       ytGrid.innerHTML = data.items.slice(0, 6).map(v => buildVideoCard(v)).join('');
       ytGrid.classList.remove('hidden');
-      ytGrid.querySelectorAll('article').forEach(el => {
+      ytGrid.querySelectorAll('article').forEach((el) => {
         el.style.opacity = '0';
         el.style.transform = 'translateY(20px)';
         el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
         fadeObserver.observe(el);
       });
+      document.getElementById('yt-show-more').style.display = 'block';
     })
     .catch(() => {
       ytLoading.classList.add('hidden');
@@ -303,4 +305,50 @@ window.addEventListener('scroll', () => {
 });
 backToTop.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ── Mobile: show more cards ──
+function toggleMobileCards(gridId, btnWrapperId) {
+  const grid = document.getElementById(gridId);
+  const btn = document.querySelector(`#${btnWrapperId} button`);
+  const expanded = grid.classList.toggle('show-all');
+  btn.textContent = expanded ? 'Show less ↑' : 'Show more ↓';
+  if (!expanded) {
+    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// ── Experience "Read more" toggle (always injected; CSS hides button on desktop) ──
+document.querySelectorAll('.exp-ul').forEach(ul => {
+  const wrap = document.createElement('div');
+  wrap.className = 'exp-ul-wrap';
+  ul.parentNode.insertBefore(wrap, ul);
+  wrap.appendChild(ul);
+
+  // Pull the tech-badges div (next sibling) into the wrap so it collapses too
+  const techBadges = wrap.nextElementSibling;
+  if (techBadges && techBadges.classList.contains('flex')) {
+    wrap.appendChild(techBadges);
+  }
+
+  const btn = document.createElement('button');
+  btn.textContent = 'Read more';
+  btn.className = 'exp-read-more text-xs text-brand-400 hover:text-brand-300 mt-2 transition-colors';
+  btn.addEventListener('click', () => {
+    wrap.classList.toggle('expanded');
+    btn.textContent = wrap.classList.contains('expanded') ? 'Show less' : 'Read more';
+  });
+  wrap.parentNode.insertBefore(btn, wrap.nextSibling);
+});
+
+// ── Skill panel badge "Read more" toggle (CSS collapses on mobile) ──
+document.querySelectorAll('.skill-tags').forEach(wrap => {
+  const btn = document.createElement('button');
+  btn.textContent = 'Read more';
+  btn.className = 'skill-read-more text-xs text-brand-400 hover:text-brand-300 mt-2 transition-colors';
+  btn.addEventListener('click', () => {
+    wrap.classList.toggle('expanded');
+    btn.textContent = wrap.classList.contains('expanded') ? 'Show less' : 'Read more';
+  });
+  wrap.parentNode.insertBefore(btn, wrap.nextSibling);
 });

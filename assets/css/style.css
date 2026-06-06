@@ -1,7 +1,10 @@
 /* ── Base ── */
 *, *::before, *::after { box-sizing: border-box; }
-html { font-family: 'Inter', system-ui, sans-serif; }
+html { font-family: 'Source Sans 3', system-ui, sans-serif; }
 body { background-color: #0a0a0f; color: #e2e8f0; }
+
+h1, h2, h3, h4, h5, h6 { font-family: 'Fraunces', Georgia, serif; }
+.gradient-text { font-family: 'Fraunces', Georgia, serif; }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
@@ -248,4 +251,62 @@ body::before {
 }
 #mobile-menu.open {
   max-height: 500px;
+}
+
+/* ── Mobile card limiting (CSS nth-child, no JS screen-check needed) ── */
+@media (max-width: 639px) {
+  #blog-grid:not(.show-all) article:nth-child(n+4),
+  #yt-grid:not(.show-all) article:nth-child(n+4) {
+    display: none !important;
+  }
+}
+
+/* ── Experience read-more (mobile only via CSS) ── */
+@media (max-width: 639px) {
+  .exp-ul-wrap {
+    position: relative;
+    max-height: 140px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .exp-ul-wrap.expanded {
+    max-height: 1200px;
+  }
+  .exp-ul-wrap:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, #0f172a);
+    pointer-events: none;
+  }
+  .exp-read-more {
+    display: inline-block;
+  }
+}
+/* ── Skill panel badge collapse (mobile only) ── */
+@media (max-width: 639px) {
+  .skill-tags {
+    position: relative;
+    max-height: 76px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .skill-tags.expanded {
+    max-height: 600px;
+  }
+  .skill-tags:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 32px;
+    background: linear-gradient(to bottom, transparent, #1e293b);
+    pointer-events: none;
+  }
+  .skill-read-more { display: inline-block; }
+}
+@media (min-width: 640px) {
+  .skill-read-more { display: none !important; }
+  .exp-read-more  { display: none !important; }
+  .show-more-wrap { display: none !important; }
 }
