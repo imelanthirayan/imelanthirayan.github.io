@@ -45,7 +45,7 @@ sections.forEach(s => observer.observe(s));
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   if (window.scrollY > 20) {
-    navbar.querySelector('.glass').style.backgroundColor = 'rgba(10,10,15,0.85)';
+    navbar.querySelector('.glass').style.backgroundColor = 'rgba(10,10,15,0.92)';
   } else {
     navbar.querySelector('.glass').style.backgroundColor = '';
   }
@@ -157,7 +157,7 @@ fadeEls.forEach(el => {
     const thumbHtml = thumb
       ? `<div class="relative h-40 overflow-hidden">
            <img src="${thumb}" alt="${title}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-           <div class="absolute inset-0 bg-gradient-to-t from-surface-900/80 to-transparent"></div>
+           <div class="absolute inset-0 bg-gradient-to-t from-white/60 to-transparent"></div>
          </div>`
       : '';
 
@@ -171,11 +171,11 @@ fadeEls.forEach(el => {
             ${icon}
           </div>
           <div class="flex-1 min-w-0">
-            ${date ? `<time class="text-xs text-slate-500 font-mono">${date}</time>` : ''}
+            ${date ? `<time class="text-xs text-slate-600 font-mono">${date}</time>` : ''}
             <h3 class="text-sm font-semibold text-slate-200 leading-snug mt-0.5 line-clamp-2 group-hover:text-brand-300 transition-colors">${title}</h3>
           </div>
         </div>
-        ${snippet ? `<p class="text-xs text-slate-400 leading-relaxed mb-4 flex-1 line-clamp-3">${snippet}</p>` : '<div class="flex-1"></div>'}
+        ${snippet ? `<p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1 line-clamp-3">${snippet}</p>` : '<div class="flex-1"></div>'}
         ${tagsHtml ? `<div class="flex flex-wrap gap-1.5 mb-4">${tagsHtml}</div>` : ''}
         <a href="${link}" target="_blank" rel="noopener noreferrer"
            class="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-brand-400 hover:text-brand-300 transition-colors group/link">
@@ -245,7 +245,7 @@ fadeEls.forEach(el => {
       <a href="${link}" target="_blank" rel="noopener noreferrer" class="relative block overflow-hidden" aria-label="Watch: ${title}">
         <img src="${thumb}" alt="${title}" loading="lazy"
              class="w-full aspect-video object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-white/30 via-white/10 to-transparent"></div>
         <div class="absolute inset-0 flex items-center justify-center">
           <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-lg
                       transition-transform duration-300 group-hover:scale-110 group-hover:bg-red-500">
@@ -258,7 +258,7 @@ fadeEls.forEach(el => {
                     scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
       </a>
       <div class="p-4 flex flex-col flex-1">
-        ${date ? `<time class="text-xs text-slate-500 font-mono mb-1.5">${date}</time>` : ''}
+        ${date ? `<time class="text-xs text-slate-600 font-mono mb-1.5">${date}</time>` : ''}
         <h3 class="text-sm font-semibold text-slate-200 leading-snug line-clamp-2 group-hover:text-red-300 transition-colors flex-1">
           ${title}
         </h3>
@@ -292,7 +292,135 @@ fadeEls.forEach(el => {
     });
 })();
 
-// Back to top button
+// ════════════════════════════════════════════
+// GITHUB REPOSITORIES
+// Uses the public GitHub REST API (no CORS issues for public repos).
+// Username: imelanthirayan
+// ════════════════════════════════════════════
+(function loadGitHubRepos() {
+  const GH_API = 'https://api.github.com/users/imelanthirayan/repos?sort=updated&per_page=9&type=public';
+
+  const grid    = document.getElementById('gh-grid');
+  const loading = document.getElementById('gh-loading');
+  const error   = document.getElementById('gh-error');
+
+  const LANG_COLORS = {
+    'JavaScript': '#f7df1e', 'TypeScript': '#3178c6', 'Python': '#3572A5',
+    'HTML': '#e34c26', 'CSS': '#563d7c', 'C#': '#178600',
+    'Java': '#b07219', 'Go': '#00ADD8', 'Rust': '#dea584',
+    'Shell': '#89e051', 'Vue': '#41b883', 'Svelte': '#ff3e00',
+  };
+
+  const ACCENTS = [
+    'from-teal-500 to-cyan-400',
+    'from-cyan-500 to-sky-400',
+    'from-teal-600 to-teal-400',
+    'from-sky-500 to-cyan-400',
+    'from-cyan-600 to-teal-400',
+    'from-teal-500 to-sky-400',
+  ];
+
+  function formatDate(dateStr) {
+    try { return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch { return ''; }
+  }
+
+  function buildRepoCard(repo, idx) {
+    const name        = repo.name || 'Untitled';
+    const description = repo.description || '';
+    const link        = repo.html_url || '#';
+    const homepage    = repo.homepage || '';
+    const language    = repo.language || '';
+    const stars       = repo.stargazers_count || 0;
+    const forks       = repo.forks_count || 0;
+    const topics      = (repo.topics || []).slice(0, 3);
+    const updated     = formatDate(repo.updated_at);
+    const accent      = ACCENTS[idx % ACCENTS.length];
+    const langColor   = LANG_COLORS[language] || '#2dd4bf';
+
+    const topicsHtml = topics.map(t =>
+      `<span class="tech-badge" style="border-color:${langColor}33;color:${langColor};background:${langColor}15;">${t}</span>`
+    ).join('');
+
+    const langBadge = language
+      ? `<span class="inline-flex items-center gap-1 text-xs text-slate-600">
+           <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${langColor};"></span>
+           ${language}
+         </span>`
+      : '';
+
+    const statsHtml = `
+      <div class="flex items-center gap-3 text-xs text-slate-600">
+        ${langBadge}
+        ${stars > 0 ? `<span class="inline-flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          ${stars}
+        </span>` : ''}
+        ${forks > 0 ? `<span class="inline-flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v9a3 3 0 003 3h6m0 0V9m0 6l3-3m-3 3l-3-3"/></svg>
+          ${forks}
+        </span>` : ''}
+      </div>`;
+
+    const liveLink = homepage
+      ? `<a href="${homepage}" target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold text-accent-400 hover:text-accent-300 transition-colors group/link">
+           Live
+           <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+         </a>`
+      : '';
+
+    return `
+    <article class="glass glass-hover rounded-2xl overflow-hidden flex flex-col group">
+      <div class="h-1.5 bg-gradient-to-r ${accent}"></div>
+      <div class="p-5 flex flex-col flex-1">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="w-9 h-9 rounded-lg bg-teal-500/15 border border-teal-500/20 flex items-center justify-center flex-shrink-0 text-teal-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            ${updated ? `<time class="text-xs text-slate-600 font-mono">Updated ${updated}</time>` : ''}
+            <h3 class="text-sm font-semibold text-slate-200 leading-snug mt-0.5 truncate group-hover:text-teal-300 transition-colors">${name}</h3>
+          </div>
+        </div>
+        ${description ? `<p class="text-xs text-slate-600 leading-relaxed mb-4 flex-1 line-clamp-3">${description}</p>` : '<div class="flex-1"></div>'}
+        ${topicsHtml ? `<div class="flex flex-wrap gap-1.5 mb-4">${topicsHtml}</div>` : ''}
+        <div class="mt-auto flex items-center justify-between gap-2 flex-wrap">
+          ${statsHtml}
+          <div class="flex items-center gap-3">
+            ${liveLink}
+            <a href="${link}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors group/link">
+              View repo
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover/link:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  fetch(GH_API, { headers: { 'Accept': 'application/vnd.github+json' } })
+    .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
+    .then(repos => {
+      loading.classList.add('hidden');
+      const publicRepos = repos.filter(r => !r.fork && !r.name.endsWith('.github.io')).slice(0, 6);
+      if (!publicRepos.length) throw new Error('No repos');
+      grid.innerHTML = publicRepos.map((repo, i) => buildRepoCard(repo, i)).join('');
+      grid.classList.remove('hidden');
+      grid.querySelectorAll('article').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
+        fadeObserver.observe(el);
+      });
+      document.getElementById('gh-show-more').style.display = 'block';
+    })
+    .catch(() => {
+      loading.classList.add('hidden');
+      error.classList.remove('hidden');
+    });
+})();
 const backToTop = document.getElementById('back-to-top');
 window.addEventListener('scroll', () => {
   if (window.scrollY > 400) {

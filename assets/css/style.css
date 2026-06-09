@@ -256,7 +256,8 @@ body::before {
 /* ── Mobile card limiting (CSS nth-child, no JS screen-check needed) ── */
 @media (max-width: 639px) {
   #blog-grid:not(.show-all) article:nth-child(n+4),
-  #yt-grid:not(.show-all) article:nth-child(n+4) {
+  #yt-grid:not(.show-all) article:nth-child(n+4),
+  #gh-grid:not(.show-all) article:nth-child(n+4) {
     display: none !important;
   }
 }
@@ -278,12 +279,10 @@ body::before {
     bottom: 0; left: 0; right: 0;
     height: 48px;
     background: linear-gradient(to bottom, transparent, #0f172a);
-    pointer-events: none;
-  }
-  .exp-read-more {
     display: inline-block;
   }
 }
+
 /* ── Skill panel badge collapse (mobile only) ── */
 @media (max-width: 639px) {
   .skill-tags {
@@ -327,10 +326,7 @@ body::before {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 48px;
-    background: linear-gradient(to bottom, transparent, #0f0f1a);
-    pointer-events: none;
-  }
-  .about-read-more { display: inline-block; }
+    background: linear-gradient(to bottom, transparent, #0f0f1a); display: inline-block; }
 }
 @media (min-width: 640px) {
   .about-read-more { display: none !important; }
