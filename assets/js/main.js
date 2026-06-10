@@ -493,3 +493,37 @@ if (aboutBio) {
   });
   aboutBio.parentNode.insertBefore(btn, aboutBio.nextSibling);
 }
+
+// ════════════════════════════════════════════
+// TESTIMONIALS CAROUSEL
+// ════════════════════════════════════════════
+(function initTestimonialCarousel() {
+  const slides = document.getElementById('testimonial-slides');
+  const dots   = document.querySelectorAll('#testimonial-dots button');
+  const total  = dots.length;
+  let current  = 0;
+
+  function goTo(index) {
+    current = (index + total) % total;
+    slides.style.transform = `translateX(-${current * 100}%)`;
+    dots.forEach((d, i) => {
+      d.classList.toggle('bg-brand-400', i === current);
+      d.classList.toggle('w-5', i === current);
+      d.classList.toggle('bg-white/20', i !== current);
+      d.classList.toggle('w-2.5', i !== current);
+    });
+  }
+
+  document.getElementById('testimonial-prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('testimonial-next').addEventListener('click', () => goTo(current + 1));
+  dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.index)));
+
+  // Auto-advance every 6 seconds
+  let timer = setInterval(() => goTo(current + 1), 6000);
+  document.getElementById('testimonial-track').addEventListener('mouseenter', () => clearInterval(timer));
+  document.getElementById('testimonial-track').addEventListener('mouseleave', () => {
+    timer = setInterval(() => goTo(current + 1), 6000);
+  });
+
+  goTo(0);
+})();
