@@ -503,7 +503,19 @@ if (aboutBio) {
   const total  = dots.length;
   let current  = 0;
 
+  function collapseAll() {
+    document.querySelectorAll('.testimonial-body').forEach(body => {
+      body.style.maxHeight = '9rem';
+      const fade = body.querySelector('.testimonial-fade');
+      if (fade) fade.style.display = '';
+    });
+    document.querySelectorAll('.testimonial-toggle').forEach(btn => {
+      btn.textContent = 'Read more ↓';
+    });
+  }
+
   function goTo(index) {
+    collapseAll();
     current = (index + total) % total;
     slides.style.transform = `translateX(-${current * 100}%)`;
     dots.forEach((d, i) => {
@@ -518,12 +530,30 @@ if (aboutBio) {
   document.getElementById('testimonial-next').addEventListener('click', () => goTo(current + 1));
   dots.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.index)));
 
-  // Auto-advance every 6 seconds
+  // Auto-advance every 6 seconds — paused while any slide is expanded
   let timer = setInterval(() => goTo(current + 1), 6000);
   document.getElementById('testimonial-track').addEventListener('mouseenter', () => clearInterval(timer));
   document.getElementById('testimonial-track').addEventListener('mouseleave', () => {
-    timer = setInterval(() => goTo(current + 1), 6000);
+    const anyExpanded = [...document.querySelectorAll('.testimonial-body')]
+      .some(b => b.style.maxHeight === 'none');
+    if (!anyExpanded) timer = setInterval(() => goTo(current + 1), 6000);
   });
 
   goTo(0);
 })();
+
+// TESTIMONIAL READ MORE / LESS
+// ════════════════════════════════════════════
+document.querySelectorAll('.testimonial-toggle').forEach(btn => {
+  const body = btn.previousElementSibling;
+  const fade = body.querySelector('.testimonial-fade');
+  const track = document.getElementById('testimonial-track');
+  btn.addEventListener('click', () => {
+    const expanded = body.style.maxHeight === 'none';
+    body.style.maxHeight = expanded ? '9rem' : 'none';
+    fade.style.display = expanded ? '' : 'none';
+    btn.textContent = expanded ? 'Read more ↓' : 'Read less ↑';
+    // Dispatch a synthetic mouseleave/mouseenter to sync the auto-timer
+    track.dispatchEvent(new Event(expanded ? 'mouseleave' : 'mouseenter'));
+  });
+});
