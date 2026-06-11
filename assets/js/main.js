@@ -24,6 +24,22 @@ document.querySelectorAll('.mobile-nav-link').forEach(link => {
   });
 });
 
+// ── "More" dropdown toggle ──
+const moreToggle   = document.getElementById('more-toggle');
+const moreDropdown = document.getElementById('more-dropdown');
+if (moreToggle && moreDropdown) {
+  moreToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    moreDropdown.classList.toggle('hidden');
+  });
+  // Close on any link inside dropdown
+  moreDropdown.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => moreDropdown.classList.add('hidden'));
+  });
+  // Close when clicking outside
+  document.addEventListener('click', () => moreDropdown.classList.add('hidden'));
+}
+
 // ── Highlight active nav link on scroll ──
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
@@ -404,7 +420,7 @@ fadeEls.forEach(el => {
     .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
     .then(repos => {
       loading.classList.add('hidden');
-      const publicRepos = repos.filter(r => !r.fork && !r.name.endsWith('.github.io')).slice(0, 6);
+      const publicRepos = repos.filter(r => !r.fork && !r.name.endsWith('.github.io')).slice(0, 3);
       if (!publicRepos.length) throw new Error('No repos');
       grid.innerHTML = publicRepos.map((repo, i) => buildRepoCard(repo, i)).join('');
       grid.classList.remove('hidden');
@@ -414,7 +430,6 @@ fadeEls.forEach(el => {
         el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
         fadeObserver.observe(el);
       });
-      document.getElementById('gh-show-more').style.display = 'block';
     })
     .catch(() => {
       loading.classList.add('hidden');
