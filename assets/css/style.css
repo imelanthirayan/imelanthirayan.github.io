@@ -92,6 +92,30 @@ body::before {
 .nav-link:hover::after,
 .nav-link.active::after { width: 100%; }
 
+/* ── Dropdown solid background ── */
+.dropdown-solid {
+  background: #13131f;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.more-btn {
+  position: relative;
+  transition: color 0.2s;
+}
+.more-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #34d399);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.more-btn.more-active { color: #e2e8f0; }
+.more-btn.more-active::after { width: 100%; }
+
 /* ── Timeline ── */
 .timeline-item::before {
   content: '';
@@ -193,13 +217,18 @@ body::before {
   color: #818cf8;
   margin-bottom: 0.75rem;
 }
-.section-label::before {
+.section-label::before,
+.section-label::after {
   content: '';
   display: inline-block;
   width: 1.5rem;
   height: 2px;
   background: linear-gradient(90deg, #6366f1, #34d399);
   border-radius: 2px;
+}
+.section-label[data-animated='1']::before,
+.section-label[data-animated='1']::after {
+  display: none;
 }
 
 /* ── Placeholder notice ── */
@@ -310,7 +339,13 @@ body::before {
   .show-more-wrap { display: none !important; }
 }
 
-/* ── About bio read-more (mobile only) ── */
+/* ── Tighter section spacing on mobile ── */
+@media (max-width: 639px) {
+  section[id]:not(#home) {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+}
 @media (max-width: 639px) {
   .about-bio-wrap {
     position: relative;
@@ -331,3 +366,112 @@ body::before {
 @media (min-width: 640px) {
   .about-read-more { display: none !important; }
 }
+
+/* ── Hero entrance animations ── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-animate {
+  animation: fadeSlideUp 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-d1 { animation-delay: 0.05s; }
+.hero-d2 { animation-delay: 0.18s; }
+.hero-d3 { animation-delay: 0.30s; }
+.hero-d4 { animation-delay: 0.42s; }
+.hero-d5 { animation-delay: 0.54s; }
+.hero-d6 { animation-delay: 0.64s; }
+.hero-d7 { animation-delay: 0.74s; }
+.hero-d8 { animation-delay: 0.84s; }
+.hero-d9 { animation-delay: 0.94s; }
+
+/* ── Typewriter cursor (border-right on element, no layout shift) ── */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.typing-active::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 0.8em;
+  background: #818cf8;
+  border-radius: 2px;
+  margin-left: 3px;
+  vertical-align: middle;
+  animation: blink-cursor 0.75s step-end infinite;
+}
+.typing-cursor {
+  display: none;
+}
+
+/* ── Floating glow orbs ── */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-22px) scale(1.04); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(16px) scale(0.96); }
+}
+.float-1 { animation: float-slow 8s ease-in-out infinite; }
+.float-2 { animation: float-medium 10s ease-in-out infinite 1s; }
+.float-3 { animation: float-slow 12s ease-in-out infinite 3s; }
+
+/* ── Animated gradient text (hero name) ── */
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gradient-text-anim {
+  background: linear-gradient(270deg, #818cf8, #34d399, #a78bfa, #818cf8);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* ── Skill badge pop-in ── */
+@keyframes badge-pop {
+  from { opacity: 0; transform: scale(0.75) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.badge-pop {
+  opacity: 0;
+  animation: badge-pop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Scroll-reveal for section elements ── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Counter stat pulse ── */
+@keyframes stat-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.stat-popped { animation: stat-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Smooth underline for section labels ── */
+.section-label-line {
+  display: inline-block;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #34d399);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+.section-label-line.expanded { width: 1.5rem; }

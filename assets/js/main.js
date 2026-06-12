@@ -43,14 +43,23 @@ if (moreToggle && moreDropdown) {
 // ── Highlight active nav link on scroll ──
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
+const moreBtn  = document.querySelector('.more-btn');
+const MORE_SECTIONS = new Set(['blog', 'media', 'github']);
+// Sections not in nav — map to the nearest nav item to highlight
+const NAV_ALIAS = { hobbies: 'contact' };
 
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const id = entry.target.getAttribute('id');
+      const activeId = NAV_ALIAS[id] || id;
       navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+        link.classList.toggle('active', link.getAttribute('href') === `#${activeId}`);
       });
+      // Highlight More button when inside its child sections
+      if (moreBtn) {
+        moreBtn.classList.toggle('more-active', MORE_SECTIONS.has(id));
+      }
     }
   });
 }, { rootMargin: '-40% 0px -55% 0px' });
@@ -68,7 +77,7 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 
 // ── Fade-in on scroll ──
-const fadeEls = document.querySelectorAll('article, .glass:not(header .glass)');
+const fadeEls = document.querySelectorAll('article, .glass:not(header .glass):not(.no-fade)');
 const fadeObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -572,3 +581,99 @@ document.querySelectorAll('.testimonial-toggle').forEach(btn => {
     track.dispatchEvent(new Event(expanded ? 'mouseleave' : 'mouseenter'));
   });
 });
+
+// ════════════════════════════════════════════
+// ANIMATIONS
+// ════════════════════════════════════════════
+
+// ── Typewriter effect for hero role title ──
+(function initTypewriter() {
+  const el = document.getElementById('hero-role');
+  if (!el) return;
+  const text = el.textContent.trim();
+  el.textContent = '';
+  let i = 0;
+  const speed = 60;
+  function type() {
+    if (i < text.length) {
+      el.textContent += text[i++];
+      setTimeout(type, speed);
+    } else {
+      el.classList.remove('typing-active'); // remove cursor when done
+    }
+  }
+  // Start after hero fade-in completes (hero-d4: 0.42s delay + 0.72s duration)
+  setTimeout(() => {
+    el.classList.add('typing-active');
+    type();
+  }, 1250);
+})();// ── Animated counters ──
+(function initCounters() {
+  const els = document.querySelectorAll('[data-count-to]');
+  if (!els.length) return;
+  const counterObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.countTo, 10);
+      const suffix = el.dataset.suffix || '';
+      const duration = 2800;
+      const start = performance.now();
+      function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * target) + suffix;
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          el.classList.add('stat-popped');
+          el.addEventListener('animationend', () => el.classList.remove('stat-popped'), { once: true });
+        }
+      }
+      requestAnimationFrame(tick);
+      counterObserver.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  els.forEach(el => counterObserver.observe(el));
+})();
+
+// ── Staggered skill-badge pop-in on scroll ──
+(function initBadgeStagger() {
+  document.querySelectorAll('.skill-tags').forEach(container => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.querySelectorAll('.skill-badge').forEach((badge, i) => {
+          badge.classList.add('badge-pop');
+          badge.style.animationDelay = `${i * 45}ms`;
+        });
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.1 });
+    observer.observe(container);
+  });
+})();
+
+// ── Section label line expand on scroll ──
+(function initSectionLabels() {
+  document.querySelectorAll('.section-label').forEach(label => {
+    const lineLeft  = document.createElement('span');
+    const lineRight = document.createElement('span');
+    lineLeft.className  = 'section-label-line';
+    lineRight.className = 'section-label-line';
+    label.prepend(lineLeft);
+    label.append(lineRight);
+    label.dataset.animated = '1';
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          lineLeft.classList.add('expanded');
+          lineRight.classList.add('expanded');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    observer.observe(label);
+  });
+})();
