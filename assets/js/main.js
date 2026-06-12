@@ -470,13 +470,21 @@ fadeEls.forEach(el => {
     });
 })();
 const backToTop = document.getElementById('back-to-top');
+const progressRingBar = document.querySelector('.progress-ring-bar');
+const RING_CIRCUMFERENCE = 113.097; // 2 * π * 18
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 400) {
+  const scrolled = window.scrollY;
+  if (scrolled > 400) {
     backToTop.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
     backToTop.classList.add('opacity-100', 'translate-y-0');
   } else {
     backToTop.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
     backToTop.classList.remove('opacity-100', 'translate-y-0');
+  }
+  if (progressRingBar) {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? scrolled / docHeight : 0;
+    progressRingBar.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - progress);
   }
 });
 backToTop.addEventListener('click', () => {
