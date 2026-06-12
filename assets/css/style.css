@@ -71,6 +71,7 @@ body::before {
   border-radius: 50%;
   filter: blur(80px);
   pointer-events: none;
+  opacity: 0.9;
 }
 
 /* ── Nav link underline ── */
@@ -475,3 +476,123 @@ body::before {
   margin-right: 0.5rem;
 }
 .section-label-line.expanded { width: 1.5rem; }
+
+/* ════════════════════════════════════════════
+   LIGHT MODE
+════════════════════════════════════════════ */
+html[data-theme="light"] body {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+html[data-theme="light"] body::before { opacity: 0.12; }
+
+/* Section backgrounds */
+html[data-theme="light"] .bg-surface-900 { background-color: #f8fafc !important; }
+html[data-theme="light"] .bg-surface-800 { background-color: #f1f5f9 !important; }
+html[data-theme="light"] .bg-surface-700 { background-color: #e8edf5 !important; }
+
+/* Scrollbar */
+html[data-theme="light"] ::-webkit-scrollbar-track { background: #f1f5f9; }
+
+/* Glass */
+html[data-theme="light"] .glass {
+  background: rgba(255,255,255,0.82) !important;
+  border-color: rgba(99,102,241,0.14) !important;
+}
+html[data-theme="light"] .glass-hover:hover {
+  background: rgba(255,255,255,0.97) !important;
+  border-color: rgba(99,102,241,0.35) !important;
+  box-shadow: 0 20px 40px rgba(99,102,241,0.1) !important;
+}
+
+/* Nav */
+html[data-theme="light"] header .glass {
+  background: rgba(248,250,252,0.95) !important;
+  border-color: rgba(0,0,0,0.07) !important;
+}
+html[data-theme="light"] .nav-link,
+html[data-theme="light"] .more-btn { color: #475569; }
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .nav-link.active,
+html[data-theme="light"] .more-btn.more-active { color: #1e293b !important; }
+html[data-theme="light"] #theme-toggle { color: #475569; }
+html[data-theme="light"] #theme-toggle:hover { color: #1e293b; background: rgba(0,0,0,0.05); }
+
+/* Dropdown */
+html[data-theme="light"] .dropdown-solid {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+}
+html[data-theme="light"] #more-dropdown a { color: #475569; }
+html[data-theme="light"] #more-dropdown a:hover { background: rgba(99,102,241,0.07); color: #1e293b; }
+
+/* Mobile menu */
+html[data-theme="light"] #mobile-menu a { color: #475569; }
+html[data-theme="light"] #mobile-menu a:hover { background: rgba(99,102,241,0.06); color: #1e293b; }
+
+/* Text overrides */
+html[data-theme="light"] .text-white { color: #0f172a !important; }
+html[data-theme="light"] .text-slate-200 { color: #1e293b !important; }
+html[data-theme="light"] .text-slate-300 { color: #334155 !important; }
+html[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+html[data-theme="light"] .text-slate-500,
+html[data-theme="light"] .text-slate-600 { color: #64748b !important; }
+
+/* Borders */
+html[data-theme="light"] .border-surface-800 { border-color: #e2e8f0 !important; }
+
+/* Profile ring */
+html[data-theme="light"] .profile-ring::after { background: #f1f5f9; }
+
+/* Glow orbs — soften in light */
+html[data-theme="light"] .glow-orb { opacity: 0.25; }
+
+/* Skill badges */
+html[data-theme="light"] .skill-badge {
+  background: rgba(99,102,241,0.08) !important;
+  border-color: rgba(99,102,241,0.22) !important;
+  color: #4338ca !important;
+}
+html[data-theme="light"] .skill-badge:hover {
+  background: rgba(99,102,241,0.15) !important;
+}
+html[data-theme="light"] .tech-badge {
+  background: rgba(16,185,129,0.08) !important;
+  border-color: rgba(16,185,129,0.25) !important;
+  color: #047857 !important;
+}
+
+/* Buttons */
+html[data-theme="light"] .btn-primary { box-shadow: 0 4px 20px rgba(99,102,241,0.25); }
+html[data-theme="light"] .btn-outline {
+  color: #4f46e5;
+  border-color: rgba(99,102,241,0.35);
+}
+html[data-theme="light"] .btn-outline:hover {
+  background: rgba(99,102,241,0.08);
+  color: #3730a3;
+}
+
+/* Fade overlays — match light bg */
+html[data-theme="light"] .exp-ul-wrap:not(.expanded)::after {
+  background: linear-gradient(to bottom, transparent, #f8fafc);
+}
+html[data-theme="light"] .skill-tags:not(.expanded)::after {
+  background: linear-gradient(to bottom, transparent, #f8fafc);
+}
+html[data-theme="light"] .about-bio-wrap:not(.expanded)::after {
+  background: linear-gradient(to bottom, transparent, #f8fafc);
+}
+
+/* Typewriter cursor */
+html[data-theme="light"] .typing-active::after { background: #6366f1; }
+
+/* Section label lines */
+html[data-theme="light"] .section-label-line {
+  background: linear-gradient(90deg, #6366f1, #10b981);
+}
+
+/* Navbar scroll bg */
+html[data-theme="light"] #navbar .glass[style] {
+  background-color: rgba(248,250,252,0.97) !important;
+}

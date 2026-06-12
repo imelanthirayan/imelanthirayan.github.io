@@ -1,6 +1,32 @@
 // ── Current year in footer ──
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
+// ── Theme toggle ──
+(function initTheme() {
+  const html    = document.documentElement;
+  const btn     = document.getElementById('theme-toggle');
+  const sunIcon = document.getElementById('theme-icon-sun');
+  const moonIcon= document.getElementById('theme-icon-moon');
+  if (!btn) return;
+
+  const saved = localStorage.getItem('theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  updateIcons(saved);
+
+  btn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    updateIcons(next);
+  });
+
+  function updateIcons(theme) {
+    const isLight = theme === 'light';
+    sunIcon.classList.toggle('hidden', isLight);
+    moonIcon.classList.toggle('hidden', !isLight);
+  }
+})();
+
 // ── Mobile menu toggle ──
 const menuToggle  = document.getElementById('menu-toggle');
 const mobileMenu  = document.getElementById('mobile-menu');
@@ -69,11 +95,9 @@ sections.forEach(s => observer.observe(s));
 // ── Scroll-based navbar background ──
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
-  if (window.scrollY > 20) {
-    navbar.querySelector('.glass').style.backgroundColor = 'rgba(10,10,15,0.92)';
-  } else {
-    navbar.querySelector('.glass').style.backgroundColor = '';
-  }
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const scrolledBg = isLight ? 'rgba(248,250,252,0.97)' : 'rgba(10,10,15,0.92)';
+  navbar.querySelector('.glass').style.backgroundColor = window.scrollY > 20 ? scrolledBg : '';
 }, { passive: true });
 
 // ── Fade-in on scroll ──
