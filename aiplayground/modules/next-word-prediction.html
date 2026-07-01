@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="See how language models predict the next token one at a time   an interactive beginner demo." />
+  <title>Next Word Prediction   AI Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../css/custom.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #6366f1; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a5b4fc; }
+
+    /* ── Input ───────────────────────────────── */
+    .pg-input {
+      width: 100%; padding: 0.75rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; font-size: 0.95rem; color: #1e293b;
+      background: #f8fafc; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pg-input:focus {
+      border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); background: white;
+    }
+    html.dark .pg-input {
+      background: rgba(15,23,42,0.7); border-color: #334155; color: #f1f5f9;
+    }
+    html.dark .pg-input:focus {
+      border-color: #a5b4fc; background: rgba(15,23,42,0.9);
+      box-shadow: 0 0 0 3px rgba(165,180,252,0.1);
+    }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(99,102,241,0.25); background: rgba(99,102,241,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #a5b4fc; border-color: rgba(165,180,252,0.28); background: rgba(99,102,241,0.1); }
+
+    /* ── Speed buttons ───────────────────────── */
+    .speed-btn {
+      padding: 0.28rem 0.7rem; border-radius: 9999px;
+      font-size: 0.72rem; font-weight: 700;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .speed-btn:hover { border-color: #6366f1; color: #6366f1; }
+    .speed-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+    html.dark .speed-btn { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    html.dark .speed-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+
+    /* ── Current sentence display ────────────── */
+    .sentence-display {
+      min-height: 3rem; padding: 0.875rem 1rem; border-radius: 1rem;
+      background: #f8fafc; border: 1.5px solid rgba(0,0,0,0.06);
+      font-size: 0.95rem; font-weight: 600; color: #1e293b;
+      line-height: 1.6; display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center;
+    }
+    html.dark .sentence-display {
+      background: rgba(15,23,42,0.5); border-color: rgba(255,255,255,0.07); color: #f1f5f9;
+    }
+
+    /* ── Token chips in sentence ─────────────── */
+    .sent-tok {
+      display: inline-block; padding: 0.2rem 0.55rem; border-radius: 0.5rem;
+      font-size: 0.82rem; font-weight: 700;
+      background: rgba(99,102,241,0.08); color: #4f46e5;
+      border: 1.5px solid rgba(99,102,241,0.2);
+    }
+    html.dark .sent-tok { background: rgba(99,102,241,0.12); color: #a5b4fc; border-color: rgba(165,180,252,0.22); }
+    .sent-tok.new-tok {
+      background: #6366f1; color: white; border-color: #6366f1;
+      animation: tokLand 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    @keyframes tokLand {
+      0%   { opacity:0; transform: scale(0.5) translateY(-10px); }
+      70%  { transform: scale(1.12) translateY(1px); }
+      100% { opacity:1; transform: scale(1) translateY(0); background:#6366f1; }
+    }
+    .sent-tok.settled {
+      background: rgba(99,102,241,0.1); color: #4f46e5;
+      border-color: rgba(99,102,241,0.22);
+      transition: background 0.5s, color 0.5s;
+    }
+
+    /* ── Prediction cards ────────────────────── */
+    .pred-card {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; background: white;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 0.4rem;
+      position: relative; overflow: hidden;
+    }
+    html.dark .pred-card { background: #1e293b; border-color: #334155; }
+    .pred-card:hover { border-color: #6366f1; transform: translateX(3px); box-shadow: 0 3px 12px rgba(99,102,241,0.15); }
+    .pred-card.top-pred {
+      border-color: rgba(99,102,241,0.45);
+      background: rgba(99,102,241,0.04);
+    }
+    html.dark .pred-card.top-pred { background: rgba(99,102,241,0.1); }
+    .pred-card.selected-pred {
+      border-color: #6366f1; background: #6366f1; color: white;
+      animation: predSelect 0.3s ease;
+    }
+    @keyframes predSelect {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+    .pred-word {
+      font-size: 0.88rem; font-weight: 800; color: #1e293b; min-width: 5rem;
+    }
+    html.dark .pred-word { color: #f1f5f9; }
+    .pred-card.top-pred .pred-word { color: #4f46e5; }
+    html.dark .pred-card.top-pred .pred-word { color: #a5b4fc; }
+    .pred-card.selected-pred .pred-word { color: white; }
+    .pred-bar-wrap {
+      flex: 1; height: 6px; border-radius: 9999px;
+      background: #e2e8f0; overflow: hidden;
+    }
+    html.dark .pred-bar-wrap { background: #334155; }
+    .pred-card.selected-pred .pred-bar-wrap { background: rgba(255,255,255,0.25); }
+    .pred-bar {
+      height: 100%; border-radius: 9999px; background: #6366f1;
+      transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .pred-card.top-pred .pred-bar { background: #6366f1; }
+    .pred-card.selected-pred .pred-bar { background: white; }
+    .pred-pct {
+      font-size: 0.72rem; font-weight: 900; color: #6366f1;
+      width: 2.5rem; text-align: right; flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    html.dark .pred-pct { color: #a5b4fc; }
+    .pred-card.selected-pred .pred-pct { color: white; }
+    .top-badge {
+      font-size: 0.52rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 0.07em; padding: 0.1rem 0.4rem; border-radius: 9999px;
+      background: #6366f1; color: white; flex-shrink: 0;
+    }
+
+    @keyframes cardIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .card-in { animation: cardIn 0.22s ease forwards; }
+
+    /* ── Timeline steps ──────────────────────── */
+    .timeline-step {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      padding: 0.5rem 0.75rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; background: white; margin-bottom: 0.4rem;
+    }
+    html.dark .timeline-step { background: #1e293b; border-color: #334155; }
+    .timeline-step.ts-active {
+      border-color: #6366f1; background: rgba(99,102,241,0.04);
+      animation: cardIn 0.25s ease;
+    }
+    html.dark .timeline-step.ts-active { background: rgba(99,102,241,0.1); }
+    .ts-num {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 900;
+      background: #e2e8f0; color: #64748b;
+    }
+    html.dark .ts-num { background: #334155; color: #94a3b8; }
+    .timeline-step.ts-active .ts-num { background: #6366f1; color: white; }
+    .ts-content { font-size: 0.78rem; line-height: 1.5; }
+    .ts-arrow { color: #6366f1; font-weight: 900; }
+    .ts-chosen { font-weight: 900; color: #6366f1; }
+    html.dark .ts-chosen { color: #a5b4fc; }
+
+    /* ── Stat boxes ──────────────────────────── */
+    .stat-box {
+      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
+      text-align: center; border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val {
+      font-size: 1.05rem; font-weight: 900; line-height: 1.2;
+      font-variant-numeric: tabular-nums; word-break: break-all;
+    }
+    .stat-lbl {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
+    }
+
+    /* ── Flow diagram ────────────────────────── */
+    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
+    .flow-pill-box {
+      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
+      text-align: center; border: 1.5px solid #e2e8f0; background: white;
+      font-size: 0.58rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
+    }
+    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
+    .flow-pill-box.fp-active { background: rgba(99,102,241,0.1); border-color: #6366f1; color: #6366f1; }
+    html.dark .flow-pill-box.fp-active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .flow-pill-box.fp-done { background: rgba(16,185,129,0.08); border-color: #10b981; color: #059669; }
+    html.dark .flow-pill-box.fp-done { background: rgba(16,185,129,0.1); color: #34d399; }
+    .flow-pill-emoji { font-size: 0.95rem; }
+    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
+    html.dark .flow-sep { color: #334155; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+
+    /* ── Spinner ─────────────────────────────── */
+    @keyframes spin360 { to { transform: rotate(360deg); } }
+    .spin { animation: spin360 0.8s linear infinite; }
+
+    /* ── Gen cursor blink ────────────────────── */
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .cursor-blink { animation: blink 0.9s ease infinite; display:inline-block; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="../index.html" class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Playground</span>
+        </a>
+        <div class="hidden md:flex items-center gap-2">
+          <a href="../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">All Modules</a>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <a href="../index.html" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">← Back to Home</a>
+        <a href="../index.html#learn" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">All Modules</a>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm nav-link">Dark Mode</span>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+          <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+          <span class="text-indigo-700 dark:text-indigo-400 text-xs font-bold tracking-wide">How AI Works</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="type" class="w-7 h-7 text-indigo-600 dark:text-indigo-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Next Word Prediction</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Language models generate text by <strong class="text-slate-800 dark:text-slate-200">predicting the next token</strong> again and again.
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simple learning demo</strong> using predefined predictions, not a real AI model.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           MAIN GRID
+      ══════════════════════════════════════ -->
+      <div class="pg-grid">
+
+        <!-- ── LEFT: Playground ──────────────── -->
+        <div class="flex flex-col gap-5">
+
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="play-circle" style="width:12px;height:12px;"></i>
+              Interactive Playground
+            </div>
+
+            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block">Starting Text</label>
+            <input id="nwpInput" type="text" class="pg-input mb-3" value="The sky is" placeholder="Type a phrase…" />
+
+            <!-- Buttons -->
+            <div class="flex flex-wrap gap-2">
+              <button id="predictBtn" onclick="predictNextWord()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="zap" style="width:13px;height:13px;"></i>
+                <span id="predictBtnLabel">Predict Next Word</span>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-2">
+              <button onclick="resetDemo()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i>
+                Reset
+              </button>
+              <button onclick="randomExample()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="shuffle" style="width:13px;height:13px;"></i>
+                Random
+              </button>
+            </div>
+          </section>
+
+          <!-- Generation Timeline -->
+          <section class="module-card" id="timelineSection" style="display:none;">
+            <div class="mod-label">
+              <i data-lucide="list" style="width:12px;height:12px;"></i>
+              Generation Timeline
+            </div>
+            <div id="timelineContainer"></div>
+          </section>
+
+        </div><!-- /left -->
+
+
+        <!-- ── RIGHT: Visualization ──────────── -->
+        <div class="pg-grid-right">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="eye" style="width:12px;height:12px;"></i>
+              Live Visualization
+            </div>
+
+            <!-- Current sentence -->
+            <div class="mb-4">
+              <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Current Sentence</div>
+              <div class="sentence-display" id="sentenceDisplay">
+                <span class="text-slate-400 dark:text-slate-600 text-sm italic">Enter text and click Predict…</span>
+              </div>
+            </div>
+
+            <div style="height:1px;background:rgba(0,0,0,0.05);margin-bottom:1.25rem;"></div>
+
+            <!-- Predictions -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Possible Next Words</div>
+                <div id="predBadge" class="text-xs font-black px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" style="display:none;">
+                  Click to choose
+                </div>
+              </div>
+              <div id="predContainer">
+                <div class="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                  <i data-lucide="type" style="width:28px;height:28px;color:#a5b4fc;"></i>
+                  <p class="text-sm text-slate-400 dark:text-slate-500">Predictions will appear here</p>
+                </div>
+              </div>
+            </div>
+
+          </section>
+        </div>
+
+      </div><!-- /pg-grid -->
+
+
+      <!-- ══════════════════════════════════════
+           STATS + FLOW
+      ══════════════════════════════════════ -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-5">
+
+        <!-- Statistics -->
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i>
+            Statistics
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="stat-box">
+              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statTokenCount"> </div>
+              <div class="stat-lbl">Current Tokens</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-emerald-600 dark:text-emerald-400" id="statGenCount">0</div>
+              <div class="stat-lbl">Generated Tokens</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="stat-box">
+              <div class="stat-val text-indigo-500 dark:text-indigo-400" id="statPredOptions"> </div>
+              <div class="stat-lbl">Pred. Options</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-amber-500 dark:text-amber-400 text-sm" id="statTopWord"> </div>
+              <div class="stat-lbl">Top Prediction</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-slate-600 dark:text-slate-400" id="statStep">0</div>
+              <div class="stat-lbl">Current Step</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="git-branch" style="width:12px;height:12px;"></i>
+            How It Works
+          </div>
+          <div class="flex items-start gap-0.5">
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">📝</div>
+              <div class="flow-pill-box" id="fp-0">Text</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🔤</div>
+              <div class="flow-pill-box" id="fp-1">Tokens</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🤖</div>
+              <div class="flow-pill-box" id="fp-2">Predict</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">➕</div>
+              <div class="flow-pill-box" id="fp-3">Add Token</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🔁</div>
+              <div class="flow-pill-box" id="fp-4">Repeat</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+
+      
+      <!-- ══════════════════════════════════════
+           BEGINNER TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-5" id="tipsNextWord">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Beginner Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>AI doesn't plan ahead, it picks the next token without knowing what it will write later. Yet coherent text still emerges!</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>This is why AI <strong>streams text gradually</strong>, each token is generated one at a time and sent as it's produced.</span>
+          </div>
+        </div>
+      </div>
+
+<!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-8">
+        <span class="text-2xl flex-shrink-0">💡</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Key Takeaway</div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-1">
+            AI responses are built <strong class="text-slate-900 dark:text-white">one token at a time</strong> by repeatedly predicting what should come next.
+          </p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+            Each prediction is made by looking at <em>everything written so far</em>   so every new word changes what comes next.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           NAVIGATION
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="token-cost.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Token Cost
+        </a>
+        <a href="temperature.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Temperature
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <a href="../index.html" class="flex items-center gap-2">
+        <div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-md flex items-center justify-center">
+          <i data-lucide="brain" class="w-3 h-3 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-600 dark:text-slate-400 text-sm">AI Playground</span>
+      </a>
+      <p class="text-slate-400 dark:text-slate-600 text-xs">How AI Works</p>
+      <div class="flex items-center gap-4">
+        <a href="../index.html#learn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-sm transition-colors">All Modules</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     PREDICTION DATA
+  ═══════════════════════════════════════════════ */
+  const PREDICTION_DB = [
+    { key: "the sky is",              preds: [{ w:"blue", p:0.45 }, { w:"clear", p:0.25 }, { w:"cloudy", p:0.18 }, { w:"beautiful", p:0.12 }] },
+    { key: "the sky is blue",         preds: [{ w:"today", p:0.35 }, { w:"and", p:0.28 }, { w:"above", p:0.22 }, { w:"always", p:0.15 }] },
+    { key: "the sky is clear",        preds: [{ w:"and", p:0.38 }, { w:"today", p:0.30 }, { w:"above", p:0.20 }, { w:"always", p:0.12 }] },
+    { key: "the sky is cloudy",       preds: [{ w:"today", p:0.40 }, { w:"and", p:0.30 }, { w:"above", p:0.18 }, { w:"outside", p:0.12 }] },
+    { key: "the sky is beautiful",    preds: [{ w:"today", p:0.42 }, { w:"and", p:0.30 }, { w:"above", p:0.18 }, { w:"always", p:0.10 }] },
+    { key: "the cat is",              preds: [{ w:"sleeping", p:0.40 }, { w:"hungry", p:0.25 }, { w:"playing", p:0.20 }, { w:"small", p:0.15 }] },
+    { key: "the cat is sleeping",     preds: [{ w:"quietly", p:0.45 }, { w:"now", p:0.28 }, { w:"peacefully", p:0.17 }, { w:"deeply", p:0.10 }] },
+    { key: "the cat is hungry",       preds: [{ w:"now", p:0.42 }, { w:"again", p:0.28 }, { w:"today", p:0.18 }, { w:"always", p:0.12 }] },
+    { key: "the cat is playing",      preds: [{ w:"happily", p:0.40 }, { w:"outside", p:0.28 }, { w:"now", p:0.20 }, { w:"quietly", p:0.12 }] },
+    { key: "ai can",                  preds: [{ w:"help", p:0.35 }, { w:"learn", p:0.25 }, { w:"answer", p:0.20 }, { w:"generate", p:0.20 }] },
+    { key: "ai can help",             preds: [{ w:"people", p:0.42 }, { w:"doctors", p:0.28 }, { w:"students", p:0.18 }, { w:"everyone", p:0.12 }] },
+    { key: "ai can learn",            preds: [{ w:"quickly", p:0.40 }, { w:"from", p:0.30 }, { w:"patterns", p:0.18 }, { w:"fast", p:0.12 }] },
+    { key: "learning ai is",          preds: [{ w:"fun", p:0.38 }, { w:"exciting", p:0.28 }, { w:"important", p:0.22 }, { w:"useful", p:0.12 }] },
+    { key: "learning ai is fun",      preds: [{ w:"and", p:0.42 }, { w:"today", p:0.30 }, { w:"especially", p:0.18 }, { w:"always", p:0.10 }] },
+    { key: "learning ai is exciting", preds: [{ w:"and", p:0.40 }, { w:"today", p:0.28 }, { w:"really", p:0.20 }, { w:"especially", p:0.12 }] },
+    { key: "the future of technology is", preds: [{ w:"bright", p:0.38 }, { w:"changing", p:0.28 }, { w:"exciting", p:0.22 }, { w:"incredible", p:0.12 }] },
+    { key: "the future of technology is bright", preds: [{ w:"and", p:0.40 }, { w:"today", p:0.28 }, { w:"always", p:0.20 }, { w:"especially", p:0.12 }] },
+  ];
+
+  const GENERIC_PREDS = [
+    { w:"interesting", p:0.30 }, { w:"useful", p:0.25 },
+    { w:"simple", p:0.20 },     { w:"powerful", p:0.15 }, { w:"today", p:0.10 },
+  ];
+
+  const RANDOM_EXAMPLES = [
+    "The sky is", "The cat is", "AI can", "Learning AI is", "The future of technology is",
+  ];
+
+  /* ═══════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════ */
+  let currentText    = "";
+  let generatedCount = 0;
+  let stepCount      = 0;
+  let isGenerating   = false;
+  let animTimers     = [];
+  let speedKey       = 'slow';
+
+  const SPEEDS = { slow: 900, normal: 500, fast: 200 };
+  function delay() { return SPEEDS[speedKey] || 900; }
+
+  function wait(ms) {
+    return new Promise(resolve => {
+      const id = setTimeout(resolve, ms);
+      animTimers.push(id);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     CORE LOGIC
+  ═══════════════════════════════════════════════ */
+  function getSimplePredictions(text) {
+    const key = text.trim().toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
+    for (const entry of PREDICTION_DB) {
+      if (key === entry.key || key.endsWith(entry.key)) return [...entry.preds];
+    }
+    // Partial match   check if key contains any db key
+    for (const entry of PREDICTION_DB) {
+      if (key.endsWith(entry.key.split(' ').slice(-3).join(' '))) return [...entry.preds];
+    }
+    return [...GENERIC_PREDS];
+  }
+
+  function getInput() { return (document.getElementById('nwpInput').value || '').trim(); }
+  function esc(s)     { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* ═══════════════════════════════════════════════
+     RENDER SENTENCE
+  ═══════════════════════════════════════════════ */
+  function renderSentenceDisplay(text, newWord) {
+    const display = document.getElementById('sentenceDisplay');
+    if (!display) return;
+    const words = text.trim().split(/\s+/).filter(Boolean);
+    const newW  = newWord ? newWord.toLowerCase().trim() : null;
+
+    display.innerHTML = words.map((w, i) => {
+      const isNew = newW && i === words.length - 1 && w.toLowerCase() === newW;
+      return `<span class="sent-tok${isNew ? ' new-tok' : ''}">${esc(w)}</span>`;
+    }).join(' ');
+
+    // Settle new-tok after animation
+    if (newWord) {
+      setTimeout(() => {
+        display.querySelectorAll('.new-tok').forEach(el => {
+          el.classList.remove('new-tok');
+          el.classList.add('settled');
+        });
+      }, 450);
+    }
+    display.appendChild(Object.assign(document.createElement('span'), { className:'cursor-blink text-indigo-400 ml-1 font-black', textContent:'▌' }));
+  }
+
+  /* ═══════════════════════════════════════════════
+     RENDER PREDICTION CARDS
+  ═══════════════════════════════════════════════ */
+  function renderPredictionCards(container, predictions) {
+    if (!container) return;
+    const maxP = Math.max(...predictions.map(p => p.p));
+
+    container.innerHTML = predictions.map((pred, idx) => {
+      const isTop = pred.p === maxP;
+      const pct   = Math.round(pred.p * 100);
+      return `
+        <div class="pred-card card-in ${isTop ? 'top-pred' : ''}" style="animation-delay:${idx * 60}ms;"
+          onclick="appendPredictedToken('${esc(pred.w)}')">
+          <span class="pred-word">${esc(pred.w)}</span>
+          <div class="pred-bar-wrap">
+            <div class="pred-bar" style="width:0%;" data-pct="${pct}"></div>
+          </div>
+          <span class="pred-pct">${pct}%</span>
+          ${isTop ? '<span class="top-badge">Top</span>' : ''}
+        </div>`;
+    }).join('');
+
+    // Animate bars
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      container.querySelectorAll('.pred-bar').forEach(bar => {
+        bar.style.width = bar.dataset.pct + '%';
+      });
+    }));
+
+    // Show badge
+    const badge = document.getElementById('predBadge');
+    if (badge) badge.style.display = '';
+  }
+
+  /* ═══════════════════════════════════════════════
+     APPEND TOKEN
+  ═══════════════════════════════════════════════ */
+  function appendPredictedToken(token) {
+    if (isGenerating) return;
+    const newText = currentText.trim() + ' ' + token;
+    currentText    = newText;
+    generatedCount++;
+    stepCount++;
+
+    // Update input
+    document.getElementById('nwpInput').value = currentText;
+
+    // Add timeline entry
+    addTimelineStep(stepCount, currentText, token);
+
+    // Render sentence with animation
+    renderSentenceDisplay(currentText, token);
+
+    // Get next predictions
+    const preds = getSimplePredictions(currentText);
+    renderPredictionCards(document.getElementById('predContainer'), preds);
+
+    updateStats(preds);
+    updateFlow(3);
+    setTimeout(() => updateFlow(2), 600);
+  }
+
+  /* ═══════════════════════════════════════════════
+     TIMELINE
+  ═══════════════════════════════════════════════ */
+  function addTimelineStep(step, text, chosen) {
+    const section   = document.getElementById('timelineSection');
+    const container = document.getElementById('timelineContainer');
+    if (!section || !container) return;
+    section.style.display = '';
+
+    const words   = text.trim().split(/\s+/);
+    const context = words.slice(0, -1).join(' ') || '…';
+
+    const div = document.createElement('div');
+    div.className = 'timeline-step ts-active';
+    div.innerHTML = `
+      <div class="ts-num">${step}</div>
+      <div class="ts-content text-slate-500 dark:text-slate-400">
+        <span class="text-slate-600 dark:text-slate-300 font-semibold">${esc(context)}</span>
+        <span class="ts-arrow"> → </span>
+        <span class="ts-chosen">${esc(chosen)}</span>
+      </div>`;
+    container.appendChild(div);
+    div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  /* ═══════════════════════════════════════════════
+     GENERATE MULTIPLE TOKENS
+  ═══════════════════════════════════════════════ */
+  async function generateMultipleTokens(count) {
+    if (isGenerating) return;
+
+    // Initialize if no text yet
+    if (!currentText) {
+      currentText = getInput();
+      if (!currentText) return;
+      renderSentenceDisplay(currentText, null);
+    }
+
+    isGenerating = true;
+    setBusy(true);
+    updateFlow(1);
+
+    for (let i = 0; i < count; i++) {
+      updateFlow(2);
+      const preds = getSimplePredictions(currentText);
+      renderPredictionCards(document.getElementById('predContainer'), preds);
+      updateStats(preds);
+      await wait(delay() * 0.5);
+
+      // Choose top prediction
+      const chosen = preds[0].w;
+
+      // Flash selected card
+      const cards = document.getElementById('predContainer')?.querySelectorAll('.pred-card');
+      if (cards && cards[0]) {
+        cards[0].classList.add('selected-pred');
+        await wait(delay() * 0.4);
+      }
+
+      appendPredictedToken(chosen);
+      updateFlow(4);
+      await wait(delay() * 0.6);
+    }
+
+    updateFlow(-1);
+    isGenerating = false;
+    setBusy(false);
+  }
+
+  /* ═══════════════════════════════════════════════
+     PREDICT NEXT WORD (appends top prediction, shows next)
+  ═══════════════════════════════════════════════ */
+  async function predictNextWord() {
+    if (isGenerating) return;
+
+    // Initialize text from input on first call
+    if (!currentText) {
+      currentText = getInput();
+      if (!currentText) return;
+    }
+
+    isGenerating = true;
+    const btn   = document.getElementById('predictBtn');
+    const label = document.getElementById('predictBtnLabel');
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = 'Predicting…';
+
+    // Show current sentence
+    renderSentenceDisplay(currentText, null);
+    updateFlow(1);
+
+    // Get & show predictions
+    const preds = getSimplePredictions(currentText);
+    renderPredictionCards(document.getElementById('predContainer'), preds);
+    updateStats(preds);
+    updateFlow(2);
+
+    // Brief pause so user sees the options
+    await wait(700);
+
+    // Highlight top card
+    const topCard = document.getElementById('predContainer')?.querySelector('.pred-card');
+    if (topCard) topCard.classList.add('selected-pred');
+
+    await wait(350);
+
+    // Append top word
+    const chosen = preds[0].w;
+    appendPredictedToken(chosen);
+    updateFlow(3);
+
+    await wait(400);
+
+    // Show next predictions immediately
+    const nextPreds = getSimplePredictions(currentText);
+    renderPredictionCards(document.getElementById('predContainer'), nextPreds);
+    updateStats(nextPreds);
+    updateFlow(2);
+
+    isGenerating = false;
+    if (btn) btn.disabled = false;
+    if (label) label.textContent = 'Predict Next Word';
+  }
+
+  /* ═══════════════════════════════════════════════
+     STATS + FLOW
+  ═══════════════════════════════════════════════ */
+  function updateStats(preds) {
+    const tokens = currentText.trim().split(/\s+/).filter(Boolean).length;
+    const top    = preds && preds[0] ? preds[0].w : ' ';
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    set('statTokenCount',  tokens || ' ');
+    set('statGenCount',    generatedCount);
+    set('statPredOptions', preds ? preds.length : ' ');
+    set('statTopWord',     top);
+    set('statStep',        stepCount);
+  }
+
+  function updateFlow(active) {
+    for (let i = 0; i < 5; i++) {
+      const el = document.getElementById(`fp-${i}`);
+      if (!el) continue;
+      el.classList.remove('fp-active','fp-done');
+      if (active < 0) return;
+      if      (i < active)   el.classList.add('fp-done');
+      else if (i === active) el.classList.add('fp-active');
+    }
+  }
+
+  function setBusy(busy) {
+    const pBtn = document.getElementById('predictBtn');
+    if (pBtn) pBtn.disabled = busy;
+  }
+
+  /* ═══════════════════════════════════════════════
+     RESET / RANDOM
+  ═══════════════════════════════════════════════ */
+  function resetDemo() {
+    animTimers.forEach(t => clearTimeout(t));
+    animTimers     = [];
+    isGenerating   = false;
+    generatedCount = 0;
+    stepCount      = 0;
+    currentText    = '';
+    setBusy(false);
+
+    document.getElementById('nwpInput').value = RANDOM_EXAMPLES[0];
+    document.getElementById('sentenceDisplay').innerHTML =
+      '<span class="text-slate-400 dark:text-slate-600 text-sm italic">Enter text and click Predict…</span>';
+    document.getElementById('predContainer').innerHTML = `
+      <div class="flex flex-col items-center justify-center py-8 gap-2 text-center">
+        <i data-lucide="type" style="width:28px;height:28px;color:#a5b4fc;"></i>
+        <p class="text-sm text-slate-400 dark:text-slate-500">Predictions will appear here</p>
+      </div>`;
+    document.getElementById('predBadge').style.display = 'none';
+    document.getElementById('timelineSection').style.display = 'none';
+    document.getElementById('timelineContainer').innerHTML = '';
+    updateStats(null);
+    updateFlow(-1);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function randomExample() {
+    const cur  = getInput();
+    const pool = RANDOM_EXAMPLES.filter(e => e !== cur);
+    document.getElementById('nwpInput').value = pool[Math.floor(Math.random() * pool.length)];
+    currentText = '';
+    updateNextWordPredictionDemo();
+  }
+
+  function updateNextWordPredictionDemo() {
+    // Called on input change   just reset visual state without clearing input
+    animTimers.forEach(t => clearTimeout(t));
+    animTimers     = [];
+    isGenerating   = false;
+    generatedCount = 0;
+    stepCount      = 0;
+    currentText    = '';
+    setBusy(false);
+
+    document.getElementById('sentenceDisplay').innerHTML =
+      '<span class="text-slate-400 dark:text-slate-600 text-sm italic">Enter text and click Predict…</span>';
+    document.getElementById('predContainer').innerHTML = `
+      <div class="flex flex-col items-center justify-center py-8 gap-2 text-center">
+        <i data-lucide="type" style="width:28px;height:28px;color:#a5b4fc;"></i>
+        <p class="text-sm text-slate-400 dark:text-slate-500">Predictions will appear here</p>
+      </div>`;
+    document.getElementById('predBadge').style.display = 'none';
+    document.getElementById('timelineSection').style.display = 'none';
+    document.getElementById('timelineContainer').innerHTML = '';
+    updateStats(null);
+    updateFlow(-1);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    document.getElementById('nwpInput').addEventListener('input', Utils.debounce(updateNextWordPredictionDemo, 300));
+
+    updateStats(null);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HNSW Index · AI Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Dark mode overrides for Tailwind utility classes ─────────────────── */
+    html.dark body                        { background:#0f172a; color:#f1f5f9; }
+    html.dark .bg-white                   { background:#1e293b !important; }
+    html.dark .bg-gray-50                 { background:#1e293b !important; }
+    html.dark .bg-gray-100                { background:#0f172a !important; }
+    html.dark .bg-gray-200                { background:#1e293b !important; }
+    html.dark .border-gray-200            { border-color:#334155 !important; }
+    html.dark .border-gray-100            { border-color:#1e293b !important; }
+    html.dark .divide-gray-100 > * + *    { border-color:#1e293b !important; }
+
+    /* Text */
+    html.dark .text-slate-800             { color:#f1f5f9 !important; }
+    html.dark .text-slate-700             { color:#e2e8f0 !important; }
+    html.dark .text-slate-600             { color:#cbd5e1 !important; }
+    html.dark .text-slate-500             { color:#94a3b8 !important; }
+    html.dark .text-slate-400             { color:#64748b !important; }
+    html.dark .text-gray-800              { color:#f1f5f9 !important; }
+    html.dark .text-gray-700              { color:#e2e8f0 !important; }
+    html.dark .text-gray-600              { color:#cbd5e1 !important; }
+    html.dark .text-gray-500              { color:#94a3b8 !important; }
+
+    /* Cards / panels */
+    html.dark .bg-indigo-50               { background:rgba(99,102,241,0.12) !important; }
+    html.dark .bg-blue-50                 { background:rgba(37,99,235,0.12)  !important; }
+    html.dark .bg-purple-50               { background:rgba(124,58,237,0.12) !important; }
+    html.dark .bg-teal-50                 { background:rgba(13,148,136,0.12) !important; }
+    html.dark .bg-orange-50               { background:rgba(234,88,12,0.12)  !important; }
+    html.dark .bg-emerald-50              { background:rgba(5,150,105,0.12)  !important; }
+    html.dark .bg-yellow-50               { background:rgba(234,179,8,0.12)  !important; }
+    html.dark .bg-red-50                  { background:rgba(220,38,38,0.12)  !important; }
+    html.dark .bg-green-50                { background:rgba(22,163,74,0.12)  !important; }
+    html.dark .bg-amber-50                { background:rgba(217,119,6,0.12)  !important; }
+    html.dark .bg-pink-50                 { background:rgba(219,39,119,0.12) !important; }
+    html.dark .bg-cyan-50                 { background:rgba(6,182,212,0.12)  !important; }
+    html.dark .bg-sky-50                  { background:rgba(14,165,233,0.12) !important; }
+
+    /* Border colors in dark */
+    html.dark .border-indigo-100          { border-color:rgba(99,102,241,0.2)  !important; }
+    html.dark .border-blue-100            { border-color:rgba(37,99,235,0.2)   !important; }
+    html.dark .border-purple-100          { border-color:rgba(124,58,237,0.2)  !important; }
+    html.dark .border-teal-100            { border-color:rgba(13,148,136,0.2)  !important; }
+    html.dark .border-orange-100          { border-color:rgba(234,88,12,0.2)   !important; }
+    html.dark .border-emerald-100         { border-color:rgba(5,150,105,0.2)   !important; }
+    html.dark .border-amber-100           { border-color:rgba(217,119,6,0.2)   !important; }
+
+    /* Inputs / selects / textareas */
+    html.dark input[type=number],
+    html.dark input[type=text],
+    html.dark input[type=range],
+    html.dark select,
+    html.dark textarea                    { background:#1e293b; border-color:#334155; color:#f1f5f9; }
+    html.dark input[type=number]:focus,
+    html.dark input[type=text]:focus,
+    html.dark select:focus,
+    html.dark textarea:focus              { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+
+    /* Shadow softening in dark */
+    html.dark .shadow-sm                  { box-shadow:0 1px 3px rgba(0,0,0,0.35) !important; }
+    html.dark .shadow                     { box-shadow:0 2px 8px rgba(0,0,0,0.4)  !important; }
+
+    /* Dividers */
+    html.dark hr                          { border-color:#1e293b; }
+
+    /* ── back-btn (not in custom.css, defined per-module) ─────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1;
+      text-decoration: none; padding: 0.4rem 0.9rem;
+      border-radius: 9999px; border: 1px solid rgba(99,102,241,0.22);
+      background: rgba(99,102,241,0.07); transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color:#a78bfa; border-color:rgba(167,139,250,0.25); background:rgba(99,102,241,0.1); }
+
+    /* ── Dark overrides for -100 tint classes (panels, badges, icons) ─────── */
+    html.dark .bg-indigo-100  { background:rgba(99,102,241,0.18)  !important; }
+    html.dark .bg-blue-100    { background:rgba(37,99,235,0.18)   !important; }
+    html.dark .bg-purple-100  { background:rgba(124,58,237,0.18)  !important; }
+    html.dark .bg-teal-100    { background:rgba(13,148,136,0.18)  !important; }
+    html.dark .bg-orange-100  { background:rgba(234,88,12,0.18)   !important; }
+    html.dark .bg-emerald-100 { background:rgba(5,150,105,0.18)   !important; }
+    html.dark .bg-green-100   { background:rgba(22,163,74,0.18)   !important; }
+    html.dark .bg-amber-100   { background:rgba(217,119,6,0.18)   !important; }
+    html.dark .bg-yellow-100  { background:rgba(234,179,8,0.18)   !important; }
+    html.dark .bg-red-100     { background:rgba(220,38,38,0.18)   !important; }
+    html.dark .bg-pink-100    { background:rgba(219,39,119,0.18)  !important; }
+    html.dark .bg-cyan-100    { background:rgba(6,182,212,0.18)   !important; }
+    html.dark .bg-sky-100     { background:rgba(14,165,233,0.18)  !important; }
+    html.dark .bg-slate-100   { background:rgba(148,163,184,0.12) !important; }
+    html.dark .bg-slate-50    { background:#1e293b !important; }
+
+    /* ── Dark text for colored text classes ───────────────────────────────── */
+    html.dark .text-indigo-700 { color:#a5b4fc !important; }
+    html.dark .text-indigo-800 { color:#c7d2fe !important; }
+    html.dark .text-blue-700   { color:#93c5fd !important; }
+    html.dark .text-blue-800   { color:#bfdbfe !important; }
+    html.dark .text-purple-700 { color:#c4b5fd !important; }
+    html.dark .text-purple-800 { color:#ddd6fe !important; }
+    html.dark .text-teal-700   { color:#5eead4 !important; }
+    html.dark .text-teal-800   { color:#99f6e4 !important; }
+    html.dark .text-orange-700 { color:#fdba74 !important; }
+    html.dark .text-orange-800 { color:#fed7aa !important; }
+    html.dark .text-emerald-700{ color:#6ee7b7 !important; }
+    html.dark .text-emerald-800{ color:#a7f3d0 !important; }
+    html.dark .text-green-700  { color:#86efac !important; }
+    html.dark .text-green-800  { color:#bbf7d0 !important; }
+    html.dark .text-amber-700  { color:#fcd34d !important; }
+    html.dark .text-amber-800  { color:#fde68a !important; }
+
+    /* ── Dark borders for colored border classes ──────────────────────────── */
+    html.dark .border-indigo-200 { border-color:rgba(99,102,241,0.3)  !important; }
+    html.dark .border-indigo-300 { border-color:rgba(99,102,241,0.45) !important; }
+    html.dark .border-blue-200   { border-color:rgba(37,99,235,0.3)   !important; }
+    html.dark .border-purple-200 { border-color:rgba(124,58,237,0.3)  !important; }
+    html.dark .border-teal-200   { border-color:rgba(13,148,136,0.3)  !important; }
+    html.dark .border-orange-200 { border-color:rgba(234,88,12,0.3)   !important; }
+    html.dark .border-emerald-200{ border-color:rgba(5,150,105,0.3)   !important; }
+    html.dark .border-green-200  { border-color:rgba(22,163,74,0.3)   !important; }
+    html.dark .border-amber-200  { border-color:rgba(217,119,6,0.3)   !important; }
+
+    /* ── Inputs with explicit bg-white class ─────────────────────────────── */
+    html.dark input.bg-white,
+    html.dark textarea.bg-white { background:#1e293b !important; color:#f1f5f9 !important; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ══════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════ -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo -->
+        <a href="../../index.html" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Playground</span>
+        </a>
+
+        <!-- Desktop links -->
+        <div class="hidden md:flex items-center gap-2">
+          <a href="../../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+            All Modules
+          </a>
+          <a href="compare.html" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+            Compare All
+          </a>
+          <button data-dark-toggle
+            class="nav-dark-btn ml-1 p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button id="mobileMenuBtn"
+          class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+          aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div id="mobileMenu"
+      class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <a href="../../index.html"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          ← Back to Home
+        </a>
+        <a href="../../index.html#learn"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          All Modules
+        </a>
+        <a href="compare.html"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          Compare All Indexes
+        </a>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm nav-link">Dark Mode</span>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- ══════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════ -->
+  <main class="pt-20 pb-16">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-6 mb-6 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <a href="compare.html" class="back-btn" style="--lc-color:#d97706;">
+          <i data-lucide="layers" style="width:13px;height:13px;"></i>
+          Compare All
+        </a>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800">Graph Search</span>
+      </div>
+
+      <!-- Page heading -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl flex-shrink-0">🕸️</div>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">HNSW Index</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Builds a navigable graph · jumps node-to-node to find the nearest neighbor fast</p>
+        </div>
+      </div>
+
+<div class="mb-5 rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-orange-500 px-5 py-3">
+      <p class="text-white text-sm font-medium">HNSW builds a graph where each vector is a node. Search starts at entry node A and greedily hops to whichever neighbor is most similar and stops when no neighbor is better.</p>
+    </div>
+    <div class="bg-orange-50 px-5 py-3 flex items-center gap-2 flex-wrap border border-orange-100 border-t-0 rounded-b-2xl">
+      <span class="text-xs font-semibold text-orange-700 mr-2">Flow:</span>
+      <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🚪 Start at A</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🔍 Compare neighbors</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-orange-100 text-orange-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🏃 Move to best</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-green-100 text-green-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🏆 Done</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+
+    <!-- LEFT (2/5) -->
+    <div class="xl:col-span-2 space-y-4">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center text-sm">🎯</div>
+          <h2 class="text-base font-bold text-slate-800">Query Vector</h2>
+          <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Editable</span>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">x<input type="number" step="0.01" id="q0" value="0.50" oninput="onVecChange()" class="w-full border-2 border-orange-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-orange-500 bg-white shadow-sm"/></label>
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">y<input type="number" step="0.01" id="q1" value="0.60" oninput="onVecChange()" class="w-full border-2 border-orange-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-orange-500 bg-white shadow-sm"/></label>
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">z<input type="number" step="0.01" id="q2" value="0.40" oninput="onVecChange()" class="w-full border-2 border-orange-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-orange-500 bg-white shadow-sm"/></label>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-indigo-100 rounded-lg flex items-center justify-center text-sm">📍</div>
+            <h2 class="text-base font-bold text-slate-800">Node Vectors</h2>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Editable</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="addNode()" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">➕ Add Node</button>
+            <button onclick="resetAll()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-1.5 px-3 rounded-lg transition">🔄 Reset</button>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Edit node values. similarity scores update live. New nodes connect to the last existing node.</p>
+        <div class="grid grid-cols-1 gap-2" id="node-inputs"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT (3/5) -->
+    <div class="xl:col-span-3 space-y-4">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center text-sm">🕸️</div>
+            <h2 class="text-base font-bold text-slate-800">Graph Visualization</h2>
+          </div>
+          <div class="flex gap-3 text-xs flex-wrap">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block"></span>Unvisited</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>Visited</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-orange-400 inline-block"></span>Current</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>Done</span>
+          </div>
+        </div>
+        <p id="connections-label" class="text-xs text-slate-400 mb-3">Connections: A↔B, A↔C, B↔D, C↔D, C↔E, D↔F, E↔F</p>
+
+        <svg id="hnsw-graph" viewBox="0 0 500 420" class="w-full max-w-lg mx-auto block rounded-xl bg-slate-50 border border-slate-100">
+          <line id="edge-AB" x1="250" y1="58" x2="110" y2="168" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-AC" x1="250" y1="58" x2="390" y2="168" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-BD" x1="110" y1="168" x2="185" y2="283" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-CD" x1="390" y1="168" x2="185" y2="283" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-CE" x1="390" y1="168" x2="450" y2="248" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-DF" x1="185" y1="283" x2="305" y2="355" stroke="#c7d2fe" stroke-width="2.5"/>
+          <line id="edge-EF" x1="450" y1="248" x2="305" y2="355" stroke="#c7d2fe" stroke-width="2.5"/>
+          <!-- Circles first, then labels, then score texts on top -->
+          <circle id="nc-A" cx="250" cy="58" r="30" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <circle id="nc-B" cx="110" cy="168" r="28" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <circle id="nc-C" cx="390" cy="168" r="28" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <circle id="nc-D" cx="185" cy="283" r="28" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <circle id="nc-E" cx="450" cy="248" r="28" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <circle id="nc-F" cx="305" cy="355" r="28" fill="#e0e7ff" stroke="#6366f1" stroke-width="2.5"/>
+          <text x="250" y="63" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">A</text>
+          <text x="110" y="173" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">B</text>
+          <text x="390" y="173" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">C</text>
+          <text x="185" y="288" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">D</text>
+          <text x="450" y="253" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">E</text>
+          <text x="305" y="360" text-anchor="middle" font-size="15" font-weight="bold" fill="#3730a3">F</text>
+          <!-- Score texts last: always rendered on top -->
+          <text id="ns-A" x="250" y="18" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+          <text id="ns-B" x="110" y="128" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+          <text id="ns-C" x="390" y="128" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+          <text id="ns-D" x="185" y="243" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+          <text id="ns-E" x="450" y="208" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+          <text id="ns-F" x="305" y="315" text-anchor="middle" font-size="10" font-weight="600" fill="#059669"></text>
+        </svg>
+
+        <div class="flex flex-wrap gap-2 justify-center mt-4">
+          <button id="start-btn" onclick="startSearch()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-5 rounded-xl transition text-sm">▶ Start Search</button>
+          <button id="step-btn" onclick="stepSearch()" disabled class="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2.5 px-5 rounded-xl transition text-sm">⏭ Step</button>
+          <button onclick="resetSearch()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl transition text-sm">🔄 Reset</button>
+        </div>
+
+        <div id="search-status" class="mt-3 text-center text-sm text-slate-400 font-medium">
+          Press "Start Search" to begin the greedy graph traversal.
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+          <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">Visited</div>
+            <div id="visited-count" class="text-2xl font-extrabold text-amber-700">0</div>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-3 border border-purple-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">Comparisons</div>
+            <div id="comparison-count" class="text-2xl font-extrabold text-purple-700">0</div>
+          </div>
+          <div class="bg-green-50 rounded-xl p-3 border border-green-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">FLAT checks</div>
+            <div class="text-2xl font-extrabold text-green-700">6</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-orange-50 rounded-2xl p-4 border border-orange-100">
+          <h3 class="font-bold text-orange-800 text-sm mb-1">💡 Key Idea</h3>
+          <p class="text-orange-700 text-xs leading-relaxed">Follows best-path through a graph. Like GPS navigation, skips dead ends, finds nearest fast.</p>
+        </div>
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <h3 class="font-bold text-emerald-800 text-sm mb-1">✅ Best For</h3>
+          <p class="text-emerald-700 text-xs leading-relaxed">High-speed search, large in-memory datasets, low latency.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- Mutable graph data ----
+// GRAPH: adjacency list (bidirectional)
+let GRAPH = {
+  A: ['B', 'C'],
+  B: ['A', 'D'],
+  C: ['A', 'D', 'E'],
+  D: ['B', 'C', 'F'],
+  E: ['C', 'F'],
+  F: ['D', 'E'],
+};
+
+// NODE_IDS: ordered list of all node IDs
+let NODE_IDS = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+// nodeVecs: current vector for each node (mutable, so user can add/reset)
+let nodeVecs = {
+  A: [0.30, 0.50, 0.70],
+  B: [0.20, 0.80, 0.20],
+  C: [0.55, 0.45, 0.45],
+  D: [0.52, 0.58, 0.42],
+  E: [0.70, 0.30, 0.60],
+  F: [0.49, 0.61, 0.39],
+};
+
+// Defaults for reset
+const DEFAULT_GRAPH = () => ({
+  A:['B','C'], B:['A','D'], C:['A','D','E'], D:['B','C','F'], E:['C','F'], F:['D','E'],
+});
+const DEFAULT_NODE_IDS = () => ['A','B','C','D','E','F'];
+const DEFAULT_VECS = () => ({
+  A:[0.30,0.50,0.70], B:[0.20,0.80,0.20], C:[0.55,0.45,0.45],
+  D:[0.52,0.58,0.42], E:[0.70,0.30,0.60], F:[0.49,0.61,0.39],
+});
+
+// Fixed positions for the 6 default nodes in the SVG (cx, cy)
+const NODE_POS = {
+  A:[250,58], B:[110,168], C:[390,168], D:[185,283], E:[450,248], F:[305,355],
+};
+// Positions for extra nodes added dynamically (placed below main graph)
+const EXTRA_POS = [
+  [80,430],[230,440],[390,440],[510,420],
+  [140,510],[300,510],[450,510],
+];
+
+// Search state
+let state = { current:null, visited:new Set(), comparisons:0, done:false, started:false };
+
+// ---- SVG helpers ----
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([k,v]) => el.setAttribute(k, v));
+  return el;
+}
+
+// Add a new node circle+label to the SVG
+function addNodeToSVG(id, cx, cy, isEntry) {
+  const svg = document.getElementById('hnsw-graph');
+  // Circle first: so score text and label render on top
+  const circle = svgEl('circle', { id:`nc-${id}`, cx, cy, r:28, fill:'#e0e7ff', stroke:'#6366f1', 'stroke-width':'2.5' });
+  svg.appendChild(circle);
+  // Main label (node letter): on top of circle
+  const label = svgEl('text', { x:cx, y:cy+5, 'text-anchor':'middle', 'font-size':'15', 'font-weight':'bold', fill:'#3730a3' });
+  label.textContent = id;
+  svg.appendChild(label);
+  // Score label above the circle: appended last so it's always visible
+  const scoreText = svgEl('text', { id:`ns-${id}`, x:cx, y:cy-35, 'text-anchor':'middle', 'font-size':'10', 'font-weight':'600', fill:'#059669' });
+  svg.appendChild(scoreText);
+}
+
+// Add an edge line between two nodes to the SVG
+function addEdgeToSVG(id1, id2) {
+  const svg = document.getElementById('hnsw-graph');
+  const [x1,y1] = NODE_POS[id1] || EXTRA_POS[NODE_IDS.indexOf(id1)-6] || [0,0];
+  const [x2,y2] = NODE_POS[id2] || EXTRA_POS[NODE_IDS.indexOf(id2)-6] || [0,0];
+  const edgeKey = [id1,id2].sort().join('-');
+  if (document.getElementById(`edge-${edgeKey}`)) return; // already drawn
+  const line = svgEl('line', { id:`edge-${edgeKey}`, x1,y1,x2,y2, stroke:'#c7d2fe', 'stroke-width':'2.5' });
+  // Insert before first circle so edges appear behind nodes
+  const firstCircle = svg.querySelector('circle');
+  if (firstCircle) svg.insertBefore(line, firstCircle);
+  else svg.appendChild(line);
+}
+
+// Update the connections text label from current GRAPH state
+function updateConnectionsLabel() {
+  const seen = new Set();
+  const pairs = [];
+  Object.entries(GRAPH).forEach(([id, neighbors]) => {
+    neighbors.forEach(n => {
+      const key = [id, n].sort().join('↔');
+      if (!seen.has(key)) { seen.add(key); pairs.push(key); }
+    });
+  });
+  const el = document.getElementById('connections-label');
+  if (el) el.textContent = 'Connections: ' + pairs.join(', ');
+}
+
+// ---- Build / rebuild the node input panel ----
+function buildNodeInputs() {
+  const container = document.getElementById('node-inputs');
+  container.innerHTML = '';
+  NODE_IDS.forEach(id => {
+    const v = nodeVecs[id];
+    const isEntry = id === 'A';
+    const isExtra = !NODE_POS[id]; // dynamically added
+    const div = document.createElement('div');
+    div.id = `ni-${id}`;
+    div.className = `flex flex-wrap items-center gap-2 p-3 rounded-xl border ${isExtra ? 'bg-orange-50 border-orange-200' : 'bg-indigo-50 border-indigo-200'}`;
+    div.innerHTML = `
+      <div class="flex items-center justify-between w-full mb-2">
+        <span class="font-bold ${isExtra?'text-orange-700':'text-indigo-700'} text-sm">Node ${id}</span>
+        ${isExtra ? '<span class="text-xs text-orange-400 font-semibold">(New)</span>' : ''}
+        <span id="nscore-${id}" class="font-mono text-xs text-slate-400 ml-auto">—</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 w-full">
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">x
+          <input type="number" step="0.01" id="n${id}0" value="${v[0].toFixed(2)}" oninput="onVecChange()"
+            class="w-full border-2 border-orange-200 rounded-lg px-1 py-1.5 text-center font-mono text-xs focus:outline-none focus:border-orange-400 bg-white"/>
+        </label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">y
+          <input type="number" step="0.01" id="n${id}1" value="${v[1].toFixed(2)}" oninput="onVecChange()"
+            class="w-full border-2 border-orange-200 rounded-lg px-1 py-1.5 text-center font-mono text-xs focus:outline-none focus:border-orange-400 bg-white"/>
+        </label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">z
+          <input type="number" step="0.01" id="n${id}2" value="${v[2].toFixed(2)}" oninput="onVecChange()"
+            class="w-full border-2 border-orange-200 rounded-lg px-1 py-1.5 text-center font-mono text-xs focus:outline-none focus:border-orange-400 bg-white"/>
+        </label>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+// Read a node's vector from inputs
+function readNodeVec(id) {
+  return [0,1,2].map(i => parseFloat(document.getElementById(`n${id}${i}`)?.value)||0);
+}
+
+// ---- Add a brand-new node ----
+function syncNodesToVecs() {
+  // Read current DOM input values back into nodeVecs so edits survive buildNodeInputs()
+  NODE_IDS.forEach(id => {
+    nodeVecs[id] = [0,1,2].map(i => parseFloat(document.getElementById(`n${id}${i}`)?.value) ?? nodeVecs[id][i]);
+  });
+}
+
+function addNode() {
+  // 1. Save any user edits to existing node inputs into nodeVecs before re-rendering
+  syncNodesToVecs();
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const newId = letters[NODE_IDS.length] || `N${NODE_IDS.length}`;
+
+  // New node gets a vector slightly closer to the query than the current best,
+  // so the search has a reason to travel to it.
+  const qv = readVec('q');
+  nodeVecs[newId] = qv.map((v, i) => parseFloat((v + (i === 0 ? 0.02 : i === 1 ? 0.01 : -0.01)).toFixed(2)));
+
+  // Connect to top-2 nearest existing nodes by cosine similarity. real HNSW behaviour.
+  // This ensures the new node is reachable via the graph from entry node A.
+  NODE_IDS.push(newId);
+  const similarities = NODE_IDS
+    .filter(id => id !== newId)
+    .map(id => ({ id, sim: cosineSimilarity(nodeVecs[newId], nodeVecs[id]) }))
+    .sort((a, b) => b.sim - a.sim);
+  const connectTo = similarities.slice(0, 2).map(x => x.id);
+  GRAPH[newId] = [...connectTo];
+  connectTo.forEach(id => { GRAPH[id] = [...(GRAPH[id]||[]), newId]; });
+
+  // Determine SVG position for this extra node
+  const extraIdx = NODE_IDS.length - 6 - 1;
+  const [cx, cy] = EXTRA_POS[extraIdx] || [250, 440 + extraIdx * 70];
+  NODE_POS[newId] = [cx, cy];
+
+  // Expand SVG viewBox height if needed
+  const svg = document.getElementById('hnsw-graph');
+  const parts = svg.getAttribute('viewBox').split(' ');
+  const newH = Math.max(parseInt(parts[3]), cy + 60);
+  svg.setAttribute('viewBox', `0 0 ${parts[2]} ${newH}`);
+
+  // Draw edges to the top-2 nearest neighbours
+  connectTo.forEach(id => addEdgeToSVG(id, newId));
+  addNodeToSVG(newId, cx, cy, false);
+
+  // Rebuild the inputs panel and reset search
+  buildNodeInputs();
+  updateConnectionsLabel();
+  resetSearch();
+  // Show live similarity scores for all nodes including the new one
+  updateNodeSimLabels();
+
+  // Update "vs FLAT" counter
+  document.querySelector('#comparison-count').closest('.grid').querySelector('.text-green-700').textContent = NODE_IDS.length;
+}
+
+// ---- Node color state ----
+const NODE_COLORS = {
+  default: { fill:'#e0e7ff', stroke:'#6366f1' },
+  visited: { fill:'#fef3c7', stroke:'#f59e0b' },
+  current: { fill:'#fed7aa', stroke:'#f97316' },
+  done:    { fill:'#d1fae5', stroke:'#10b981' },
+};
+
+function updateGraphColors() {
+  NODE_IDS.forEach(id => {
+    const circle = document.getElementById(`nc-${id}`);
+    if (!circle) return;
+    let s;
+    if (state.done && id === state.current)  s = NODE_COLORS.done;
+    else if (id === state.current)           s = NODE_COLORS.current;
+    else if (state.visited.has(id))          s = NODE_COLORS.visited;
+    else                                     s = NODE_COLORS.default;
+    circle.setAttribute('fill', s.fill);
+    circle.setAttribute('stroke', s.stroke);
+  });
+}
+
+function updateNodeSimLabels() {
+  const query = readVec('q');
+  NODE_IDS.forEach(id => {
+    const lbl = document.getElementById(`ns-${id}`);
+    const scoreEl = document.getElementById(`nscore-${id}`);
+    // Always compute and show live similarity scores so edits give immediate feedback
+    const sim = cosineSimilarity(query, readNodeVec(id));
+    const txt = f4(sim);
+    if (lbl) lbl.textContent = state.started ? txt : '';
+    if (scoreEl) scoreEl.textContent = txt;
+  });
+}
+
+function updateUI() {
+  document.getElementById('visited-count').textContent = state.visited.size;
+  document.getElementById('comparison-count').textContent = state.comparisons;
+  updateGraphColors();
+  updateNodeSimLabels();
+  const statusEl = document.getElementById('search-status');
+  if (state.done) {
+    statusEl.textContent = `✅ Search complete! Best match found: Node ${state.current}`;
+    statusEl.className = 'mt-4 text-center text-sm font-semibold text-green-600';
+    document.getElementById('step-btn').disabled = true;
+  } else if (state.started) {
+    statusEl.textContent = `🔍 Currently at Node ${state.current} . Press "Step Search" to move`;
+    statusEl.className = 'mt-4 text-center text-sm font-semibold text-orange-600';
+  }
+}
+
+function startSearch() {
+  state = { current:'A', visited:new Set(['A']), comparisons:1, done:false, started:true };
+  document.getElementById('step-btn').disabled = false;
+  updateUI();
+}
+
+function stepSearch() {
+  if (!state.started || state.done) return;
+  const query = readVec('q');
+  const current = state.current;
+  const neighbors = GRAPH[current] || [];
+  state.comparisons += neighbors.length;
+  let bestNode = current;
+  let bestSim = cosineSimilarity(query, readNodeVec(current));
+  for (const n of neighbors) {
+    const sim = cosineSimilarity(query, readNodeVec(n));
+    if (sim > bestSim) { bestSim = sim; bestNode = n; }
+  }
+  if (bestNode === current) {
+    state.done = true;
+  } else {
+    state.current = bestNode;
+    state.visited.add(bestNode);
+  }
+  updateUI();
+}
+
+function resetSearch() {
+  state = { current:null, visited:new Set(), comparisons:0, done:false, started:false };
+  document.getElementById('step-btn').disabled = true;
+  document.getElementById('search-status').textContent = 'Press "Start Search" to begin the greedy graph traversal.';
+  document.getElementById('search-status').className = 'mt-4 text-center text-sm text-slate-400';
+  document.getElementById('visited-count').textContent = '0';
+  document.getElementById('comparison-count').textContent = '0';
+  updateGraphColors();
+  NODE_IDS.forEach(id => {
+    const lbl = document.getElementById(`ns-${id}`);
+    if (lbl) lbl.textContent = '';
+    const s = document.getElementById(`nscore-${id}`);
+    if (s) s.textContent = '—';
+  });
+}
+
+// Triggered when any vector input changes: reset search to avoid stale state, show live scores
+function recomputeGraph() {
+  syncNodesToVecs();
+
+  // Each node connects to its top-2 nearest neighbours by cosine similarity
+  const newGraph = {};
+  NODE_IDS.forEach(id => {
+    const ranked = NODE_IDS
+      .filter(other => other !== id)
+      .map(other => ({ id: other, sim: cosineSimilarity(nodeVecs[id], nodeVecs[other]) }))
+      .sort((a, b) => b.sim - a.sim);
+    newGraph[id] = ranked.slice(0, 2).map(x => x.id);
+  });
+
+  // Make all connections bidirectional
+  NODE_IDS.forEach(id => {
+    newGraph[id].forEach(neighbor => {
+      if (!newGraph[neighbor].includes(id)) newGraph[neighbor].push(id);
+    });
+  });
+
+  GRAPH = newGraph;
+
+  // Remove all existing edge lines from SVG and redraw
+  const svg = document.getElementById('hnsw-graph');
+  svg.querySelectorAll('line').forEach(l => l.remove());
+  const drawn = new Set();
+  NODE_IDS.forEach(id => {
+    (GRAPH[id] || []).forEach(neighbor => {
+      const key = [id, neighbor].sort().join('-');
+      if (!drawn.has(key)) { drawn.add(key); addEdgeToSVG(id, neighbor); }
+    });
+  });
+
+  updateConnectionsLabel();
+}
+
+function onVecChange() {
+  if (state.started) resetSearch();
+  recomputeGraph();
+  updateNodeSimLabels();
+}
+
+// ---- Reset everything to defaults ----
+function resetAll() {
+  GRAPH = DEFAULT_GRAPH();
+  NODE_IDS = DEFAULT_NODE_IDS();
+  nodeVecs = DEFAULT_VECS();
+  // Remove extra SVG nodes and edges (keep only A-F)
+  const svg = document.getElementById('hnsw-graph');
+  ['G','H','I','J','K','L','M','N','O','P'].forEach(id => {
+    ['nc-','ns-','ni-'].forEach(pre => { const el = document.getElementById(pre+id); if(el) el.remove(); });
+    // Also remove text labels inside SVG
+    svg.querySelectorAll(`text`).forEach(t => { if(t.textContent === id) t.remove(); });
+  });
+  // Remove extra edges
+  svg.querySelectorAll('line[id]').forEach(line => {
+    const base = ['AB','AC','BD','CD','CE','DF','EF'];
+    const key = (line.id||'').replace('edge-','');
+    if (!base.includes(key)) line.remove();
+  });
+  // Remove any extra score text nodes above F
+  svg.setAttribute('viewBox','0 0 520 420');
+  // Restore node vectors in inputs
+  document.getElementById('q0').value = '0.50';
+  document.getElementById('q1').value = '0.60';
+  document.getElementById('q2').value = '0.40';
+  buildNodeInputs();
+  updateConnectionsLabel();
+  // Restore default values in existing inputs
+  Object.entries(nodeVecs).forEach(([id, v]) => {
+    [0,1,2].forEach((_, i) => {
+      const el = document.getElementById(`n${id}${i}`);
+      if (el) el.value = v[i].toFixed(2);
+    });
+  });
+  resetSearch();
+  recomputeGraph();
+}
+
+buildNodeInputs();
+recomputeGraph();
+updateConnectionsLabel();
+updateGraphColors();
+updateNodeSimLabels();
+</script>
+
+
+      <!-- ── Prev / Next navigation ──────────────────────────────────────── -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-between items-center mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+        <a href="ivf-sq8.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: IVF_SQ8 Index
+        </a>
+        <a href="diskann.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
+          Next: DiskANN Index
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+  </div><!-- /max-w-7xl -->
+  </main>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <a href="../../index.html" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow">
+          <i data-lucide="brain" class="w-3.5 h-3.5 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-700 dark:text-slate-300 text-sm">AI Fundamentals Playground</span>
+      </a>
+      <p class="text-slate-400 dark:text-slate-600 text-sm">Vector Index Visual Explorer · Interactive 3D demos</p>
+      <div class="flex items-center gap-4">
+        <a href="compare.html" class="text-sm text-amber-600 dark:text-amber-400 font-semibold hover:underline">Compare All →</a>
+        <a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener"
+          class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          About the Author
+        </a>
+        <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
+          <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+          <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // ── Dark mode + icons ──────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('aip_dark');
+      if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+
+    function syncDarkIcons() {
+      const dark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    function toggleDark() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('aip_dark', isDark ? '1' : '0');
+      syncDarkIcons();
+    }
+
+    window.addEventListener('load', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', toggleDark);
+      });
+
+      // Mobile menu
+      const mBtn  = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen   = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu?.classList.toggle('hidden', !mOpen);
+        const icon = mBtn.querySelector('[data-lucide]');
+        if (icon) {
+          icon.setAttribute('data-lucide', mOpen ? 'x' : 'menu');
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [mBtn] });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn how KNN search works in AI through an interactive nearest-neighbour playground." />
+  <title>KNN Search   AI Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../css/custom.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+  <style>
+    /* ── Module card ────────────────────────── */
+    .module-card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b;
+      border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+
+    .mod-label {
+      font-size: 0.6875rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #7c3aed;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a78bfa; }
+
+    /* ── Inputs ─────────────────────────────── */
+    .pg-input {
+      width: 100%;
+      padding: 0.6rem 0.875rem;
+      border-radius: 0.75rem;
+      border: 1.5px solid #e2e8f0;
+      font-size: 0.875rem;
+      color: #1e293b;
+      background: #f8fafc;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pg-input:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+      background: white;
+    }
+    html.dark .pg-input {
+      background: rgba(15,23,42,0.7);
+      border-color: #334155;
+      color: #f1f5f9;
+    }
+    html.dark .pg-input:focus {
+      border-color: #a78bfa;
+      background: rgba(15,23,42,0.9);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
+    }
+
+    /* ── K Slider ───────────────────────────── */
+    .k-slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .k-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 9999px;
+      background: linear-gradient(to right, #7c3aed 0%, #7c3aed 60%, #e2e8f0 60%);
+      outline: none;
+      cursor: pointer;
+    }
+    html.dark .k-slider {
+      background: linear-gradient(to right, #7c3aed 0%, #7c3aed 60%, #334155 60%);
+    }
+    .k-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #7c3aed;
+      border: 2.5px solid white;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(124,58,237,0.35);
+      transition: transform 0.15s ease;
+    }
+    .k-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .k-slider::-moz-range-thumb {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #7c3aed; border: 2.5px solid white; cursor: pointer;
+    }
+    .k-value {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: #7c3aed;
+      min-width: 32px;
+      text-align: center;
+    }
+    html.dark .k-value { color: #a78bfa; }
+
+    /* ── Dataset inputs grid ────────────────── */
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .ds-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ds-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Map wrapper ────────────────────────── */
+    #knnMapWrap {
+      width: 100%;
+      background: #f8fafc;
+      border-radius: 1rem;
+      border: 1.5px solid #e2e8f0;
+      overflow: hidden;
+    }
+    html.dark #knnMapWrap {
+      background: rgba(15,23,42,0.55);
+      border-color: #334155;
+    }
+
+    /* ── Ranking rows ───────────────────────── */
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.6rem 0.875rem;
+      border-radius: 0.875rem;
+      border: 1.5px solid transparent;
+      transition: opacity 0.35s, background 0.3s, border-color 0.3s;
+    }
+
+    .rank-row.top-k {
+      background: rgba(124,58,237,0.05);
+      border-color: rgba(124,58,237,0.2);
+    }
+    html.dark .rank-row.top-k {
+      background: rgba(124,58,237,0.08);
+      border-color: rgba(167,139,250,0.25);
+    }
+
+    .rank-row.non-k {
+      opacity: 0.45;
+    }
+
+    .rank-num {
+      font-size: 0.7rem;
+      font-weight: 900;
+      color: #94a3b8;
+      min-width: 20px;
+    }
+
+    .rank-text {
+      font-size: 0.875rem;
+      font-weight: 600;
+      flex: 1;
+      color: #1e293b;
+    }
+    html.dark .rank-text { color: #f1f5f9; }
+
+    .rank-score {
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-width: 38px;
+      text-align: right;
+    }
+
+    .nn-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      background: #7c3aed;
+      color: white;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* ── Stat boxes ─────────────────────────── */
+    .stat-box {
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem 0.875rem;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val {
+      font-size: 1.375rem;
+      font-weight: 900;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+      word-break: break-all;
+    }
+    .stat-lbl {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Flow diagram ───────────────────────── */
+    .flow-wrap { display:flex; align-items:center; gap:0.5rem; overflow-x:auto; padding:0.25rem 0.125rem; }
+    .flow-node {
+      display:flex; flex-direction:column; align-items:center; gap:0.35rem;
+      padding:0.75rem 1rem; border-radius:1rem; min-width:80px; text-align:center;
+      background:rgba(124,58,237,0.06); border:1.5px solid rgba(124,58,237,0.14); flex-shrink:0;
+    }
+    .flow-node.active {
+      background:rgba(124,58,237,0.12); border-color:rgba(124,58,237,0.35);
+      box-shadow:0 4px 14px rgba(124,58,237,0.18);
+    }
+    html.dark .flow-node { background:rgba(124,58,237,0.09); border-color:rgba(124,58,237,0.18); }
+    html.dark .flow-node.active { background:rgba(124,58,237,0.16); border-color:rgba(124,58,237,0.36); }
+    .flow-emoji { font-size:1.25rem; line-height:1; }
+    .flow-lbl { font-size:0.58rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:#7c3aed; }
+    html.dark .flow-lbl { color:#a78bfa; }
+    .flow-node.active .flow-emoji { animation: float 2.5s ease-in-out infinite; }
+    .flow-arrow { font-size:1rem; color:#cbd5e1; flex-shrink:0; }
+
+    /* ── Takeaway ───────────────────────────── */
+    .takeaway {
+      display:flex; align-items:flex-start; gap:1rem;
+      padding:1.5rem 1.75rem;
+      background:linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border:1.5px solid rgba(251,191,36,0.22); border-left:4px solid #f59e0b;
+      border-radius:1.25rem;
+    }
+    html.dark .takeaway {
+      background:linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color:rgba(251,191,36,0.16); border-left-color:#f59e0b;
+    }
+
+    /* ── Back button ────────────────────────── */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:0.3rem;
+      font-size:0.875rem; font-weight:600; color:#7c3aed; text-decoration:none;
+      padding:0.4rem 0.9rem; border-radius:9999px;
+      border:1px solid rgba(124,58,237,0.22); background:rgba(124,58,237,0.07);
+      transition:all 0.22s ease;
+    }
+    .back-btn:hover { background:rgba(124,58,237,0.13); transform:translateX(-2px); }
+    html.dark .back-btn { color:#a78bfa; border-color:rgba(167,139,250,0.25); background:rgba(124,58,237,0.1); }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- NAV -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="../index.html" class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Playground</span>
+        </a>
+        <div class="hidden md:flex items-center gap-2">
+          <a href="../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">All Modules</a>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <a href="../index.html" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">← Back to Home</a>
+        <a href="../index.html#learn" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">All Modules</a>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm nav-link">Dark Mode</span>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30">
+          <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+          <span class="text-violet-700 dark:text-violet-400 text-xs font-bold tracking-wide">AI Fundamentals</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="search" class="w-7 h-7 text-violet-600 dark:text-violet-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">KNN Search</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          KNN means <strong class="text-slate-800 dark:text-slate-200">K Nearest Neighbors</strong>, where <em>K</em> is just a number you choose (like 3 or 10). It finds the K most similar items to your query, the same way you might ask "who are the 5 people most like me?"
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            Known words use <strong>preset semantic positions</strong>. Unknown words get a character-based estimate.
+          </p>
+        </div>
+      </header>
+
+
+      <div class="pg-grid">
+      <!-- ══════════════════════════════════════
+           1. INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+          Interactive Playground
+        </div>
+
+        <!-- Query -->
+        <div class="mb-4">
+          <label class="text-xs font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-2 block">
+            Query
+          </label>
+          <input id="queryInput" type="text" class="pg-input" value="cat"
+            placeholder="Type a word…" autocomplete="off" spellcheck="false" />
+        </div>
+
+        <!-- K Slider -->
+        <div class="mb-5 p-4 rounded-xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/30">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400">
+              K   Number of Neighbors
+            </label>
+            <span id="kValue" class="k-value">3</span>
+          </div>
+          <div class="k-slider-wrap">
+            <span class="text-xs font-bold text-slate-400">1</span>
+            <input id="kSlider" type="range" min="1" max="5" value="3" class="k-slider" />
+            <span class="text-xs font-bold text-slate-400">5</span>
+          </div>
+        </div>
+
+        <!-- Dataset inputs -->
+        <div class="mb-5">
+          <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
+            Dataset
+          </label>
+          <div class="dataset-grid" id="datasetInputs"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="resetExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">Reset Example</button>
+          <button id="btnRandom" onclick="randomExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">✨ Random Example</button>
+        </div>
+      </section>
+
+
+        <div class="pg-grid-right">
+
+      <!-- ══════════════════════════════════════
+           3. STATISTICS PANEL
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="mod-label">
+          <i data-lucide="activity" style="width:12px;height:12px;"></i>
+          Statistics
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="stat-box">
+            <div class="stat-val" style="color:#7c3aed;">8</div>
+            <div class="stat-lbl">Dataset Size</div>
+          </div>
+          <div class="stat-box">
+            <div id="stK" class="stat-val" style="color:#2563eb;">3</div>
+            <div class="stat-lbl">K Value</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val" style="color:#0d9488;">8</div>
+            <div class="stat-lbl">Comparisons</div>
+          </div>
+          <div class="stat-box">
+            <div id="stTop" class="stat-val text-base leading-tight" style="color:#ea580c;"> </div>
+            <div class="stat-lbl">Top Neighbor</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════
+           4. FLOW DIAGRAM
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="git-merge" style="width:12px;height:12px;"></i>
+          How It Works
+        </div>
+        <div class="flow-wrap">
+          <div class="flow-node">
+            <span class="flow-emoji">🔍</span>
+            <span class="flow-lbl">Query</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node active">
+            <span class="flow-emoji">📐</span>
+            <span class="flow-lbl">Compare All</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">
+            <span class="flow-emoji">📊</span>
+            <span class="flow-lbl">Sort</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-node">
+            <span class="flow-emoji">🏆</span>
+            <span class="flow-lbl">Return K</span>
+          </div>
+        </div>
+      </section>
+
+        </div><!-- /pg-grid-right -->
+      </div><!-- /pg-grid -->
+
+      <!-- ══════════════════════════════════════
+           2. LIVE VISUALIZATION (full-width)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i>
+          Live Visualization
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <!-- 2D Map -->
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+              2D Map &nbsp;<span class="font-normal normal-case tracking-normal text-slate-400/70">(D1 = X · D2 = Y)</span>
+            </div>
+            <div id="knnMapWrap" style="min-height:300px;"></div>
+          </div>
+
+          <!-- Ranking -->
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+              Ranking
+            </div>
+            <div id="knnRanking" class="flex flex-col gap-1.5"></div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ══════════════════════════════════════
+           BEGINNER TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-5" id="tipsKnn">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Beginner Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>K is your choice. K=1 returns only the single closest item. K=5 returns the 5 closest. Larger K = more results but potentially more noise.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Brute-force KNN checks every item, it's <strong>exact but slow</strong> at scale. Real systems use Approximate Nearest Neighbour (ANN) for millions of vectors.</span>
+          </div>
+        </div>
+      </div>
+
+<!-- ══════════════════════════════════════
+           5. KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-10">
+        <div style="font-size:1.75rem;line-height:1;flex-shrink:0;padding-top:2px;">💡</div>
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1.5">Key Takeaway</div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            KNN compares the query with <strong class="text-slate-900 dark:text-white">every item</strong>
+            and returns the nearest ones   no training needed.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           6. LESSON NAVIGATION
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="distance-vs-similarity.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Distance vs Similarity
+        </a>
+        <a href="top-k.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Top-K Search
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+      <p class="text-center text-xs text-slate-400 dark:text-slate-600 mt-3">Module 6 → Top-K</p>
+
+    </div>
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <a href="../index.html" class="flex items-center gap-2">
+        <div class="w-6 h-6 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-md flex items-center justify-center">
+          <i data-lucide="brain" class="w-3 h-3 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-600 dark:text-slate-400 text-sm">AI Playground</span>
+      </a>
+      
+      <div class="flex items-center gap-4">
+        <a href="../index.html#learn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-sm transition-colors">All Modules</a>
+        <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
+          <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+          <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/animations.js"></script>
+
+  <script>
+    /* ─────────────────────────────────────────
+       Semantic vector library (shared across modules)
+    ───────────────────────────────────────── */
+    const SEMANTIC_VECTORS = {
+      // 🐾 Animals
+      cat:[0.75,0.18,0.22], dog:[0.80,0.20,0.18], tiger:[0.82,0.15,0.25],
+      lion:[0.85,0.22,0.20], elephant:[0.78,0.25,0.15], fish:[0.70,0.18,0.28],
+      // 🚗 Vehicles
+      car:[0.20,0.82,0.18], bus:[0.22,0.78,0.22], train:[0.18,0.85,0.20],
+      bike:[0.25,0.72,0.25], plane:[0.15,0.88,0.18],
+      // 🍎 Food
+      apple:[0.22,0.20,0.80], mango:[0.18,0.22,0.82], banana:[0.20,0.18,0.78],
+      orange:[0.24,0.22,0.76], pizza:[0.28,0.25,0.75], burger:[0.30,0.28,0.72],
+      pasta:[0.26,0.24,0.70], rice:[0.21,0.20,0.72],
+      // 💻 Tech
+      python:[0.78,0.82,0.22], javascript:[0.75,0.85,0.20], java:[0.80,0.80,0.25],
+      html:[0.72,0.88,0.20],
+      // 👑 Royalty
+      king:[0.52,0.45,0.50], queen:[0.48,0.52,0.48], prince:[0.55,0.42,0.52],
+      princess:[0.50,0.50,0.48],
+    };
+
+    /* ─────────────────────────────────────────
+       Constants
+    ───────────────────────────────────────── */
+    const ITEM_COLORS = [
+      '#7c3aed','#2563eb','#0d9488','#ea580c',
+      '#db2777','#d97706','#059669','#dc2626',
+    ];
+
+    const MAP_W = 300, MAP_H = 280, PAD = 38;
+
+    const DEFAULT_DATASET = ['cat','dog','tiger','lion','car','bus','apple','banana'];
+
+    const RANDOM_SETS = [
+      ['cat','dog','tiger','lion','car','bus','apple','banana'],
+      ['apple','mango','banana','orange','train','bike','car','bus'],
+      ['python','java','javascript','html','tiger','lion','cat','dog'],
+      ['king','queen','prince','princess','pizza','burger','pasta','rice'],
+    ];
+
+    let dataset = DEFAULT_DATASET.map(t => ({ text: t, vec: [0,0,0] }));
+    let kVal    = 3;
+
+    /* ─────────────────────────────────────────
+       textToSimpleVector(text)
+    ───────────────────────────────────────── */
+    function textToSimpleVector(text) {
+      const key = text.trim().toLowerCase();
+      if (SEMANTIC_VECTORS[key]) return SEMANTIC_VECTORS[key];
+      const letters = key.replace(/[^a-z]/g, '');
+      if (!letters.length) return [0, 0, 0];
+      const codes  = letters.split('').map(c => c.charCodeAt(0) - 97);
+      const n      = codes.length;
+      const vowels = letters.split('').filter(c => 'aeiou'.includes(c)).length;
+      const d1     = codes.reduce((s, v) => s + v, 0) / (n * 25);
+      const d2     = vowels / n;
+      const w      = n * (n + 1) / 2;
+      const d3     = codes.reduce((s, v, i) => s + (i + 1) * v, 0) / (w * 25);
+      return [Math.min(1, +d1.toFixed(2)), +d2.toFixed(2), Math.min(1, +d3.toFixed(2))];
+    }
+
+    /* ─────────────────────────────────────────
+       cosineSimilarity(a, b)
+    ───────────────────────────────────────── */
+    function cosineSimilarity(a, b) {
+      const dot  = a.reduce((s, v, i) => s + v * b[i], 0);
+      const magA = Math.sqrt(a.reduce((s, v) => s + v * v, 0));
+      const magB = Math.sqrt(b.reduce((s, v) => s + v * v, 0));
+      if (magA === 0 || magB === 0) return 0;
+      return Math.min(1, dot / (magA * magB));
+    }
+
+    /* ─────────────────────────────────────────
+       vecToXY(vec) → SVG pixel coords
+    ───────────────────────────────────────── */
+    function vecToXY(vec) {
+      return {
+        x: PAD + vec[0] * (MAP_W - PAD * 2),
+        y: (MAP_H - PAD) - vec[1] * (MAP_H - PAD * 2),
+      };
+    }
+
+    /* ─────────────────────────────────────────
+       renderKnnMap(wrap, queryVec, dataset, topKIndices)
+    ───────────────────────────────────────── */
+    function renderKnnMap(wrap, queryVec, dataset, topKIndices) {
+      const isDark     = Utils.isDark();
+      const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+      const axisColor  = isDark ? '#475569' : '#cbd5e1';
+      const labelColor = isDark ? '#64748b' : '#94a3b8';
+      const textColor  = isDark ? '#f1f5f9' : '#0f172a';
+      const qPos       = vecToXY(queryVec);
+
+      let inner = '';
+
+      // Grid
+      for (let i = 0; i <= 4; i++) {
+        const f  = i / 4;
+        const gx = PAD + f * (MAP_W - PAD * 2);
+        const gy = PAD + f * (MAP_H - PAD * 2);
+        inner += `<line x1="${gx}" y1="${PAD}" x2="${gx}" y2="${MAP_H-PAD}" stroke="${gridColor}" stroke-width="1"/>`;
+        inner += `<line x1="${PAD}" y1="${gy}" x2="${MAP_W-PAD}" y2="${gy}" stroke="${gridColor}" stroke-width="1"/>`;
+      }
+
+      // Axes
+      inner += `<line x1="${PAD}" y1="${MAP_H-PAD}" x2="${MAP_W-PAD}" y2="${MAP_H-PAD}" stroke="${axisColor}" stroke-width="1.5"/>`;
+      inner += `<line x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${MAP_H-PAD}" stroke="${axisColor}" stroke-width="1.5"/>`;
+      inner += `<text x="${MAP_W/2}" y="${MAP_H-6}" text-anchor="middle" fill="${labelColor}" font-size="9" font-family="Inter,sans-serif" font-weight="700">D1 →</text>`;
+      inner += `<text x="11" y="${MAP_H/2}" text-anchor="middle" fill="${labelColor}" font-size="9" font-family="Inter,sans-serif" font-weight="700" transform="rotate(-90,11,${MAP_H/2})">D2 ↑</text>`;
+
+      // Lines from query to top-K items
+      topKIndices.forEach(i => {
+        const p = vecToXY(dataset[i].vec);
+        inner += `<line x1="${qPos.x}" y1="${qPos.y}" x2="${p.x}" y2="${p.y}"
+          stroke="${ITEM_COLORS[i]}" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>`;
+      });
+
+      const topKSet = new Set(topKIndices);
+
+      // Dataset dots (non-K first, then K, then query on top)
+      dataset.forEach((item, i) => {
+        const { x, y } = vecToXY(item.vec);
+        const color    = ITEM_COLORS[i];
+        const isTopK   = topKSet.has(i);
+        const r        = isTopK ? 7 : 5.5;
+        const opacity  = isTopK ? '1' : '0.28';
+        const safe     = (item.text || '?').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+        if (isTopK) {
+          inner += `<circle cx="${x}" cy="${y}" r="12" fill="${color}" opacity="0.12"/>`;
+        }
+        inner += `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" stroke="white"
+          stroke-width="1.5" opacity="${opacity}"/>`;
+        inner += `<text x="${x + (x > MAP_W/2 ? -11 : 11)}" y="${y + (y < MAP_H/2 ? 15 : -8)}"
+          text-anchor="${x > MAP_W/2 ? 'end' : 'start'}"
+          fill="${isTopK ? color : labelColor}"
+          font-size="${isTopK ? 10 : 9}" font-weight="${isTopK ? 800 : 500}"
+          font-family="Inter,sans-serif" opacity="${isTopK ? 1 : 0.45}">${safe}</text>`;
+      });
+
+      // Query star ★
+      inner += `<circle cx="${qPos.x}" cy="${qPos.y}" r="18" fill="#7c3aed" opacity="0.12"/>`;
+      inner += `<circle cx="${qPos.x}" cy="${qPos.y}" r="10" fill="#7c3aed" stroke="white" stroke-width="2.5"/>`;
+      inner += `<text x="${qPos.x}" y="${qPos.y+4}" text-anchor="middle"
+        fill="white" font-size="11" font-weight="900" font-family="Inter,sans-serif">★</text>`;
+      // Query label
+      const qText = (document.getElementById('queryInput')?.value || 'query')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      inner += `<text x="${qPos.x}" y="${qPos.y + (qPos.y < MAP_H/2 ? 28 : -16)}"
+        text-anchor="middle" fill="#7c3aed" font-size="10" font-weight="800"
+        font-family="Inter,sans-serif">${qText}</text>`;
+
+      wrap.innerHTML = `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" width="100%"
+        xmlns="http://www.w3.org/2000/svg" style="display:block;">${inner}</svg>`;
+    }
+
+    /* ─────────────────────────────────────────
+       updateKnnResults()   main update function
+    ───────────────────────────────────────── */
+    function updateKnnResults() {
+      const queryText = document.getElementById('queryInput').value;
+      const queryVec  = textToSimpleVector(queryText);
+      kVal = parseInt(document.getElementById('kSlider').value);
+
+      // Compute similarities
+      const scored = dataset.map((item, i) => ({
+        i,
+        text:  item.text,
+        score: cosineSimilarity(queryVec, item.vec),
+      })).sort((a, b) => b.score - a.score);
+
+      const topKIndices = scored.slice(0, kVal).map(e => e.i);
+
+      // Render map
+      renderKnnMap(
+        document.getElementById('knnMapWrap'),
+        queryVec, dataset, topKIndices
+      );
+
+      // Render ranking
+      const rankEl = document.getElementById('knnRanking');
+      rankEl.innerHTML = scored.map((entry, rank) => {
+        const isTopK = rank < kVal;
+        const color  = ITEM_COLORS[entry.i];
+        return `
+          <div class="rank-row ${isTopK ? 'top-k' : 'non-k'}">
+            <span class="rank-num">${rank + 1}</span>
+            <span class="ds-dot" style="background:${color};flex-shrink:0;"></span>
+            <span class="rank-text">${entry.text || '?'}</span>
+            <span class="rank-score" style="color:${color};">${entry.score.toFixed(2)}</span>
+            ${isTopK ? '<span class="nn-badge">★ Nearest</span>' : ''}
+          </div>`;
+      }).join('');
+
+      // Stats
+      document.getElementById('stK').textContent   = kVal;
+      document.getElementById('stTop').textContent  = scored[0]?.text || ' ';
+
+      // K slider track fill
+      const slider = document.getElementById('kSlider');
+      const pct = ((kVal - 1) / 4) * 100;
+      const track = Utils.isDark() ? '#334155' : '#e2e8f0';
+      slider.style.background = `linear-gradient(to right, #7c3aed ${pct}%, ${track} ${pct}%)`;
+    }
+
+    /* ─────────────────────────────────────────
+       buildDatasetInputs()
+    ───────────────────────────────────────── */
+    function buildDatasetInputs() {
+      const container = document.getElementById('datasetInputs');
+      container.innerHTML = dataset.map((item, i) => `
+        <div class="ds-row">
+          <span class="ds-dot" style="background:${ITEM_COLORS[i]};"></span>
+          <input class="pg-input" data-ds="${i}" value="${item.text}"
+            placeholder="word…" autocomplete="off" spellcheck="false"
+            style="font-size:0.82rem;padding:0.5rem 0.75rem;" />
+        </div>
+      `).join('');
+
+      container.querySelectorAll('input[data-ds]').forEach(input => {
+        input.addEventListener('input', Utils.debounce(() => {
+          const idx = parseInt(input.dataset.ds);
+          dataset[idx].text = input.value;
+          dataset[idx].vec  = textToSimpleVector(input.value);
+          updateKnnResults();
+        }, 80));
+      });
+
+      // Compute initial vectors
+      dataset.forEach((item, i) => { item.vec = textToSimpleVector(item.text); });
+    }
+
+    /* ─────────────────────────────────────────
+       resetExample / randomExample
+    ───────────────────────────────────────── */
+    function resetExample() {
+      document.getElementById('queryInput').value = 'cat';
+      document.getElementById('kSlider').value    = '3';
+      dataset = DEFAULT_DATASET.map(t => ({ text: t, vec: [0,0,0] }));
+      buildDatasetInputs();
+      updateKnnResults();
+    }
+
+    function randomExample() {
+      const set = RANDOM_SETS[Math.floor(Math.random() * RANDOM_SETS.length)];
+      dataset = set.map(t => ({ text: t, vec: [0,0,0] }));
+      // Pick a random word from the same set as query
+      document.getElementById('queryInput').value = set[Math.floor(Math.random() * 4)];
+      buildDatasetInputs();
+      updateKnnResults();
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo('#btnRandom', { scale: 0.88 }, { scale: 1, duration: 0.45, ease: 'back.out(2)' });
+      }
+    }
+
+    /* ─────────────────────────────────────────
+       syncDarkIcons
+    ───────────────────────────────────────── */
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    /* ─────────────────────────────────────────
+       Init
+    ───────────────────────────────────────── */
+    window.addEventListener('load', () => {
+      Utils.loadDarkPreference();
+      lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          Utils.toggleDark();
+          syncDarkIcons();
+          updateKnnResults(); // re-render map with new theme colours
+        });
+      });
+
+      const mBtn = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu?.classList.toggle('hidden', !mOpen);
+        const icon = mBtn.querySelector('[data-lucide]');
+        if (icon) { icon.setAttribute('data-lucide', mOpen ? 'x' : 'menu'); lucide.createIcons({ nodes: [mBtn] }); }
+      });
+
+      document.getElementById('queryInput')
+        .addEventListener('input', Utils.debounce(updateKnnResults, 80));
+
+      document.getElementById('kSlider').addEventListener('input', () => {
+        document.getElementById('kValue').textContent = document.getElementById('kSlider').value;
+        updateKnnResults();
+      });
+
+      buildDatasetInputs();
+      updateKnnResults();
+
+      if (typeof gsap !== 'undefined') {
+        Animations.init();
+        gsap.from('header', { y: 30, opacity: 0, duration: 0.75, ease: 'power3.out', delay: 0.1 });
+        gsap.from('.module-card, .stat-box, .takeaway', {
+          y: 40, opacity: 0, duration: 0.65, ease: 'power3.out', stagger: 0.08, delay: 0.25,
+        });
+      }
+    });
+  </script>
+</body>
+</html>

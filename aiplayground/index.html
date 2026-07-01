@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn AI visually through interactive experiments. Your guided roadmap from tokens to clustering. No prerequisites." />
+  <title>AI Fundamentals Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { brand: { DEFAULT: '#6366f1', dark: '#4f46e5', light: '#818cf8' } }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="css/custom.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+  <script src="https://d3js.org/d3.v7.min.js" defer></script>
+
+  <style>
+    /* ── Search ──────────────────────────────── */
+    .search-wrap { position: relative; }
+    .search-icon-pos {
+      position: absolute; left: 0.875rem; top: 50%;
+      transform: translateY(-50%); pointer-events: none; color: #94a3b8;
+    }
+    .search-input {
+      width: 100%; padding: 0.7rem 1rem 0.7rem 2.75rem;
+      border-radius: 0.875rem; border: 1.5px solid #e2e8f0;
+      background: white; color: #1e293b;
+      font-size: 0.9rem; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+    .search-input::placeholder { color: #94a3b8; }
+    html.dark .search-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+    html.dark .search-input:focus { border-color: #818cf8; }
+
+    /* ── Filter chips ────────────────────────── */
+    .filter-chip {
+      padding: 0.28rem 0.8rem; border-radius: 9999px;
+      font-size: 0.72rem; font-weight: 600;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b;
+      cursor: pointer; transition: all 0.18s ease; white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: #6366f1; color: #6366f1; background: rgba(99,102,241,0.05); }
+    .filter-chip.active { background: #6366f1; color: white; border-color: #6366f1; }
+    html.dark .filter-chip { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    html.dark .filter-chip.active { background: #6366f1; color: white; border-color: #6366f1; }
+    .chips-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .chip-divider { width: 1px; height: 20px; background: #e2e8f0; align-self: center; flex-shrink: 0; }
+    html.dark .chip-divider { background: #334155; }
+
+    /* ── Compact lesson card (available) ────────── */
+    .lesson-card {
+      display: flex; align-items: center; gap: 0.875rem;
+      background: white; border-radius: 1rem; padding: 0.875rem 1rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-left: 3px solid var(--lc-color, #6366f1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer; text-decoration: none; color: inherit;
+    }
+    .lesson-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+    html.dark .lesson-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.07);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.28); color: inherit;
+    }
+    html.dark .lesson-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+
+    .lesson-num {
+      width: 34px; height: 34px; border-radius: 0.625rem;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 900; color: white; flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .lesson-body { flex: 1; min-width: 0; }
+    .lesson-mod-tag {
+      font-size: 0.575rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.09em; margin-bottom: 0.2rem;
+    }
+    .lesson-title {
+      font-size: 0.9375rem; font-weight: 800; color: #0f172a;
+      line-height: 1.25; margin-bottom: 0.2rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    html.dark .lesson-title { color: #f1f5f9; }
+    .lesson-desc {
+      font-size: 0.775rem; color: #64748b; line-height: 1.5;
+    }
+    html.dark .lesson-desc { color: #94a3b8; }
+    .lesson-meta { font-size: 0.625rem; color: #94a3b8; font-weight: 600; white-space: nowrap; margin-top: 0.25rem; }
+    .lesson-arrow {
+      flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; color: #cbd5e1;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .lesson-card:hover .lesson-arrow {
+      background: var(--lc-color, #6366f1); color: white; transform: translateX(2px);
+    }
+
+    /* ── Module section wrapper (available, collapsible) ─── */
+    .mod-section { margin-bottom: 1rem; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); }
+    html.dark .mod-section { border-color: rgba(255,255,255,0.07); }
+    .mod-section-head {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border-radius: 0; border: none;
+      cursor: pointer; transition: opacity 0.18s; width: 100%;
+      margin-bottom: 0;
+    }
+    .mod-section-head:hover { opacity: 0.85; }
+    .mod-section-icon {
+      width: 28px; height: 28px; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .mod-section-name { font-weight: 800; font-size: 0.875rem; flex: 1; }
+    .mod-section-count { font-size: 0.7rem; color: #94a3b8; white-space: nowrap; }
+    .mod-section-chevron { color: #94a3b8; transition: transform 0.25s ease; flex-shrink: 0; }
+    .mod-section.open .mod-section-chevron { transform: rotate(180deg); }
+    .mod-section-body {
+      display: none; padding: 0 0.75rem 0.75rem; background: white;
+    }
+    html.dark .mod-section-body { background: #1e293b; }
+    .mod-section.open .mod-section-body { display: block; }
+
+    /* ── Coming soon accordion ───────────────── */
+    .cs-accordion { border-radius: 1rem; overflow: hidden; margin-bottom: 0.625rem; border: 1px solid rgba(0,0,0,0.07); }
+    html.dark .cs-accordion { border-color: rgba(255,255,255,0.07); }
+    .cs-accordion-btn {
+      width: 100%; display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.875rem 1rem; background: white; cursor: pointer;
+      text-align: left; border: none; transition: background 0.18s;
+    }
+    .cs-accordion-btn:hover { background: #f8fafc; }
+    html.dark .cs-accordion-btn { background: #1e293b; }
+    html.dark .cs-accordion-btn:hover { background: #263045; }
+    .cs-mod-badge {
+      width: 30px; height: 30px; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .cs-accordion-name { font-weight: 800; font-size: 0.875rem; flex: 1; }
+    html.dark .cs-accordion-name { color: #e2e8f0; }
+    .cs-accordion-count {
+      font-size: 0.7rem; font-weight: 600; color: #94a3b8;
+      padding: 0.18rem 0.6rem; border-radius: 9999px;
+      background: rgba(148,163,184,0.1); white-space: nowrap;
+    }
+    .cs-accordion-chevron { color: #94a3b8; transition: transform 0.25s ease; flex-shrink: 0; }
+    .cs-accordion.open .cs-accordion-chevron { transform: rotate(180deg); }
+    .cs-accordion-body {
+      display: none; padding: 0 0.75rem 0.75rem;
+      background: white;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem;
+    }
+    html.dark .cs-accordion-body { background: #1e293b; }
+    .cs-accordion.open .cs-accordion-body { display: grid; }
+
+    .cs-mini {
+      border-radius: 0.75rem; padding: 0.75rem 0.875rem;
+      background: #f8fafc; border: 1px solid rgba(0,0,0,0.05);
+      opacity: 0.7;
+    }
+    html.dark .cs-mini { background: rgba(15,23,42,0.5); border-color: rgba(255,255,255,0.05); }
+    .cs-mini-num { font-size: 0.6rem; font-weight: 800; color: #94a3b8; margin-bottom: 0.2rem; }
+    .cs-mini-title { font-size: 0.825rem; font-weight: 800; color: #334155; margin-bottom: 0.25rem; line-height: 1.3; }
+    html.dark .cs-mini-title { color: #cbd5e1; }
+    .cs-mini-desc { font-size: 0.7rem; color: #94a3b8; line-height: 1.5; }
+    .cs-mini-meta { font-size: 0.6rem; color: #94a3b8; margin-top: 0.4rem; }
+
+    /* ── Available count badge ───────────────── */
+    .avail-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.6rem; font-weight: 800;
+      padding: 0.2rem 0.55rem; border-radius: 9999px;
+      background: rgba(37,99,235,0.1); color: #1d4ed8;
+      border: 1px solid rgba(37,99,235,0.2);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    html.dark .avail-badge { background: rgba(96,165,250,0.12); color: #60a5fa; border-color: rgba(96,165,250,0.22); }
+
+    /* ── Flow pills ──────────────────────────── */
+    .flow-pill {
+      padding: 0.3rem 0.75rem; border-radius: 9999px;
+      font-size: 0.75rem; font-weight: 700; border: 1.5px solid; white-space: nowrap;
+    }
+    .flow-sep { color: #cbd5e1; font-size: 0.875rem; flex-shrink: 0; }
+
+    /* ── Section card ────────────────────────── */
+    .section-card {
+      background: white; border-radius: 1.25rem; padding: 1.5rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    html.dark .section-card { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+
+    /* ── Empty state ─────────────────────────── */
+    .dyn-empty { text-align: center; padding: 2.5rem 1rem; }
+    .dyn-empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .dyn-empty-title { font-weight: 700; font-size: 0.9rem; color: #64748b; }
+    html.dark .dyn-empty-title { color: #475569; }
+    .dyn-empty-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
+
+    /* ── Dark mode for dynamic content ──────── */
+    .dyn-mod-lbl { font-size: 0.575rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.09em; }
+    .dyn-cs-title { color: #1e293b; font-size: 0.9375rem; font-weight: 800; line-height: 1.3; margin-bottom: 0.35rem; }
+    html.dark .dyn-cs-title { color: #e2e8f0; }
+    .dyn-cs-desc { color: #64748b; font-size: 0.8rem; line-height: 1.6; }
+    html.dark .dyn-cs-desc { color: #94a3b8; }
+    .dyn-mod-name { font-weight: 800; font-size: 0.875rem; }
+    .dyn-mod-count { font-size: 0.7rem; color: #94a3b8; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ══════════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════════ -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base text-white transition-colors duration-300">AI Playground</span>
+        </a>
+        <div class="hidden md:flex items-center gap-2">
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all ml-1" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+          <a href="#learn" class="ml-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold rounded-full transition-all hover:scale-105">
+            Start Learning →
+          </a>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all" aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden absolute top-16 inset-x-0 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between py-2.5">
+          <span class="text-white/60 text-sm">Dark Mode</span>
+          <button data-dark-toggle class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-all">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+        <a href="#learn" class="btn-primary mt-2 text-sm py-2.5">Start Learning →</a>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════
+       HERO, compact
+  ══════════════════════════════════════════ -->
+  <section id="hero" class="bg-hero relative flex flex-col items-center justify-center min-h-[78vh] overflow-hidden">
+    <!-- Particle canvas -->
+    <canvas id="heroCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+    <!-- Floating blobs (parallax targets) -->
+    <div class="hero-blob hero-blob-1" id="blob1"></div>
+    <div class="hero-blob hero-blob-2" id="blob2"></div>
+    <div class="hero-blob hero-blob-3" id="blob3"></div>
+    <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none"></div>
+
+    <div class="relative z-10 text-center px-6 max-w-3xl mx-auto pt-32 pb-16">
+
+      <!-- Fun pill -->
+      <div id="heroBadge" class="hero-pill mb-8 hero-anim" style="opacity:0">
+        <span class="hero-brain-spin">🧠</span> Learn AI by actually playing with it
+      </div>
+
+      <!-- Title -->
+      <h1 id="heroTitle" class="text-6xl sm:text-7xl md:text-8xl font-black leading-[1.0] tracking-tight mb-6 hero-anim" style="opacity:0">
+        <span class="hero-gradient-text">AI Playground</span>
+      </h1>
+
+      <!-- Typewriter subtitle -->
+      <p id="heroSubtitle" class="text-xl sm:text-2xl text-white/50 font-light max-w-lg mx-auto mb-4 leading-relaxed hero-anim" style="opacity:0">
+        <span id="heroTypewriter"></span><span class="hero-cursor">|</span>
+      </p>
+
+      <!-- Tags row -->
+      <div id="heroStats" class="flex flex-wrap justify-center gap-2 mb-10 hero-anim" style="opacity:0">
+        <span class="hero-tag hero-tag-pop">🎯 Zero prerequisites</span>
+        <span class="hero-tag hero-tag-pop" style="animation-delay:.1s">⚡ Interactive lessons</span>
+        <span class="hero-tag hero-tag-pop" id="heroBadgeCount" style="animation-delay:.2s">📚 13 lessons</span>
+      </div>
+
+      <!-- CTA -->
+      <div id="heroCTAs" class="hero-anim" style="opacity:0">
+        <a href="#learn" id="heroCTA" class="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold rounded-2xl shadow-2xl shadow-violet-500/40 hover:shadow-violet-500/60 transition-all hover:-translate-y-1 text-lg">
+          Let's go <span class="group-hover:translate-x-1 inline-block transition-transform">→</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       LEARN  #learn
+  ══════════════════════════════════════════ -->
+  <section id="learn" class="py-12 px-5 md:px-8">
+    <div class="max-w-5xl mx-auto">
+
+      <!-- Search + Filters -->
+      <div class="section-reveal mb-6 space-y-2.5">
+        <div class="search-wrap">
+          <div class="search-icon-pos"><i data-lucide="search" style="width:15px;height:15px;"></i></div>
+          <input id="searchInput" type="search" class="search-input" placeholder="Search lessons…" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="chips-row" id="filterChips">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="available">Available</button>
+          <button class="filter-chip" data-filter="coming-soon">Coming Soon</button>
+          <div class="chip-divider"></div>
+          <button class="filter-chip" data-filter="How AI Works">How AI Works</button>
+          <button class="filter-chip" data-filter="Embeddings & Search">Embeddings & Search</button>
+          <button class="filter-chip" data-filter="Vector Indexes">Vector Indexes</button>
+          <button class="filter-chip" data-filter="RAG">RAG</button>
+          <div class="chip-divider"></div>
+          <button class="filter-chip" data-filter="Beginner">Beginner</button>
+          <button class="filter-chip" data-filter="Intermediate">Intermediate</button>
+          <button class="filter-chip" data-filter="Advanced">Advanced</button>
+        </div>
+      </div>
+
+
+      <!-- ── AVAILABLE LESSONS ──────────────────── -->
+      <div id="availableSection" class="mb-10">
+        <div id="availableContainer"></div>
+      </div>
+
+
+      <!-- ── COMING SOON (accordion) ────────────── -->
+      <div id="comingSoonSection" class="mb-6">
+        <div id="comingSoonContainer"></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-10 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow">
+          <i data-lucide="brain" class="w-3.5 h-3.5 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-700 dark:text-slate-300 text-sm">AI Fundamentals Playground</span>
+      </a>
+      <p class="text-slate-400 dark:text-slate-600 text-sm">Built for curious minds. Learn by doing.</p>
+      <div class="flex items-center gap-5">
+        <a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener"
+          class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          About the Author
+        </a>
+        <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
+          <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+          <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════════
+       SCRIPTS
+  ══════════════════════════════════════════ -->
+  <script src="js/utils.js"></script>
+  <script src="js/animations.js"></script>
+  <script src="js/visualizations.js"></script>
+  <script src="js/components.js"></script>
+
+  <script>
+    /* ═══════════════════════════════════════════════
+       LESSONS DATA
+    ═══════════════════════════════════════════════ */
+    const LESSONS = [
+      // ── Module 1: How AI Works ────────────────────────────────────────────────
+      { num:1,  id:'ai-model',      title:'How an AI Model Works',        desc:'Understand the basics of how AI models process input.',       status:'available',   diff:'Beginner',     dur:'10 min', mod:'How AI Works', page:'modules/how-ai-model-works.html',         icon:'cpu',           color:'#6366f1' },
+      { num:2,  id:'tokens',        title:'Tokens',                       desc:'Learn how AI breaks text into smaller pieces.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'How AI Works', page:'modules/tokens.html',                     icon:'type',          color:'#6366f1' },
+      { num:3,  id:'hallucinate',   title:'Hallucinations',               desc:'Understand why AI sometimes makes mistakes.',                 status:'available',   diff:'Beginner',     dur:'8 min',  mod:'How AI Works', page:'modules/hallucinations.html',             icon:'alert-circle',  color:'#6366f1' },
+      { num:4,  id:'ctx-window',    title:'Context Window',               desc:'Understand how much text AI can read at once.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'How AI Works', page:'modules/context-window.html',             icon:'maximize-2',    color:'#6366f1' },
+      { num:5,  id:'prompts',       title:'Prompt Engineering',           desc:'Experiment with better prompts for better results.',          status:'available',   diff:'Beginner',     dur:'10 min', mod:'How AI Works', page:'modules/prompt-engineering.html',         icon:'pen-tool',      color:'#6366f1' },
+      { num:6,  id:'token-cost',    title:'Token Cost Estimator',         desc:'See how token count affects AI API usage.',                   status:'available',   diff:'Beginner',     dur:'8 min',  mod:'How AI Works', page:'modules/token-cost.html',                 icon:'hash',          color:'#6366f1' },
+      { num:7,  id:'next-word',     title:'Next Word Prediction',         desc:'Understand how language models generate text.',               status:'available',   diff:'Intermediate', dur:'10 min', mod:'How AI Works', page:'modules/next-word-prediction.html',       icon:'type',          color:'#6366f1' },
+      { num:8,  id:'temperature',   title:'Temperature',                  desc:'Control how creative or focused AI responses are.',           status:'available',   diff:'Intermediate', dur:'8 min',  mod:'How AI Works', page:'modules/temperature.html',                icon:'thermometer',   color:'#6366f1' },
+      { num:9,  id:'top-p',         title:'Top-P Sampling',               desc:'Control which words AI picks when generating text.',          status:'available',   diff:'Intermediate', dur:'8 min',  mod:'How AI Works', page:'modules/top-p-sampling.html',             icon:'percent',       color:'#6366f1' },
+      { num:10, id:'transformer',   title:'What is a Transformer?',       desc:'Discover the architecture behind modern AI.',                 status:'available',   diff:'Intermediate', dur:'12 min', mod:'How AI Works', page:'modules/transformer.html',                icon:'git-branch',    color:'#6366f1' },
+      { num:11, id:'trans-reads',   title:'How a Transformer Reads Text', desc:'See how transformers process and understand language.',       status:'available',   diff:'Intermediate', dur:'10 min', mod:'How AI Works', page:'modules/transformer-reads-text.html',     icon:'book-open',     color:'#6366f1' },
+      { num:12, id:'attention',     title:'Attention',                    desc:'See how words focus on each other inside a model.',           status:'available',   diff:'Intermediate', dur:'10 min', mod:'How AI Works', page:'modules/attention.html',                  icon:'eye',           color:'#6366f1' },
+
+      // ── Module 2: Embeddings & Search ─────────────────────────────────────────
+      { num:1,  id:'vectors',       title:'Vectors',                      desc:'Learn how text can become numbers.',                          status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/vectors.html',                    icon:'hash',          color:'#2563eb' },
+      { num:2,  id:'embeddings',    title:'Embeddings',                   desc:'Learn how meaning can be represented as vectors.',            status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings.html',                 icon:'map-pin',       color:'#2563eb' },
+      { num:3,  id:'kw-vs-sem',     title:'Keyword vs Semantic Search',   desc:'See why AI understands meaning, not just words.',             status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/keyword-vs-semantic-search.html', icon:'search',        color:'#2563eb' },
+      { num:4,  id:'similarity',    title:'Similarity Metrics',           desc:'Learn how computers measure how alike two items are.',        status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/similarity.html',                 icon:'ruler',         color:'#2563eb' },
+      { num:5,  id:'dist-vs-sim',   title:'Distance vs Similarity',       desc:'Learn the difference between distance and similarity.',      status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Embeddings & Search', page:'modules/distance-vs-similarity.html',     icon:'arrow-left-right', color:'#2563eb' },
+      { num:6,  id:'knn',           title:'KNN Search',                   desc:'Learn how nearest neighbors are found.',                      status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/knn.html',                        icon:'search',        color:'#2563eb' },
+      { num:7,  id:'top-k',         title:'Top-K Search',                 desc:'Learn how the best K results are returned.',                  status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Embeddings & Search', page:'modules/top-k.html',                      icon:'filter',        color:'#2563eb' },
+      { num:8,  id:'ranking',       title:'Ranking',                      desc:'Understand how search results are ordered by relevance.',     status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Embeddings & Search', page:'modules/ranking.html',                    icon:'list',          color:'#2563eb' },
+      { num:9,  id:'clustering',    title:'Clustering',                   desc:'Learn how similar items are grouped together.',               status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/clustering.html',                 icon:'circle-dot',    color:'#2563eb' },
+      { num:10, id:'sim-matrix',    title:'Similarity Matrix',            desc:'Compare every item with every other item at once.',           status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/similarity-matrix.html',          icon:'grid',          color:'#2563eb' },
+      { num:11, id:'emb-dims',      title:'Embedding Dimensions',         desc:'Understand what vector dimensions mean.',                     status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embedding-dimensions.html',       icon:'layers',        color:'#2563eb' },
+      { num:12, id:'vec-norm',      title:'Vector Normalization',         desc:'See why vectors are normalized before comparison.',           status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/vector-normalization.html',        icon:'compass',       color:'#2563eb' },
+      { num:13, id:'vec-arith',     title:'Vector Arithmetic',            desc:'Learn how vectors capture word relationships.',               status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/vector-arithmetic.html',          icon:'plus',          color:'#2563eb' },
+
+      // ── Module 3: Vector Indexes ──────────────────────────────────────────────
+      { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Intermediate', dur:'15 min', mod:'Vector Indexes', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
+      { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared — 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Indexes', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
+      { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Indexes', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
+      { num:4,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Intermediate', dur:'10 min', mod:'Vector Indexes', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
+      { num:5,  id:'vi-ivf-sq8',  title:'IVF_SQ8 Index',                desc:'Converts 32-bit floats to 8-bit integers — 75% less memory, minimal accuracy loss.',       status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Indexes', page:'modules/vector-indexes/ivf-sq8.html',  icon:'hash',          color:'#d97706' },
+      { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Intermediate', dur:'10 min', mod:'Vector Indexes', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
+      { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Indexes', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
+
+      // ── Module 4: Retrieval-Augmented Generation ──────────────────────────────
+      { num:1,  id:'chunking',      title:'Document Chunking',            desc:'Split documents into smaller searchable pieces.',             status:'coming-soon', diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'scissors',      color:'#0d9488' },
+      { num:2,  id:'metadata',      title:'Metadata Filtering',           desc:'Filter search results using document properties.',            status:'coming-soon', diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'filter',        color:'#0d9488' },
+      { num:3,  id:'emb-rag',       title:'Embeddings in RAG',            desc:'Convert document chunks into searchable vectors.',            status:'coming-soon', diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'database',      color:'#0d9488' },
+      { num:4,  id:'vec-search',    title:'Vector Search',                desc:'Find relevant chunks using vector similarity.',               status:'coming-soon', diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'zap',           color:'#0d9488' },
+      { num:5,  id:'retrieval',     title:'Retrieval',                    desc:'Bring useful information back to the AI.',                    status:'coming-soon', diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'inbox',         color:'#0d9488' },
+      { num:6,  id:'reranking',     title:'Re-ranking',                   desc:'Reorder retrieved results for better relevance.',             status:'coming-soon', diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'arrow-up-down', color:'#0d9488' },
+      { num:7,  id:'rag-pipeline',  title:'RAG Pipeline',                 desc:'See the full retrieval-augmented generation flow.',           status:'coming-soon', diff:'Intermediate', dur:'12 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'git-branch',    color:'#0d9488' },
+    ];
+
+    const MODULE_CONFIGS = {
+      'How AI Works':                     { icon:'brain',    color:'#6366f1', bg:'rgba(99,102,241,0.07)',  border:'rgba(99,102,241,0.2)',  iconBg:'rgba(99,102,241,0.1)'  },
+      'Embeddings & Search':              { icon:'search',   color:'#2563eb', bg:'rgba(37,99,235,0.07)',   border:'rgba(37,99,235,0.2)',   iconBg:'rgba(37,99,235,0.1)'   },
+      'Retrieval-Augmented Generation':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
+      'Vector Indexes':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
+    };
+
+    const DIFF_CONFIG = {
+      Beginner:     { cls:'badge-beginner',     emoji:'🟢' },
+      Intermediate: { cls:'badge-intermediate', emoji:'🟡' },
+      Advanced:     { cls:'badge-advanced',     emoji:'🔴' },
+    };
+
+    let activeFilter = 'all';
+    let searchText   = '';
+
+    function esc(str) {
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function refreshIcons(el) {
+      if (typeof lucide === 'undefined') return;
+      el ? lucide.createIcons({ nodes: [el] }) : lucide.createIcons();
+    }
+
+    function getFiltered() {
+      const q = searchText.toLowerCase();
+      return LESSONS.filter(l => {
+        if (q) {
+          const hay = (l.title + ' ' + l.desc + ' ' + l.mod).toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        if (activeFilter === 'all')               return true;
+        if (activeFilter === 'available')         return l.status === 'available';
+        if (activeFilter === 'coming-soon')       return l.status === 'coming-soon';
+        if (activeFilter === 'Beginner')          return l.diff === 'Beginner';
+        if (activeFilter === 'Intermediate')      return l.diff === 'Intermediate';
+        if (activeFilter === 'Advanced')          return l.diff === 'Advanced';
+        if (activeFilter === 'How AI Works')       return l.mod === 'How AI Works';
+        if (activeFilter === 'Embeddings & Search') return l.mod === 'Embeddings & Search';
+        if (activeFilter === 'Vector Indexes')      return l.mod === 'Vector Indexes';
+        if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation';
+        return true;
+      });
+    }
+
+    /* ── Render: Available lessons, grouped by module, no per-card module tag ── */
+    function renderAvailable(filtered) {
+      const available = filtered.filter(l => l.status === 'available');
+      const section   = document.getElementById('availableSection');
+      const container = document.getElementById('availableContainer');
+
+      if (activeFilter === 'coming-soon') { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      if (!available.length) {
+        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No available lessons match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
+        return;
+      }
+
+      // Group by module
+      const groups = new Map();
+      available.forEach(l => {
+        if (!groups.has(l.mod)) groups.set(l.mod, []);
+        groups.get(l.mod).push(l);
+      });
+
+      let html = '';
+      groups.forEach((lessons, mod) => {
+        const cfg = MODULE_CONFIGS[mod] || MODULE_CONFIGS['AI Fundamentals'];
+
+        const cards = lessons.map(l => {
+          const diff = DIFF_CONFIG[l.diff] ?? DIFF_CONFIG.Beginner;
+          return `
+            <a href="${esc(l.page)}" class="lesson-card" style="--lc-color:${esc(l.color)};">
+              <div class="lesson-num" style="background:${esc(l.color)};">${l.num}</div>
+              <div class="lesson-body">
+                <div class="lesson-title">${esc(l.title)}</div>
+                <div class="lesson-desc">${esc(l.desc)}</div>
+                <div class="lesson-meta">${esc(l.dur)} · ${diff.emoji} ${l.diff}</div>
+              </div>
+              <div class="lesson-arrow">
+                <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+              </div>
+            </a>`;
+        }).join('');
+
+        html += `
+          <div class="mod-section open" id="avail-acc-${esc(mod.replace(/\s+/g,'-'))}">
+            <div class="mod-section-head" style="background:${cfg.bg};" onclick="toggleModSection('avail-acc-${esc(mod.replace(/\s+/g,'-'))}')">
+              <div class="mod-section-icon" style="background:${cfg.iconBg};">
+                <i data-lucide="${cfg.icon}" style="width:13px;height:13px;color:${cfg.color};"></i>
+              </div>
+              <span class="mod-section-name" style="color:${cfg.color};">${esc(mod)}</span>
+              <span class="mod-section-count">${lessons.length} lesson${lessons.length !== 1 ? 's' : ''}</span>
+              <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
+            </div>
+            <div class="mod-section-body">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.5rem;padding-top:0.5rem;">
+                ${cards}
+              </div>
+            </div>
+          </div>`;
+      });
+
+      container.innerHTML = html;
+      refreshIcons(container);
+    }
+
+    /* ── Render: Coming Soon (collapsible accordion by module) ── */
+    function renderComingSoon(filtered) {
+      const upcoming  = filtered.filter(l => l.status === 'coming-soon');
+      const section   = document.getElementById('comingSoonSection');
+      const container = document.getElementById('comingSoonContainer');
+
+      if (activeFilter === 'available') { section.style.display = 'none'; return; }
+      section.style.display = '';
+
+      if (!upcoming.length) {
+        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No upcoming lessons match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
+        return;
+      }
+
+      // Group by module (preserving order)
+      const ordered = [];
+      const seen = new Map();
+      upcoming.forEach(l => {
+        if (!seen.has(l.mod)) { seen.set(l.mod, []); ordered.push(l.mod); }
+        seen.get(l.mod).push(l);
+      });
+
+      container.innerHTML = ordered.map((mod, modIdx) => {
+        const lessons = seen.get(mod);
+        const cfg = MODULE_CONFIGS[mod] || { icon:'book-open', color:'#6366f1', bg:'rgba(99,102,241,0.07)', border:'rgba(99,102,241,0.2)', iconBg:'rgba(99,102,241,0.1)' };
+        const isSearch = !!searchText;
+
+        const cards = lessons.map(l => {
+          const diff = DIFF_CONFIG[l.diff] ?? DIFF_CONFIG.Beginner;
+          return `
+            <div class="cs-mini">
+              <div class="cs-mini-num">${l.num}</div>
+              <div class="cs-mini-title">${esc(l.title)}</div>
+              <div class="cs-mini-desc">${esc(l.desc)}</div>
+              <div class="cs-mini-meta">${diff.emoji} ${l.diff} · ${esc(l.dur)}</div>
+            </div>`;
+        }).join('');
+
+        // Auto-open first accordion (or all when searching)
+        const openClass = (modIdx === 0 || isSearch) ? ' open' : '';
+
+        return `
+          <div class="cs-accordion${openClass}" id="acc-${modIdx}">
+            <button class="cs-accordion-btn" onclick="toggleAccordion('acc-${modIdx}')">
+              <div class="cs-mod-badge" style="background:${cfg.iconBg};">
+                <i data-lucide="${cfg.icon}" style="width:14px;height:14px;color:${cfg.color};"></i>
+              </div>
+              <span class="cs-accordion-name">${esc(mod)}</span>
+              <span class="cs-accordion-count">${lessons.length} lessons</span>
+              <i data-lucide="chevron-down" style="width:15px;height:15px;" class="cs-accordion-chevron"></i>
+            </button>
+            <div class="cs-accordion-body">
+              ${cards}
+            </div>
+          </div>`;
+      }).join('');
+
+      refreshIcons(container);
+    }
+
+    window.toggleAccordion = function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('open');
+    };
+
+    window.toggleModSection = function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('open');
+    };
+
+    function applyFilters() {
+      const filtered = getFiltered();
+      renderAvailable(filtered);
+      renderComingSoon(filtered);
+    }
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    window.addEventListener('load', () => {
+      AIPlayground.init();
+      syncDarkIcons();
+
+      // Update hero badge count from data
+      const availCount = LESSONS.filter(l => l.status === 'available').length;
+      const totalCount = LESSONS.length;
+      const heroBadgeCount = document.getElementById('heroBadgeCount');
+      const statAvailable  = document.getElementById('statAvailable');
+      const statTotal      = document.getElementById('statTotal');
+      if (heroBadgeCount) heroBadgeCount.textContent = `📚 ${availCount} lessons`;
+      if (statAvailable)  statAvailable.textContent  = availCount;
+      if (statTotal)      statTotal.textContent       = totalCount;
+
+      const searchEl = document.getElementById('searchInput');
+      searchEl.addEventListener('input', Utils.debounce(() => {
+        searchText = searchEl.value.trim();
+        applyFilters();
+      }, 180));
+
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          activeFilter = chip.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      applyFilters();
+    });
+  </script>
+
+  <!-- ── Hero animations ── -->
+  <script>
+  (function() {
+    /* ── 1. Particle canvas ── */
+    function initParticles() {
+      const canvas = document.getElementById('heroCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, particles = [];
+
+      const COLORS = ['#818cf8','#c084fc','#38bdf8','#34d399','#f472b6'];
+      const COUNT  = 60;
+
+      function resize() {
+        W = canvas.width  = canvas.offsetWidth;
+        H = canvas.height = canvas.offsetHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function rand(a, b) { return Math.random() * (b - a) + a; }
+
+      for (let i = 0; i < COUNT; i++) {
+        particles.push({
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-0.25, 0.25), vy: rand(-0.25, 0.25),
+          r: rand(1.5, 3.5),
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: rand(0.3, 0.8)
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 110) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              const isDark = document.documentElement.classList.contains('dark');
+              ctx.strokeStyle = isDark
+                ? `rgba(129,140,248,${0.12 * (1 - dist/110)})`
+                : `rgba(99,102,241,${0.09 * (1 - dist/110)})`;
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+        }
+        // Draw dots
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color + Math.round(p.alpha * 255).toString(16).padStart(2,'0');
+          ctx.fill();
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > W) p.vx *= -1;
+          if (p.y < 0 || p.y > H) p.vy *= -1;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    /* ── 2. GSAP entrance ── */
+    function initGSAP() {
+      if (!window.gsap) return;
+      const elems = document.querySelectorAll('.hero-anim');
+      gsap.fromTo(elems,
+        { opacity: 0, y: 40, scale: 0.95 },
+        { opacity: 1, y: 0,  scale: 1,
+          duration: 0.8, stagger: 0.15,
+          ease: 'power3.out', delay: 0.1 }
+      );
+      // CTA button pulse after entrance
+      gsap.to('#heroCTA', {
+        boxShadow: '0 0 40px rgba(139,92,246,0.6)',
+        repeat: -1, yoyo: true,
+        duration: 2, ease: 'sine.inOut', delay: 1.2
+      });
+    }
+
+    /* ── 3. Typewriter ── */
+    function initTypewriter() {
+      const el = document.getElementById('heroTypewriter');
+      if (!el) return;
+      const lines = [
+        'No boring slides. Just hands-on AI. ✨',
+        'Tokens, embeddings, models. Demystified.',
+        'Experiment. Break things. Learn faster. 🚀',
+        'From zero to AI fluent. No fluff. ⚡',
+      ];
+      let li = 0, ci = 0, deleting = false;
+      function tick() {
+        const target = lines[li];
+        if (!deleting) {
+          el.textContent = target.slice(0, ++ci);
+          if (ci === target.length) { deleting = true; setTimeout(tick, 2200); return; }
+        } else {
+          el.textContent = target.slice(0, --ci);
+          if (ci === 0) { deleting = false; li = (li + 1) % lines.length; }
+        }
+        setTimeout(tick, deleting ? 28 : 52);
+      }
+      tick();
+    }
+
+    /* ── 4. Mouse parallax on blobs ── */
+    function initParallax() {
+      const b1 = document.getElementById('blob1');
+      const b2 = document.getElementById('blob2');
+      const b3 = document.getElementById('blob3');
+      if (!b1 || !b2 || !b3) return;
+      document.getElementById('hero').addEventListener('mousemove', e => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width  - 0.5;
+        const my = (e.clientY - rect.top)  / rect.height - 0.5;
+        if (window.gsap) {
+          gsap.to(b1, { x: mx * 40,  y: my * 30,  duration: 1.8, ease: 'power2.out' });
+          gsap.to(b2, { x: mx * -50, y: my * -35, duration: 1.8, ease: 'power2.out' });
+          gsap.to(b3, { x: mx * 30,  y: my * 50,  duration: 1.8, ease: 'power2.out' });
+        }
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initParticles();
+      initGSAP();
+      initTypewriter();
+      initParallax();
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IVF_PQ Index · AI Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Dark mode overrides for Tailwind utility classes ─────────────────── */
+    html.dark body                        { background:#0f172a; color:#f1f5f9; }
+    html.dark .bg-white                   { background:#1e293b !important; }
+    html.dark .bg-gray-50                 { background:#1e293b !important; }
+    html.dark .bg-gray-100                { background:#0f172a !important; }
+    html.dark .bg-gray-200                { background:#1e293b !important; }
+    html.dark .border-gray-200            { border-color:#334155 !important; }
+    html.dark .border-gray-100            { border-color:#1e293b !important; }
+    html.dark .divide-gray-100 > * + *    { border-color:#1e293b !important; }
+
+    /* Text */
+    html.dark .text-slate-800             { color:#f1f5f9 !important; }
+    html.dark .text-slate-700             { color:#e2e8f0 !important; }
+    html.dark .text-slate-600             { color:#cbd5e1 !important; }
+    html.dark .text-slate-500             { color:#94a3b8 !important; }
+    html.dark .text-slate-400             { color:#64748b !important; }
+    html.dark .text-gray-800              { color:#f1f5f9 !important; }
+    html.dark .text-gray-700              { color:#e2e8f0 !important; }
+    html.dark .text-gray-600              { color:#cbd5e1 !important; }
+    html.dark .text-gray-500              { color:#94a3b8 !important; }
+
+    /* Cards / panels */
+    html.dark .bg-indigo-50               { background:rgba(99,102,241,0.12) !important; }
+    html.dark .bg-blue-50                 { background:rgba(37,99,235,0.12)  !important; }
+    html.dark .bg-purple-50               { background:rgba(124,58,237,0.12) !important; }
+    html.dark .bg-teal-50                 { background:rgba(13,148,136,0.12) !important; }
+    html.dark .bg-orange-50               { background:rgba(234,88,12,0.12)  !important; }
+    html.dark .bg-emerald-50              { background:rgba(5,150,105,0.12)  !important; }
+    html.dark .bg-yellow-50               { background:rgba(234,179,8,0.12)  !important; }
+    html.dark .bg-red-50                  { background:rgba(220,38,38,0.12)  !important; }
+    html.dark .bg-green-50                { background:rgba(22,163,74,0.12)  !important; }
+    html.dark .bg-amber-50                { background:rgba(217,119,6,0.12)  !important; }
+    html.dark .bg-pink-50                 { background:rgba(219,39,119,0.12) !important; }
+    html.dark .bg-cyan-50                 { background:rgba(6,182,212,0.12)  !important; }
+    html.dark .bg-sky-50                  { background:rgba(14,165,233,0.12) !important; }
+
+    /* Border colors in dark */
+    html.dark .border-indigo-100          { border-color:rgba(99,102,241,0.2)  !important; }
+    html.dark .border-blue-100            { border-color:rgba(37,99,235,0.2)   !important; }
+    html.dark .border-purple-100          { border-color:rgba(124,58,237,0.2)  !important; }
+    html.dark .border-teal-100            { border-color:rgba(13,148,136,0.2)  !important; }
+    html.dark .border-orange-100          { border-color:rgba(234,88,12,0.2)   !important; }
+    html.dark .border-emerald-100         { border-color:rgba(5,150,105,0.2)   !important; }
+    html.dark .border-amber-100           { border-color:rgba(217,119,6,0.2)   !important; }
+
+    /* Inputs / selects / textareas */
+    html.dark input[type=number],
+    html.dark input[type=text],
+    html.dark input[type=range],
+    html.dark select,
+    html.dark textarea                    { background:#1e293b; border-color:#334155; color:#f1f5f9; }
+    html.dark input[type=number]:focus,
+    html.dark input[type=text]:focus,
+    html.dark select:focus,
+    html.dark textarea:focus              { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+
+    /* Shadow softening in dark */
+    html.dark .shadow-sm                  { box-shadow:0 1px 3px rgba(0,0,0,0.35) !important; }
+    html.dark .shadow                     { box-shadow:0 2px 8px rgba(0,0,0,0.4)  !important; }
+
+    /* Dividers */
+    html.dark hr                          { border-color:#1e293b; }
+
+    /* ── back-btn (not in custom.css, defined per-module) ─────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1;
+      text-decoration: none; padding: 0.4rem 0.9rem;
+      border-radius: 9999px; border: 1px solid rgba(99,102,241,0.22);
+      background: rgba(99,102,241,0.07); transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color:#a78bfa; border-color:rgba(167,139,250,0.25); background:rgba(99,102,241,0.1); }
+
+    /* ── Dark overrides for -100 tint classes (panels, badges, icons) ─────── */
+    html.dark .bg-indigo-100  { background:rgba(99,102,241,0.18)  !important; }
+    html.dark .bg-blue-100    { background:rgba(37,99,235,0.18)   !important; }
+    html.dark .bg-purple-100  { background:rgba(124,58,237,0.18)  !important; }
+    html.dark .bg-teal-100    { background:rgba(13,148,136,0.18)  !important; }
+    html.dark .bg-orange-100  { background:rgba(234,88,12,0.18)   !important; }
+    html.dark .bg-emerald-100 { background:rgba(5,150,105,0.18)   !important; }
+    html.dark .bg-green-100   { background:rgba(22,163,74,0.18)   !important; }
+    html.dark .bg-amber-100   { background:rgba(217,119,6,0.18)   !important; }
+    html.dark .bg-yellow-100  { background:rgba(234,179,8,0.18)   !important; }
+    html.dark .bg-red-100     { background:rgba(220,38,38,0.18)   !important; }
+    html.dark .bg-pink-100    { background:rgba(219,39,119,0.18)  !important; }
+    html.dark .bg-cyan-100    { background:rgba(6,182,212,0.18)   !important; }
+    html.dark .bg-sky-100     { background:rgba(14,165,233,0.18)  !important; }
+    html.dark .bg-slate-100   { background:rgba(148,163,184,0.12) !important; }
+    html.dark .bg-slate-50    { background:#1e293b !important; }
+
+    /* ── Dark text for colored text classes ───────────────────────────────── */
+    html.dark .text-indigo-700 { color:#a5b4fc !important; }
+    html.dark .text-indigo-800 { color:#c7d2fe !important; }
+    html.dark .text-blue-700   { color:#93c5fd !important; }
+    html.dark .text-blue-800   { color:#bfdbfe !important; }
+    html.dark .text-purple-700 { color:#c4b5fd !important; }
+    html.dark .text-purple-800 { color:#ddd6fe !important; }
+    html.dark .text-teal-700   { color:#5eead4 !important; }
+    html.dark .text-teal-800   { color:#99f6e4 !important; }
+    html.dark .text-orange-700 { color:#fdba74 !important; }
+    html.dark .text-orange-800 { color:#fed7aa !important; }
+    html.dark .text-emerald-700{ color:#6ee7b7 !important; }
+    html.dark .text-emerald-800{ color:#a7f3d0 !important; }
+    html.dark .text-green-700  { color:#86efac !important; }
+    html.dark .text-green-800  { color:#bbf7d0 !important; }
+    html.dark .text-amber-700  { color:#fcd34d !important; }
+    html.dark .text-amber-800  { color:#fde68a !important; }
+
+    /* ── Dark borders for colored border classes ──────────────────────────── */
+    html.dark .border-indigo-200 { border-color:rgba(99,102,241,0.3)  !important; }
+    html.dark .border-indigo-300 { border-color:rgba(99,102,241,0.45) !important; }
+    html.dark .border-blue-200   { border-color:rgba(37,99,235,0.3)   !important; }
+    html.dark .border-purple-200 { border-color:rgba(124,58,237,0.3)  !important; }
+    html.dark .border-teal-200   { border-color:rgba(13,148,136,0.3)  !important; }
+    html.dark .border-orange-200 { border-color:rgba(234,88,12,0.3)   !important; }
+    html.dark .border-emerald-200{ border-color:rgba(5,150,105,0.3)   !important; }
+    html.dark .border-green-200  { border-color:rgba(22,163,74,0.3)   !important; }
+    html.dark .border-amber-200  { border-color:rgba(217,119,6,0.3)   !important; }
+
+    /* ── Inputs with explicit bg-white class ─────────────────────────────── */
+    html.dark input.bg-white,
+    html.dark textarea.bg-white { background:#1e293b !important; color:#f1f5f9 !important; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ══════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════ -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo -->
+        <a href="../../index.html" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Playground</span>
+        </a>
+
+        <!-- Desktop links -->
+        <div class="hidden md:flex items-center gap-2">
+          <a href="../../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+            All Modules
+          </a>
+          <a href="compare.html" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
+            Compare All
+          </a>
+          <button data-dark-toggle
+            class="nav-dark-btn ml-1 p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button id="mobileMenuBtn"
+          class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+          aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div id="mobileMenu"
+      class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <a href="../../index.html"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          ← Back to Home
+        </a>
+        <a href="../../index.html#learn"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          All Modules
+        </a>
+        <a href="compare.html"
+          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
+          Compare All Indexes
+        </a>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm nav-link">Dark Mode</span>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <!-- ══════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════ -->
+  <main class="pt-20 pb-16">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-6 mb-6 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <a href="compare.html" class="back-btn" style="--lc-color:#d97706;">
+          <i data-lucide="layers" style="width:13px;height:13px;"></i>
+          Compare All
+        </a>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">Product Quantization</span>
+      </div>
+
+      <!-- Page heading -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl flex-shrink-0">💾</div>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">IVF_PQ Index</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Compresses vectors into short codes · huge memory savings, slight accuracy trade-off</p>
+        </div>
+      </div>
+
+<div class="mb-5 rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-purple-600 px-5 py-3">
+      <p class="text-white text-sm font-medium">IVF_PQ compresses each vector into short codes using a codebook. Huge memory savings with slight accuracy trade-off, adjustable via compression level.</p>
+    </div>
+    <div class="bg-purple-50 px-5 py-3 flex items-center gap-2 flex-wrap border border-purple-100 border-t-0 rounded-b-2xl">
+      <span class="text-xs font-semibold text-purple-700 mr-2">Flow:</span>
+      <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg text-xs font-semibold">📥 Vector</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg text-xs font-semibold">✂️ Split</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg text-xs font-semibold">📚 Quantize</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🔢 Code</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-green-100 text-green-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🏆 Approx Match</span>
+    </div>
+  </div>
+
+  <!-- Query Vector + Compression Level: full-width row above the columns -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center text-sm">🎯</div>
+        <h2 class="text-sm font-bold text-slate-800">Query Vector</h2>
+        <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Editable</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">x<input type="number" step="0.01" id="q0" value="0.50" oninput="calc()" class="w-full border-2 border-purple-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-purple-500 bg-white shadow-sm"/></label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">y<input type="number" step="0.01" id="q1" value="0.60" oninput="calc()" class="w-full border-2 border-purple-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-purple-500 bg-white shadow-sm"/></label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">z<input type="number" step="0.01" id="q2" value="0.40" oninput="calc()" class="w-full border-2 border-purple-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-purple-500 bg-white shadow-sm"/></label>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 bg-pink-100 rounded-lg flex items-center justify-center text-sm">🗜️</div>
+        <h2 class="text-sm font-bold text-slate-800">Compression Level</h2>
+      </div>
+      <select id="compression" onchange="calc()"
+        class="w-full border-2 border-purple-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:border-purple-500 bg-white mb-3">
+        <option value="low">Low: 75% memory, High accuracy</option>
+        <option value="medium" selected>Medium: 50% memory, Medium accuracy</option>
+        <option value="high">High: 25% memory, Lower accuracy</option>
+      </select>
+      <div class="mb-2">
+        <div class="flex justify-between text-xs text-slate-500 mb-1">
+          <span>Memory used</span>
+          <span id="mem-pct-label" class="font-bold text-purple-700">50%</span>
+        </div>
+        <div class="bg-slate-200 rounded-full h-3 overflow-hidden">
+          <div id="mem-bar" class="bg-purple-500 h-3 rounded-full transition-all duration-500" style="width:50%"></div>
+        </div>
+        <div class="flex justify-between text-xs text-slate-400 mt-1">
+          <span>Original: 12 bytes</span>
+          <span id="mem-bytes-label" class="font-medium">≈ 6 bytes</span>
+        </div>
+      </div>
+      <span id="accuracy-badge" class="px-3 py-1 rounded-full font-semibold text-xs bg-yellow-100 text-yellow-700">Accuracy: Medium</span>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+
+    <!-- LEFT (2/5) -->
+    <div class="xl:col-span-2 space-y-4">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-sm">🗃️</div>
+            <h2 class="text-base font-bold text-slate-800">Stored Vectors</h2>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="addVector()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">➕ Add</button>
+            <button onclick="resetDemo()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-1.5 px-3 rounded-lg transition">🔄 Reset</button>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Edit values · change compression · watch scores shift.</p>
+        <div id="vectors-container" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT (3/5) -->
+    <div class="xl:col-span-3 space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-sm">📊</div>
+          <h2 class="text-base font-bold text-slate-800">Approximate Ranked Results</h2>
+          <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Live</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Similarity is computed using <strong>compressed</strong> vectors. Higher compression may change the ranking.</p>
+        <div id="results-container" class="space-y-2"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-purple-50 rounded-2xl p-4 border border-purple-100">
+          <h3 class="font-bold text-purple-800 text-sm mb-1">💡 Key Idea</h3>
+          <p class="text-purple-700 text-xs leading-relaxed">Codebook replacement. only short codes stored. High compression = less memory, less accuracy.</p>
+        </div>
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <h3 class="font-bold text-emerald-800 text-sm mb-1">✅ Best For</h3>
+          <p class="text-emerald-700 text-xs leading-relaxed">Large datasets with tight RAM budgets, edge devices, mobile.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- Default stored vectors (let so we can add/reset) ----
+let STORED_VECS = [
+  { label:'Vector A', vals:[0.12, 0.85, 0.31] },
+  { label:'Vector B', vals:[0.55, 0.21, 0.67] },
+  { label:'Vector C', vals:[0.33, 0.78, 0.25] },
+  { label:'Vector D', vals:[0.91, 0.14, 0.63] },
+];
+
+const STORED_VECS_DEFAULT = () => [
+  { label:'Vector A', vals:[0.12, 0.85, 0.31] },
+  { label:'Vector B', vals:[0.55, 0.21, 0.67] },
+  { label:'Vector C', vals:[0.33, 0.78, 0.25] },
+  { label:'Vector D', vals:[0.91, 0.14, 0.63] },
+];
+
+// Compression settings
+const COMP_CONFIG = {
+  low:    { memPct: 75,  bytes: 9,  decimals: 2, accuracy: 'High',   accCls: 'bg-green-100 text-green-700',  barCls: 'bg-purple-300' },
+  medium: { memPct: 50,  bytes: 6,  decimals: 1, accuracy: 'Medium', accCls: 'bg-yellow-100 text-yellow-700', barCls: 'bg-purple-500' },
+  high:   { memPct: 25,  bytes: 3,  decimals: 0, accuracy: 'Lower',  accCls: 'bg-red-100 text-red-700',      barCls: 'bg-purple-700' },
+};
+
+// Quantize a single float value to given decimal places
+function quantize(val, decimals) {
+  return parseFloat(val.toFixed(decimals));
+}
+
+// Build vector row HTML
+function buildVecRow(idx) {
+  const v = STORED_VECS[idx];
+  const row = document.createElement('div');
+  row.id = `row-${idx}`;
+  row.className = 'p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all';
+  row.innerHTML = `
+    <div class="flex flex-wrap items-start gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-purple-600 text-sm mb-2">${v.label}</div>
+        <div class="flex gap-3 items-end mb-2">
+          <span class="text-xs text-slate-400 font-semibold uppercase self-center">Original</span>
+          <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">x
+            <input type="number" step="0.01" id="v${idx}_0" value="${v.vals[0].toFixed(2)}" oninput="calc()"
+              class="w-14 border-2 border-purple-200 rounded-lg px-1 py-1 text-center font-mono text-xs focus:outline-none focus:border-purple-500 bg-white"/>
+          </label>
+          <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">y
+            <input type="number" step="0.01" id="v${idx}_1" value="${v.vals[1].toFixed(2)}" oninput="calc()"
+              class="w-14 border-2 border-purple-200 rounded-lg px-1 py-1 text-center font-mono text-xs focus:outline-none focus:border-purple-500 bg-white"/>
+          </label>
+          <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">z
+            <input type="number" step="0.01" id="v${idx}_2" value="${v.vals[2].toFixed(2)}" oninput="calc()"
+              class="w-14 border-2 border-purple-200 rounded-lg px-1 py-1 text-center font-mono text-xs focus:outline-none focus:border-purple-500 bg-white"/>
+          </label>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-xs font-semibold text-purple-500 uppercase">Compressed →</span>
+          <span id="comp-${idx}" class="font-mono text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">—</span>
+        </div>
+      </div>
+      <div class="text-right min-w-fit">
+        <div class="text-xs text-slate-400">Approx. Similarity</div>
+        <div id="score-${idx}" class="text-2xl font-extrabold text-purple-700">—</div>
+      </div>
+    </div>`;
+  return row;
+}
+
+function renderRows() {
+  const c = document.getElementById('vectors-container');
+  c.innerHTML = '';
+  STORED_VECS.forEach((_, i) => c.appendChild(buildVecRow(i)));
+}
+
+// ---- Sync current DOM input values back into the STORED_VECS array ----
+// Must be called before any renderRows() to preserve user edits
+function syncToArray() {
+  STORED_VECS.forEach((v, i) => {
+    v.vals = [0,1,2].map(j => parseFloat(document.getElementById(`v${i}_${j}`)?.value) ?? v.vals[j]);
+  });
+}
+
+function calc() {
+  const level = document.getElementById('compression').value;
+  const cfg = COMP_CONFIG[level];
+
+  // Update memory bar
+  document.getElementById('mem-pct-label').textContent = cfg.memPct + '%';
+  document.getElementById('mem-bytes-label').textContent = `≈ ${cfg.bytes} bytes`;
+  document.getElementById('mem-bar').style.width = cfg.memPct + '%';
+  document.getElementById('mem-bar').className = `${cfg.barCls} h-4 rounded-full transition-all duration-500`;
+  document.getElementById('accuracy-badge').className = `px-2 py-0.5 rounded-full font-semibold text-xs ${cfg.accCls}`;
+  document.getElementById('accuracy-badge').textContent = `Accuracy: ${cfg.accuracy}`;
+
+  const query = readVec('q');
+  // Compress the query vector too
+  const qComp = query.map(v => quantize(v, cfg.decimals));
+
+  const scores = STORED_VECS.map((_, idx) => {
+    // Read original values from inputs
+    const orig = [0,1,2].map(j => parseFloat(document.getElementById(`v${idx}_${j}`)?.value)||0);
+    // Compress the stored vector
+    const comp = orig.map(v => quantize(v, cfg.decimals));
+    // Show compressed representation
+    const compEl = document.getElementById(`comp-${idx}`);
+    if (compEl) compEl.textContent = `[${comp.map(v=>v.toFixed(cfg.decimals)).join(', ')}]`;
+    // Calculate approx similarity using compressed vectors
+    const sim = cosineSimilarity(qComp, comp);
+    return { idx, label: STORED_VECS[idx].label, sim };
+  });
+
+  const sorted = [...scores].sort((a,b) => b.sim - a.sim);
+  const topIdx = sorted[0].idx;
+  const maxSim = sorted[0].sim;
+
+  // Update scores and highlight top row
+  scores.forEach(({ idx, sim }) => {
+    const el = document.getElementById(`score-${idx}`);
+    if (el) el.textContent = f4(sim);
+    const row = document.getElementById(`row-${idx}`);
+    if (row) {
+      row.className = idx === topIdx
+        ? 'p-4 bg-green-50 rounded-xl border-2 border-green-400 transition-all'
+        : 'p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all';
+    }
+  });
+
+  // Render results
+  const rc = document.getElementById('results-container');
+  rc.innerHTML = '';
+  sorted.forEach((item, rank) => {
+    const isTop = rank === 0;
+    const div = document.createElement('div');
+    div.className = `flex items-center gap-3 p-3 rounded-xl border-2 ${isTop ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-slate-200'}`;
+    div.innerHTML = `
+      <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isTop ? 'bg-green-500 text-white' : 'bg-purple-100 text-purple-700'}">${rank+1}</div>
+      <div class="flex-1 font-semibold text-slate-700 text-sm">${item.label}
+        ${isTop ? '<span class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">🏆 Top Match</span>' : ''}
+      </div>
+      <div class="flex-1">
+        <div class="bg-slate-200 rounded-full h-2 overflow-hidden">
+          <div class="${isTop?'bg-green-500':'bg-purple-400'} h-2 rounded-full" style="width:${pct(item.sim,maxSim)}"></div>
+        </div>
+      </div>
+      <div class="font-extrabold text-sm ${isTop?'text-green-700':'text-purple-600'} w-16 text-right">${f4(item.sim)}</div>`;
+    rc.appendChild(div);
+  });
+}
+
+renderRows();
+calc();
+
+// ---- Add a new vector ----
+function addVector() {
+  // 1. Save any user edits from inputs back into the array
+  syncToArray();
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const next = letters[STORED_VECS.length] || `#${STORED_VECS.length + 1}`;
+  // 2. Push new default vector
+  STORED_VECS.push({ label: `Vector ${next}`, vals: [0.50, 0.50, 0.50] });
+  // 3. Full re-render from updated array: preserves all existing edits
+  renderRows();
+  calc();
+}
+
+// ---- Reset to defaults ----
+function resetDemo() {
+  STORED_VECS = STORED_VECS_DEFAULT();
+  document.getElementById('q0').value = '0.50';
+  document.getElementById('q1').value = '0.60';
+  document.getElementById('q2').value = '0.40';
+  document.getElementById('compression').value = 'medium';
+  renderRows();
+  calc();
+}
+</script>
+
+
+      <!-- ── Prev / Next navigation ──────────────────────────────────────── -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-between items-center mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
+        <a href="ivf-flat.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: IVF_FLAT Index
+        </a>
+        <a href="ivf-sq8.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
+          Next: IVF_SQ8 Index
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+  </div><!-- /max-w-7xl -->
+  </main>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <a href="../../index.html" class="flex items-center gap-2.5">
+        <div class="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow">
+          <i data-lucide="brain" class="w-3.5 h-3.5 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-700 dark:text-slate-300 text-sm">AI Fundamentals Playground</span>
+      </a>
+      <p class="text-slate-400 dark:text-slate-600 text-sm">Vector Index Visual Explorer · Interactive 3D demos</p>
+      <div class="flex items-center gap-4">
+        <a href="compare.html" class="text-sm text-amber-600 dark:text-amber-400 font-semibold hover:underline">Compare All →</a>
+        <a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener"
+          class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          About the Author
+        </a>
+        <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
+          <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+          <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // ── Dark mode + icons ──────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('aip_dark');
+      if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+
+    function syncDarkIcons() {
+      const dark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    function toggleDark() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('aip_dark', isDark ? '1' : '0');
+      syncDarkIcons();
+    }
+
+    window.addEventListener('load', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', toggleDark);
+      });
+
+      // Mobile menu
+      const mBtn  = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen   = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu?.classList.toggle('hidden', !mOpen);
+        const icon = mBtn.querySelector('[data-lucide]');
+        if (icon) {
+          icon.setAttribute('data-lucide', mOpen ? 'x' : 'menu');
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [mBtn] });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

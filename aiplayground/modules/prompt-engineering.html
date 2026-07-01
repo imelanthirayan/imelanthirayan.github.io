@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn how to write better prompts and get better AI responses, an interactive beginner demo." />
+  <title>Prompt Engineering, AI Playground</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #6366f1; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a5b4fc; }
+
+    /* ── Textarea ────────────────────────────── */
+    .pg-textarea {
+      width: 100%; padding: 0.75rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; font-size: 0.9rem; color: #1e293b;
+      background: #f8fafc; outline: none; font-family: 'Inter', sans-serif;
+      resize: vertical; line-height: 1.65;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pg-textarea:focus {
+      border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); background: white;
+    }
+    html.dark .pg-textarea {
+      background: rgba(15,23,42,0.7); border-color: #334155; color: #f1f5f9;
+    }
+    html.dark .pg-textarea:focus {
+      border-color: #a5b4fc; background: rgba(15,23,42,0.9);
+      box-shadow: 0 0 0 3px rgba(165,180,252,0.1);
+    }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(99,102,241,0.25); background: rgba(99,102,241,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #a5b4fc; border-color: rgba(165,180,252,0.28); background: rgba(99,102,241,0.1); }
+
+    /* ── Quality meter ───────────────────────── */
+    .quality-track {
+      height: 14px; border-radius: 9999px; overflow: hidden;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .quality-track { background: #0f172a; border-color: #334155; }
+    .quality-fill {
+      height: 100%; border-radius: 9999px;
+      transition: width 0.55s cubic-bezier(0.34,1.56,0.64,1), background 0.5s;
+    }
+
+    /* ── Checklist cards ─────────────────────── */
+    .check-card {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.55rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid; margin-bottom: 0.4rem;
+      transition: all 0.3s;
+    }
+    .check-card.present {
+      background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.3);
+    }
+    html.dark .check-card.present { background: rgba(16,185,129,0.1); }
+    .check-card.missing {
+      background: rgba(148,163,184,0.04); border-color: rgba(148,163,184,0.18);
+      opacity: 0.65;
+    }
+    html.dark .check-card.missing { background: rgba(15,23,42,0.3); border-color: #334155; }
+    .check-icon {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 900; transition: all 0.3s;
+    }
+    .check-card.present .check-icon { background: #10b981; color: white; }
+    .check-card.missing  .check-icon { background: #e2e8f0; color: #94a3b8; }
+    html.dark .check-card.missing .check-icon { background: #334155; color: #475569; }
+    .check-lbl {
+      font-size: 0.82rem; font-weight: 700; flex: 1;
+      color: #1e293b; transition: color 0.3s;
+    }
+    html.dark .check-lbl { color: #e2e8f0; }
+    .check-card.missing .check-lbl { color: #94a3b8; }
+    html.dark .check-card.missing .check-lbl { color: #475569; }
+    .check-tip {
+      font-size: 0.65rem; color: #94a3b8; font-style: italic; flex-shrink: 0;
+    }
+
+    /* ── Before/after comparison ─────────────── */
+    .compare-box {
+      border-radius: 0.875rem; padding: 0.75rem 0.875rem;
+      font-size: 0.82rem; line-height: 1.65; font-weight: 500;
+      border: 1.5px solid;
+    }
+    .compare-box.before {
+      background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.25);
+      color: #7f1d1d;
+    }
+    html.dark .compare-box.before {
+      background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); color: #fca5a5;
+    }
+    .compare-box.after {
+      background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.3);
+      color: #064e3b;
+    }
+    html.dark .compare-box.after {
+      background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.3); color: #6ee7b7;
+    }
+
+    /* ── Response card ───────────────────────── */
+    .response-card {
+      border-radius: 1rem; padding: 1rem 1.125rem;
+      border: 1.5px solid; line-height: 1.7; font-size: 0.88rem;
+      font-weight: 500;
+      transition: background 0.4s, border-color 0.4s;
+    }
+    @keyframes responseIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .resp-in { animation: responseIn 0.35s ease forwards; }
+
+    /* ── Stat boxes ──────────────────────────── */
+    .stat-box {
+      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
+      text-align: center; border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val {
+      font-size: 1.05rem; font-weight: 900; line-height: 1.2;
+      font-variant-numeric: tabular-nums; word-break: break-all;
+    }
+    .stat-lbl {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
+    }
+
+    /* ── Flow ────────────────────────────────── */
+    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
+    .flow-pill-box {
+      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
+      text-align: center; border: 1.5px solid #e2e8f0; background: white;
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
+    }
+    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
+    .flow-pill-box.fp-active { background: rgba(99,102,241,0.1); border-color: #6366f1; color: #6366f1; }
+    html.dark .flow-pill-box.fp-active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .flow-pill-box.fp-done { background: rgba(16,185,129,0.08); border-color: #10b981; color: #059669; }
+    html.dark .flow-pill-box.fp-done { background: rgba(16,185,129,0.1); color: #34d399; }
+    .flow-pill-emoji { font-size: 0.95rem; }
+    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
+    html.dark .flow-sep { color: #334155; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+
+    /* ── Score badge ─────────────────────────── */
+    .score-ring {
+      width: 56px; height: 56px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      border: 3px solid; font-size: 1rem; font-weight: 900; transition: all 0.5s;
+    }
+
+    /* ── Improve highlight ───────────────────── */
+    @keyframes highlightIn {
+      0%   { background: rgba(99,102,241,0.25); }
+      100% { background: transparent; }
+    }
+    .highlight-flash { animation: highlightIn 1s ease forwards; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="../index.html" class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+          </div>
+          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Playground</span>
+        </a>
+        <div class="hidden md:flex items-center gap-2">
+          <a href="../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">All Modules</a>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+        <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Open menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <div id="mobileMenu" class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
+      <div class="flex flex-col gap-2">
+        <a href="../index.html" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">← Back to Home</a>
+        <a href="../index.html#learn" class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">All Modules</a>
+        <div class="flex items-center justify-between py-2">
+          <span class="text-sm nav-link">Dark Mode</span>
+          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all">
+            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
+            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+          <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+          <span class="text-indigo-700 dark:text-indigo-400 text-xs font-bold tracking-wide">How AI Works</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="pen-tool" class="w-7 h-7 text-indigo-600 dark:text-indigo-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Prompt Engineering</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Prompt engineering means writing <strong class="text-slate-800 dark:text-slate-200">clear instructions</strong> so AI can give <strong class="text-slate-800 dark:text-slate-200">better answers</strong>.
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simple learning demo</strong> using predefined responses, not a real AI model.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           MAIN GRID
+      ══════════════════════════════════════ -->
+      <div class="pg-grid">
+
+        <!-- ── LEFT: Playground ──────────────── -->
+        <div class="flex flex-col gap-5">
+
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="edit-3" style="width:12px;height:12px;"></i>
+              Prompt Playground
+            </div>
+
+            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block">Your Prompt</label>
+            <textarea id="promptInput" class="pg-textarea mb-3" rows="4"
+              placeholder="Type your prompt here…">Explain AI.</textarea>
+
+            <div class="flex flex-wrap gap-2">
+              <button id="improveBtn" onclick="improvePromptAction()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="wand-2" style="width:13px;height:13px;"></i>
+                Make Prompt Better
+              </button>
+              <button onclick="resetExample()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i>
+                Reset
+              </button>
+              <button onclick="randomExample()"
+                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                <i data-lucide="shuffle" style="width:13px;height:13px;"></i>
+                Random
+              </button>
+            </div>
+          </section>
+
+          <!-- Checklist -->
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="check-square" style="width:12px;height:12px;"></i>
+              Prompt Quality Checklist
+            </div>
+            <div id="checklistContainer"></div>
+          </section>
+
+        </div><!-- /left -->
+
+
+        <!-- ── RIGHT: Visualization ──────────── -->
+        <div class="pg-grid-right">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="eye" style="width:12px;height:12px;"></i>
+              Live Visualization
+            </div>
+
+            <!-- Quality meter -->
+            <div class="mb-5">
+              <div class="flex items-center gap-4 mb-3">
+                <div class="score-ring" id="scoreRing">
+                  <span id="scoreNum">0</span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Prompt Quality</span>
+                    <span id="qualityLabel" class="text-xs font-black text-slate-400">: </span>
+                  </div>
+                  <div class="quality-track">
+                    <div id="qualityFill" class="quality-fill" style="width:0%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="height:1px;background:rgba(0,0,0,0.05);margin-bottom:1.25rem;"></div>
+
+            <!-- Before / After comparison -->
+            <div id="compareSection" style="display:none;">
+              <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Before → After</div>
+              <div class="compare-box before mb-2">
+                <div class="text-xs font-bold text-red-400 mb-1 uppercase tracking-wide">Before</div>
+                <div id="beforeText" class="italic"></div>
+              </div>
+              <div class="compare-box after">
+                <div class="text-xs font-bold text-emerald-500 mb-1 uppercase tracking-wide">After</div>
+                <div id="afterText"></div>
+              </div>
+              <div style="height:1px;background:rgba(0,0,0,0.05);margin:1.25rem 0;"></div>
+            </div>
+
+            <!-- AI Response simulation -->
+            <div>
+              <div class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Simulated AI Response</div>
+              <div id="responseArea">
+                <div class="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                  <i data-lucide="message-square" style="width:26px;height:26px;color:#a5b4fc;"></i>
+                  <p class="text-sm text-slate-400 dark:text-slate-500">Start typing your prompt to see a response</p>
+                </div>
+              </div>
+            </div>
+
+          </section>
+        </div>
+
+      </div><!-- /pg-grid -->
+
+
+      <!-- ══════════════════════════════════════
+           STATS + FLOW
+      ══════════════════════════════════════ -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-5">
+
+        <!-- Statistics -->
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i>
+            Statistics
+          </div>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="stat-box">
+              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statLength">: </div>
+              <div class="stat-lbl">Prompt Length</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-indigo-500 dark:text-indigo-400" id="statTokens">: </div>
+              <div class="stat-lbl">Est. Tokens</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="stat-box">
+              <div class="stat-val text-2xl font-black" id="statScore">0</div>
+              <div class="stat-lbl">Quality Score</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-rose-500 dark:text-rose-400" id="statMissing">: </div>
+              <div class="stat-lbl">Missing Items</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-emerald-600 dark:text-emerald-400 text-sm" id="statRespStyle">: </div>
+              <div class="stat-lbl">Response Style</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="git-branch" style="width:12px;height:12px;"></i>
+            How It Works
+          </div>
+          <div class="flex items-start gap-0.5">
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">✍️</div>
+              <div class="flow-pill-box" id="fp-0">Prompt</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🔍</div>
+              <div class="flow-pill-box" id="fp-1">Clarity<br>Check</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">✨</div>
+              <div class="flow-pill-box" id="fp-2">Better<br>Instructions</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">💬</div>
+              <div class="flow-pill-box" id="fp-3">Better<br>Response</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+
+      
+      <!-- ══════════════════════════════════════
+           BEGINNER TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-5" id="tipsPromptEng">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Beginner Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">3 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>Be specific about format</strong>, "List 3 bullet points" gives better results than "Tell me about it".</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Giving one example of the output you want (few-shot prompting) dramatically improves results.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Shorter isn't always better, a clear 50-word prompt beats a vague 5-word one every time.</span>
+          </div>
+        </div>
+      </div>
+
+<!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-8">
+        <span class="text-2xl flex-shrink-0">💡</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Key Takeaway</div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-1">
+            <strong class="text-slate-900 dark:text-white">Clear prompts</strong> usually lead to clearer and more useful AI responses.
+          </p>
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+            Adding a task, audience, format, context, and tone turns a vague request into a precise instruction the model can act on.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           NAVIGATION
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="context-window.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Context Window
+        </a>
+        <a href="token-cost.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Token Cost Estimator
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <a href="../index.html" class="flex items-center gap-2">
+        <div class="w-6 h-6 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-md flex items-center justify-center">
+          <i data-lucide="brain" class="w-3 h-3 text-white"></i>
+        </div>
+        <span class="font-bold text-slate-600 dark:text-slate-400 text-sm">AI Playground</span>
+      </a>
+      <p class="text-slate-400 dark:text-slate-600 text-xs">How AI Works</p>
+      <div class="flex items-center gap-4">
+        <a href="../index.html#learn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-sm transition-colors">All Modules</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="../js/utils.js"></script>
+  <script src="../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     DATA
+  ═══════════════════════════════════════════════ */
+  const RANDOM_PROMPTS = [
+    "Explain AI.",
+    "Write about chatbots.",
+    "Tell me about machine learning.",
+    "Summarize vectors.",
+    "Help me learn Python.",
+  ];
+
+  const IMPROVED_PROMPTS = {
+    "explain ai.":
+      "Explain artificial intelligence to a complete beginner in simple words. Use 3 short bullet points and one real-world example.",
+    "write about chatbots.":
+      "Write a beginner-friendly explanation of chatbots in 2 short paragraphs. Include one real example and keep the tone friendly.",
+    "tell me about machine learning.":
+      "Explain machine learning to a 12-year-old using a simple analogy. Keep it under 100 words and avoid technical jargon.",
+    "summarize vectors.":
+      "Summarize what vectors are in the context of AI for a beginner. Use one sentence definition and one everyday example.",
+    "help me learn python.":
+      "Create a 3-step beginner learning plan for Python. Focus on practical exercises. Assume the learner has no programming experience.",
+  };
+
+  const RESPONSES = {
+    low: "AI means machines doing smart tasks.",
+    medium: "Artificial intelligence means teaching computers to do tasks that usually need human thinking, like understanding text, recognizing images, or making suggestions.",
+    high: "Artificial intelligence is like giving a computer a helpful brain for specific tasks. It can find patterns, answer questions, and make predictions, and it gets better the more data it sees.",
+  };
+
+  // Per-prompt responses at different quality levels
+  const PROMPT_RESPONSES = {
+    "explain ai": {
+      low:    "AI means machines doing smart tasks.",
+      medium: "Artificial intelligence means teaching computers to do tasks that usually need human thinking, like understanding text, recognizing images, or making suggestions.",
+      high:   "Artificial intelligence is like giving a computer a helpful brain for specific tasks. It can find patterns, answer questions, and make predictions, and it gets better the more data it sees.",
+    },
+    "write about chatbots": {
+      low:    "Chatbots are programs that talk to people.",
+      medium: "A chatbot is a computer program designed to simulate conversation. It reads your message and generates a response based on patterns it has learned.",
+      high:   "A chatbot is a digital assistant that understands your message and replies in natural language. Modern chatbots use AI to recognize context, answer questions, and even carry on multi-turn conversations, just like texting with a knowledgeable friend.",
+    },
+    "tell me about machine learning": {
+      low:    "Machine learning is a type of AI.",
+      medium: "Machine learning is a way of teaching computers to learn from examples instead of following strict rules. The more data it sees, the better it gets.",
+      high:   "Machine learning is like teaching a child by showing examples instead of explaining rules. You show the computer thousands of photos of cats until it can recognize a new cat it has never seen, all without being told what a cat looks like step by step.",
+    },
+    "summarize vectors": {
+      low:    "Vectors are lists of numbers.",
+      medium: "In AI, a vector is a list of numbers that represents something, like a word, image, or idea, in a form that a computer can compare and calculate with.",
+      high:   "Think of a vector as a word's address in number-space. For example, the word 'king' might map to a list like [0.8, 0.3, 0.9, …]. AI uses these number lists to find which words, images, or ideas are similar to each other.",
+    },
+    "help me learn python": {
+      low:    "Python is a programming language.",
+      medium: "Python is a beginner-friendly programming language used widely in AI, data science, and web development. Start by learning variables, loops, and functions.",
+      high:   "Here's a 3-step beginner plan for Python: (1) Learn the basics, variables, loops, functions, using free resources like Python.org. (2) Build 3 small projects: a calculator, a quiz game, and a file reader. (3) Explore a library you care about, like Pandas for data or Flask for web apps.",
+    },
+  };
+
+  const CHECKLIST = [
+    { id:'task',    label:'Has a clear task',         tip:'e.g. "explain", "write", "list"',         detect: p => /\b(explain|write|tell|describe|create|list|help|summarize|generate|compare|define|show|give)\b/i.test(p) },
+    { id:'audience',label:'Mentions the audience',     tip:'e.g. "for a beginner", "to a student"',   detect: p => /\b(beginner|student|child|expert|developer|teacher|non-technical|simple|easy)\b/i.test(p) },
+    { id:'format',  label:'Gives the desired format',  tip:'e.g. "bullet points", "one sentence"',    detect: p => /\b(bullet|point|list|paragraph|sentence|step|table|example|short|brief|summary)\b/i.test(p) },
+    { id:'context', label:'Adds useful context',       tip:'e.g. "in the context of AI"',              detect: p => /\b(context|about|regarding|related|in terms of|for|when|using|with|based on)\b/i.test(p) && p.length > 30 },
+    { id:'tone',    label:'Sets the tone',             tip:'e.g. "friendly", "technical", "simple"',  detect: p => /\b(friendly|simple|technical|formal|casual|fun|clear|professional|easy|plain)\b/i.test(p) },
+  ];
+
+  /* ═══════════════════════════════════════════════
+     CORE FUNCTIONS
+  ═══════════════════════════════════════════════ */
+  function analyzePromptQuality(prompt) {
+    const results = CHECKLIST.map(item => ({
+      ...item,
+      present: item.detect(prompt),
+    }));
+    const presentCount = results.filter(r => r.present).length;
+    const score = Math.round((presentCount / CHECKLIST.length) * 100);
+    return { results, score, presentCount };
+  }
+
+  function improvePrompt(prompt) {
+    const key = prompt.trim().toLowerCase();
+    if (IMPROVED_PROMPTS[key]) return IMPROVED_PROMPTS[key];
+    // Fallback: only append if the suffix is not already present
+    const suffix = " Explain to a beginner using simple language. Include one real-world example and keep it concise.";
+    return prompt.includes(suffix) ? prompt : prompt + suffix;
+  }
+
+  function generatePromptResponse(prompt, score) {
+    const key = prompt.trim().toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
+    for (const [k, v] of Object.entries(PROMPT_RESPONSES)) {
+      if (key.includes(k) || k.includes(key.slice(0, 15))) {
+        if (score >= 70) return v.high;
+        if (score >= 35) return v.medium;
+        return v.low;
+      }
+    }
+    if (score >= 70) return RESPONSES.high;
+    if (score >= 35) return RESPONSES.medium;
+    return RESPONSES.low;
+  }
+
+  function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* ═══════════════════════════════════════════════
+     RENDER
+  ═══════════════════════════════════════════════ */
+  function renderChecklist(results) {
+    const container = document.getElementById('checklistContainer');
+    if (!container) return;
+    container.innerHTML = results.map(r => `
+      <div class="check-card ${r.present ? 'present' : 'missing'}">
+        <div class="check-icon">${r.present ? '✓' : '✗'}</div>
+        <span class="check-lbl">${r.label}</span>
+        ${!r.present ? `<span class="check-tip">${r.tip}</span>` : ''}
+      </div>`).join('');
+  }
+
+  function renderQualityMeter(score) {
+    const fill  = document.getElementById('qualityFill');
+    const ring  = document.getElementById('scoreRing');
+    const num   = document.getElementById('scoreNum');
+    const label = document.getElementById('qualityLabel');
+    if (!fill || !ring || !num) return;
+
+    let color, ringColor, ringBorder, lbl;
+    if (score >= 80)      { color='#10b981'; ringColor='#10b981'; ringBorder='rgba(16,185,129,0.3)'; lbl='Excellent ✨'; }
+    else if (score >= 55) { color='#6366f1'; ringColor='#6366f1'; ringBorder='rgba(99,102,241,0.3)'; lbl='Good 👍'; }
+    else if (score >= 30) { color='#f59e0b'; ringColor='#f59e0b'; ringBorder='rgba(245,158,11,0.3)'; lbl='Fair ⚠️'; }
+    else                  { color='#ef4444'; ringColor='#ef4444'; ringBorder='rgba(239,68,68,0.3)';  lbl='Weak 💡'; }
+
+    fill.style.width      = score + '%';
+    fill.style.background = color;
+    ring.style.borderColor= ringBorder;
+    ring.style.color      = ringColor;
+    num.textContent        = score;
+    if (label) label.textContent = lbl;
+  }
+
+  function renderResponse(text, score) {
+    const area = document.getElementById('responseArea');
+    if (!area) return;
+
+    let bg, border, icon;
+    if (score >= 70)      { bg='rgba(16,185,129,0.06)';  border='rgba(16,185,129,0.28)';  icon='✨'; }
+    else if (score >= 35) { bg='rgba(99,102,241,0.05)';  border='rgba(99,102,241,0.25)';  icon='💬'; }
+    else                  { bg='rgba(148,163,184,0.06)'; border='rgba(148,163,184,0.2)';  icon='📝'; }
+
+    area.innerHTML = `
+      <div class="response-card resp-in" style="background:${bg};border-color:${border};">
+        <div class="flex items-center gap-1.5 mb-2">
+          <span style="font-size:0.9rem;">${icon}</span>
+          <span class="text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">AI Response</span>
+        </div>
+        <p class="text-slate-700 dark:text-slate-200 text-sm leading-relaxed">${esc(text)}</p>
+      </div>`;
+  }
+
+  /* ═══════════════════════════════════════════════
+     MAIN UPDATE
+  ═══════════════════════════════════════════════ */
+  function updatePromptEngineeringDemo() {
+    const prompt = (document.getElementById('promptInput').value || '').trim();
+    if (!prompt) return;
+
+    const { results, score, presentCount } = analyzePromptQuality(prompt);
+    const missing = CHECKLIST.length - presentCount;
+
+    renderChecklist(results);
+    renderQualityMeter(score);
+
+    const response = generatePromptResponse(prompt, score);
+    renderResponse(response, score);
+
+    // Stats
+    const tokens = Math.ceil(prompt.length / 4);
+    const respStyle = score >= 70 ? 'Detailed' : score >= 35 ? 'Moderate' : 'Minimal';
+    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+    set('statLength',    prompt.length + ' chars');
+    set('statTokens',    '~' + tokens);
+    set('statScore',     score);
+    set('statMissing',   missing || 'None 🎉');
+    set('statRespStyle', respStyle);
+
+    // Score ring color in stats
+    const scoreEl = document.getElementById('statScore');
+    if (scoreEl) scoreEl.style.color = score >= 70 ? '#10b981' : score >= 40 ? '#6366f1' : '#ef4444';
+
+    // Hide compare section on live typing
+    const compareSection = document.getElementById('compareSection');
+    if (compareSection) compareSection.style.display = 'none';
+
+    if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [document.getElementById('checklistContainer')] });
+  }
+
+  /* ═══════════════════════════════════════════════
+     IMPROVE PROMPT
+  ═══════════════════════════════════════════════ */
+  function improvePromptAction() {
+    const textarea  = document.getElementById('promptInput');
+    const before    = (textarea.value || '').trim();
+    if (!before) return;
+
+    const after = improvePrompt(before);
+
+    // Show compare
+    const compareSection = document.getElementById('compareSection');
+    const beforeEl = document.getElementById('beforeText');
+    const afterEl  = document.getElementById('afterText');
+    if (compareSection && beforeEl && afterEl) {
+      beforeEl.textContent = before;
+      afterEl.textContent  = after;
+      compareSection.style.display = '';
+    }
+
+    // Flash and update textarea
+    textarea.value = after;
+    textarea.classList.add('highlight-flash');
+    setTimeout(() => textarea.classList.remove('highlight-flash'), 1000);
+
+    // Disable button until user edits the textarea again
+    const improveBtn = document.getElementById('improveBtn');
+    if (improveBtn) improveBtn.disabled = true;
+
+    // Flow animation
+    updateFlow(0);
+    setTimeout(() => updateFlow(1), 200);
+    setTimeout(() => updateFlow(2), 500);
+    setTimeout(() => updateFlow(3), 900);
+    setTimeout(() => updateFlow(-1), 1800);
+
+    updatePromptEngineeringDemo();
+  }
+
+  /* ═══════════════════════════════════════════════
+     FLOW
+  ═══════════════════════════════════════════════ */
+  function updateFlow(active) {
+    for (let i = 0; i < 4; i++) {
+      const el = document.getElementById(`fp-${i}`);
+      if (!el) continue;
+      el.classList.remove('fp-active','fp-done');
+      if (active < 0) return;
+      if      (i < active)   el.classList.add('fp-done');
+      else if (i === active) el.classList.add('fp-active');
+    }
+  }
+
+  /* ═══════════════════════════════════════════════
+     RESET / RANDOM
+  ═══════════════════════════════════════════════ */
+  function enableImproveBtn() {
+    const btn = document.getElementById('improveBtn');
+    if (btn) btn.disabled = false;
+  }
+
+  function resetExample() {
+    document.getElementById('promptInput').value = RANDOM_PROMPTS[0];
+    const cs = document.getElementById('compareSection');
+    if (cs) cs.style.display = 'none';
+    enableImproveBtn();
+    updateFlow(-1);
+    updatePromptEngineeringDemo();
+  }
+
+  function randomExample() {
+    const cur  = (document.getElementById('promptInput').value || '').trim();
+    const pool = RANDOM_PROMPTS.filter(p => p !== cur);
+    document.getElementById('promptInput').value = pool[Math.floor(Math.random() * pool.length)];
+    const cs = document.getElementById('compareSection');
+    if (cs) cs.style.display = 'none';
+    enableImproveBtn();
+    updatePromptEngineeringDemo();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    document.getElementById('promptInput').addEventListener('input',
+      Utils.debounce(() => {
+        const improveBtn = document.getElementById('improveBtn');
+        if (improveBtn) improveBtn.disabled = false;
+        updatePromptEngineeringDemo();
+      }, 220));
+
+    updatePromptEngineeringDemo();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+      Animations.scrollReveal('.concept-card, .tip-item');
+    }
+  });
+  </script>
+
+</body>
+</html>
