@@ -1,5 +1,5 @@
 /**
- * AI Fundamentals Playground — UI Components + App Controller
+ * AI Concepts Playground — UI Components + App Controller
  * Namespaces: Components, AIPlayground
  */
 

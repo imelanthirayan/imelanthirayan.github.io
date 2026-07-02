@@ -1,5 +1,5 @@
 /**
- * AI Fundamentals Playground — Visualization Utilities  (Canvas + D3)
+ * AI Concepts Playground — Visualization Utilities  (Canvas + D3)
  * Namespace: Visualizations
  */
 
