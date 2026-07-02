@@ -344,22 +344,20 @@
 
             <!-- Buttons -->
             <div class="flex flex-wrap gap-2">
-              <button id="predictBtn" onclick="predictNextWord()"
-                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
-                <i data-lucide="zap" style="width:13px;height:13px;"></i>
-                <span id="predictBtnLabel">Predict Next Word</span>
-              </button>
-            </div>
-            <div class="flex flex-wrap gap-2 mt-2">
               <button onclick="resetDemo()"
-                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                class="btn-secondary text-sm px-6 py-3 text-center flex items-center justify-center gap-1">
                 <i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i>
                 Reset
               </button>
               <button onclick="randomExample()"
-                class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+                class="btn-secondary text-sm px-6 py-3 text-center flex items-center justify-center gap-1">
                 <i data-lucide="shuffle" style="width:13px;height:13px;"></i>
                 Random
+              </button>
+              <button id="predictBtn" onclick="predictNextWord()"
+                class="btn-secondary text-sm px-6 py-3 text-center flex items-center justify-center gap-1">
+                <i data-lucide="zap" style="width:13px;height:13px;"></i>
+                <span id="predictBtnLabel">Predict Next Word</span>
               </button>
             </div>
           </section>

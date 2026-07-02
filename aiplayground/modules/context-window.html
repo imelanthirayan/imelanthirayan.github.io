@@ -386,71 +386,6 @@
         </div>
       </section>
 
-      <!-- ══════════════════════════════════════
-           3. STATISTICS PANEL
-      ══════════════════════════════════════ -->
-      <section>
-        <div class="mod-label">
-          <i data-lucide="activity" style="width:12px;height:12px;"></i>
-          Statistics
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-          <div class="stat-box">
-            <div id="stTotal" class="stat-val" style="color:#2563eb;">0</div>
-            <div class="stat-lbl">Total Tokens</div>
-          </div>
-          <div class="stat-box">
-            <div id="stLimit" class="stat-val" style="color:#7c3aed;">80</div>
-            <div class="stat-lbl">Context Limit</div>
-          </div>
-          <div class="stat-box">
-            <div id="stInside" class="stat-val" style="color:#16a34a;">0</div>
-            <div class="stat-lbl">Inside Context</div>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="stat-box">
-            <div id="stOutside" class="stat-val" style="color:#dc2626;">0</div>
-            <div class="stat-lbl">Outside Context</div>
-          </div>
-          <div class="stat-box">
-            <div id="stPct" class="stat-val" style="color:#ea580c;">0%</div>
-            <div class="stat-lbl">Context Used</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════
-           4. FLOW DIAGRAM
-      ══════════════════════════════════════ -->
-      <section class="module-card">
-        <div class="mod-label">
-          <i data-lucide="git-merge" style="width:12px;height:12px;"></i>
-          How It Works
-        </div>
-        <div class="flow-wrap">
-          <div class="flow-node" style="flex:1;">
-            <span class="flow-emoji">📝</span>
-            <span class="flow-lbl">Text</span>
-          </div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node" style="flex:1;">
-            <span class="flow-emoji">🔤</span>
-            <span class="flow-lbl">Tokens</span>
-          </div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node active" style="flex:1;">
-            <span class="flow-emoji">🪟</span>
-            <span class="flow-lbl">Context Window</span>
-          </div>
-          <span class="flow-arrow">→</span>
-          <div class="flow-node" style="flex:1;">
-            <span class="flow-emoji">🤖</span>
-            <span class="flow-lbl">AI Reads</span>
-          </div>
-        </div>
-      </section>
-
       </div><!-- /left column -->
 
         <div class="pg-grid-right">
@@ -502,6 +437,70 @@
 
         </div><!-- /pg-grid-right -->
       </div><!-- /pg-grid -->
+
+      <!-- ══════════════════════════════════════
+           STATISTICS + HOW IT WORKS (full-width row)
+      ══════════════════════════════════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <section>
+          <div class="mod-label">
+            <i data-lucide="activity" style="width:12px;height:12px;"></i>
+            Statistics
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+            <div class="stat-box">
+              <div id="stTotal" class="stat-val" style="color:#2563eb;">0</div>
+              <div class="stat-lbl">Total Tokens</div>
+            </div>
+            <div class="stat-box">
+              <div id="stLimit" class="stat-val" style="color:#7c3aed;">80</div>
+              <div class="stat-lbl">Context Limit</div>
+            </div>
+            <div class="stat-box">
+              <div id="stInside" class="stat-val" style="color:#16a34a;">0</div>
+              <div class="stat-lbl">Inside Context</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="stat-box">
+              <div id="stOutside" class="stat-val" style="color:#dc2626;">0</div>
+              <div class="stat-lbl">Outside Context</div>
+            </div>
+            <div class="stat-box">
+              <div id="stPct" class="stat-val" style="color:#ea580c;">0%</div>
+              <div class="stat-lbl">Context Used</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="git-merge" style="width:12px;height:12px;"></i>
+            How It Works
+          </div>
+          <div class="flow-wrap">
+            <div class="flow-node" style="flex:1;">
+              <span class="flow-emoji">📝</span>
+              <span class="flow-lbl">Text</span>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node" style="flex:1;">
+              <span class="flow-emoji">🔤</span>
+              <span class="flow-lbl">Tokens</span>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node active" style="flex:1;">
+              <span class="flow-emoji">🪟</span>
+              <span class="flow-lbl">Context Window</span>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node" style="flex:1;">
+              <span class="flow-emoji">🤖</span>
+              <span class="flow-lbl">AI Reads</span>
+            </div>
+          </div>
+        </section>
+      </div>
       
       <!-- ══════════════════════════════════════
            BEGINNER TIPS
