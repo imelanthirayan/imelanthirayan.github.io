@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="See how document chunks turn into vectors so RAG can search by meaning, an interactive beginner demo." />
+  <title>Embeddings in RAG · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+      min-width: 0;
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0d9488; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #2dd4bf; }
+
+    /* ── Inputs ──────────────────────────────── */
+    .pg-input, .pg-textarea {
+      width: 100%; padding: 0.7rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; font-size: 0.9rem; color: #1e293b;
+      background: #f8fafc; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pg-textarea { resize: vertical; line-height: 1.6; }
+    .pg-input:focus, .pg-textarea:focus {
+      border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.12); background: white;
+    }
+    html.dark .pg-input, html.dark .pg-textarea {
+      background: rgba(15,23,42,0.7); border-color: #334155; color: #f1f5f9;
+    }
+    html.dark .pg-input:focus, html.dark .pg-textarea:focus {
+      border-color: #2dd4bf; background: rgba(15,23,42,0.9);
+      box-shadow: 0 0 0 3px rgba(45,212,191,0.1);
+    }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0d9488; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(13,148,136,0.25); background: rgba(13,148,136,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(13,148,136,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #2dd4bf; border-color: rgba(45,212,191,0.28); background: rgba(13,148,136,0.1); }
+
+    /* ── Chunk edit cards (playground dataset) ── */
+    .chunk-edit-card {
+      border-radius: 1rem; padding: 0.875rem 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .chunk-edit-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .chunk-edit-card label {
+      font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      color: #94a3b8; display: block; margin-bottom: 0.2rem;
+    }
+    .chunk-edit-input {
+      width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.6rem;
+      border: 1.5px solid #e2e8f0; font-size: 0.8rem; color: #1e293b;
+      background: white; outline: none; font-family: 'Inter', sans-serif;
+      resize: vertical; line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+    .chunk-edit-input:focus { border-color: #0d9488; }
+    html.dark .chunk-edit-input { background: rgba(2,6,23,0.4); border-color: #334155; color: #f1f5f9; }
+
+    /* ── Embedding vector bars ───────────────── */
+    .vec-bars { display: flex; align-items: flex-end; gap: 3px; height: 2.4rem; }
+    .vec-bar {
+      width: 0.6rem; border-radius: 3px 3px 0 0; background: #0d9488;
+      min-height: 3px; transition: height 0.4s ease, background 0.35s;
+    }
+    html.dark .vec-bar { background: #2dd4bf; }
+    .vec-bar.is-query { background: #f59e0b; }
+    html.dark .vec-bar.is-query { background: #fbbf24; }
+
+    /* ── Vector legend + array notation ──────── */
+    .vec-legend {
+      display: flex; flex-wrap: wrap; gap: 0.4rem 0.9rem;
+      font-size: 0.68rem; font-weight: 700; color: #64748b; margin-bottom: 1rem;
+      padding: 0.6rem 0.9rem; border-radius: 0.75rem;
+      background: rgba(13,148,136,0.05); border: 1px dashed rgba(13,148,136,0.25);
+    }
+    html.dark .vec-legend { color: #94a3b8; background: rgba(45,212,191,0.06); border-color: rgba(45,212,191,0.22); }
+    .vec-legend-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: #0d9488; margin-right: 0.3rem; }
+    html.dark .vec-legend-dot { background: #2dd4bf; }
+    .vec-array {
+      font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.72rem; font-weight: 700;
+      color: #0f766e; background: rgba(13,148,136,0.08); border-radius: 0.5rem;
+      padding: 0.2rem 0.55rem; display: inline-block; margin-top: 0.45rem; letter-spacing: 0.01em;
+    }
+    html.dark .vec-array { color: #5eead4; background: rgba(45,212,191,0.1); }
+
+    /* ── Embedding chunk cards (live visualization) ── */
+    .embed-chunk-card {
+      border-radius: 1rem; padding: 0.9rem 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s, background 0.35s;
+    }
+    html.dark .embed-chunk-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .embed-chunk-card.is-best {
+      border-color: #0d9488; background: rgba(13,148,136,0.07);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.15); transform: translateY(-1px);
+    }
+    html.dark .embed-chunk-card.is-best {
+      border-color: #2dd4bf; background: rgba(45,212,191,0.08);
+      box-shadow: 0 0 0 3px rgba(45,212,191,0.18);
+    }
+    .embed-chunk-title { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .embed-chunk-text { font-size: 0.85rem; line-height: 1.55; color: #334155; margin-top: 0.3rem; }
+    html.dark .embed-chunk-text { color: #cbd5e1; }
+
+    /* ── Similarity score bar ────────────────── */
+    .sim-score-track {
+      width: 100%; height: 0.45rem; border-radius: 9999px; background: #e2e8f0; overflow: hidden; margin-top: 0.6rem;
+    }
+    html.dark .sim-score-track { background: #334155; }
+    .sim-score-fill {
+      height: 100%; border-radius: 9999px; background: linear-gradient(90deg, #0d9488, #2dd4bf);
+      transition: width 0.5s ease;
+    }
+
+    /* ── Badges ──────────────────────────────── */
+    .badge-pill {
+      display: inline-flex; align-items: center; gap: 0.25rem;
+      font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.2rem 0.55rem; border-radius: 9999px; flex-shrink: 0;
+    }
+    .badge-best { background: rgba(245,158,11,0.18); color: #92400e; }
+    html.dark .badge-best { background: rgba(251,191,36,0.22); color: #fcd34d; }
+
+    /* ── Pipeline mini flow ──────────────────── */
+    .mini-flow { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .mini-flow-step {
+      font-size: 0.68rem; font-weight: 700; color: #0f766e; background: rgba(13,148,136,0.1);
+      border: 1.5px solid rgba(13,148,136,0.25); border-radius: 9999px; padding: 0.35rem 0.8rem;
+      white-space: nowrap;
+    }
+    html.dark .mini-flow-step { color: #5eead4; background: rgba(45,212,191,0.12); border-color: rgba(45,212,191,0.28); }
+    .mini-flow-arrow { color: #cbd5e1; font-size: 0.8rem; }
+    html.dark .mini-flow-arrow { color: #475569; }
+
+    /* ── Stat boxes ──────────────────────────── */
+    .stat-box {
+      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
+      text-align: center; border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val { font-size: 0.9rem; font-weight: 900; line-height: 1.2; word-break: break-word; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem; }
+
+    /* ── Flow diagram ────────────────────────── */
+    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
+    .flow-pill-box {
+      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
+      text-align: center; border: 1.5px solid #e2e8f0; background: white;
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
+    }
+    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
+    .flow-pill-box.fp-active { background: rgba(13,148,136,0.1); border-color: #0d9488; color: #0f766e; }
+    html.dark .flow-pill-box.fp-active { background: rgba(45,212,191,0.15); color: #5eead4; }
+    .flow-pill-emoji { font-size: 0.95rem; }
+    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
+    html.dark .flow-sep { color: #334155; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/30">
+          <span class="w-1.5 h-1.5 bg-teal-500 rounded-full"></span>
+          <span class="text-teal-700 dark:text-teal-400 text-xs font-bold tracking-wide">Retrieval-Augmented Generation (RAG)</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="database" class="w-7 h-7 text-teal-600 dark:text-teal-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Embeddings in RAG</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Embeddings in RAG turn document chunks into <strong class="text-slate-800 dark:text-slate-200">vectors</strong> so the system can search by meaning.
+        </p>
+
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This demo uses <strong>simple learning vectors</strong>, not real AI embeddings.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           PLAYGROUND (full width)
+      ══════════════════════════════════════ -->
+      <section class="module-card">
+        <div class="mod-label">
+          <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
+          Interactive Playground
+        </div>
+
+        <label class="text-xs font-bold uppercase tracking-widest text-teal-600 dark:text-teal-400 mb-2 block">Search Query</label>
+        <input type="text" id="queryInput" class="pg-input mb-5" value="Can I get my money back?" placeholder="Ask a question…" />
+
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Document Chunks</p>
+        <div id="chunkEditCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5"></div>
+
+        <!-- Buttons -->
+        <div class="flex flex-wrap gap-2">
+          <button onclick="resetExample()"
+            class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+            <i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i> Reset Example
+          </button>
+          <button onclick="randomExample()"
+            class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+            <i data-lucide="shuffle" style="width:13px;height:13px;"></i> Random Example
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           LIVE VISUALIZATION (full width)
+      ══════════════════════════════════════ -->
+      <section class="module-card mt-5">
+        <div class="mod-label">
+          <i data-lucide="eye" style="width:12px;height:12px;"></i>
+          Live Visualization
+        </div>
+
+        <div class="mini-flow">
+          <span class="mini-flow-step">📄 Chunks</span>
+          <span class="mini-flow-arrow">→</span>
+          <span class="mini-flow-step">🔢 Embeddings</span>
+          <span class="mini-flow-arrow">→</span>
+          <span class="mini-flow-step">🔍 Compare with Query</span>
+          <span class="mini-flow-arrow">→</span>
+          <span class="mini-flow-step">🎯 Best Match</span>
+        </div>
+
+        <div class="vec-legend" id="vecLegend"></div>
+
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Query Vector</p>
+        <div class="embed-chunk-card mb-5">
+          <p class="embed-chunk-text mb-2" id="queryVectorText">—</p>
+          <div class="vec-bars" id="queryVectorBars"></div>
+          <div class="vec-array" id="queryVectorArray">[0, 0, 0, 0, 0, 0]</div>
+        </div>
+
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">Chunks Ranked by Similarity</p>
+        <div id="chunkVectorCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           STATISTICS + HOW IT WORKS (single row)
+      ══════════════════════════════════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5 mb-8">
+
+        <section class="module-card">
+          <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">Statistics</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div class="stat-box">
+              <div class="stat-val text-teal-600 dark:text-teal-400" id="statNumChunks">4</div>
+              <div class="stat-lbl">Chunks</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-teal-600 dark:text-teal-400" id="statQueryTokens">0</div>
+              <div class="stat-lbl">Query Tokens</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-val text-slate-700 dark:text-slate-300" id="statComparisons">0</div>
+              <div class="stat-lbl">Comparisons Made</div>
+            </div>
+            <div class="stat-box col-span-2 sm:col-span-1">
+              <div class="stat-val text-amber-600 dark:text-amber-400" id="statBestMatch">—</div>
+              <div class="stat-lbl">Best Matching Chunk</div>
+            </div>
+            <div class="stat-box col-span-2 sm:col-span-2">
+              <div class="stat-val text-slate-700 dark:text-slate-300" id="statHighestSimilarity">0%</div>
+              <div class="stat-lbl">Highest Similarity</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card">
+          <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">How It Works</p>
+          <div class="flex items-start gap-1 overflow-x-auto pb-1">
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">📄</div>
+              <div class="flow-pill-box fp-active">Document<br>Chunks</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🔢</div>
+              <div class="flow-pill-box fp-active">Embeddings</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">❓</div>
+              <div class="flow-pill-box fp-active">Query<br>Embedding</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🔍</div>
+              <div class="flow-pill-box fp-active">Similarity<br>Search</div>
+            </div>
+            <div class="flow-sep">→</div>
+            <div class="flow-node-wrap">
+              <div class="flow-pill-emoji">🎯</div>
+              <div class="flow-pill-box fp-active">Relevant<br>Chunk</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mt-6 mb-5" id="tipsEmbeddingsInRag">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-xs font-bold">3 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>Similar meaning, similar vectors.</strong> Even without shared words, "money back" and "refund" can point in a similar direction.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>Cosine similarity measures direction, not length.</strong> It checks how closely two vectors point the same way.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Real embedding models use hundreds or thousands of dimensions learned from massive text datasets, this demo uses just a handful to stay easy to visualize.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-8">
+        <span class="text-2xl flex-shrink-0">💡</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Key Takeaway</div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            <strong class="text-slate-900 dark:text-white">RAG uses embeddings</strong> so it can find useful information by meaning, not just exact words.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           NAVIGATION
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="metadata-filtering.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Metadata Filtering
+        </a>
+        <a href="vector-search.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-teal-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Vector Search
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Retrieval-Augmented Generation (RAG)');</script>
+
+
+  <script src="../../js/utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     DEFAULT DATASET
+  ═══════════════════════════════════════════════ */
+  const DEFAULT_CHUNKS = [
+    'Customers can request a refund within 30 days.',
+    'Orders usually ship within 3 to 5 business days.',
+    'Users can reset passwords from account settings.',
+    'Premium plans include analytics and priority support.',
+  ];
+  const DEFAULT_QUERY = 'Can I get my money back?';
+
+  const RANDOM_EXAMPLES = [
+    { name: 'Refund policy chunks',        query: 'Can I get my money back?' },
+    { name: 'Shipping/help chunks',        query: 'When will my order arrive?' },
+    { name: 'Pricing/support chunks',      query: 'What do I get with premium?' },
+    { name: 'Product documentation chunks', query: 'How do I reset my login?' },
+  ];
+
+  /* ═══════════════════════════════════════════════
+     SIMPLE LEARNING EMBEDDING
+     A tiny, explainable stand-in for a real embedding model.
+     Each text is reduced to a 6-dimensional vector where each
+     dimension represents a simple topic concept. Words are
+     mapped to the concept they relate to (with common synonyms
+     folded together) so texts about the same idea, even using
+     different words, end up with similar vectors.
+  ═══════════════════════════════════════════════ */
+  const CONCEPT_DIMS = ['Refund', 'Shipping', 'Account', 'Pricing', 'Support', 'Time'];
+
+  const CONCEPT_MAP = {
+    // 0 · Refund / money
+    refund: 0, refunds: 0, money: 0, back: 0, reimburse: 0, reimbursement: 0,
+    pay: 0, paid: 0, cash: 0, customer: 0, customers: 0, request: 0, requests: 0,
+    // 1 · Shipping / delivery
+    ship: 1, ships: 1, shipped: 1, shipping: 1, order: 1, orders: 1,
+    deliver: 1, delivery: 1, delivered: 1, arrive: 1, arrives: 1, arrived: 1, package: 1, packages: 1,
+    // 2 · Account / security
+    account: 2, accounts: 2, password: 2, passwords: 2, reset: 2, settings: 2,
+    login: 2, logins: 2, user: 2, users: 2, profile: 2, security: 2,
+    // 3 · Pricing / plans
+    plan: 3, plans: 3, premium: 3, pricing: 3, price: 3, prices: 3,
+    cost: 3, costs: 3, subscription: 3, subscriptions: 3, tier: 3, tiers: 3,
+    // 4 · Support / help
+    support: 4, help: 4, guide: 4, guides: 4, priority: 4, assist: 4,
+    assistance: 4, documentation: 4, features: 4, feature: 4, analytics: 4,
+    // 5 · Time / duration
+    days: 5, day: 5, within: 5, business: 5, usually: 5, hours: 5,
+    minutes: 5, week: 5, weeks: 5, month: 5, months: 5, soon: 5,
+  };
+
+  const STOPWORDS_EMB = new Set([
+    'the','is','a','an','of','to','in','on','for','and','can','i','my','get',
+    'do','does','are','you','your','it','this','that','with','be','was','were',
+    'from','include','includes','explain','explains','me','have','has','had',
+    'when','will','what','how','where','did','would','should','could','who',
+    'why','which','there','here','then','than','so','if','not','no','yes',
+  ]);
+
+  /* Deterministic fallback bucket for words outside the concept
+     map, so every word still contributes somewhere in the vector. */
+  function fallbackBucket(word) {
+    let hash = 0;
+    for (let i = 0; i < word.length; i++) hash = (hash * 31 + word.charCodeAt(i)) >>> 0;
+    return hash % CONCEPT_DIMS.length;
+  }
+
+  function tokenizeForEmbedding(text) {
+    return (text || '').toLowerCase().match(/[a-z0-9']+/g) || [];
+  }
+
+  /* ═══════════════════════════════════════════════
+     CORE: createChunkEmbedding / createQueryEmbedding
+     Both build the same kind of vector; kept as two
+     named functions so the pipeline reads naturally.
+  ═══════════════════════════════════════════════ */
+  function textToVector(text) {
+    const words = tokenizeForEmbedding(text);
+    const vec = new Array(CONCEPT_DIMS.length).fill(0);
+    words.forEach(word => {
+      if (STOPWORDS_EMB.has(word)) return;
+      const dim = CONCEPT_MAP.hasOwnProperty(word) ? CONCEPT_MAP[word] : fallbackBucket(word);
+      vec[dim] += 1;
+    });
+    return vec;
+  }
+
+  function createChunkEmbedding(text) {
+    return textToVector(text);
+  }
+
+  function createQueryEmbedding(text) {
+    return textToVector(text);
+  }
+
+  function cosineSimilarity(a, b) {
+    let dot = 0, magA = 0, magB = 0;
+    for (let i = 0; i < a.length; i++) {
+      dot += a[i] * b[i];
+      magA += a[i] * a[i];
+      magB += b[i] * b[i];
+    }
+    if (magA === 0 || magB === 0) return 0;
+    return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+  }
+
+  /* ═══════════════════════════════════════════════
+     CORE: rankChunksBySimilarity
+     Embeds the query and every chunk, scores each chunk
+     with cosine similarity, and returns chunks sorted by
+     score (highest first).
+  ═══════════════════════════════════════════════ */
+  function rankChunksBySimilarity(query, chunks) {
+    const queryVector = createQueryEmbedding(query);
+    return chunks
+      .map((text, index) => {
+        const vector = createChunkEmbedding(text);
+        const score = cosineSimilarity(queryVector, vector);
+        return { index, text, vector, score };
+      })
+      .sort((a, b) => b.score - a.score);
+  }
+
+  /* ═══════════════════════════════════════════════
+     RENDER: vector bars
+     Renders a small bar per vector dimension, scaled
+     against a shared max so bars are visually comparable
+     across the query and every chunk.
+  ═══════════════════════════════════════════════ */
+  function renderVectorBars(container, vector, maxVal, isQuery) {
+    if (!container) return;
+    container.innerHTML = '';
+    const safeMax = maxVal > 0 ? maxVal : 1;
+    vector.forEach((val, i) => {
+      const bar = document.createElement('div');
+      bar.className = 'vec-bar' + (isQuery ? ' is-query' : '');
+      bar.style.height = Math.max(3, (val / safeMax) * 38) + 'px';
+      bar.title = CONCEPT_DIMS[i] + ': ' + val;
+      container.appendChild(bar);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
+  /* Formats a vector as a readable bracketed array, e.g. [2, 0, 0, 0, 0, 0],
+     so beginners can see the exact numbers behind the bars. */
+  function formatVectorArray(vector) {
+    return '[' + vector.join(', ') + ']';
+  }
+
+  /* Renders the one-time legend explaining what each vector
+     dimension/concept represents. */
+  function renderVectorLegend(container) {
+    if (!container) return;
+    container.innerHTML = CONCEPT_DIMS
+      .map((dim, i) => `<span><span class="vec-legend-dot"></span>Dim ${i + 1} = ${dim}</span>`)
+      .join('');
+  }
+
+  /* ═══════════════════════════════════════════════
+     RENDER: renderRagEmbeddingCards
+     Draws the ranked chunk cards: text, vector bars,
+     similarity score bar, and a "Best Match" badge on
+     the top-ranked chunk.
+  ═══════════════════════════════════════════════ */
+  function renderRagEmbeddingCards(container, rankedChunks) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    const maxVal = Math.max(1, ...rankedChunks.map(c => Math.max(...c.vector)));
+    const topScore = rankedChunks.length ? rankedChunks[0].score : 0;
+
+    rankedChunks.forEach((chunk, rank) => {
+      const isBest = rank === 0 && topScore > 0;
+      const pct = Math.round(chunk.score * 100);
+
+      const card = document.createElement('div');
+      card.className = 'embed-chunk-card' + (isBest ? ' is-best' : '');
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-2 mb-1">
+          <span class="embed-chunk-title">Chunk ${chunk.index + 1}</span>
+          ${isBest ? '<span class="badge-pill badge-best"><i data-lucide="target" style="width:9px;height:9px;"></i> Best Match</span>' : ''}
+        </div>
+        <p class="embed-chunk-text">${escapeHtml(chunk.text)}</p>
+        <div class="vec-bars mt-2" id="chunkVecBars-${chunk.index}"></div>
+        <div class="vec-array" id="chunkVecArray-${chunk.index}">${formatVectorArray(chunk.vector)}</div>
+        <div class="flex items-center justify-between mt-2">
+          <span class="text-[0.65rem] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide">Similarity</span>
+          <span class="text-xs font-black text-teal-600 dark:text-teal-400">${pct}%</span>
+        </div>
+        <div class="sim-score-track"><div class="sim-score-fill" style="width:${pct}%"></div></div>`;
+      container.appendChild(card);
+      renderVectorBars(document.getElementById('chunkVecBars-' + chunk.index), chunk.vector, maxVal, false);
+    });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ═══════════════════════════════════════════════
+     Read the 4 editable chunk cards into an array
+  ═══════════════════════════════════════════════ */
+  function readChunksFromCards() {
+    return DEFAULT_CHUNKS.map((_, i) => document.getElementById('chunkText-' + i).value.trim());
+  }
+
+  /* ═══════════════════════════════════════════════
+     RENDER: the 4 editable chunk cards (once)
+  ═══════════════════════════════════════════════ */
+  function renderChunkEditCards() {
+    const container = document.getElementById('chunkEditCards');
+    container.innerHTML = '';
+    DEFAULT_CHUNKS.forEach((text, i) => {
+      const card = document.createElement('div');
+      card.className = 'chunk-edit-card flex flex-col gap-2';
+      card.innerHTML = `
+        <label>Chunk ${i + 1}</label>
+        <textarea id="chunkText-${i}" rows="2" class="chunk-edit-input">${escapeHtml(text)}</textarea>`;
+      container.appendChild(card);
+    });
+
+    // Live update on any dataset edit
+    DEFAULT_CHUNKS.forEach((_, i) => {
+      document.getElementById('chunkText-' + i).addEventListener('input', Utils.debounce(updateEmbeddingsInRagDemo, 200));
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     CORE: updateEmbeddingsInRagDemo
+     Reads query + chunk dataset, ranks chunks by
+     similarity, and refreshes every live element.
+  ═══════════════════════════════════════════════ */
+  function updateEmbeddingsInRagDemo() {
+    const query = document.getElementById('queryInput').value;
+    const chunks = readChunksFromCards();
+
+    const queryVector = createQueryEmbedding(query);
+    const ranked = rankChunksBySimilarity(query, chunks);
+
+    const maxVal = Math.max(1, ...queryVector, ...ranked.map(c => Math.max(...c.vector)));
+    document.getElementById('queryVectorText').textContent = '"' + query + '"';
+    renderVectorBars(document.getElementById('queryVectorBars'), queryVector, maxVal, true);
+    document.getElementById('queryVectorArray').textContent = formatVectorArray(queryVector);
+
+    renderRagEmbeddingCards(document.getElementById('chunkVectorCards'), ranked);
+
+    const queryTokens = tokenizeForEmbedding(query).length;
+    const best = ranked.length && ranked[0].score > 0 ? ranked[0] : null;
+
+    document.getElementById('statNumChunks').textContent = chunks.length;
+    document.getElementById('statQueryTokens').textContent = queryTokens;
+    document.getElementById('statComparisons').textContent = chunks.length;
+    document.getElementById('statBestMatch').textContent = best ? ('Chunk ' + (best.index + 1)) : '—';
+    document.getElementById('statHighestSimilarity').textContent = best ? Math.round(best.score * 100) + '%' : '0%';
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ═══════════════════════════════════════════════
+     EXAMPLES
+  ═══════════════════════════════════════════════ */
+  function resetChunkCardsToDefault() {
+    DEFAULT_CHUNKS.forEach((text, i) => {
+      document.getElementById('chunkText-' + i).value = text;
+    });
+  }
+
+  function resetExample() {
+    document.getElementById('queryInput').value = DEFAULT_QUERY;
+    resetChunkCardsToDefault();
+    updateEmbeddingsInRagDemo();
+  }
+
+  function randomExample() {
+    const current = document.getElementById('queryInput').value.trim();
+    const pool = RANDOM_EXAMPLES.filter(ex => ex.query !== current);
+    const next = pool[Math.floor(Math.random() * pool.length)];
+    document.getElementById('queryInput').value = next.query;
+    updateEmbeddingsInRagDemo();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderChunkEditCards();
+    renderVectorLegend(document.getElementById('vecLegend'));
+
+    document.getElementById('queryInput').addEventListener('input', Utils.debounce(updateEmbeddingsInRagDemo, 200));
+
+    updateEmbeddingsInRagDemo();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+    }
+  });
+  </script>
+
+</body>
+</html>

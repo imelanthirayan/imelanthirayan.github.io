@@ -113,6 +113,23 @@
     /* ── Inputs with explicit bg-white class ─────────────────────────────── */
     html.dark input.bg-white,
     html.dark textarea.bg-white { background:#1e293b !important; color:#f1f5f9 !important; }
+
+    /* ── Takeaway ───────────────────────────────── */
+    .takeaway {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22);
+      border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16);
+      border-left-color: #f59e0b;
+    }
   </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
@@ -120,58 +137,8 @@
   <!-- ══════════════════════════════════════
        NAVIGATION
   ══════════════════════════════════════ -->
-  <nav id="navbar" class="fixed top-0 inset-x-0 z-50 nav-scrolled">
-    <div class="max-w-7xl mx-auto px-5 md:px-8">
-      <div class="flex items-center justify-between h-16">
-
-        <a href="../../index.html" class="flex items-center gap-2.5 group">
-          <div class="w-8 h-8 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <i data-lucide="brain" class="w-4 h-4 text-white"></i>
-          </div>
-          <span class="nav-logo-text font-bold text-base transition-colors duration-300">AI Concepts Playground</span>
-        </a>
-
-        <div class="hidden md:flex items-center gap-2">
-          <a href="../../index.html#learn" class="nav-link px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
-            All Modules
-          </a>
-          <button data-dark-toggle
-            class="nav-dark-btn ml-1 p-2 rounded-lg transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
-            aria-label="Toggle dark mode">
-            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
-            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
-          </button>
-        </div>
-
-        <button id="mobileMenuBtn"
-          class="md:hidden p-2 rounded-lg nav-dark-btn transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
-          aria-label="Open menu">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-
-    <div id="mobileMenu"
-      class="hidden md:hidden absolute inset-x-0 top-16 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-5">
-      <div class="flex flex-col gap-2">
-        <a href="../../index.html"
-          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
-          ← Back to Home
-        </a>
-        <a href="../../index.html#learn"
-          class="nav-link text-sm font-medium py-2.5 border-b border-slate-100 dark:border-slate-800 transition-colors">
-          All Modules
-        </a>
-        <div class="flex items-center justify-between py-2">
-          <span class="text-sm nav-link">Dark Mode</span>
-          <button data-dark-toggle class="nav-dark-btn p-2 rounded-lg transition-all" aria-label="Toggle dark mode">
-            <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
-            <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </nav>
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
 
   <!-- ══════════════════════════════════════
        MAIN
@@ -185,7 +152,7 @@
           <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
           Back to Home
         </a>
-        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Vector Indexes Explorer</span>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Vector Index Explorer</span>
       </div>
 
       <div class="flex items-center gap-3 mb-6">
@@ -599,14 +566,59 @@ function resetDefaults() {
 runAll();
 </script>
 
+      <!-- ══════════════════════════════════════
+           TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mt-6 mb-5" id="tipsVICompare">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold">3 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>No single "best" index.</strong> Each index trades off speed, accuracy, and memory differently, the right choice depends on your dataset size and latency needs.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Try changing the query vector, the <strong>ranking of similarity scores</strong> stays the same across indexes since they all approximate the same underlying search.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>FLAT is the baseline.</strong> Every other index is a shortcut that sacrifices some exactness for speed, compare their results here to see how close they get.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-10">
+        <div style="font-size:1.75rem;line-height:1;flex-shrink:0;padding-top:2px;">💡</div>
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1.5">
+            Key Takeaway
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            Different vector index strategies make different <strong class="text-slate-900 dark:text-white">speed vs. accuracy vs. memory</strong> trade-offs, comparing them side by side helps you pick the right one for your use case.
+          </p>
+        </div>
+      </div>
+
       <!-- ── Prev / Next navigation ──────────────────────────────────────── -->
-      <div class="flex flex-col sm:flex-row gap-3 justify-between items-center mt-10 pt-8 border-t border-slate-200 dark:border-slate-800">
-        <a href="../clustering.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="../embeddings-search/clustering.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
           <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
           Previous: Clustering
         </a>
-        <a href="flat.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto flex items-center justify-center gap-1">
-          Next: FLAT Index
+        <a href="flat.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> FLAT Index
           <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
         </a>
       </div>
@@ -617,28 +629,7 @@ runAll();
   <!-- ══════════════════════════════════════
        FOOTER
   ══════════════════════════════════════ -->
-  <footer class="border-t border-slate-200 dark:border-slate-800 py-8 px-6">
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <a href="../../index.html" class="flex items-center gap-2.5">
-        <div class="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-lg flex items-center justify-center shadow">
-          <i data-lucide="brain" class="w-3.5 h-3.5 text-white"></i>
-        </div>
-        <span class="font-bold text-slate-700 dark:text-slate-300 text-sm">AI Concepts Playground</span>
-      </a>
-      <p class="text-slate-400 dark:text-slate-600 text-sm">Vector Index Visual Explorer · Interactive 3D demos</p>
-      <div class="flex items-center gap-4">
-        <a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener"
-          class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-          <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          About the Author
-        </a>
-        <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
-          <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
-          <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </footer>
+  <script>writeSiteFooterVI();</script>
 
   <script>
     (function () {

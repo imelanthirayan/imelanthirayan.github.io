@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn what a similarity matrix is   an interactive AI fundamentals demo." />
+  <title>Similarity Matrix   AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #2563eb; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #60a5fa; }
+
+    /* ── Text input ──────────────────────────── */
+    .pg-input {
+      width: 100%; padding: 0.6rem 0.875rem; border-radius: 0.875rem;
+      border: 1.5px solid #e2e8f0; font-size: 0.9rem; color: #1e293b;
+      background: #f8fafc; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .pg-input:focus {
+      border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: white;
+    }
+    html.dark .pg-input {
+      background: rgba(15,23,42,0.7); border-color: #334155; color: #f1f5f9;
+    }
+    html.dark .pg-input:focus {
+      border-color: #60a5fa; background: rgba(15,23,42,0.9);
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.1);
+    }
+
+    /* ── Dataset grid ────────────────────────── */
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .dataset-item-label {
+      font-size: 0.625rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 0.25rem;
+    }
+
+    /* ── Stat boxes ──────────────────────────── */
+    .stat-box {
+      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
+      text-align: center; border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val {
+      font-size: 1.1rem; font-weight: 900; line-height: 1.2;
+      font-variant-numeric: tabular-nums; word-break: break-all;
+    }
+    .stat-lbl {
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
+    }
+
+    /* ── Flow diagram ────────────────────────── */
+    .flow-wrap { display:flex; align-items:center; gap:0.5rem; overflow-x:auto; padding:0.25rem 0.125rem; }
+    .flow-node {
+      display:flex; flex-direction:column; align-items:center; gap:0.35rem;
+      padding:0.75rem 1rem; border-radius:1rem; min-width:80px; text-align:center;
+      background:rgba(37,99,235,0.06); border:1.5px solid rgba(37,99,235,0.14); flex-shrink:0;
+    }
+    .flow-node.active {
+      background:rgba(37,99,235,0.12); border-color:rgba(37,99,235,0.4);
+      box-shadow:0 4px 14px rgba(37,99,235,0.18);
+    }
+    html.dark .flow-node { background:rgba(37,99,235,0.09); border-color:rgba(37,99,235,0.2); }
+    html.dark .flow-node.active { background:rgba(37,99,235,0.18); border-color:rgba(96,165,250,0.4); }
+    .flow-emoji { font-size:1.25rem; line-height:1; }
+    .flow-lbl { font-size:0.58rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:#2563eb; }
+    html.dark .flow-lbl { color:#60a5fa; }
+    .flow-node.active .flow-emoji { animation: float 2.5s ease-in-out infinite; }
+    .flow-arrow { font-size:1rem; color:#cbd5e1; flex-shrink:0; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display:flex; align-items:flex-start; gap:1rem; padding:1.5rem 1.75rem;
+      background:linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border:1.5px solid rgba(251,191,36,0.22); border-left:4px solid #f59e0b;
+      border-radius:1.25rem;
+    }
+    html.dark .takeaway {
+      background:linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color:rgba(251,191,36,0.16); border-left-color:#f59e0b;
+    }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display:inline-flex; align-items:center; gap:0.3rem;
+      font-size:0.875rem; font-weight:600; color:#2563eb; text-decoration:none;
+      padding:0.4rem 0.9rem; border-radius:9999px;
+      border:1px solid rgba(37,99,235,0.25); background:rgba(37,99,235,0.07);
+      transition:all 0.22s ease;
+    }
+    .back-btn:hover { background:rgba(37,99,235,0.13); transform:translateX(-2px); }
+    html.dark .back-btn { color:#60a5fa; border-color:rgba(96,165,250,0.28); background:rgba(37,99,235,0.1); }
+
+    /* ── Similarity Matrix Table ─────────────── */
+    .sim-matrix-outer {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 0.25rem;
+    }
+    .sim-matrix {
+      border-collapse: separate;
+      border-spacing: 3px;
+      min-width: 100%;
+    }
+    .sim-matrix .corner-cell {
+      width: 60px; min-width: 60px;
+    }
+    .sim-matrix .col-header {
+      font-size: 0.625rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #64748b; padding: 0.35rem 0.25rem;
+      text-align: center; white-space: nowrap; min-width: 58px;
+    }
+    html.dark .sim-matrix .col-header { color: #94a3b8; }
+    .sim-matrix .row-header {
+      font-size: 0.625rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #64748b; padding: 0.35rem 0.5rem 0.35rem 0;
+      text-align: right; white-space: nowrap;
+    }
+    html.dark .sim-matrix .row-header { color: #94a3b8; }
+    .sim-cell {
+      width: 58px; min-width: 58px; height: 48px;
+      font-size: 0.75rem; font-weight: 800;
+      text-align: center; vertical-align: middle;
+      border-radius: 0.5rem;
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: default;
+    }
+    .sim-cell.best-pair {
+      outline: 2.5px solid #f59e0b;
+      outline-offset: -2px;
+      transform: scale(1.07);
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Best pair banner ───────────────────── */
+    .best-pair-banner {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1rem; border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(251,191,36,0.04));
+      border: 1.5px solid rgba(245,158,11,0.25);
+      margin-top: 1rem;
+    }
+    html.dark .best-pair-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(251,191,36,0.05));
+      border-color: rgba(245,158,11,0.2);
+    }
+
+    /* ── Legend ─────────────────────────────── */
+    .matrix-legend {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.75rem; flex-wrap: wrap;
+    }
+    .legend-swatch {
+      display: inline-block; width: 12px; height: 12px;
+      border-radius: 3px; flex-shrink: 0;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- NAV -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30">
+          <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+          <span class="text-blue-700 dark:text-blue-400 text-xs font-bold tracking-wide">Embeddings &amp; Search</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="grid" class="w-7 h-7 text-blue-600 dark:text-blue-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Similarity Matrix</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          A similarity matrix shows how <strong class="text-slate-800 dark:text-slate-200">every item compares with every other item</strong>   all at once.
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This demo uses <strong>simple learning vectors</strong>, not real AI embeddings.
+          </p>
+        </div>
+      </header>
+
+
+      <div class="pg-grid">
+      <!-- LEFT COLUMN: Playground + Statistics + Info Card -->
+      <div class="flex flex-col gap-5">
+
+      <!-- ══════════════════════════════════════
+           1. INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card">
+        <div class="mod-label">
+          <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+          Interactive Playground
+        </div>
+
+        <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3 block">
+          Dataset   6 Items
+        </label>
+        <div class="dataset-grid mb-5" id="datasetInputs"></div>
+
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="resetExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">Reset Example</button>
+          <button id="btnRandom" onclick="randomExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">✨ Random Example</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. STATISTICS PANEL
+      ══════════════════════════════════════ -->
+      <section>
+        <div class="mod-label">
+          <i data-lucide="activity" style="width:12px;height:12px;"></i>
+          Statistics
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div class="stat-box">
+            <div id="stTotal" class="stat-val" style="color:#2563eb;">6</div>
+            <div class="stat-lbl">Total Items</div>
+          </div>
+          <div class="stat-box">
+            <div id="stPairs" class="stat-val" style="color:#7c3aed;">15</div>
+            <div class="stat-lbl">Unique Pairs</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="stat-box">
+            <div id="stBestPair" class="stat-val" style="color:#f59e0b;font-size:0.85rem;line-height:1.3;"> </div>
+            <div class="stat-lbl">Most Similar Pair</div>
+          </div>
+          <div class="stat-box">
+            <div id="stBestScore" class="stat-val" style="color:#16a34a;"> </div>
+            <div class="stat-lbl">Highest Score</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. HOW TO READ THE MATRIX
+      ══════════════════════════════════════ -->
+      <section class="module-card">
+        <div class="mod-label">
+          <i data-lucide="book-open" style="width:12px;height:12px;"></i>
+          How to Read the Matrix
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-start gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <span class="text-lg flex-shrink-0">↘️</span>
+            <div>
+              <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Diagonal = always 1.0</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Every item is perfectly similar to itself.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <span class="text-lg flex-shrink-0">🟩</span>
+            <div>
+              <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Green = high similarity</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Score close to 1 means the pair share similar meaning.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <span class="text-lg flex-shrink-0">↔️</span>
+            <div>
+              <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Matrix is symmetric</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Row A × Col B always equals Row B × Col A.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+            <span class="text-lg flex-shrink-0">👆</span>
+            <div>
+              <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Hover a cell</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Click or hover any cell to see which two items are compared.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      </div><!-- /left column -->
+
+
+        <div class="pg-grid-right">
+      <!-- ══════════════════════════════════════
+           2. LIVE VISUALIZATION
+      ══════════════════════════════════════ -->
+      <section class="module-card">
+        <div class="mod-label">
+          <i data-lucide="grid" style="width:12px;height:12px;"></i>
+          Live Matrix
+        </div>
+
+        <!-- Legend -->
+        <div class="matrix-legend mb-4">
+          <div class="flex items-center gap-1.5">
+            <span class="legend-swatch" style="background:#dbeafe; border:1px solid #bfdbfe;"></span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Low similarity</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
+          <div class="flex items-center gap-1.5">
+            <span class="legend-swatch" style="background:#2563eb;"></span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">High similarity</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
+          <div class="flex items-center gap-1.5">
+            <span class="legend-swatch" style="background:#bfdbfe; border: 2px solid #f59e0b;"></span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">🏆 Best pair</span>
+          </div>
+          <span class="text-slate-300 dark:text-slate-600">·</span>
+          <div class="flex items-center gap-1.5">
+            <span class="legend-swatch" style="background:#1e3a8a;"></span>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Self (1.00)</span>
+          </div>
+        </div>
+
+        <!-- Matrix container -->
+        <div id="matrixContainer"></div>
+
+        <!-- Best pair banner -->
+        <div id="bestPairBanner" class="best-pair-banner hidden">
+          <span style="font-size:1.25rem;">🏆</span>
+          <div>
+            <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-0.5">Most Similar Pair</div>
+            <div id="bestPairText" class="text-sm font-bold text-slate-700 dark:text-slate-300"></div>
+          </div>
+        </div>
+      </section>
+
+        </div><!-- /pg-grid-right -->
+      </div><!-- /pg-grid -->
+
+
+      
+      <!-- ══════════════════════════════════════
+           BEGINNER TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-5" id="tipsSimilarityMatrix">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>The diagonal is always 1.0, every item is perfectly similar to itself. That's expected, not a bug.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Look for <strong>blocks of green</strong>, a cluster of high-similarity cells reveals a group of related items.</span>
+          </div>
+        </div>
+      </div>
+
+<!-- ══════════════════════════════════════
+           5. KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-10 mt-8">
+        <div style="font-size:1.75rem;line-height:1;flex-shrink:0;padding-top:2px;">💡</div>
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1.5">Key Takeaway</div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            A similarity matrix helps us quickly see
+            <strong class="text-slate-900 dark:text-white">which items are most alike</strong>
+              without comparing them one by one.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           6. LESSON NAVIGATION
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="distance-vs-similarity.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Distance vs Similarity
+        </a>
+        <a href="keyword-vs-semantic-search.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Keyword vs Semantic Search
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- FOOTER -->
+  <script>writeSiteFooter('Embeddings & Search');</script>
+
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+    /* ─────────────────────────────────────────
+       Data
+    ───────────────────────────────────────── */
+    const RANDOM_EXAMPLES = [
+      ['cat',    'dog',   'tiger',      'car',   'bus',    'apple'     ],
+      ['apple',  'mango', 'banana',     'train', 'bike',   'car'       ],
+      ['python', 'java',  'javascript', 'tiger', 'lion',   'dog'       ],
+      ['king',   'queen', 'prince',     'pizza', 'burger', 'pasta'     ],
+    ];
+
+    const DEFAULT_ITEMS = RANDOM_EXAMPLES[0];
+
+    const SEMANTIC_VECTORS = {
+      cat:[0.75,0.18,0.22], dog:[0.80,0.20,0.18], tiger:[0.82,0.15,0.25],
+      lion:[0.85,0.22,0.20], elephant:[0.78,0.25,0.15], fish:[0.70,0.18,0.28],
+      cow:[0.72,0.20,0.20], goat:[0.73,0.21,0.19],
+      car:[0.20,0.82,0.18], bus:[0.22,0.78,0.22], train:[0.18,0.85,0.20],
+      bike:[0.25,0.72,0.25], plane:[0.15,0.88,0.18],
+      apple:[0.22,0.20,0.80], mango:[0.18,0.22,0.82], banana:[0.20,0.18,0.78],
+      orange:[0.24,0.22,0.76], pizza:[0.28,0.25,0.75], burger:[0.30,0.28,0.72],
+      pasta:[0.26,0.24,0.74],
+      python:[0.78,0.82,0.22], javascript:[0.75,0.85,0.20], java:[0.80,0.80,0.25],
+      king:[0.52,0.45,0.50], queen:[0.48,0.52,0.48], prince:[0.55,0.42,0.52],
+    };
+
+    /* ─────────────────────────────────────────
+       textToSimpleVector(text)
+    ───────────────────────────────────────── */
+    function textToSimpleVector(text) {
+      const key = text.trim().toLowerCase();
+      if (SEMANTIC_VECTORS[key]) return SEMANTIC_VECTORS[key];
+      const letters = key.replace(/[^a-z]/g, '');
+      if (!letters.length) return [0.33, 0.33, 0.33];
+      const codes  = letters.split('').map(c => c.charCodeAt(0) - 97);
+      const n      = codes.length;
+      const vowels = letters.split('').filter(c => 'aeiou'.includes(c)).length;
+      const d1     = codes.reduce((s, v) => s + v, 0) / (n * 25);
+      const d2     = vowels / n;
+      const w      = n * (n + 1) / 2;
+      const d3     = codes.reduce((s, v, i) => s + (i + 1) * v, 0) / (w * 25);
+      return [Math.min(1, +d1.toFixed(3)), +d2.toFixed(3), Math.min(1, +d3.toFixed(3))];
+    }
+
+    /* ─────────────────────────────────────────
+       cosineSimilarity(a, b)
+    ───────────────────────────────────────── */
+    function cosineSimilarity(a, b) {
+      const dot  = a.reduce((s, v, i) => s + v * b[i], 0);
+      const magA = Math.sqrt(a.reduce((s, v) => s + v * v, 0));
+      const magB = Math.sqrt(b.reduce((s, v) => s + v * v, 0));
+      if (magA === 0 || magB === 0) return 0;
+      return Math.min(1, dot / (magA * magB));
+    }
+
+    /* ─────────────────────────────────────────
+       calculateSimilarityMatrix(items)
+    ───────────────────────────────────────── */
+    function calculateSimilarityMatrix(items) {
+      return items.map(a =>
+        items.map(b => cosineSimilarity(textToSimpleVector(a), textToSimpleVector(b)))
+      );
+    }
+
+    /* ─────────────────────────────────────────
+       findHighestSimilarityPair(matrix, items)
+    ───────────────────────────────────────── */
+    function findHighestSimilarityPair(matrix, items) {
+      let best = { score: -1, i: -1, j: -1 };
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          if (matrix[i][j] > best.score) {
+            best = { score: matrix[i][j], i, j };
+          }
+        }
+      }
+      return best;
+    }
+
+    /* ─────────────────────────────────────────
+       cellBg   interpolate cell background color
+    ───────────────────────────────────────── */
+    function cellBg(score, isDiag, isDark) {
+      if (isDiag) {
+        return isDark ? '#1e3a8a' : '#bfdbfe';
+      }
+      if (isDark) {
+        // slate-800 (#1e293b) → blue-400 (#60a5fa)
+        const r = Math.round(30  + score * (96  - 30));
+        const g = Math.round(41  + score * (165 - 41));
+        const b = Math.round(59  + score * (250 - 59));
+        return `rgb(${r},${g},${b})`;
+      } else {
+        // slate-100 (#f1f5fb) → blue-600 (#2563eb)
+        const r = Math.round(241 + score * (37  - 241));
+        const g = Math.round(245 + score * (99  - 245));
+        const b = Math.round(251 + score * (235 - 251));
+        return `rgb(${r},${g},${b})`;
+      }
+    }
+
+    function cellTextColor(score, isDiag, isDark) {
+      if (isDiag) return isDark ? '#93c5fd' : '#1d4ed8';
+      if (isDark)  return score > 0.55 ? '#f8fafc' : '#94a3b8';
+      return score > 0.6 ? 'white' : '#1e293b';
+    }
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* ─────────────────────────────────────────
+       renderSimilarityMatrix(container, matrix, items)
+    ───────────────────────────────────────── */
+    function renderSimilarityMatrix(container, matrix, items) {
+      const n    = items.length;
+      const best = findHighestSimilarityPair(matrix, items);
+      const dark = Utils.isDark();
+
+      let html = '<div class="sim-matrix-outer"><table class="sim-matrix"><thead><tr>';
+      html += '<th class="corner-cell"></th>';
+      for (const item of items) {
+        html += `<th class="col-header">${esc(item || ' ')}</th>`;
+      }
+      html += '</tr></thead><tbody>';
+
+      for (let i = 0; i < n; i++) {
+        html += '<tr>';
+        html += `<th class="row-header">${esc(items[i] || ' ')}</th>`;
+        for (let j = 0; j < n; j++) {
+          const score   = matrix[i][j];
+          const isDiag  = i === j;
+          const isBest  = !isDiag && (
+            (i === best.i && j === best.j) ||
+            (i === best.j && j === best.i)
+          );
+          const bg   = cellBg(score, isDiag, dark);
+          const col  = cellTextColor(score, isDiag, dark);
+          const cls  = 'sim-cell' + (isBest ? ' best-pair' : '');
+          html += `<td class="${cls}" style="background:${bg};color:${col};">${score.toFixed(2)}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    }
+
+    /* ─────────────────────────────────────────
+       getItems   read current input values
+    ───────────────────────────────────────── */
+    function getItems() {
+      return Array.from({ length: 6 }, (_, i) => {
+        const el = document.getElementById(`item${i}`);
+        return el ? el.value.trim() : '';
+      });
+    }
+
+    /* ─────────────────────────────────────────
+       updateSimilarityMatrixDemo
+    ───────────────────────────────────────── */
+    function updateSimilarityMatrixDemo() {
+      const items  = getItems();
+      const matrix = calculateSimilarityMatrix(items);
+      const best   = findHighestSimilarityPair(matrix, items);
+      const n      = items.length;
+      const pairs  = n * (n - 1) / 2;
+
+      // Render matrix
+      renderSimilarityMatrix(
+        document.getElementById('matrixContainer'),
+        matrix,
+        items
+      );
+
+      // Stats
+      document.getElementById('stTotal').textContent = n;
+      document.getElementById('stPairs').textContent = pairs;
+
+      if (best.i >= 0) {
+        const a = items[best.i] || ' ';
+        const b = items[best.j] || ' ';
+        document.getElementById('stBestPair').textContent  = `${a} & ${b}`;
+        document.getElementById('stBestScore').textContent = best.score.toFixed(3);
+
+        // Best pair banner
+        const banner = document.getElementById('bestPairBanner');
+        banner.classList.remove('hidden');
+        document.getElementById('bestPairText').textContent =
+          `"${a}" and "${b}" are the most similar   score ${best.score.toFixed(3)}`;
+      }
+    }
+
+    /* ─────────────────────────────────────────
+       buildInputs   create 6 input fields
+    ───────────────────────────────────────── */
+    function buildInputs(values) {
+      const grid = document.getElementById('datasetInputs');
+      grid.innerHTML = '';
+      values.forEach((val, i) => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `
+          <div class="dataset-item-label">Item ${i + 1}</div>
+          <input id="item${i}" type="text" class="pg-input" value="${esc(val)}"
+            placeholder="e.g. cat" autocomplete="off" spellcheck="false" />`;
+        grid.appendChild(wrapper);
+        wrapper.querySelector('input').addEventListener('input',
+          Utils.debounce(updateSimilarityMatrixDemo, 120));
+      });
+    }
+
+    /* ─────────────────────────────────────────
+       resetExample / randomExample
+    ───────────────────────────────────────── */
+    window.resetExample = function() {
+      buildInputs(DEFAULT_ITEMS);
+      updateSimilarityMatrixDemo();
+    };
+
+    window.randomExample = function() {
+      const ex = RANDOM_EXAMPLES[Math.floor(Math.random() * RANDOM_EXAMPLES.length)];
+      buildInputs(ex);
+      updateSimilarityMatrixDemo();
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo('#btnRandom', { scale: 0.88 }, { scale: 1, duration: 0.45, ease: 'back.out(2)' });
+      }
+    };
+
+    /* ─────────────────────────────────────────
+       syncDarkIcons
+    ───────────────────────────────────────── */
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    /* ─────────────────────────────────────────
+       Init
+    ───────────────────────────────────────── */
+    window.addEventListener('load', () => {
+      Utils.loadDarkPreference();
+      lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          Utils.toggleDark();
+          syncDarkIcons();
+          updateSimilarityMatrixDemo();
+        });
+      });
+
+      const mBtn  = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen   = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu.classList.toggle('hidden', !mOpen);
+      });
+
+      buildInputs(DEFAULT_ITEMS);
+      updateSimilarityMatrixDemo();
+    });
+  </script>
+
+</body>
+</html>
