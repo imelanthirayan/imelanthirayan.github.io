@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DiskANN Index · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Dark mode overrides for Tailwind utility classes ─────────────────── */
+    html.dark body                        { background:#0f172a; color:#f1f5f9; }
+    html.dark .bg-white                   { background:#1e293b !important; }
+    html.dark .bg-gray-50                 { background:#1e293b !important; }
+    html.dark .bg-gray-100                { background:#0f172a !important; }
+    html.dark .bg-gray-200                { background:#1e293b !important; }
+    html.dark .border-gray-200            { border-color:#334155 !important; }
+    html.dark .border-gray-100            { border-color:#1e293b !important; }
+    html.dark .divide-gray-100 > * + *    { border-color:#1e293b !important; }
+
+    /* Text */
+    html.dark .text-slate-800             { color:#f1f5f9 !important; }
+    html.dark .text-slate-700             { color:#e2e8f0 !important; }
+    html.dark .text-slate-600             { color:#cbd5e1 !important; }
+    html.dark .text-slate-500             { color:#94a3b8 !important; }
+    html.dark .text-slate-400             { color:#64748b !important; }
+    html.dark .text-gray-800              { color:#f1f5f9 !important; }
+    html.dark .text-gray-700              { color:#e2e8f0 !important; }
+    html.dark .text-gray-600              { color:#cbd5e1 !important; }
+    html.dark .text-gray-500              { color:#94a3b8 !important; }
+
+    /* Cards / panels */
+    html.dark .bg-indigo-50               { background:rgba(99,102,241,0.12) !important; }
+    html.dark .bg-blue-50                 { background:rgba(37,99,235,0.12)  !important; }
+    html.dark .bg-purple-50               { background:rgba(124,58,237,0.12) !important; }
+    html.dark .bg-teal-50                 { background:rgba(13,148,136,0.12) !important; }
+    html.dark .bg-orange-50               { background:rgba(234,88,12,0.12)  !important; }
+    html.dark .bg-emerald-50              { background:rgba(5,150,105,0.12)  !important; }
+    html.dark .bg-yellow-50               { background:rgba(234,179,8,0.12)  !important; }
+    html.dark .bg-red-50                  { background:rgba(220,38,38,0.12)  !important; }
+    html.dark .bg-green-50                { background:rgba(22,163,74,0.12)  !important; }
+    html.dark .bg-amber-50                { background:rgba(217,119,6,0.12)  !important; }
+    html.dark .bg-pink-50                 { background:rgba(219,39,119,0.12) !important; }
+    html.dark .bg-cyan-50                 { background:rgba(6,182,212,0.12)  !important; }
+    html.dark .bg-sky-50                  { background:rgba(14,165,233,0.12) !important; }
+
+    /* Border colors in dark */
+    html.dark .border-indigo-100          { border-color:rgba(99,102,241,0.2)  !important; }
+    html.dark .border-blue-100            { border-color:rgba(37,99,235,0.2)   !important; }
+    html.dark .border-purple-100          { border-color:rgba(124,58,237,0.2)  !important; }
+    html.dark .border-teal-100            { border-color:rgba(13,148,136,0.2)  !important; }
+    html.dark .border-orange-100          { border-color:rgba(234,88,12,0.2)   !important; }
+    html.dark .border-emerald-100         { border-color:rgba(5,150,105,0.2)   !important; }
+    html.dark .border-amber-100           { border-color:rgba(217,119,6,0.2)   !important; }
+
+    /* Inputs / selects / textareas */
+    html.dark input[type=number],
+    html.dark input[type=text],
+    html.dark input[type=range],
+    html.dark select,
+    html.dark textarea                    { background:#1e293b; border-color:#334155; color:#f1f5f9; }
+    html.dark input[type=number]:focus,
+    html.dark input[type=text]:focus,
+    html.dark select:focus,
+    html.dark textarea:focus              { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+
+    /* Shadow softening in dark */
+    html.dark .shadow-sm                  { box-shadow:0 1px 3px rgba(0,0,0,0.35) !important; }
+    html.dark .shadow                     { box-shadow:0 2px 8px rgba(0,0,0,0.4)  !important; }
+
+    /* Dividers */
+    html.dark hr                          { border-color:#1e293b; }
+
+    /* ── back-btn (not in custom.css, defined per-module) ─────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1;
+      text-decoration: none; padding: 0.4rem 0.9rem;
+      border-radius: 9999px; border: 1px solid rgba(99,102,241,0.22);
+      background: rgba(99,102,241,0.07); transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color:#a78bfa; border-color:rgba(167,139,250,0.25); background:rgba(99,102,241,0.1); }
+
+    /* ── Dark overrides for -100 tint classes (panels, badges, icons) ─────── */
+    html.dark .bg-indigo-100  { background:rgba(99,102,241,0.18)  !important; }
+    html.dark .bg-blue-100    { background:rgba(37,99,235,0.18)   !important; }
+    html.dark .bg-purple-100  { background:rgba(124,58,237,0.18)  !important; }
+    html.dark .bg-teal-100    { background:rgba(13,148,136,0.18)  !important; }
+    html.dark .bg-orange-100  { background:rgba(234,88,12,0.18)   !important; }
+    html.dark .bg-emerald-100 { background:rgba(5,150,105,0.18)   !important; }
+    html.dark .bg-green-100   { background:rgba(22,163,74,0.18)   !important; }
+    html.dark .bg-amber-100   { background:rgba(217,119,6,0.18)   !important; }
+    html.dark .bg-yellow-100  { background:rgba(234,179,8,0.18)   !important; }
+    html.dark .bg-red-100     { background:rgba(220,38,38,0.18)   !important; }
+    html.dark .bg-pink-100    { background:rgba(219,39,119,0.18)  !important; }
+    html.dark .bg-cyan-100    { background:rgba(6,182,212,0.18)   !important; }
+    html.dark .bg-sky-100     { background:rgba(14,165,233,0.18)  !important; }
+    html.dark .bg-slate-100   { background:rgba(148,163,184,0.12) !important; }
+    html.dark .bg-slate-50    { background:#1e293b !important; }
+
+    /* ── Dark text for colored text classes ───────────────────────────────── */
+    html.dark .text-indigo-700 { color:#a5b4fc !important; }
+    html.dark .text-indigo-800 { color:#c7d2fe !important; }
+    html.dark .text-blue-700   { color:#93c5fd !important; }
+    html.dark .text-blue-800   { color:#bfdbfe !important; }
+    html.dark .text-purple-700 { color:#c4b5fd !important; }
+    html.dark .text-purple-800 { color:#ddd6fe !important; }
+    html.dark .text-teal-700   { color:#5eead4 !important; }
+    html.dark .text-teal-800   { color:#99f6e4 !important; }
+    html.dark .text-orange-700 { color:#fdba74 !important; }
+    html.dark .text-orange-800 { color:#fed7aa !important; }
+    html.dark .text-emerald-700{ color:#6ee7b7 !important; }
+    html.dark .text-emerald-800{ color:#a7f3d0 !important; }
+    html.dark .text-green-700  { color:#86efac !important; }
+    html.dark .text-green-800  { color:#bbf7d0 !important; }
+    html.dark .text-amber-700  { color:#fcd34d !important; }
+    html.dark .text-amber-800  { color:#fde68a !important; }
+
+    /* ── Dark borders for colored border classes ──────────────────────────── */
+    html.dark .border-indigo-200 { border-color:rgba(99,102,241,0.3)  !important; }
+    html.dark .border-indigo-300 { border-color:rgba(99,102,241,0.45) !important; }
+    html.dark .border-blue-200   { border-color:rgba(37,99,235,0.3)   !important; }
+    html.dark .border-purple-200 { border-color:rgba(124,58,237,0.3)  !important; }
+    html.dark .border-teal-200   { border-color:rgba(13,148,136,0.3)  !important; }
+    html.dark .border-orange-200 { border-color:rgba(234,88,12,0.3)   !important; }
+    html.dark .border-emerald-200{ border-color:rgba(5,150,105,0.3)   !important; }
+    html.dark .border-green-200  { border-color:rgba(22,163,74,0.3)   !important; }
+    html.dark .border-amber-200  { border-color:rgba(217,119,6,0.3)   !important; }
+
+    /* ── Inputs with explicit bg-white class ─────────────────────────────── */
+    html.dark input.bg-white,
+    html.dark textarea.bg-white { background:#1e293b !important; color:#f1f5f9 !important; }
+
+    /* ── Takeaway ───────────────────────────────── */
+    .takeaway {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22);
+      border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16);
+      border-left-color: #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ══════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════ -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+  <!-- ══════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════ -->
+  <main class="pt-20 pb-16">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-6 mb-6 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <a href="compare.html" class="back-btn" style="--lc-color:#d97706;">
+          <i data-lucide="layers" style="width:13px;height:13px;"></i>
+          Compare All
+        </a>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">RAM + Disk</span>
+      </div>
+
+      <!-- Page heading -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl flex-shrink-0">💿</div>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">DiskANN Index</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Keeps hot vectors in RAM, rest on disk · handles billion-scale with small memory</p>
+        </div>
+      </div>
+
+<div class="mb-5 rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-emerald-600 px-5 py-3">
+      <p class="text-white text-sm font-medium">DiskANN keeps hot vectors in fast RAM and stores the rest on disk. Search scans RAM first, then reads targeted disk vectors. Near-HNSW quality with much less memory.</p>
+    </div>
+    <div class="bg-emerald-50 px-5 py-3 flex items-center gap-2 flex-wrap border border-emerald-100 border-t-0 rounded-b-2xl">
+      <span class="text-xs font-semibold text-emerald-700 mr-2">Flow:</span>
+      <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-lg text-xs font-semibold">📥 Query</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🧠 Search RAM</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-lg text-xs font-semibold">💿 Read Disk</span>
+      <span class="text-slate-400 text-sm">→</span>
+      <span class="bg-green-100 text-green-800 px-2.5 py-1 rounded-lg text-xs font-semibold">🏆 Top Match</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+
+    <!-- LEFT (2/5) -->
+    <div class="xl:col-span-2 space-y-4">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center text-sm">🎯</div>
+            <h2 class="text-base font-bold text-slate-800">Query Vector</h2>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">Editable</span>
+          </div>
+          <button onclick="resetDemo()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-1.5 px-3 rounded-lg transition">🔄 Reset</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">x<input type="number" step="0.01" id="q0" value="0.50" class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-emerald-500 bg-white shadow-sm"/></label>
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">y<input type="number" step="0.01" id="q1" value="0.60" class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-emerald-500 bg-white shadow-sm"/></label>
+          <label class="flex flex-col items-center gap-1.5 text-sm font-semibold text-slate-600">z<input type="number" step="0.01" id="q2" value="0.40" class="w-full border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center font-mono text-base focus:outline-none focus:border-emerald-500 bg-white shadow-sm"/></label>
+        </div>
+        <button onclick="doSearch()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">🔍 Search</button>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-sm">🎚️</div>
+          <h2 class="text-base font-bold text-slate-800">RAM Cache Size</h2>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-slate-500 font-medium">1</span>
+          <input type="range" id="ram-size" min="1" max="5" value="3" oninput="updateRamLabel()" class="flex-1 accent-emerald-600"/>
+          <span class="text-xs text-slate-500 font-medium">5</span>
+          <span id="ram-label" class="bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-lg text-xs">3 in RAM</span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-400 mt-1.5">
+          <span>More disk reads</span><span>Fewer disk reads</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border-2 border-blue-200 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">🧠</span>
+          <h3 class="font-bold text-blue-700 text-base">RAM Cache</h3>
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Editable</span>
+          <span id="ram-count-badge" class="ml-auto text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-lg">3 vectors</span>
+        </div>
+        <div id="ram-vectors" class="space-y-2 mb-3"></div>
+        <button onclick="addRamVec()" class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 px-3 rounded-lg border border-blue-200 transition">➕ Add RAM Vector</button>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border-2 border-amber-200 p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">💿</span>
+          <h3 class="font-bold text-amber-700 text-base">Disk Storage</h3>
+          <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Editable</span>
+          <span id="disk-count-badge" class="ml-auto text-xs font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-lg">5 vectors</span>
+        </div>
+        <div id="disk-vectors" class="space-y-2 mb-3"></div>
+        <button onclick="addDiskVec()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold py-2 px-3 rounded-lg border border-amber-200 transition">➕ Add Disk Vector</button>
+      </div>
+    </div>
+
+    <!-- RIGHT (3/5) -->
+    <div class="xl:col-span-3 space-y-4">
+
+      <div id="search-placeholder" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <div class="text-5xl mb-4">🔍</div>
+        <p class="text-base font-semibold text-slate-600">Click <strong class="text-emerald-700">Search</strong> to see results</p>
+        <p class="text-sm text-slate-400 mt-2">Adjust the RAM slider, edit vectors, then run a search to see how DiskANN works.</p>
+      </div>
+
+      <div id="search-stats" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-sm">📊</div>
+          <h2 class="text-base font-bold text-slate-800">Search Statistics</h2>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center mb-5">
+          <div class="bg-blue-50 rounded-xl p-3 border border-blue-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">RAM Reads</div>
+            <div id="ram-reads" class="text-2xl font-extrabold text-blue-700">0</div>
+          </div>
+          <div class="bg-amber-50 rounded-xl p-3 border border-amber-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">Disk Reads</div>
+            <div id="disk-reads" class="text-2xl font-extrabold text-amber-700">0</div>
+          </div>
+          <div class="bg-purple-50 rounded-xl p-3 border border-purple-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">Total Checked</div>
+            <div id="total-reads" class="text-2xl font-extrabold text-purple-700">0</div>
+          </div>
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <div class="text-xs text-slate-500 font-semibold uppercase">FLAT checks</div>
+            <div id="flat-total" class="text-2xl font-extrabold text-slate-600">8</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-sm">🏆</div>
+          <h3 class="text-base font-bold text-slate-800">Ranked Results</h3>
+          <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Live</span>
+        </div>
+        <div id="results-container" class="space-y-2"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <h3 class="font-bold text-emerald-800 text-sm mb-1">💡 Key Idea</h3>
+          <p class="text-emerald-700 text-xs leading-relaxed">RAM as fast guide, disk for full data. 10–100× less RAM than pure HNSW.</p>
+        </div>
+        <div class="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+          <h3 class="font-bold text-blue-800 text-sm mb-1">✅ Best For</h3>
+          <p class="text-blue-700 text-xs leading-relaxed">Billion-scale datasets, limited RAM, cost-sensitive production workloads.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- All stored vectors (let so we can add more) ----
+// First 5 can be in RAM (determined by slider). Last 3 are always disk-only.
+let ALL_VECS = [
+  { id:'R1', label:'Vector 1', vals:[0.51, 0.59, 0.41] },
+  { id:'R2', label:'Vector 2', vals:[0.30, 0.70, 0.50] },
+  { id:'R3', label:'Vector 3', vals:[0.80, 0.20, 0.40] },
+  { id:'R4', label:'Vector 4', vals:[0.20, 0.40, 0.80] },
+  { id:'R5', label:'Vector 5', vals:[0.60, 0.60, 0.20] },
+  { id:'D1', label:'Vector 6', vals:[0.48, 0.62, 0.38] }, // very close to query → disk surprise!
+  { id:'D2', label:'Vector 7', vals:[0.70, 0.30, 0.50] },
+  { id:'D3', label:'Vector 8', vals:[0.10, 0.90, 0.10] },
+];
+
+const ALL_VECS_DEFAULT = () => [
+  { id:'R1', label:'Vector 1', vals:[0.51, 0.59, 0.41] },
+  { id:'R2', label:'Vector 2', vals:[0.30, 0.70, 0.50] },
+  { id:'R3', label:'Vector 3', vals:[0.80, 0.20, 0.40] },
+  { id:'R4', label:'Vector 4', vals:[0.20, 0.40, 0.80] },
+  { id:'R5', label:'Vector 5', vals:[0.60, 0.60, 0.20] },
+  { id:'D1', label:'Vector 6', vals:[0.48, 0.62, 0.38] },
+  { id:'D2', label:'Vector 7', vals:[0.70, 0.30, 0.50] },
+  { id:'D3', label:'Vector 8', vals:[0.10, 0.90, 0.10] },
+];
+
+// Build a small vector input row
+function buildVecRow(vec, borderColor) {
+  return `
+    <div id="vec-row-${vec.id}" class="flex flex-wrap items-center gap-2 p-2 rounded-lg border ${borderColor} bg-gray-50 text-xs transition-all">
+      <span class="font-bold text-slate-600 w-16">${vec.label}</span>
+      <label class="flex items-center gap-0.5 text-slate-400">x
+        <input type="number" step="0.01" id="vec-${vec.id}-0" value="${vec.vals[0].toFixed(2)}"
+          class="w-14 border border-slate-200 rounded px-1 py-0.5 text-center font-mono focus:outline-none focus:border-emerald-400 bg-white"/>
+      </label>
+      <label class="flex items-center gap-0.5 text-slate-400">y
+        <input type="number" step="0.01" id="vec-${vec.id}-1" value="${vec.vals[1].toFixed(2)}"
+          class="w-14 border border-slate-200 rounded px-1 py-0.5 text-center font-mono focus:outline-none focus:border-emerald-400 bg-white"/>
+      </label>
+      <label class="flex items-center gap-0.5 text-slate-400">z
+        <input type="number" step="0.01" id="vec-${vec.id}-2" value="${vec.vals[2].toFixed(2)}"
+          class="w-14 border border-slate-200 rounded px-1 py-0.5 text-center font-mono focus:outline-none focus:border-emerald-400 bg-white"/>
+      </label>
+      <span id="vsim-${vec.id}" class="ml-auto hidden font-extrabold font-mono text-xs"></span>
+    </div>`;
+}
+
+// Read a vector by its id
+function readVecById(id) {
+  return [0,1,2].map(j => parseFloat(document.getElementById(`vec-${id}-${j}`)?.value)||0);
+}
+
+// ---- Render RAM and Disk sections based on slider ----
+function syncAllVecs() {
+  // Read current DOM input values back into ALL_VECS so edits are preserved across re-renders
+  ALL_VECS.forEach(v => {
+    v.vals = [0,1,2].map(j => parseFloat(document.getElementById(`vec-${v.id}-${j}`)?.value) ?? v.vals[j]);
+  });
+}
+
+function renderLayout() {
+  const slider = document.getElementById('ram-size');
+  // Keep slider max = total vectors - 1 (at least 1 must be on disk)
+  slider.max = Math.max(1, ALL_VECS.length - 1);
+  const ramSize = parseInt(slider.value);
+  const ramVecs = ALL_VECS.slice(0, ramSize);
+  const diskVecs = ALL_VECS.slice(ramSize);
+
+  document.getElementById('ram-count-badge').textContent = `${ramVecs.length} vector${ramVecs.length!==1?'s':''}`;
+  document.getElementById('disk-count-badge').textContent = `${diskVecs.length} vector${diskVecs.length!==1?'s':''}`;
+
+  document.getElementById('ram-vectors').innerHTML = ramVecs.map(v => buildVecRow(v, 'border-blue-200')).join('');
+  document.getElementById('disk-vectors').innerHTML = diskVecs.map(v => buildVecRow(v, 'border-amber-200')).join('');
+  // Update vs FLAT counter
+  const ft = document.getElementById('flat-total');
+  if (ft) ft.textContent = ALL_VECS.length;
+}
+
+function updateRamLabel() {
+  const v = document.getElementById('ram-size').value;
+  document.getElementById('ram-label').textContent = `${v} in RAM`;
+  renderLayout();
+  document.getElementById('search-stats').classList.add('hidden');
+}
+
+// ---- Perform DiskANN-like search ----
+function doSearch() {
+  const query = readVec('q');
+  const ramSize = parseInt(document.getElementById('ram-size').value);
+  const ramVecs = ALL_VECS.slice(0, ramSize);
+  const diskVecs = ALL_VECS.slice(ramSize);
+
+  // Step 1: Search RAM vectors
+  const ramScores = ramVecs.map(v => ({
+    ...v,
+    vec: readVecById(v.id),
+    sim: 0,
+    source: 'ram',
+  }));
+  ramScores.forEach(s => { s.sim = cosineSimilarity(query, s.vec); });
+  const ramReads = ramScores.length;
+
+  // Step 2: Search ALL disk vectors (in real DiskANN this is more selective)
+  const diskScores = diskVecs.map(v => ({
+    ...v,
+    vec: readVecById(v.id),
+    sim: 0,
+    source: 'disk',
+  }));
+  diskScores.forEach(s => { s.sim = cosineSimilarity(query, s.vec); });
+  const diskReads = diskScores.length;
+
+  // Step 3: Combine and rank all results
+  const allScores = [...ramScores, ...diskScores].sort((a,b) => b.sim - a.sim);
+  const maxSim = allScores[0].sim;
+
+  // Update stats display
+  document.getElementById('ram-reads').textContent = ramReads;
+  document.getElementById('disk-reads').textContent = diskReads;
+  document.getElementById('total-reads').textContent = ramReads + diskReads;
+  document.getElementById('search-stats').classList.remove('hidden');
+  document.getElementById('search-placeholder')?.classList.add('hidden');
+
+  // Highlight rows in their respective sections
+  [...ramScores, ...diskScores].forEach(({ id, sim, source }) => {
+    const isTop = id === allScores[0].id;
+    const row = document.getElementById(`vec-row-${id}`);
+    const simEl = document.getElementById(`vsim-${id}`);
+    if (row) {
+      const base = source === 'ram' ? 'border-blue-200' : 'border-amber-200';
+      row.className = `flex flex-wrap items-center gap-2 p-2 rounded-lg border text-xs transition-all ${
+        isTop ? 'bg-green-50 border-green-400' : `bg-gray-50 ${base}`}`;
+    }
+    if (simEl) {
+      simEl.textContent = f4(sim);
+      simEl.className = `ml-auto font-extrabold font-mono text-xs ${isTop ? 'text-green-600' : 'text-slate-500'}`;
+    }
+  });
+
+  // Render ranked results list
+  const rc = document.getElementById('results-container');
+  rc.innerHTML = '';
+  allScores.forEach((item, rank) => {
+    const isTop = rank === 0;
+    const isRam = item.source === 'ram';
+    const div = document.createElement('div');
+    div.className = `flex items-center gap-3 p-3 rounded-xl border-2 ${isTop ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-slate-200'}`;
+    div.innerHTML = `
+      <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isTop ? 'bg-green-500 text-white' : 'bg-emerald-100 text-emerald-700'}">${rank+1}</div>
+      <div class="flex-1 font-semibold text-slate-700 text-sm">${item.label}
+        <span class="ml-1 px-1.5 py-0.5 rounded text-xs font-semibold ${isRam ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}">${isRam ? '🧠 RAM' : '💿 Disk'}</span>
+        ${isTop ? '<span class="ml-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">🏆 Top Match</span>' : ''}
+      </div>
+      <div class="flex-1">
+        <div class="bg-slate-200 rounded-full h-2 overflow-hidden">
+          <div class="${isTop?'bg-green-500':'bg-emerald-400'} h-2 rounded-full" style="width:${pct(item.sim,maxSim)}"></div>
+        </div>
+      </div>
+      <div class="font-extrabold text-sm ${isTop?'text-green-700':'text-emerald-600'} w-16 text-right">${f4(item.sim)}</div>`;
+    rc.appendChild(div);
+  });
+}
+
+// ---- Reset to default state ----
+// ---- Add a new RAM vector (inserted before the disk boundary) ----
+function addRamVec() {
+  // 1. Save user edits to the array before re-render
+  syncAllVecs();
+  const ramSize = parseInt(document.getElementById('ram-size').value);
+  const num = ALL_VECS.length + 1;
+  // 2. Insert at current RAM boundary so it shows in RAM immediately
+  ALL_VECS.splice(ramSize, 0, { id:`X${num}`, label:`Vector ${num}`, vals:[0.50, 0.50, 0.50] });
+  // 3. Grow slider so the new vector stays in RAM
+  const slider = document.getElementById('ram-size');
+  slider.value = ramSize + 1;
+  document.getElementById('ram-label').textContent = `${ramSize+1} in RAM`;
+  renderLayout();
+  document.getElementById('search-stats').classList.add('hidden');
+}
+
+// ---- Add a new Disk vector (appended at the end) ----
+function addDiskVec() {
+  // 1. Save user edits to the array before re-render
+  syncAllVecs();
+  const num = ALL_VECS.length + 1;
+  // 2. Push to end (disk section)
+  ALL_VECS.push({ id:`X${num}`, label:`Vector ${num}`, vals:[0.50, 0.50, 0.50] });
+  renderLayout();
+  document.getElementById('search-stats').classList.add('hidden');
+}
+
+function resetDemo() {
+  ALL_VECS = ALL_VECS_DEFAULT();
+  document.getElementById('ram-size').value = 3;
+  document.getElementById('ram-label').textContent = '3 in RAM';
+  document.getElementById('q0').value = '0.50';
+  document.getElementById('q1').value = '0.60';
+  document.getElementById('q2').value = '0.40';
+  renderLayout();
+  document.getElementById('search-stats').classList.add('hidden');
+}
+
+// ---- Initialize ----
+renderLayout();
+</script>
+
+
+      <!-- ══════════════════════════════════════
+           TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mt-6 mb-5" id="tipsVIDiskann">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold">3 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>Hot vectors stay in RAM,</strong> the rest live on disk, letting DiskANN handle datasets far larger than available memory.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>It's built for <strong>billion-scale search</strong>, where keeping everything in RAM (like HNSW) would be too expensive.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>The trade-off is <strong>slightly higher latency</strong> from disk access compared to fully in-memory indexes.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-10">
+        <div style="font-size:1.75rem;line-height:1;flex-shrink:0;padding-top:2px;">💡</div>
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1.5">
+            Key Takeaway
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            DiskANN keeps only the most-used vectors in RAM and the rest on disk, enabling <strong class="text-slate-900 dark:text-white">billion-scale search</strong> with a small memory footprint.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Prev / Next navigation ──────────────────────────────────────── -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="hnsw.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: HNSW Index
+        </a>
+        <a href="compare.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          🎉 Section Complete · Compare All Indexes
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+  </div><!-- /max-w-7xl -->
+  </main>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <script>writeSiteFooterVI();</script>
+
+  <script src="script.js"></script>
+  <script>
+    // ── Dark mode + icons ──────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('aip_dark');
+      if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+
+    function syncDarkIcons() {
+      const dark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    function toggleDark() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('aip_dark', isDark ? '1' : '0');
+      syncDarkIcons();
+    }
+
+    window.addEventListener('load', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', toggleDark);
+      });
+
+      // Mobile menu
+      const mBtn  = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen   = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu?.classList.toggle('hidden', !mOpen);
+        const icon = mBtn.querySelector('[data-lucide]');
+        if (icon) {
+          icon.setAttribute('data-lucide', mOpen ? 'x' : 'menu');
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [mBtn] });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IVF_SQ8 Index · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Dark mode overrides for Tailwind utility classes ─────────────────── */
+    html.dark body                        { background:#0f172a; color:#f1f5f9; }
+    html.dark .bg-white                   { background:#1e293b !important; }
+    html.dark .bg-gray-50                 { background:#1e293b !important; }
+    html.dark .bg-gray-100                { background:#0f172a !important; }
+    html.dark .bg-gray-200                { background:#1e293b !important; }
+    html.dark .border-gray-200            { border-color:#334155 !important; }
+    html.dark .border-gray-100            { border-color:#1e293b !important; }
+    html.dark .divide-gray-100 > * + *    { border-color:#1e293b !important; }
+
+    /* Text */
+    html.dark .text-slate-800             { color:#f1f5f9 !important; }
+    html.dark .text-slate-700             { color:#e2e8f0 !important; }
+    html.dark .text-slate-600             { color:#cbd5e1 !important; }
+    html.dark .text-slate-500             { color:#94a3b8 !important; }
+    html.dark .text-slate-400             { color:#64748b !important; }
+    html.dark .text-gray-800              { color:#f1f5f9 !important; }
+    html.dark .text-gray-700              { color:#e2e8f0 !important; }
+    html.dark .text-gray-600              { color:#cbd5e1 !important; }
+    html.dark .text-gray-500              { color:#94a3b8 !important; }
+
+    /* Cards / panels */
+    html.dark .bg-indigo-50               { background:rgba(99,102,241,0.12) !important; }
+    html.dark .bg-blue-50                 { background:rgba(37,99,235,0.12)  !important; }
+    html.dark .bg-purple-50               { background:rgba(124,58,237,0.12) !important; }
+    html.dark .bg-teal-50                 { background:rgba(13,148,136,0.12) !important; }
+    html.dark .bg-orange-50               { background:rgba(234,88,12,0.12)  !important; }
+    html.dark .bg-emerald-50              { background:rgba(5,150,105,0.12)  !important; }
+    html.dark .bg-yellow-50               { background:rgba(234,179,8,0.12)  !important; }
+    html.dark .bg-red-50                  { background:rgba(220,38,38,0.12)  !important; }
+    html.dark .bg-green-50                { background:rgba(22,163,74,0.12)  !important; }
+    html.dark .bg-amber-50                { background:rgba(217,119,6,0.12)  !important; }
+    html.dark .bg-pink-50                 { background:rgba(219,39,119,0.12) !important; }
+    html.dark .bg-cyan-50                 { background:rgba(6,182,212,0.12)  !important; }
+    html.dark .bg-sky-50                  { background:rgba(14,165,233,0.12) !important; }
+
+    /* Border colors in dark */
+    html.dark .border-indigo-100          { border-color:rgba(99,102,241,0.2)  !important; }
+    html.dark .border-blue-100            { border-color:rgba(37,99,235,0.2)   !important; }
+    html.dark .border-purple-100          { border-color:rgba(124,58,237,0.2)  !important; }
+    html.dark .border-teal-100            { border-color:rgba(13,148,136,0.2)  !important; }
+    html.dark .border-orange-100          { border-color:rgba(234,88,12,0.2)   !important; }
+    html.dark .border-emerald-100         { border-color:rgba(5,150,105,0.2)   !important; }
+    html.dark .border-amber-100           { border-color:rgba(217,119,6,0.2)   !important; }
+
+    /* Inputs / selects / textareas */
+    html.dark input[type=number],
+    html.dark input[type=text],
+    html.dark input[type=range],
+    html.dark select,
+    html.dark textarea                    { background:#1e293b; border-color:#334155; color:#f1f5f9; }
+    html.dark input[type=number]:focus,
+    html.dark input[type=text]:focus,
+    html.dark select:focus,
+    html.dark textarea:focus              { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
+
+    /* Shadow softening in dark */
+    html.dark .shadow-sm                  { box-shadow:0 1px 3px rgba(0,0,0,0.35) !important; }
+    html.dark .shadow                     { box-shadow:0 2px 8px rgba(0,0,0,0.4)  !important; }
+
+    /* Dividers */
+    html.dark hr                          { border-color:#1e293b; }
+
+    /* ── back-btn (not in custom.css, defined per-module) ─────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #6366f1;
+      text-decoration: none; padding: 0.4rem 0.9rem;
+      border-radius: 9999px; border: 1px solid rgba(99,102,241,0.22);
+      background: rgba(99,102,241,0.07); transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(99,102,241,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color:#a78bfa; border-color:rgba(167,139,250,0.25); background:rgba(99,102,241,0.1); }
+
+    /* ── Dark overrides for -100 tint classes (panels, badges, icons) ─────── */
+    html.dark .bg-indigo-100  { background:rgba(99,102,241,0.18)  !important; }
+    html.dark .bg-blue-100    { background:rgba(37,99,235,0.18)   !important; }
+    html.dark .bg-purple-100  { background:rgba(124,58,237,0.18)  !important; }
+    html.dark .bg-teal-100    { background:rgba(13,148,136,0.18)  !important; }
+    html.dark .bg-orange-100  { background:rgba(234,88,12,0.18)   !important; }
+    html.dark .bg-emerald-100 { background:rgba(5,150,105,0.18)   !important; }
+    html.dark .bg-green-100   { background:rgba(22,163,74,0.18)   !important; }
+    html.dark .bg-amber-100   { background:rgba(217,119,6,0.18)   !important; }
+    html.dark .bg-yellow-100  { background:rgba(234,179,8,0.18)   !important; }
+    html.dark .bg-red-100     { background:rgba(220,38,38,0.18)   !important; }
+    html.dark .bg-pink-100    { background:rgba(219,39,119,0.18)  !important; }
+    html.dark .bg-cyan-100    { background:rgba(6,182,212,0.18)   !important; }
+    html.dark .bg-sky-100     { background:rgba(14,165,233,0.18)  !important; }
+    html.dark .bg-slate-100   { background:rgba(148,163,184,0.12) !important; }
+    html.dark .bg-slate-50    { background:#1e293b !important; }
+
+    /* ── Dark text for colored text classes ───────────────────────────────── */
+    html.dark .text-indigo-700 { color:#a5b4fc !important; }
+    html.dark .text-indigo-800 { color:#c7d2fe !important; }
+    html.dark .text-blue-700   { color:#93c5fd !important; }
+    html.dark .text-blue-800   { color:#bfdbfe !important; }
+    html.dark .text-purple-700 { color:#c4b5fd !important; }
+    html.dark .text-purple-800 { color:#ddd6fe !important; }
+    html.dark .text-teal-700   { color:#5eead4 !important; }
+    html.dark .text-teal-800   { color:#99f6e4 !important; }
+    html.dark .text-orange-700 { color:#fdba74 !important; }
+    html.dark .text-orange-800 { color:#fed7aa !important; }
+    html.dark .text-emerald-700{ color:#6ee7b7 !important; }
+    html.dark .text-emerald-800{ color:#a7f3d0 !important; }
+    html.dark .text-green-700  { color:#86efac !important; }
+    html.dark .text-green-800  { color:#bbf7d0 !important; }
+    html.dark .text-amber-700  { color:#fcd34d !important; }
+    html.dark .text-amber-800  { color:#fde68a !important; }
+
+    /* ── Dark borders for colored border classes ──────────────────────────── */
+    html.dark .border-indigo-200 { border-color:rgba(99,102,241,0.3)  !important; }
+    html.dark .border-indigo-300 { border-color:rgba(99,102,241,0.45) !important; }
+    html.dark .border-blue-200   { border-color:rgba(37,99,235,0.3)   !important; }
+    html.dark .border-purple-200 { border-color:rgba(124,58,237,0.3)  !important; }
+    html.dark .border-teal-200   { border-color:rgba(13,148,136,0.3)  !important; }
+    html.dark .border-orange-200 { border-color:rgba(234,88,12,0.3)   !important; }
+    html.dark .border-emerald-200{ border-color:rgba(5,150,105,0.3)   !important; }
+    html.dark .border-green-200  { border-color:rgba(22,163,74,0.3)   !important; }
+    html.dark .border-amber-200  { border-color:rgba(217,119,6,0.3)   !important; }
+
+    /* ── Inputs with explicit bg-white class ─────────────────────────────── */
+    html.dark input.bg-white,
+    html.dark textarea.bg-white { background:#1e293b !important; color:#f1f5f9 !important; }
+
+    /* ── Takeaway ───────────────────────────────── */
+    .takeaway {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22);
+      border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16);
+      border-left-color: #f59e0b;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ══════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════ -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+  <!-- ══════════════════════════════════════
+       MAIN
+  ══════════════════════════════════════ -->
+  <main class="pt-20 pb-16">
+    <div class="max-w-7xl mx-auto px-5 md:px-8">
+
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-3 mt-6 mb-6 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <a href="compare.html" class="back-btn" style="--lc-color:#d97706;">
+          <i data-lucide="layers" style="width:13px;height:13px;"></i>
+          Compare All
+        </a>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800">8-bit Quantization</span>
+      </div>
+
+      <!-- Page heading -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-2xl flex-shrink-0">🔢</div>
+        <div>
+          <h1 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">IVF_SQ8 Index</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Converts 32-bit floats to 8-bit integers · 75% less memory, minimal accuracy loss</p>
+        </div>
+      </div>
+
+<div class="mb-5 rounded-2xl overflow-hidden shadow-sm">
+    <div class="bg-teal-600 px-5 py-3">
+      <p class="text-white text-sm font-medium">SQ8 maps each 32-bit float to an 8-bit integer (0–255) using the global min/max range. 4x less memory per value, similarity is approximate but very close.</p>
+    </div>
+    <div class="bg-teal-50 px-5 py-3 flex items-center gap-2 flex-wrap border border-teal-100 border-t-0 rounded-b-2xl">
+      <span class="text-xs font-semibold text-teal-700 mr-2">Formula:</span>
+      <code class="bg-teal-100 text-teal-800 px-3 py-1 rounded-lg text-xs font-mono">round( (v − min) ÷ (max − min) × 255 )</code>
+    </div>
+  </div>
+
+  <!-- Query Vector + Global Range: full-width row above the columns -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 bg-teal-100 rounded-lg flex items-center justify-center text-sm">🎯</div>
+        <h2 class="text-sm font-bold text-slate-800">Query Vector</h2>
+        <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">Editable</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-3">
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">x<input type="number" step="0.01" id="q0" value="0.50" oninput="calc()" class="w-full border-2 border-teal-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-teal-500 bg-white shadow-sm"/></label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">y<input type="number" step="0.01" id="q1" value="0.60" oninput="calc()" class="w-full border-2 border-teal-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-teal-500 bg-white shadow-sm"/></label>
+        <label class="flex flex-col items-center gap-1 text-xs font-semibold text-slate-500">z<input type="number" step="0.01" id="q2" value="0.40" oninput="calc()" class="w-full border-2 border-teal-300 rounded-xl px-1 py-2 text-center font-mono text-sm focus:outline-none focus:border-teal-500 bg-white shadow-sm"/></label>
+      </div>
+      <div class="flex items-center gap-2 bg-teal-50 rounded-lg px-3 py-1.5 text-xs">
+        <span class="text-slate-500">Quantized →</span>
+        <span id="query-quantized" class="font-mono font-bold text-teal-700">—</span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4 flex-1">
+        <h3 class="text-sm font-bold text-teal-700 mb-1">📏 Global Value Range</h3>
+        <p class="text-xs text-teal-600 mb-2">Min/max across ALL values, sets the 0–255 mapping scale.</p>
+        <div class="flex gap-5 text-sm font-semibold text-teal-800">
+          <span>Min: <span id="global-min" class="font-mono">—</span></span>
+          <span>Max: <span id="global-max" class="font-mono">—</span></span>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex-1">
+        <h3 class="font-bold text-teal-800 text-sm mb-2">💾 Memory Comparison</h3>
+        <div class="space-y-2">
+          <div>
+            <div class="flex justify-between text-xs text-slate-600 mb-1"><span>Original (32-bit floats × 3)</span><span class="font-bold">12 bytes</span></div>
+            <div class="bg-slate-200 rounded-full h-3 overflow-hidden"><div class="bg-red-400 h-3 rounded-full" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs text-slate-600 mb-1"><span>SQ8 (8-bit ints × 3)</span><span class="font-bold text-green-600">3 bytes (75% saved!)</span></div>
+            <div class="bg-slate-200 rounded-full h-3 overflow-hidden"><div class="bg-teal-500 h-3 rounded-full" style="width:25%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+    <!-- LEFT (2/5) -->
+    <div class="space-y-4">
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-sm">🗃️</div>
+            <h2 class="text-base font-bold text-slate-800">Stored Vectors</h2>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="addVector()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg transition">➕ Add</button>
+            <button onclick="resetDemo()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-1.5 px-3 rounded-lg transition">🔄 Reset</button>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Edit any float. 8-bit integers and scores update instantly.</p>
+        <div id="vectors-container" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT (3/5) -->
+    <div class="space-y-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-7 h-7 bg-green-100 rounded-lg flex items-center justify-center text-sm">📊</div>
+          <h2 class="text-base font-bold text-slate-800">Approximate Ranked Results</h2>
+          <span class="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Live</span>
+        </div>
+        <p class="text-xs text-slate-400 mb-3">Similarity computed using <strong>8-bit quantized</strong> values.</p>
+        <div id="results-container" class="space-y-2"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-teal-50 rounded-2xl p-4 border border-teal-100">
+          <h3 class="font-bold text-teal-800 text-sm mb-1">💡 Key Idea</h3>
+          <p class="text-teal-700 text-xs leading-relaxed">4 bytes → 1 byte per value. 75% memory saved, minimal accuracy loss.</p>
+        </div>
+        <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <h3 class="font-bold text-emerald-800 text-sm mb-1">✅ Best For</h3>
+          <p class="text-emerald-700 text-xs leading-relaxed">Large datasets needing 75% less RAM with near-original accuracy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ---- Default stored vectors (let so we can add/reset) ----
+let STORED_VECS = [
+  { label:'Vector A', vals:[0.12, 0.85, 0.31] },
+  { label:'Vector B', vals:[0.55, 0.21, 0.67] },
+  { label:'Vector C', vals:[0.33, 0.78, 0.25] },
+  { label:'Vector D', vals:[0.91, 0.14, 0.63] },
+];
+const STORED_VECS_DEFAULT = () => [
+  { label:'Vector A', vals:[0.12, 0.85, 0.31] },
+  { label:'Vector B', vals:[0.55, 0.21, 0.67] },
+  { label:'Vector C', vals:[0.33, 0.78, 0.25] },
+  { label:'Vector D', vals:[0.91, 0.14, 0.63] },
+];
+
+// Scalar quantization: map value from [min, max] → [0, 255]
+function sq8(val, min, max) {
+  if (max === min) return 0;
+  return Math.round(((val - min) / (max - min)) * 255);
+}
+
+// Build one vector card
+function buildVecRow(idx) {
+  const v = STORED_VECS[idx];
+  const row = document.createElement('div');
+  row.id = `row-${idx}`;
+  row.className = 'p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all';
+  row.innerHTML = `
+    <div class="flex flex-wrap items-start gap-4">
+      <div class="flex-1 min-w-0">
+        <div class="font-bold text-teal-600 text-sm mb-2">${v.label}</div>
+        <div class="grid grid-cols-3 gap-2">
+          ${[0,1,2].map(j => `
+            <div class="text-center">
+              <div class="text-xs text-slate-400 mb-1">${['x','y','z'][j]}</div>
+              <input type="number" step="0.01" id="v${idx}_${j}" value="${v.vals[j].toFixed(2)}" oninput="calc()"
+                class="w-full border-2 border-teal-200 rounded-lg px-1 py-1 text-center font-mono text-sm focus:outline-none focus:border-teal-500 bg-white"/>
+              <div class="text-xs text-gray-300 mt-0.5">32-bit float</div>
+              <div class="mt-1 flex items-center justify-center gap-1">
+                <span class="text-gray-300 text-xs">→</span>
+                <span id="q8-${idx}-${j}" class="font-bold text-teal-700 font-mono text-sm bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">—</span>
+              </div>
+              <div class="text-xs text-gray-300 mt-0.5">8-bit int</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="text-right min-w-fit">
+        <div class="text-xs text-slate-400">Approx. Similarity</div>
+        <div id="score-${idx}" class="text-2xl font-extrabold text-teal-700">—</div>
+      </div>
+    </div>`;
+  return row;
+}
+
+function renderRows() {
+  const c = document.getElementById('vectors-container');
+  c.innerHTML = '';
+  STORED_VECS.forEach((_, i) => c.appendChild(buildVecRow(i)));
+}
+
+// ---- Sync current DOM input values back into the STORED_VECS array ----
+function syncToArray() {
+  STORED_VECS.forEach((v, i) => {
+    v.vals = [0,1,2].map(j => parseFloat(document.getElementById(`v${i}_${j}`)?.value) ?? v.vals[j]);
+  });
+}
+
+function calc() {
+  // Read all values (stored + query)
+  const query = readVec('q');
+  const stored = STORED_VECS.map((_, idx) =>
+    [0,1,2].map(j => parseFloat(document.getElementById(`v${idx}_${j}`)?.value)||0)
+  );
+
+  // Find global min and max across ALL values (query + stored)
+  const allValues = [...query, ...stored.flat()];
+  const gMin = Math.min(...allValues);
+  const gMax = Math.max(...allValues);
+
+  document.getElementById('global-min').textContent = gMin.toFixed(4);
+  document.getElementById('global-max').textContent = gMax.toFixed(4);
+
+  // Quantize query to 8-bit
+  const qQ = query.map(v => sq8(v, gMin, gMax));
+  document.getElementById('query-quantized').textContent = `[${qQ.join(', ')}]`;
+
+  // Quantize each stored vector and calculate approx similarity
+  const scores = stored.map((vec, idx) => {
+    const q8 = vec.map(v => sq8(v, gMin, gMax));
+    // Show 8-bit values
+    [0,1,2].forEach(j => {
+      const el = document.getElementById(`q8-${idx}-${j}`);
+      if (el) el.textContent = q8[j];
+    });
+    // Cosine similarity using quantized vectors
+    const sim = cosineSimilarity(qQ, q8);
+    return { idx, label: STORED_VECS[idx].label, sim };
+  });
+
+  const sorted = [...scores].sort((a,b) => b.sim - a.sim);
+  const topIdx = sorted[0].idx;
+  const maxSim = sorted[0].sim;
+
+  // Update scores and highlight top row
+  scores.forEach(({ idx, sim }) => {
+    const el = document.getElementById(`score-${idx}`);
+    if (el) el.textContent = f4(sim);
+    const row = document.getElementById(`row-${idx}`);
+    if (row) {
+      row.className = idx === topIdx
+        ? 'p-4 bg-green-50 rounded-xl border-2 border-green-400 transition-all'
+        : 'p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all';
+    }
+  });
+
+  // Render ranked results
+  const rc = document.getElementById('results-container');
+  rc.innerHTML = '';
+  sorted.forEach((item, rank) => {
+    const isTop = rank === 0;
+    const div = document.createElement('div');
+    div.className = `flex items-center gap-3 p-3 rounded-xl border-2 ${isTop ? 'bg-green-50 border-green-400' : 'bg-gray-50 border-slate-200'}`;
+    div.innerHTML = `
+      <div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${isTop ? 'bg-green-500 text-white' : 'bg-teal-100 text-teal-700'}">${rank+1}</div>
+      <div class="flex-1 font-semibold text-slate-700 text-sm">${item.label}
+        ${isTop ? '<span class="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">🏆 Top Match</span>' : ''}
+      </div>
+      <div class="flex-1">
+        <div class="bg-slate-200 rounded-full h-2 overflow-hidden">
+          <div class="${isTop?'bg-green-500':'bg-teal-400'} h-2 rounded-full" style="width:${pct(item.sim,maxSim)}"></div>
+        </div>
+      </div>
+      <div class="font-extrabold text-sm ${isTop?'text-green-700':'text-teal-600'} w-16 text-right">${f4(item.sim)}</div>`;
+    rc.appendChild(div);
+  });
+}
+
+renderRows();
+calc();
+
+// ---- Add a new vector ----
+function addVector() {
+  // 1. Save any user edits from inputs back into the array
+  syncToArray();
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const next = letters[STORED_VECS.length] || `#${STORED_VECS.length + 1}`;
+  // 2. Push new default vector
+  STORED_VECS.push({ label: `Vector ${next}`, vals: [0.50, 0.50, 0.50] });
+  // 3. Full re-render from updated array: preserves all existing edits
+  renderRows();
+  calc();
+}
+
+// ---- Reset to defaults ----
+function resetDemo() {
+  STORED_VECS = STORED_VECS_DEFAULT();
+  document.getElementById('q0').value = '0.50';
+  document.getElementById('q1').value = '0.60';
+  document.getElementById('q2').value = '0.40';
+  renderRows();
+  calc();
+}
+</script>
+
+
+      <!-- ══════════════════════════════════════
+           TIPS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mt-6 mb-5" id="tipsVIIvfSq8">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🎓</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
+            <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-xs font-bold">3 tips</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span><strong>Scalar quantization shrinks memory.</strong> Converting 32-bit floats to 8-bit integers cuts storage by roughly 75%.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>The <strong>accuracy loss is usually small</strong>, quantization introduces tiny rounding errors, but rankings stay close to the original.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Great option when you need to fit <strong>many more vectors in the same RAM</strong> and can tolerate a slight accuracy trade-off.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           KEY TAKEAWAY
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-10">
+        <div style="font-size:1.75rem;line-height:1;flex-shrink:0;padding-top:2px;">💡</div>
+        <div>
+          <div class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 mb-1.5">
+            Key Takeaway
+          </div>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+            IVF_SQ8 combines cluster search with <strong class="text-slate-900 dark:text-white">8-bit compression</strong>, cutting memory use by ~75% with only a minor accuracy loss.
+          </p>
+        </div>
+      </div>
+
+      <!-- ── Prev / Next navigation ──────────────────────────────────────── -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="ivf-flat.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: IVF_FLAT Index
+        </a>
+        <a href="ivf-pq.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> IVF_PQ Index
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+  </div><!-- /max-w-7xl -->
+  </main>
+
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <script>writeSiteFooterVI();</script>
+
+  <script src="script.js"></script>
+  <script>
+    // ── Dark mode + icons ──────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('aip_dark');
+      if (saved === '1' || (saved === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+
+    function syncDarkIcons() {
+      const dark = document.documentElement.classList.contains('dark');
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+
+    function toggleDark() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('aip_dark', isDark ? '1' : '0');
+      syncDarkIcons();
+    }
+
+    window.addEventListener('load', () => {
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      syncDarkIcons();
+
+      document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
+        btn.addEventListener('click', toggleDark);
+      });
+
+      // Mobile menu
+      const mBtn  = document.getElementById('mobileMenuBtn');
+      const mMenu = document.getElementById('mobileMenu');
+      let mOpen   = false;
+      mBtn?.addEventListener('click', () => {
+        mOpen = !mOpen;
+        mMenu?.classList.toggle('hidden', !mOpen);
+        const icon = mBtn.querySelector('[data-lucide]');
+        if (icon) {
+          icon.setAttribute('data-lucide', mOpen ? 'x' : 'menu');
+          if (typeof lucide !== 'undefined') lucide.createIcons({ nodes: [mBtn] });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
