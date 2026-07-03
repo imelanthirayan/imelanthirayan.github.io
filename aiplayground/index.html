@@ -299,13 +299,13 @@
       <!-- Tags row -->
       <div id="heroStats" class="flex flex-wrap justify-center gap-2 mb-10 hero-anim" style="opacity:0">
         <span class="hero-tag hero-tag-pop">🎯 Zero prerequisites</span>
-        <span class="hero-tag hero-tag-pop" style="animation-delay:.1s">⚡ Interactive lessons</span>
-        <span class="hero-tag hero-tag-pop" id="heroBadgeCount" style="animation-delay:.2s">📚 13 lessons</span>
+        <span class="hero-tag hero-tag-pop" style="animation-delay:.1s">⚡ Interactive modules</span>
+        <span class="hero-tag hero-tag-pop" id="heroBadgeCount" style="animation-delay:.2s">📚 13 modules</span>
       </div>
 
       <!-- CTA -->
       <div id="heroCTAs" class="hero-anim" style="opacity:0">
-        <a href="modules/how-ai-model-works.html" id="heroCTA" class="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold rounded-2xl shadow-2xl shadow-violet-500/40 hover:shadow-violet-500/60 transition-all hover:-translate-y-1 text-lg">
+        <a href="modules/inside-llm/how-ai-model-works.html" id="heroCTA" class="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold rounded-2xl shadow-2xl shadow-violet-500/40 hover:shadow-violet-500/60 transition-all hover:-translate-y-1 text-lg">
           Start here <span class="group-hover:translate-x-1 inline-block transition-transform">→</span> How AI Models Work
         </a>
       </div>
@@ -324,7 +324,7 @@
       <div class="section-reveal mb-6 space-y-2.5">
         <div class="search-wrap">
           <div class="search-icon-pos"><i data-lucide="search" style="width:15px;height:15px;"></i></div>
-          <input id="searchInput" type="search" class="search-input" placeholder="Search lessons…" autocomplete="off" spellcheck="false" />
+          <input id="searchInput" type="search" class="search-input" placeholder="Search modules…" autocomplete="off" spellcheck="false" />
         </div>
         <div class="chips-row" id="filterChips">
           <button class="filter-chip active" data-filter="all">All</button>
@@ -333,8 +333,8 @@
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Inside an LLM">Inside an LLM</button>
           <button class="filter-chip" data-filter="Embeddings & Search">Embeddings & Search</button>
-          <button class="filter-chip" data-filter="Vector Indexes Explorer">Vector Indexes Explorer</button>
           <button class="filter-chip" data-filter="RAG">RAG</button>
+          <button class="filter-chip" data-filter="Vector Index Explorer">Vector Index Explorer</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner">Beginner</button>
           <button class="filter-chip" data-filter="Intermediate">Intermediate</button>
@@ -385,6 +385,12 @@
   </footer>
 
 
+  <!-- Go to top button -->
+  <button id="goToTopBtn" aria-label="Go to top"
+    class="fixed bottom-6 right-6 z-50 w-11 h-11 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg flex items-center justify-center opacity-0 pointer-events-none translate-y-4 transition-all duration-300">
+    <i data-lucide="arrow-up" class="w-5 h-5"></i>
+  </button>
+
   <!-- ══════════════════════════════════════════
        SCRIPTS
   ══════════════════════════════════════════ -->
@@ -399,59 +405,59 @@
     ═══════════════════════════════════════════════ */
     const LESSONS = [
       // ── Module 1: Inside an LLM ────────────────────────────────────────────────
-      { num:1,  id:'ai-model',      title:'How an AI Model Works',        desc:'Understand the basics of how AI models process input.',       status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/how-ai-model-works.html',         icon:'cpu',           color:'#6366f1' },
-      { num:2,  id:'tokens',        title:'Tokens',                       desc:'Learn how AI breaks text into smaller pieces.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/tokens.html',                     icon:'type',          color:'#6366f1' },
-      { num:3,  id:'ctx-window',    title:'Context Window',               desc:'Understand how much text AI can read at once.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/context-window.html',             icon:'maximize-2',    color:'#6366f1' },
-      { num:4,  id:'transformer',   title:'What is a Transformer?',       desc:'Discover the architecture behind modern AI.',                 status:'available',   diff:'Intermediate', dur:'12 min', mod:'Inside an LLM', page:'modules/transformer.html',                icon:'git-branch',    color:'#6366f1' },
-      { num:5,  id:'trans-reads',   title:'How a Transformer Reads Text', desc:'See how transformers process and understand language.',       status:'available',   diff:'Intermediate', dur:'10 min', mod:'Inside an LLM', page:'modules/transformer-reads-text.html',     icon:'book-open',     color:'#6366f1' },
-      { num:6,  id:'attention',     title:'Attention',                    desc:'See how words focus on each other inside a model.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Inside an LLM', page:'modules/attention.html',                  icon:'eye',           color:'#6366f1' },
-      { num:7,  id:'next-word',     title:'Next Word Prediction',         desc:'Understand how language models generate text.',               status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/next-word-prediction.html',       icon:'type',          color:'#6366f1' },
-      { num:8,  id:'temperature',   title:'Temperature',                  desc:'Control how creative or focused AI responses are.',           status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/temperature.html',                icon:'thermometer',   color:'#6366f1' },
-      { num:9,  id:'top-p',         title:'Top-P Sampling',               desc:'Control which words AI picks when generating text.',          status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Inside an LLM', page:'modules/top-p-sampling.html',             icon:'percent',       color:'#6366f1' },
-      { num:10, id:'hallucinate',   title:'Hallucinations',               desc:'Understand why AI sometimes makes mistakes.',                 status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Inside an LLM', page:'modules/hallucinations.html',             icon:'alert-circle',  color:'#6366f1' },
-      { num:11, id:'prompts',       title:'Prompt Engineering',           desc:'Experiment with better prompts for better results.',          status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/prompt-engineering.html',         icon:'pen-tool',      color:'#6366f1' },
-      { num:12, id:'token-cost',    title:'Token Cost Estimator',         desc:'See how token count affects AI API usage.',                   status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/token-cost.html',                 icon:'hash',          color:'#6366f1' },
+      { num:1,  id:'ai-model',      title:'How an AI Model Works',        desc:'Understand the basics of how AI models process input.',       status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/inside-llm/how-ai-model-works.html',         icon:'cpu',           color:'#6366f1' },
+      { num:2,  id:'tokens',        title:'Tokens',                       desc:'Learn how AI breaks text into smaller pieces.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/tokens.html',                     icon:'type',          color:'#6366f1' },
+      { num:3,  id:'ctx-window',    title:'Context Window',               desc:'Understand how much text AI can read at once.',               status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/context-window.html',             icon:'maximize-2',    color:'#6366f1' },
+      { num:4,  id:'transformer',   title:'What is a Transformer?',       desc:'Discover the architecture behind modern AI.',                 status:'available',   diff:'Intermediate', dur:'12 min', mod:'Inside an LLM', page:'modules/inside-llm/transformer.html',                icon:'git-branch',    color:'#6366f1' },
+      { num:5,  id:'trans-reads',   title:'How a Transformer Reads Text', desc:'See how transformers process and understand language.',       status:'available',   diff:'Intermediate', dur:'10 min', mod:'Inside an LLM', page:'modules/inside-llm/transformer-reads-text.html',     icon:'book-open',     color:'#6366f1' },
+      { num:6,  id:'attention',     title:'Attention',                    desc:'See how words focus on each other inside a model.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Inside an LLM', page:'modules/inside-llm/attention.html',                  icon:'eye',           color:'#6366f1' },
+      { num:7,  id:'next-word',     title:'Next Word Prediction',         desc:'Understand how language models generate text.',               status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/inside-llm/next-word-prediction.html',       icon:'type',          color:'#6366f1' },
+      { num:8,  id:'temperature',   title:'Temperature',                  desc:'Control how creative or focused AI responses are.',           status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/temperature.html',                icon:'thermometer',   color:'#6366f1' },
+      { num:9,  id:'top-p',         title:'Top-P Sampling',               desc:'Control which words AI picks when generating text.',          status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/top-p-sampling.html',             icon:'percent',       color:'#6366f1' },
+      { num:10, id:'hallucinate',   title:'Hallucinations',               desc:'Understand why AI sometimes makes mistakes.',                 status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/hallucinations.html',             icon:'alert-circle',  color:'#6366f1' },
+      { num:11, id:'prompts',       title:'Prompt Engineering',           desc:'Experiment with better prompts for better results.',          status:'available',   diff:'Beginner',     dur:'10 min', mod:'Inside an LLM', page:'modules/inside-llm/prompt-engineering.html',         icon:'pen-tool',      color:'#6366f1' },
+      { num:12, id:'token-cost',    title:'Token Cost Estimator',         desc:'See how token count affects AI API usage.',                   status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Inside an LLM', page:'modules/inside-llm/token-cost.html',                 icon:'hash',          color:'#6366f1' },
 
       // ── Module 2: Embeddings & Search ─────────────────────────────────────────
-      { num:1,  id:'embeddings',    title:'Embeddings',                   desc:'Learn how meaning can be represented as vectors.',            status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings.html',                 icon:'map-pin',       color:'#2563eb' },
-      { num:2,  id:'vectors',       title:'Vectors',                      desc:'Learn how text can become numbers.',                          status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/vectors.html',                    icon:'hash',          color:'#2563eb' },
-      { num:3,  id:'emb-dims',      title:'Embedding Dimensions',         desc:'Understand what vector dimensions mean.',                     status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embedding-dimensions.html',       icon:'layers',        color:'#2563eb' },
-      { num:4,  id:'vec-arith',     title:'Vector Arithmetic',            desc:'Learn how vectors capture word relationships.',               status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/vector-arithmetic.html',          icon:'plus',          color:'#2563eb' },
-      { num:5,  id:'vec-norm',      title:'Vector Normalization',         desc:'See why vectors are normalized before comparison.',           status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/vector-normalization.html',        icon:'compass',       color:'#2563eb' },
-      { num:6,  id:'similarity',    title:'Similarity Metrics',           desc:'Learn how computers measure how alike two items are.',        status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/similarity.html',                 icon:'ruler',         color:'#2563eb' },
-      { num:7,  id:'dist-vs-sim',   title:'Distance vs Similarity',       desc:'Learn the difference between distance and similarity.',      status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/distance-vs-similarity.html',     icon:'arrow-left-right', color:'#2563eb' },
-      { num:8,  id:'sim-matrix',    title:'Similarity Matrix',            desc:'Compare every item with every other item at once.',           status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/similarity-matrix.html',          icon:'grid',          color:'#2563eb' },
-      { num:9,  id:'kw-vs-sem',     title:'Keyword vs Semantic Search',   desc:'See why AI understands meaning, not just words.',             status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/keyword-vs-semantic-search.html', icon:'search',        color:'#2563eb' },
-      { num:10, id:'knn',           title:'KNN Search',                   desc:'Learn how nearest neighbors are found.',                      status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/knn.html',                        icon:'search',        color:'#2563eb' },
-      { num:11, id:'top-k',         title:'Top-K Search',                 desc:'Learn how the best K results are returned.',                  status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Embeddings & Search', page:'modules/top-k.html',                      icon:'filter',        color:'#2563eb' },
-      { num:12, id:'ranking',       title:'Ranking',                      desc:'Understand how search results are ordered by relevance.',     status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/ranking.html',                    icon:'list',          color:'#2563eb' },
-      { num:13, id:'clustering',    title:'Clustering',                   desc:'Learn how similar items are grouped together.',               status:'available',   diff:'Advanced',     dur:'10 min', mod:'Embeddings & Search', page:'modules/clustering.html',                 icon:'circle-dot',    color:'#2563eb' },
+      { num:1,  id:'embeddings',    title:'Embeddings',                   desc:'Learn how meaning can be represented as vectors.',            status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/embeddings.html',                 icon:'map-pin',       color:'#2563eb' },
+      { num:2,  id:'vectors',       title:'Vectors',                      desc:'Learn how text can become numbers.',                          status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/vectors.html',                    icon:'hash',          color:'#2563eb' },
+      { num:3,  id:'emb-dims',      title:'Embedding Dimensions',         desc:'Understand what vector dimensions mean.',                     status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/embedding-dimensions.html',       icon:'layers',        color:'#2563eb' },
+      { num:4,  id:'vec-arith',     title:'Vector Arithmetic',            desc:'Learn how vectors capture word relationships.',               status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/vector-arithmetic.html',          icon:'plus',          color:'#2563eb' },
+      { num:5,  id:'vec-norm',      title:'Vector Normalization',         desc:'See why vectors are normalized before comparison.',           status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/embeddings-search/vector-normalization.html',        icon:'compass',       color:'#2563eb' },
+      { num:6,  id:'similarity',    title:'Similarity Metrics',           desc:'Learn how computers measure how alike two items are.',        status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/similarity.html',                 icon:'ruler',         color:'#2563eb' },
+      { num:7,  id:'dist-vs-sim',   title:'Distance vs Similarity',       desc:'Learn the difference between distance and similarity.',      status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/embeddings-search/distance-vs-similarity.html',     icon:'arrow-left-right', color:'#2563eb' },
+      { num:8,  id:'sim-matrix',    title:'Similarity Matrix',            desc:'Compare every item with every other item at once.',           status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/similarity-matrix.html',          icon:'grid',          color:'#2563eb' },
+      { num:9,  id:'kw-vs-sem',     title:'Keyword vs Semantic Search',   desc:'See why AI understands meaning, not just words.',             status:'available',   diff:'Beginner',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/keyword-vs-semantic-search.html', icon:'search',        color:'#2563eb' },
+      { num:10, id:'knn',           title:'KNN Search',                   desc:'Learn how nearest neighbors are found.',                      status:'available',   diff:'Intermediate', dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/knn.html',                        icon:'search',        color:'#2563eb' },
+      { num:11, id:'top-k',         title:'Top-K Search',                 desc:'Learn how the best K results are returned.',                  status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Embeddings & Search', page:'modules/embeddings-search/top-k.html',                      icon:'filter',        color:'#2563eb' },
+      { num:12, id:'ranking',       title:'Ranking',                      desc:'Understand how search results are ordered by relevance.',     status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Embeddings & Search', page:'modules/embeddings-search/ranking.html',                    icon:'list',          color:'#2563eb' },
+      { num:13, id:'clustering',    title:'Clustering',                   desc:'Learn how similar items are grouped together.',               status:'available',   diff:'Advanced',     dur:'10 min', mod:'Embeddings & Search', page:'modules/embeddings-search/clustering.html',                 icon:'circle-dot',    color:'#2563eb' },
 
-      // ── Module 3: Vector Indexes Explorer ──────────────────────────────────────────────
-      { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Indexes Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
-      { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared — 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Indexes Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
-      { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Indexes Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
-      { num:4,  id:'vi-ivf-sq8',  title:'IVF_SQ8 Index',                desc:'Converts 32-bit floats to 8-bit integers — 75% less memory, minimal accuracy loss.',       status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Vector Indexes Explorer', page:'modules/vector-indexes/ivf-sq8.html',  icon:'hash',          color:'#d97706' },
-      { num:5,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Indexes Explorer', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
-      { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Indexes Explorer', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
-      { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Indexes Explorer', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
+      // ── Module 3: Retrieval-Augmented Generation ──────────────────────────────
+      { num:1,  id:'rag-overview',  title:'RAG Overview',                 desc:'See the big picture of how retrieval-augmented generation works.', status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/rag-overview.html',              icon:'book-open',     color:'#0d9488' },
+      { num:2,  id:'chunking',      title:'Document Chunking & Overlap',   desc:'Split documents into smaller searchable pieces.',             status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/document-chunking.html',      icon:'scissors',      color:'#0d9488' },
+      { num:3,  id:'metadata',      title:'Metadata Filtering',           desc:'Filter search results using document properties.',            status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/metadata-filtering.html',    icon:'filter',        color:'#0d9488' },
+      { num:4,  id:'emb-rag',       title:'Embeddings in RAG',            desc:'Convert document chunks into searchable vectors.',            status:'available',   diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/embeddings-in-rag.html',       icon:'database',      color:'#0d9488' },
+      { num:5,  id:'vec-search',    title:'Vector Search',                desc:'Find relevant chunks using vector similarity.',               status:'available',   diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/vector-search.html',           icon:'zap',           color:'#0d9488' },
+      { num:6,  id:'retrieval',     title:'Retrieval',                    desc:'Bring useful information back to the AI.',                    status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/retrieval.html',              icon:'inbox',         color:'#0d9488' },
+      { num:7,  id:'reranking',     title:'Re-ranking',                   desc:'Reorder retrieved results for better relevance.',             status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/re-ranking.html',              icon:'arrow-up-down', color:'#0d9488' },
+      { num:8,  id:'rag-pipeline',  title:'RAG Pipeline',                 desc:'See the full retrieval-augmented generation flow end to end.', status:'available',   diff:'Advanced',     dur:'12 min', mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/rag-pipeline.html',           icon:'git-branch',    color:'#0d9488' },
 
-      // ── Module 4: Retrieval-Augmented Generation ──────────────────────────────
-      { num:1,  id:'rag-overview',  title:'RAG Overview',                 desc:'See the big picture of how retrieval-augmented generation works.', status:'coming-soon', diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'book-open',     color:'#0d9488' },
-      { num:2,  id:'chunking',      title:'Document Chunking',            desc:'Split documents into smaller searchable pieces.',             status:'coming-soon', diff:'Beginner',     dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'scissors',      color:'#0d9488' },
-      { num:3,  id:'metadata',      title:'Metadata Filtering',           desc:'Filter search results using document properties.',            status:'coming-soon', diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'filter',        color:'#0d9488' },
-      { num:4,  id:'emb-rag',       title:'Embeddings in RAG',            desc:'Convert document chunks into searchable vectors.',            status:'coming-soon', diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'database',      color:'#0d9488' },
-      { num:5,  id:'vec-search',    title:'Vector Search',                desc:'Find relevant chunks using vector similarity.',               status:'coming-soon', diff:'Intermediate', dur:'10 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'zap',           color:'#0d9488' },
-      { num:6,  id:'retrieval',     title:'Retrieval',                    desc:'Bring useful information back to the AI.',                    status:'coming-soon', diff:'Intermediate', dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'inbox',         color:'#0d9488' },
-      { num:7,  id:'reranking',     title:'Re-ranking',                   desc:'Reorder retrieved results for better relevance.',             status:'coming-soon', diff:'Advanced',     dur:'8 min',  mod:'Retrieval-Augmented Generation', page:null,                                      icon:'arrow-up-down', color:'#0d9488' },
-      { num:8,  id:'rag-pipeline',  title:'Complete RAG Pipeline',        desc:'See the full retrieval-augmented generation flow.',           status:'coming-soon', diff:'Advanced',     dur:'12 min', mod:'Retrieval-Augmented Generation', page:null,                                      icon:'git-branch',    color:'#0d9488' },
+      // ── Module 4: Vector Index Explorer ──────────────────────────────────────────────
+      { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
+      { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
+      { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
+      { num:4,  id:'vi-ivf-sq8',  title:'IVF_SQ8 Index',                desc:'Converts 32-bit floats to 8-bit integers, 75% less memory, minimal accuracy loss.',       status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-sq8.html',  icon:'hash',          color:'#d97706' },
+      { num:5,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
+      { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
+      { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
     ];
 
     const MODULE_CONFIGS = {
       'Inside an LLM':                     { icon:'brain',    color:'#6366f1', bg:'rgba(99,102,241,0.07)',  border:'rgba(99,102,241,0.2)',  iconBg:'rgba(99,102,241,0.1)'  },
       'Embeddings & Search':              { icon:'search',   color:'#2563eb', bg:'rgba(37,99,235,0.07)',   border:'rgba(37,99,235,0.2)',   iconBg:'rgba(37,99,235,0.1)'   },
-      'Retrieval-Augmented Generation':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
-      'Vector Indexes Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
+      'Retrieval-Augmented Generation (RAG)':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
+      'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
     };
 
     const DIFF_CONFIG = {
@@ -487,8 +493,8 @@
         if (activeFilter === 'Advanced')          return l.diff === 'Advanced';
         if (activeFilter === 'Inside an LLM')       return l.mod === 'Inside an LLM';
         if (activeFilter === 'Embeddings & Search') return l.mod === 'Embeddings & Search';
-        if (activeFilter === 'Vector Indexes Explorer')      return l.mod === 'Vector Indexes Explorer';
-        if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation';
+        if (activeFilter === 'Vector Index Explorer')      return l.mod === 'Vector Index Explorer';
+        if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation (RAG)';
         return true;
       });
     }
@@ -503,7 +509,7 @@
       section.style.display = '';
 
       if (!available.length) {
-        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No available lessons match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
+        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No available modules match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
         return;
       }
 
@@ -541,7 +547,7 @@
                 <i data-lucide="${cfg.icon}" style="width:13px;height:13px;color:${cfg.color};"></i>
               </div>
               <span class="mod-section-name" style="color:${cfg.color};">${esc(mod)}</span>
-              <span class="mod-section-count">${lessons.length} lesson${lessons.length !== 1 ? 's' : ''}</span>
+              <span class="mod-section-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
             </div>
             <div class="mod-section-body">
@@ -566,7 +572,7 @@
       section.style.display = '';
 
       if (!upcoming.length) {
-        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No upcoming lessons match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
+        container.innerHTML = `<div class="dyn-empty"><div class="dyn-empty-icon">🔍</div><div class="dyn-empty-title">No upcoming modules match</div><div class="dyn-empty-sub">Try a different search or filter.</div></div>`;
         return;
       }
 
@@ -604,7 +610,7 @@
                 <i data-lucide="${cfg.icon}" style="width:14px;height:14px;color:${cfg.color};"></i>
               </div>
               <span class="cs-accordion-name">${esc(mod)}</span>
-              <span class="cs-accordion-count">${lessons.length} lessons</span>
+              <span class="cs-accordion-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="cs-accordion-chevron"></i>
             </button>
             <div class="cs-accordion-body">
@@ -650,7 +656,7 @@
       const heroBadgeCount = document.getElementById('heroBadgeCount');
       const statAvailable  = document.getElementById('statAvailable');
       const statTotal      = document.getElementById('statTotal');
-      if (heroBadgeCount) heroBadgeCount.textContent = `📚 ${availCount} lessons`;
+      if (heroBadgeCount) heroBadgeCount.textContent = `📚 ${availCount} modules`;
       if (statAvailable)  statAvailable.textContent  = availCount;
       if (statTotal)      statTotal.textContent       = totalCount;
 
@@ -759,7 +765,7 @@
       });
     }
 
-    /* ── 3. Typewriter (disabled — static subtitle now used) ── */
+    /* -- 3. Typewriter (disabled, static subtitle now used) -- */
     function initTypewriter() {}
 
     /* ── 4. Mouse parallax on blobs ── */
@@ -786,6 +792,24 @@
       initTypewriter();
       initParallax();
     });
+
+    // Go to top button
+    (function initGoToTop() {
+      const btn = document.getElementById('goToTopBtn');
+      if (!btn) return;
+      const toggleVisibility = () => {
+        if (window.scrollY > 300) {
+          btn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+        } else {
+          btn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        }
+      };
+      window.addEventListener('scroll', toggleVisibility, { passive: true });
+      btn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      toggleVisibility();
+    })();
   })();
   </script>
 </body>
