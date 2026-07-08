@@ -152,6 +152,12 @@
     }
     .cs-accordion-name { font-weight: 800; font-size: 0.875rem; flex: 1; }
     html.dark .cs-accordion-name { color: #e2e8f0; }
+    .cs-soon-badge {
+      font-size: 0.625rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase;
+      color: #b45309; background: rgba(217,119,6,0.12); border: 1px solid rgba(217,119,6,0.25);
+      padding: 0.15rem 0.55rem; border-radius: 9999px; white-space: nowrap; flex-shrink: 0;
+    }
+    html.dark .cs-soon-badge { color: #fbbf24; background: rgba(217,119,6,0.16); border-color: rgba(217,119,6,0.3); }
     .cs-accordion-count {
       font-size: 0.7rem; font-weight: 600; color: #94a3b8;
       padding: 0.18rem 0.6rem; border-radius: 9999px;
@@ -220,6 +226,256 @@
     html.dark .dyn-cs-desc { color: #94a3b8; }
     .dyn-mod-name { font-weight: 800; font-size: 0.875rem; }
     .dyn-mod-count { font-size: 0.7rem; color: #94a3b8; }
+
+    /* ── Homepage refresh ─────────────────────── */
+    .hero-grid {
+      width: 100%;
+      max-width: 1180px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+      gap: 3rem;
+      align-items: center;
+    }
+    .hero-copy { text-align: left; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.45rem 0.9rem; border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.82);
+      font-size: 0.78rem; font-weight: 800; letter-spacing: 0.02em;
+      backdrop-filter: blur(14px);
+    }
+    html:not(.dark) .hero-eyebrow {
+      background: rgba(99,102,241,0.08);
+      border-color: rgba(99,102,241,0.18);
+      color: #4f46e5;
+    }
+    .hero-title {
+      font-size: clamp(3.5rem, 8vw, 7.25rem);
+      line-height: 0.92;
+      letter-spacing: -0.065em;
+    }
+    .hero-subtitle {
+      max-width: 36rem;
+      color: rgba(255,255,255,0.62);
+      font-size: clamp(1.05rem, 2vw, 1.45rem);
+      line-height: 1.7;
+    }
+    html:not(.dark) .hero-subtitle { color: rgba(15,23,42,0.64); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.85rem; align-items: center; }
+    .hero-secondary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.95rem 1.25rem; border-radius: 1rem;
+      color: rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 800; transition: transform 0.2s, background 0.2s, border-color 0.2s;
+    }
+    .hero-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.22); }
+    html:not(.dark) .hero-secondary {
+      color: #4f46e5;
+      background: rgba(255,255,255,0.72);
+      border-color: rgba(99,102,241,0.16);
+    }
+    .hero-showcase {
+      position: relative;
+      padding: 1rem;
+      border-radius: 2rem;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)),
+        radial-gradient(circle at top left, rgba(129,140,248,0.35), transparent 42%);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.34);
+      backdrop-filter: blur(20px);
+    }
+    html:not(.dark) .hero-showcase {
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.88), rgba(255,255,255,0.56)),
+        radial-gradient(circle at top left, rgba(129,140,248,0.2), transparent 48%);
+      border-color: rgba(99,102,241,0.14);
+      box-shadow: 0 30px 80px rgba(79,70,229,0.16);
+    }
+    .path-card {
+      border-radius: 1.45rem;
+      padding: 1.1rem;
+      background: rgba(15,23,42,0.48);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    html:not(.dark) .path-card {
+      background: rgba(248,250,252,0.72);
+      border-color: rgba(99,102,241,0.1);
+    }
+    .path-head {
+      display:flex; align-items:center; justify-content:space-between; gap:1rem;
+      padding-bottom:0.9rem; margin-bottom:0.9rem;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    html:not(.dark) .path-head { border-bottom-color: rgba(99,102,241,0.1); }
+    .path-title { color:#fff; font-size:0.95rem; font-weight:900; }
+    html:not(.dark) .path-title { color:#0f172a; }
+    .path-caption { color:rgba(255,255,255,0.46); font-size:0.74rem; font-weight:700; }
+    html:not(.dark) .path-caption { color:#64748b; }
+    .path-status {
+      font-size:0.65rem; font-weight:900; letter-spacing:0.06em; text-transform:uppercase;
+      padding:0.25rem 0.55rem; border-radius:999px;
+      color:#a7f3d0; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.25);
+    }
+    .path-list { display:grid; gap:0.65rem; }
+    .path-step {
+      display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:0.75rem;
+      padding:0.8rem; border-radius:1rem;
+      background:rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.08);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .path-step:hover { transform: translateX(4px); background:rgba(255,255,255,0.09); }
+    html:not(.dark) .path-step { background:white; border-color:rgba(99,102,241,0.1); }
+    .path-dot {
+      width:2.25rem; height:2.25rem; border-radius:0.8rem;
+      display:flex; align-items:center; justify-content:center;
+      color:white; box-shadow:0 10px 22px rgba(0,0,0,0.22);
+    }
+    .path-name { color:#fff; font-size:0.84rem; font-weight:900; line-height:1.2; }
+    html:not(.dark) .path-name { color:#1e293b; }
+    .path-desc { color:rgba(255,255,255,0.46); font-size:0.68rem; font-weight:650; margin-top:0.2rem; }
+    html:not(.dark) .path-desc { color:#64748b; }
+    .path-arrow { color:rgba(255,255,255,0.38); transition: transform 0.2s, color 0.2s; }
+    .path-step:hover .path-arrow { color:rgba(255,255,255,0.75); transform: translateX(2px); }
+    html:not(.dark) .path-arrow { color:#94a3b8; }
+    html:not(.dark) .path-step:hover .path-arrow { color:#6366f1; }
+    .showcase-note {
+      margin-top:0.85rem;
+      display:flex; align-items:center; gap:0.6rem;
+      padding:0.85rem 0.95rem; border-radius:1rem;
+      color:rgba(255,255,255,0.68);
+      background:rgba(124,58,237,0.16);
+      border:1px solid rgba(167,139,250,0.18);
+      font-size:0.78rem; font-weight:750;
+    }
+    html:not(.dark) .showcase-note { color:#5b21b6; background:rgba(124,58,237,0.08); border-color:rgba(124,58,237,0.15); }
+
+    .learn-shell {
+      position: relative;
+      margin-top: -2.5rem;
+      border-radius: 2rem 2rem 0 0;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(99,102,241,0.08), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(14,165,233,0.08), transparent 30%),
+        #f8fafc;
+    }
+    html.dark .learn-shell {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(99,102,241,0.12), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(14,165,233,0.1), transparent 30%),
+        #020617;
+    }
+    .learn-header { margin-bottom:1.25rem; }
+    .learn-kicker {
+      display:inline-flex; align-items:center; gap:0.45rem;
+      padding:0.35rem 0.7rem; border-radius:999px;
+      font-size:0.7rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase;
+      color:#4f46e5; background:rgba(99,102,241,0.09); border:1px solid rgba(99,102,241,0.16);
+    }
+    html.dark .learn-kicker { color:#a78bfa; background:rgba(129,140,248,0.12); border-color:rgba(129,140,248,0.2); }
+    .learn-title { margin-top:0.8rem; font-size:clamp(2rem,4vw,3.2rem); line-height:1; letter-spacing:-0.04em; font-weight:950; color:#0f172a; }
+    html.dark .learn-title { color:#f8fafc; }
+    .learn-subtitle { margin-top:0.7rem; max-width:42rem; color:#64748b; line-height:1.7; font-size:0.98rem; }
+    html.dark .learn-subtitle { color:#94a3b8; }
+    .search-panel {
+      padding:1rem;
+      border-radius:1.35rem;
+      background:rgba(255,255,255,0.82);
+      border:1px solid rgba(15,23,42,0.07);
+      box-shadow:0 18px 45px rgba(15,23,42,0.06);
+      backdrop-filter: blur(16px);
+    }
+    html.dark .search-panel { background:rgba(15,23,42,0.72); border-color:rgba(255,255,255,0.07); box-shadow:none; }
+    .search-input {
+      min-height: 3.1rem;
+      border-radius: 1rem;
+      font-weight: 650;
+      background: #f8fafc;
+    }
+    html.dark .search-input { background: rgba(30,41,59,0.78); }
+    .chips-row { gap: 0.5rem; padding-top: 0.75rem; }
+    .filter-chip {
+      padding: 0.42rem 0.85rem;
+      box-shadow: 0 1px 0 rgba(15,23,42,0.03);
+    }
+    .mod-section {
+      border-radius: 1.35rem;
+      background: white;
+      border-color: rgba(15,23,42,0.07);
+      box-shadow: 0 18px 45px rgba(15,23,42,0.06);
+    }
+    html.dark .mod-section {
+      background: rgba(30,41,59,0.74);
+      box-shadow: none;
+    }
+    .mod-section-head { padding: 0.95rem 1.1rem; }
+    .mod-section-icon { width: 34px; height: 34px; border-radius: 0.8rem; }
+    .mod-section-name { font-size: 0.98rem; }
+    .mod-section-body { padding: 0 0.9rem 0.9rem; }
+    .lesson-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+      gap:0.75rem;
+      padding-top:0.75rem;
+    }
+    .lesson-card {
+      position: relative;
+      padding: 1rem;
+      border-radius: 1.15rem;
+      border-left-width: 0;
+      overflow: hidden;
+    }
+    .lesson-card::before {
+      content: "";
+      position: absolute; inset: 0 auto 0 0;
+      width: 4px; background: var(--lc-color, #6366f1);
+      opacity: 0.95;
+    }
+    .lesson-card::after {
+      content: "";
+      position: absolute; inset: -35% -20% auto auto;
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--lc-color, #6366f1);
+      opacity: 0.07; pointer-events: none;
+      transition: transform 0.25s, opacity 0.25s;
+    }
+    .lesson-card:hover::after { transform: scale(1.25); opacity: 0.11; }
+    .lesson-num { width: 38px; height: 38px; border-radius: 0.85rem; }
+    .lesson-title { font-size: 0.98rem; white-space: normal; }
+    .lesson-desc { font-size: 0.8rem; }
+    .lesson-meta {
+      display: inline-flex;
+      padding: 0.22rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.1);
+    }
+    .cs-accordion {
+      border-radius: 1.25rem;
+      background: white;
+      box-shadow: 0 10px 28px rgba(15,23,42,0.045);
+    }
+    html.dark .cs-accordion { background: rgba(30,41,59,0.72); box-shadow:none; }
+    .cs-accordion-btn { padding: 1rem 1.1rem; }
+
+    @media (max-width: 980px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-copy { text-align: center; }
+      .hero-subtitle { margin-left:auto; margin-right:auto; }
+      .hero-actions { justify-content:center; }
+      .hero-showcase { max-width: 620px; margin: 0 auto; }
+    }
+    @media (max-width: 640px) {
+      .hero-grid { gap: 1.5rem; }
+      .hero-showcase { display:none; }
+      .learn-shell { margin-top: 0; border-radius: 1.5rem 1.5rem 0 0; }
+      .lesson-grid { grid-template-columns: 1fr; }
+      .filter-chip { font-size: 0.68rem; }
+    }
   </style>
 </head>
 
@@ -279,35 +535,85 @@
     <div class="hero-blob hero-blob-3" id="blob3"></div>
     <div class="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none"></div>
 
-    <div class="relative z-10 text-center px-6 max-w-3xl mx-auto pt-32 pb-16">
+    <div class="relative z-10 px-6 md:px-8 pt-32 pb-20 hero-grid">
 
-      <!-- Fun pill -->
-      <div id="heroBadge" class="hero-pill mb-8 hero-anim" style="opacity:0">
-        <span class="hero-brain-spin">⚡</span> Stop reading about AI. Start experimenting with it.
+      <div class="hero-copy">
+        <div id="heroBadge" class="hero-eyebrow mb-6 hero-anim" style="opacity:0">
+          <span class="hero-brain-spin">⚡</span> Interactive AI learning
+        </div>
+
+        <h1 id="heroTitle" class="hero-title font-black mb-6 hero-anim" style="opacity:0">
+          <span class="hero-gradient-text">Learn AI by playing with it.</span>
+        </h1>
+
+        <p id="heroSubtitle" class="hero-subtitle font-light mb-6 hero-anim" style="opacity:0">
+          Explore AI concepts through visual, hands-on lessons. Change values, watch systems respond, and build intuition one idea at a time.
+        </p>
+
+        <div id="heroTags" class="flex flex-wrap gap-2 mb-8 hero-anim" style="opacity:0">
+          <span class="hero-tag hero-tag-pop">🎯 Zero prerequisites</span>
+          <span class="hero-tag hero-tag-pop" style="animation-delay:.1s">🧪 Browser experiments</span>
+          <span class="hero-tag hero-tag-pop" style="animation-delay:.2s">🧠 Simple explanations</span>
+        </div>
+
+        <div id="heroCTAs" class="hero-actions hero-anim" style="opacity:0">
+          <a href="modules/inside-llm/how-ai-model-works.html" id="heroCTA" class="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold rounded-2xl shadow-2xl shadow-violet-500/40 hover:shadow-violet-500/60 transition-all hover:-translate-y-1 text-lg">
+            Start with the basics <span class="group-hover:translate-x-1 inline-block transition-transform">→</span>
+          </a>
+          <a href="#learn" class="hero-secondary">
+            Browse lessons <i data-lucide="arrow-down" class="w-4 h-4"></i>
+          </a>
+        </div>
       </div>
 
-      <!-- Title -->
-      <h1 id="heroTitle" class="text-6xl sm:text-7xl md:text-8xl font-black leading-[1.0] tracking-tight mb-6 hero-anim" style="opacity:0">
-        <span class="hero-gradient-text">AI Concepts Playground</span>
-      </h1>
-
-      <!-- Subtitle -->
-      <p id="heroSubtitle" class="text-xl sm:text-2xl text-white/50 font-light max-w-lg mx-auto mb-4 leading-relaxed hero-anim" style="opacity:0">
-        Learn AI by changing values, visualizing concepts, and experimenting in your browser.
-      </p>
-
-      <!-- Tags row -->
-      <div id="heroStats" class="flex flex-wrap justify-center gap-2 mb-10 hero-anim" style="opacity:0">
-        <span class="hero-tag hero-tag-pop">🎯 Zero prerequisites</span>
-        <span class="hero-tag hero-tag-pop" style="animation-delay:.1s">⚡ Interactive modules</span>
-        <span class="hero-tag hero-tag-pop" id="heroBadgeCount" style="animation-delay:.2s">📚 13 modules</span>
-      </div>
-
-      <!-- CTA -->
-      <div id="heroCTAs" class="hero-anim" style="opacity:0">
-        <a href="modules/inside-llm/how-ai-model-works.html" id="heroCTA" class="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400 text-white font-bold rounded-2xl shadow-2xl shadow-violet-500/40 hover:shadow-violet-500/60 transition-all hover:-translate-y-1 text-lg">
-          Start here <span class="group-hover:translate-x-1 inline-block transition-transform">→</span> How AI Models Work
-        </a>
+      <div class="hero-showcase hero-anim" style="opacity:0">
+        <div class="path-card">
+          <div class="path-head">
+            <div>
+              <div class="path-title">Recommended learning flow</div>
+              <div class="path-caption">Start simple, then go deeper.</div>
+            </div>
+            <span class="path-status">Guided</span>
+          </div>
+          <div class="path-list">
+            <a href="modules/inside-llm/how-ai-model-works.html" class="path-step">
+              <div class="path-dot" style="background:#6366f1;"><i data-lucide="brain" class="w-4 h-4"></i></div>
+              <div>
+                <div class="path-name">Inside an LLM</div>
+                <div class="path-desc">Learn how models read, predict, and respond.</div>
+              </div>
+              <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
+            </a>
+            <a href="modules/embeddings-search/embeddings.html" class="path-step">
+              <div class="path-dot" style="background:#2563eb;"><i data-lucide="search" class="w-4 h-4"></i></div>
+              <div>
+                <div class="path-name">Embeddings & Search</div>
+                <div class="path-desc">See how meaning becomes searchable.</div>
+              </div>
+              <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
+            </a>
+            <a href="modules/rag/rag-overview.html" class="path-step">
+              <div class="path-dot" style="background:#0d9488;"><i data-lucide="database" class="w-4 h-4"></i></div>
+              <div>
+                <div class="path-name">RAG</div>
+                <div class="path-desc">Connect answers to retrieved knowledge.</div>
+              </div>
+              <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
+            </a>
+            <a href="modules/mcp/what-is-mcp.html" class="path-step">
+              <div class="path-dot" style="background:#7c3aed;"><i data-lucide="plug" class="w-4 h-4"></i></div>
+              <div>
+                <div class="path-name">Model Context Protocol</div>
+                <div class="path-desc">Understand how AI apps connect to outside domains.</div>
+              </div>
+              <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
+            </a>
+          </div>
+        </div>
+        <div class="showcase-note">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          Each lesson is visual, interactive, and focused on intuition.
+        </div>
       </div>
 
     </div>
@@ -317,11 +623,21 @@
   <!-- ══════════════════════════════════════════
        LEARN  #learn
   ══════════════════════════════════════════ -->
-  <section id="learn" class="py-12 px-5 md:px-8">
+  <section id="learn" class="learn-shell py-16 px-5 md:px-8">
     <div class="max-w-5xl mx-auto">
 
+      <div class="learn-header section-reveal">
+        <div>
+          <div class="learn-kicker"><i data-lucide="map" class="w-3.5 h-3.5"></i> Learning library</div>
+          <h2 class="learn-title">Choose what you want to understand next.</h2>
+          <p class="learn-subtitle">
+            Lessons are grouped by concept, so you can follow the path or jump directly into the topic you need.
+          </p>
+        </div>
+      </div>
+
       <!-- Search + Filters -->
-      <div class="section-reveal mb-6 space-y-2.5">
+      <div class="search-panel section-reveal mb-6">
         <div class="search-wrap">
           <div class="search-icon-pos"><i data-lucide="search" style="width:15px;height:15px;"></i></div>
           <input id="searchInput" type="search" class="search-input" placeholder="Search modules…" autocomplete="off" spellcheck="false" />
@@ -334,6 +650,7 @@
           <button class="filter-chip" data-filter="Inside an LLM">Inside an LLM</button>
           <button class="filter-chip" data-filter="Embeddings & Search">Embeddings & Search</button>
           <button class="filter-chip" data-filter="RAG">RAG</button>
+          <button class="filter-chip" data-filter="MCP">MCP</button>
           <button class="filter-chip" data-filter="Vector Index Explorer">Vector Index Explorer</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner">Beginner</button>
@@ -443,7 +760,15 @@
       { num:7,  id:'reranking',     title:'Re-ranking',                   desc:'Reorder retrieved results for better relevance.',             status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/re-ranking.html',              icon:'arrow-up-down', color:'#0d9488' },
       { num:8,  id:'rag-pipeline',  title:'RAG Pipeline',                 desc:'See the full retrieval-augmented generation flow end to end.', status:'available',   diff:'Advanced',     dur:'12 min', mod:'Retrieval-Augmented Generation (RAG)', page:'modules/rag/rag-pipeline.html',           icon:'git-branch',    color:'#0d9488' },
 
-      // ── Module 4: Vector Index Explorer ──────────────────────────────────────────────
+      // ── Module 4: Model Context Protocol (MCP) ────────────────────────────────
+      { num:1,  id:'mcp-what',      title:'What is MCP?',                 desc:'Learn what MCP is and why it was introduced using simple real-world analogies.',           status:'available',   diff:'Beginner',     dur:'6 min',  mod:'Model Context Protocol (MCP)', page:'modules/mcp/what-is-mcp.html', icon:'plug',          color:'#7c3aed' },
+      { num:2,  id:'mcp-why',       title:'Why MCP?',                     desc:'Understand the problems MCP solves and why a common standard is useful for AI applications.', status:'available',   diff:'Beginner',     dur:'6 min',  mod:'Model Context Protocol (MCP)', page:'modules/mcp/why-mcp.html', icon:'help-circle',   color:'#7c3aed' },
+      { num:3,  id:'mcp-arch',      title:'MCP Architecture',             desc:'Explore the complete MCP architecture, including the Host, MCP Clients, MCP Servers, and external domains, and see how they work together.', status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Model Context Protocol (MCP)', page:'modules/mcp/mcp-architecture.html', icon:'network',       color:'#7c3aed' },
+      { num:4,  id:'mcp-vs-api',    title:'MCP vs Traditional APIs',      desc:'Compare MCP with traditional API integrations and understand when MCP provides a better approach.', status:'available',   diff:'Intermediate', dur:'8–10 min', mod:'Model Context Protocol (MCP)', page:'modules/mcp/mcp-vs-apis.html', icon:'arrow-left-right', color:'#7c3aed' },
+      { num:5,  id:'mcp-vs-func',   title:'MCP vs Function Calling',      desc:'Learn the difference between function calling and MCP, and understand how they complement each other.', status:'available',   diff:'Intermediate', dur:'8–10 min', mod:'Model Context Protocol (MCP)', page:'modules/mcp/mcp-vs-function-calling.html', icon:'code', color:'#7c3aed' },
+      { num:6,  id:'mcp-fits',      title:'Where MCP Fits in AI Apps',    desc:'See how MCP fits into modern AI applications alongside LLMs, RAG, vector databases, and external domains.', status:'available',   diff:'Beginner',     dur:'7–10 min', mod:'Model Context Protocol (MCP)', page:'modules/mcp/where-mcp-fits.html', icon:'puzzle', color:'#7c3aed' },
+
+      // ── Module 5: Vector Index Explorer ──────────────────────────────────────────────
       { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
       { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
       { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
@@ -457,6 +782,7 @@
       'Inside an LLM':                     { icon:'brain',    color:'#6366f1', bg:'rgba(99,102,241,0.07)',  border:'rgba(99,102,241,0.2)',  iconBg:'rgba(99,102,241,0.1)'  },
       'Embeddings & Search':              { icon:'search',   color:'#2563eb', bg:'rgba(37,99,235,0.07)',   border:'rgba(37,99,235,0.2)',   iconBg:'rgba(37,99,235,0.1)'   },
       'Retrieval-Augmented Generation (RAG)':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
+      'Model Context Protocol (MCP)':            { icon:'plug',     color:'#7c3aed', bg:'rgba(124,58,237,0.07)', border:'rgba(124,58,237,0.2)',  iconBg:'rgba(124,58,237,0.1)'  },
       'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
     };
 
@@ -495,6 +821,7 @@
         if (activeFilter === 'Embeddings & Search') return l.mod === 'Embeddings & Search';
         if (activeFilter === 'Vector Index Explorer')      return l.mod === 'Vector Index Explorer';
         if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation (RAG)';
+        if (activeFilter === 'MCP')               return l.mod === 'Model Context Protocol (MCP)';
         return true;
       });
     }
@@ -551,7 +878,7 @@
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
             </div>
             <div class="mod-section-body">
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0.5rem;padding-top:0.5rem;">
+              <div class="lesson-grid">
                 ${cards}
               </div>
             </div>
@@ -610,6 +937,7 @@
                 <i data-lucide="${cfg.icon}" style="width:14px;height:14px;color:${cfg.color};"></i>
               </div>
               <span class="cs-accordion-name">${esc(mod)}</span>
+              <span class="cs-soon-badge">🚀 Coming Soon</span>
               <span class="cs-accordion-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="cs-accordion-chevron"></i>
             </button>
@@ -649,16 +977,6 @@
     window.addEventListener('load', () => {
       AIPlayground.init();
       syncDarkIcons();
-
-      // Update hero badge count from data
-      const availCount = LESSONS.filter(l => l.status === 'available').length;
-      const totalCount = LESSONS.length;
-      const heroBadgeCount = document.getElementById('heroBadgeCount');
-      const statAvailable  = document.getElementById('statAvailable');
-      const statTotal      = document.getElementById('statTotal');
-      if (heroBadgeCount) heroBadgeCount.textContent = `📚 ${availCount} modules`;
-      if (statAvailable)  statAvailable.textContent  = availCount;
-      if (statTotal)      statTotal.textContent       = totalCount;
 
       const searchEl = document.getElementById('searchInput');
       searchEl.addEventListener('input', Utils.debounce(() => {
