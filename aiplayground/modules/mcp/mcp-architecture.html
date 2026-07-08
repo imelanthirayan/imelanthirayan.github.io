@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Understand the main parts of MCP architecture and how they work together, an interactive intermediate demo." />
+  <title>MCP Architecture · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%8C</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a78bfa; }
+
+    /* ── Back / prev button ─────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #7c3aed; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.25); background: rgba(124,58,237,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(124,58,237,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #a78bfa; border-color: rgba(167,139,250,0.28); background: rgba(124,58,237,0.1); }
+
+    /* ── Request chip buttons (Section 3) ─────────── */
+    .req-btn {
+      display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
+      padding: 0.75rem 0.9rem; border-radius: 0.9rem; border: 1.5px solid #e2e8f0;
+      background: #f8fafc; font-size: 0.83rem; font-weight: 700; color: #334155;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .req-btn:hover { border-color: #c4b5fd; background: #faf5ff; }
+    .req-btn.req-active { background: rgba(124,58,237,0.08); border-color: #7c3aed; color: #6d28d9; }
+    html.dark .req-btn { background: rgba(15,23,42,0.5); border-color: #334155; color: #cbd5e1; }
+    html.dark .req-btn:hover { background: rgba(124,58,237,0.1); border-color: #6d28d9; }
+    html.dark .req-btn.req-active { background: rgba(124,58,237,0.16); border-color: #a78bfa; color: #e9d5ff; }
+    .req-icon-wrap {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .req-icon-wrap { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+    .req-multi-badge {
+      margin-left: auto; font-size: 0.62rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px;
+      background: rgba(124,58,237,0.12); color: #7c3aed; white-space: nowrap; flex-shrink: 0;
+    }
+    html.dark .req-multi-badge { background: rgba(167,139,250,0.18); color: #ddd6fe; }
+
+    /* Give the Live Visualization column more room, Request Flow list less */
+    @media (min-width: 900px) {
+      #reqFlowGrid { grid-template-columns: minmax(0, 34%) 1fr; }
+    }
+    #reqFlowGrid #requestList { gap: 0.5rem; }
+    #reqFlowGrid .req-btn { padding: 0.5rem 0.65rem; font-size: 0.78rem; }
+
+    /* ── Flow direction / status (Section 4 animation) ─── */
+    .flow-direction {
+      text-align: center; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em; color: #cbd5e1;
+      margin-top: 1.15rem; margin-bottom: 0.75rem; min-height: 1rem; transition: color 0.3s;
+    }
+    html.dark .flow-direction { color: #475569; }
+    .flow-direction.dir-out { color: #7c3aed; }
+    html.dark .flow-direction.dir-out { color: #a78bfa; }
+    .flow-direction.dir-in { color: #059669; }
+    html.dark .flow-direction.dir-in { color: #34d399; }
+
+    .flow-payload {
+      margin-bottom: 0.75rem; padding: 0.65rem 0.85rem; border-radius: 0.75rem;
+      background: rgba(124,58,237,0.06); border: 1px solid rgba(124,58,237,0.22);
+    }
+    html.dark .flow-payload { background: rgba(167,139,250,0.08); border-color: rgba(167,139,250,0.25); }
+    .fm-fetch-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .fm-fetch-item {
+      display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; font-weight: 700; color: #6d28d9;
+    }
+    html.dark .fm-fetch-item { color: #ede9fe; }
+    .fm-fetch-dot {
+      width: 7px; height: 7px; border-radius: 9999px; background: #7c3aed; flex-shrink: 0;
+      animation: fmDotPulse 1s ease-in-out infinite;
+    }
+    html.dark .fm-fetch-dot { background: #a78bfa; }
+    @keyframes fmDotPulse {
+      0%, 100% { opacity: 0.35; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .flow-status {
+      margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 0.85rem;
+      font-size: 0.8rem; font-weight: 600; line-height: 1.5; min-height: 20px;
+      border: 1.5px dashed #e2e8f0; color: #94a3b8; background: transparent; transition: all 0.35s;
+    }
+    html.dark .flow-status { border-color: #334155; color: #64748b; }
+    .flow-status.flow-status-active {
+      border-style: solid; background: rgba(124,58,237,0.06); border-color: rgba(124,58,237,0.3); color: #6d28d9;
+    }
+    html.dark .flow-status.flow-status-active { background: rgba(167,139,250,0.1); color: #ede9fe; }
+    .flow-status.flow-status-success {
+      border-style: solid; background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.3); color: #047857;
+    }
+    html.dark .flow-status.flow-status-success { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+
+    /* ── Multi-server flow (fan-out / fan-in) ─────── */
+    .flow-multi-wrap { padding: 0.15rem 0.25rem 0.25rem; }
+    .fm-chain { display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .fm-node {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.85rem; border-radius: 0.85rem;
+      border: 2px solid #e2e8f0; background: #f8fafc; font-size: 0.76rem; font-weight: 800; color: #94a3b8;
+      transition: all 0.3s; white-space: nowrap; position: relative;
+    }
+    html.dark .fm-node { background: rgba(15,23,42,0.5); border-color: #334155; color: #64748b; }
+    .fm-node.node-current {
+      border-color: #7c3aed; background: #7c3aed; color: #fff;
+      box-shadow: 0 0 0 6px rgba(124,58,237,0.22), 0 6px 16px rgba(124,58,237,0.45);
+      transform: scale(1.12);
+      animation: fmPulse 0.9s ease-in-out infinite;
+      z-index: 2;
+    }
+    .fm-node.node-current .fm-node-icon { background: rgba(255,255,255,0.25); color: #fff; }
+    html.dark .fm-node.node-current {
+      border-color: #c4b5fd; background: #7c3aed; color: #fff;
+      box-shadow: 0 0 0 6px rgba(167,139,250,0.28), 0 6px 16px rgba(124,58,237,0.55);
+    }
+    html.dark .fm-node.node-current .fm-node-icon { background: rgba(255,255,255,0.22); color: #fff; }
+    @keyframes fmPulse {
+      0%, 100% { box-shadow: 0 0 0 6px rgba(124,58,237,0.22), 0 6px 16px rgba(124,58,237,0.45); }
+      50% { box-shadow: 0 0 0 11px rgba(124,58,237,0.1), 0 6px 20px rgba(124,58,237,0.55); }
+    }
+    /* Message icon that rides along with the current highlight */
+    .fm-packet-badge {
+      position: absolute; top: -10px; right: -10px; width: 1.35rem; height: 1.35rem; line-height: 1.35rem;
+      text-align: center; font-size: 0.8rem; border-radius: 9999px; background: #fff;
+      border: 2px solid #7c3aed; box-shadow: 0 2px 6px rgba(124,58,237,0.35); z-index: 3;
+      animation: fmPacketPop 0.35s ease-out;
+    }
+    html.dark .fm-packet-badge { background: #1e1b2e; border-color: #c4b5fd; }
+    @keyframes fmPacketPop {
+      from { transform: scale(0.4); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fmTipPop {
+      from { transform: translateX(-50%) scale(0.4); opacity: 0; }
+      to { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+    /* Short step message shown right under the currently highlighted node */
+    .fm-step-tip {
+      position: absolute; top: calc(100% + 0.4rem); left: 50%; transform: translateX(-50%);
+      font-size: 0.62rem; font-weight: 700; color: #fff; background: #6d28d9; padding: 0.28rem 0.55rem;
+      border-radius: 0.45rem; white-space: nowrap; box-shadow: 0 3px 8px rgba(109,40,217,0.35);
+      z-index: 4; animation: fmTipPop 0.3s ease-out forwards; pointer-events: none;
+    }
+    .fm-step-tip::before {
+      content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-bottom-color: #6d28d9;
+    }
+    html.dark .fm-step-tip { background: #a78bfa; color: #1e1b2e; }
+    html.dark .fm-step-tip::before { border-bottom-color: #a78bfa; }
+    .fm-node.node-visited { border-color: #a78bfa; background: rgba(124,58,237,0.06); color: #7c3aed; }
+    html.dark .fm-node.node-visited { border-color: #7c3aed; background: rgba(167,139,250,0.1); color: #c4b5fd; }
+    .fm-node.node-idle { opacity: 0.4; }
+    .fm-node-icon {
+      width: 24px; height: 24px; border-radius: 0.55rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .fm-node-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+    .fm-vline { width: 2px; height: 16px; background: #cbd5e1; }
+    html.dark .fm-vline { background: #334155; }
+    .fm-vline-small { width: 2px; height: 14px; background: #cbd5e1; margin: 0 auto; transition: background 0.3s; }
+    html.dark .fm-vline-small { background: #334155; }
+    .fm-vline-small.line-idle { opacity: 0.4; }
+    .fm-hline-full { width: 100%; max-width: 30rem; height: 2px; background: #cbd5e1; }
+    html.dark .fm-hline-full { background: #334155; }
+    .fm-branch-row { display: flex; width: 100%; max-width: 30rem; gap: 0.6rem; }
+    .fm-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 0; }
+    .fm-branch-node {
+      width: 100%; flex-direction: column; gap: 0.3rem; justify-content: center; text-align: center;
+      white-space: normal; padding: 0.5rem 0.35rem; font-size: 0.66rem;
+    }
+    .fm-branch-node .fm-node-icon { margin: 0 auto; }
+    .fm-idle-tag {
+      font-size: 0.58rem; font-weight: 700; color: #cbd5e1; margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    html.dark .fm-idle-tag { color: #475569; }
+
+    /* ── Host, client & server (Section 3) ─────── */
+    .many-wrap { display: flex; flex-direction: column; align-items: center; padding: 1rem 0.5rem; }
+    .many-node {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 1.05rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 800;
+      border: 2px solid #7c3aed; background: rgba(124,58,237,0.1); color: #6d28d9;
+    }
+    html.dark .many-node { background: rgba(167,139,250,0.16); border-color: #a78bfa; color: #ede9fe; }
+    .many-vline { width: 2px; height: 18px; background: #cbd5e1; }
+    html.dark .many-vline { background: #334155; }
+    .many-branches { display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; position: relative; padding-top: 18px; max-width: 50rem; }
+    .many-branch { display: flex; flex-direction: column; align-items: center; }
+    .many-stub { width: 2px; height: 16px; background: #cbd5e1; transition: background 0.3s; }
+    html.dark .many-stub { background: #334155; }
+    .many-server {
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 0.85rem; border-radius: 0.9rem; font-size: 0.74rem; font-weight: 700;
+      border: 1.5px solid #bbf7d0; background: rgba(240,253,244,0.7); color: #16a34a; white-space: nowrap;
+      transition: all 0.3s;
+    }
+    html.dark .many-server { border-color: rgba(74,222,128,0.35); background: rgba(20,83,45,0.14); color: #4ade80; }
+    .many-server.many-disabled {
+      border-color: #e2e8f0; background: #f1f5f9; color: #94a3b8; opacity: 0.6;
+    }
+    html.dark .many-server.many-disabled { border-color: #334155; background: rgba(15,23,42,0.4); color: #64748b; }
+    .many-server.many-disabled .many-stub { background: #e2e8f0; }
+    .many-client {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.35rem 0.6rem; border-radius: 0.6rem; font-size: 0.66rem; font-weight: 800;
+      border: 1.5px solid #ddd6fe; background: rgba(237,233,254,0.7); color: #6d28d9; white-space: nowrap;
+      transition: all 0.3s;
+    }
+    html.dark .many-client { border-color: rgba(167,139,250,0.35); background: rgba(76,29,149,0.18); color: #ddd6fe; }
+    .many-client.many-disabled {
+      border-color: #e2e8f0; background: #f1f5f9; color: #cbd5e1; opacity: 0.6;
+    }
+    html.dark .many-client.many-disabled { border-color: #334155; background: rgba(15,23,42,0.4); color: #475569; }
+    .many-checkbox-row { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700; }
+    .many-checkbox-row input { accent-color: #7c3aed; width: 14px; height: 14px; cursor: pointer; }
+    .many-unavailable {
+      margin-top: 0.3rem; font-size: 0.62rem; font-weight: 700; color: #b91c1c; text-align: center; line-height: 1.3;
+    }
+    html.dark .many-unavailable { color: #fca5a5; }
+    .many-system-vline { width: 2px; height: 12px; background: #cbd5e1; margin: 0 auto; transition: background 0.3s; }
+    html.dark .many-system-vline { background: #334155; }
+    .many-systems { display: flex; flex-direction: column; gap: 0.35rem; align-items: center; margin-top: 0.4rem; }
+    .many-system {
+      display: flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.55rem 0.3rem 0.4rem; border-radius: 0.6rem;
+      font-size: 0.64rem; font-weight: 700; border: 1.5px solid #bfdbfe; background: rgba(239,246,255,0.8);
+      color: #1d4ed8; white-space: nowrap; transition: all 0.3s; cursor: pointer;
+    }
+    .many-system input { accent-color: #2563eb; width: 12px; height: 12px; cursor: pointer; flex-shrink: 0; }
+    html.dark .many-system { border-color: rgba(96,165,250,0.35); background: rgba(30,58,138,0.16); color: #93c5fd; }
+    .many-system.system-disabled {
+      border-color: #e2e8f0; background: #f1f5f9; color: #cbd5e1;
+    }
+    html.dark .many-system.system-disabled { border-color: #334155; background: rgba(15,23,42,0.4); color: #475569; }
+    /* When the parent server itself is off, dim + lock every system underneath it */
+    .many-systems.server-off .many-system { opacity: 0.45; pointer-events: none; }
+
+    /* ── One server, one purpose cards (Section 6) ── */
+    .purpose-card {
+      display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 1rem;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+    }
+    html.dark .purpose-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .purpose-icon {
+      width: 36px; height: 36px; border-radius: 0.8rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(16,185,129,0.1); color: #059669;
+    }
+    html.dark .purpose-icon { background: rgba(52,211,153,0.15); color: #34d399; }
+
+    /* ── Architecture summary (Section 7) ─────────── */
+    .summary-chain { display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .summary-node {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.55rem 0.9rem; border-radius: 0.9rem; font-size: 0.78rem; font-weight: 800;
+      border: 1.5px solid #e2e8f0; background: #ffffff; color: #334155; white-space: nowrap;
+    }
+    html.dark .summary-node { background: rgba(15,23,42,0.6); border-color: #334155; color: #e2e8f0; }
+    .summary-arrow { color: #cbd5e1; font-size: 0.9rem; flex-shrink: 0; }
+    html.dark .summary-arrow { color: #475569; }
+
+    /* ── Explainer cards ───────────────────────── */
+    .explain-card {
+      display: flex; gap: 0.8rem; padding: 1rem; border-radius: 1rem;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+    }
+    html.dark .explain-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .explain-icon {
+      width: 34px; height: 34px; border-radius: 0.7rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .explain-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    /* ── Takeaway checklist ─────────────────────── */
+    .takeaway {
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+    .takeaway-item { display: flex; align-items: flex-start; gap: 0.6rem; }
+    .takeaway-item + .takeaway-item { margin-top: 0.6rem; }
+
+    /* ── Summary panel ─────────────────────────── */
+    .summary-panel {
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem; text-align: center;
+      padding: 2rem 1.75rem; border-radius: 1.25rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.03));
+      border: 1.5px solid rgba(124,58,237,0.2);
+    }
+    html.dark .summary-panel { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(167,139,250,0.03)); border-color: rgba(167,139,250,0.25); }
+    .summary-text { font-size: 1rem; font-weight: 600; color: #334155; line-height: 1.7; max-width: 40rem; }
+    html.dark .summary-text { color: #e2e8f0; }
+    .summary-text strong { color: #6d28d9; }
+    html.dark .summary-text strong { color: #c4b5fd; }
+
+    /* ── Next module pill ─────────────────────── */
+    .next-soon {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.5rem; border-radius: 9999px;
+      border: 1.5px dashed rgba(148,163,184,0.4); color: #94a3b8;
+      font-size: 0.875rem; font-weight: 700; cursor: not-allowed; background: rgba(148,163,184,0.05);
+    }
+    html.dark .next-soon { border-color: rgba(100,116,139,0.4); color: #64748b; }
+
+    @keyframes slideIn {
+      from { opacity:0; transform:translateY(8px) scale(0.98); }
+      to   { opacity:1; transform:translateY(0)   scale(1); }
+    }
+    .slide-in { animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30">
+          <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+          <span class="text-violet-700 dark:text-violet-400 text-xs font-bold tracking-wide">Model Context Protocol (MCP)</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="network" class="w-7 h-7 text-violet-600 dark:text-violet-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">MCP Architecture</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          MCP architecture has a few main parts: the <strong class="text-slate-800 dark:text-slate-200">Host</strong>, the <strong class="text-slate-800 dark:text-slate-200">LLM</strong>, the <strong class="text-slate-800 dark:text-slate-200">MCP client</strong>, the <strong class="text-slate-800 dark:text-slate-200">MCP server</strong>, and the <strong class="text-slate-800 dark:text-slate-200">external system</strong>. Together, they help the AI application communicate with business domains and data sources in a standard way.
+        </p>
+
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="badge badge-intermediate">🟡 Intermediate</span>
+          <span class="badge" style="background:rgba(124,58,237,0.1); color:#7c3aed;">
+            <i data-lucide="clock" style="width:11px;height:11px;margin-right:4px;"></i> 7–10 min
+          </span>
+        </div>
+
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simplified learning demo</strong>. No code or technical details, just the core idea.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. INTERACTIVE REQUEST FLOW
+      ══════════════════════════════════════ -->
+      <div class="pg-grid" id="reqFlowGrid">
+        <div class="flex flex-col gap-5">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
+              Interactive Request Flow
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+              Pick a request and watch it travel through the architecture, step by step, and back.
+            </p>
+            <div class="flex flex-col gap-2.5" id="requestList"></div>
+          </section>
+        </div>
+
+        <div class="pg-grid-right">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="eye" style="width:12px;height:12px;"></i>
+              Live Visualization
+            </div>
+            <div class="flow-multi-wrap" id="flowMultiWrap">
+              <div class="fm-chain" id="fmChain"></div>
+            </div>
+            <div class="flow-direction" id="flowDirection"></div>
+            <div class="flow-payload" id="flowPayload" style="display:none;"></div>
+            <div class="flow-status" id="flowStatus">Pick a request to see it travel through the system.</div>
+          </section>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           3. HOST, CLIENT & SERVER
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="git-fork" style="width:12px;height:12px;"></i>
+          Host, Client &amp; Server
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          The Host app (where the LLM lives) uses a dedicated MCP client for each server it connects to, one client per server. Think of a server as access to one domain or department, such as Engineering, Customer, or Finance. That server may use several tools behind the scenes, but it presents one domain path to the AI app. Here's one server connection, in detail. Try unchecking it below.
+        </p>
+        <div class="many-wrap">
+          <div class="many-node"><i data-lucide="bot" style="width:16px;height:16px;"></i> Host (LLM)</div>
+          <div class="many-branches" id="manyBranches"></div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. ONE SERVER, ONE PURPOSE  +  5. ARCHITECTURE SUMMARY
+      ══════════════════════════════════════ -->
+      <div class="grid md:grid-cols-2 gap-5 mb-5">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="target" style="width:12px;height:12px;"></i>
+            One Server, One Purpose
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            An MCP server usually represents access to one domain or integration, not everything at once. It can expose several related resources within that domain.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="purpose-card">
+              <div class="purpose-icon"><i data-lucide="file-text" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="text-slate-800 dark:text-slate-200">Knowledge server</strong> → documents, policies, playbooks</p>
+            </div>
+            <div class="purpose-card">
+              <div class="purpose-icon"><i data-lucide="git-branch" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="text-slate-800 dark:text-slate-200">Engineering server</strong> → code work, issues, release tasks</p>
+            </div>
+            <div class="purpose-card">
+              <div class="purpose-icon"><i data-lucide="calendar" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="text-slate-800 dark:text-slate-200">Operations server</strong> → meetings, schedules, reminders</p>
+            </div>
+            <div class="purpose-card">
+              <div class="purpose-icon"><i data-lucide="database" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="text-slate-800 dark:text-slate-200">Customer server</strong> → accounts, orders, support records</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="clipboard-list" style="width:12px;height:12px;"></i>
+            Architecture Summary
+          </div>
+          <div class="summary-chain mb-3">
+            <div class="summary-node">💬 User</div>
+            <span class="summary-arrow">→</span>
+            <div class="summary-node">🧠 LLM</div>
+            <span class="summary-arrow">→</span>
+            <div class="summary-node">🖥️ MCP Client</div>
+            <span class="summary-arrow">→</span>
+            <div class="summary-node">🗄️ MCP Server</div>
+            <span class="summary-arrow">→</span>
+            <div class="summary-node">🌐 External System</div>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Every request follows this same path, and the answer travels back the same way, no matter which system is involved.
+          </p>
+        </section>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           6. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xl">💡</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Key Takeaways</span>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP architecture <strong class="text-slate-900 dark:text-white">separates the LLM</strong> from external domains and systems.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">The MCP client belongs on the <strong class="text-slate-900 dark:text-white">AI application side</strong>.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">The MCP server represents <strong class="text-slate-900 dark:text-white">access to one domain or integration</strong>, which can include several related resources.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">A client connects to exactly <strong class="text-slate-900 dark:text-white">one server</strong>, but the Host app can run many clients at once, giving it access to many servers.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">This structure makes connections <strong class="text-slate-900 dark:text-white">easier to understand and manage</strong>.</p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           7. TRY THIS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-8 open" id="tipsTryThis">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="true">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🧪</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Try This</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">5 ideas</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Select different user requests and watch them travel through the system.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Notice when a request uses one server path and when it needs more than one.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Enable and disable the whole MCP server below.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Enable and disable individual resources within a domain server, like support records inside Customer.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Notice how each request reaches only the specific MCP servers it needs, not all of them.</span>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           8. SUMMARY
+      ══════════════════════════════════════ -->
+      <div class="summary-panel mb-8">
+        <span class="text-2xl">🧩🔌</span>
+        <p class="summary-text">
+          MCP architecture gives AI apps a clear path to external domains: <strong>the Host uses a dedicated MCP client for each server it needs, and each server connects to its own domain or system.</strong>
+        </p>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           9. NEXT MODULE
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="why-mcp.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Why MCP?
+        </a>
+        <a href="mcp-vs-apis.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> MCP vs Traditional APIs
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Model Context Protocol (MCP)');</script>
+
+
+  <script src="../../js/utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     DATA
+  ═══════════════════════════════════════════════ */
+  const REQUESTS = [
+    { id: 'combo-plan', icon: 'layout-grid', label: 'What should I handle before standup today?', multi: true,
+      activeIds: ['calendar', 'github'],
+      answer: 'User receives: "Before standup, review the checkout bug and prepare for your 10 AM planning meeting."' },
+    { id: 'combo-onboard', icon: 'layout-grid', label: 'What do I need for the new customer kickoff?', multi: true,
+      activeIds: ['database', 'calendar', 'files'],
+      answer: 'User receives: "The customer record is active, the kickoff is tomorrow at 10 AM, and the onboarding checklist is ready in the knowledge base."' },
+    { id: 'combo-weekly', icon: 'layout-grid', label: 'What changed this week for the team update?', multi: true,
+      activeIds: ['github', 'files', 'calendar', 'database'],
+      answer: 'User receives: "This week: 12 engineering tasks closed, 3 release changes completed, 4 customer updates logged, and two roadmap meetings completed."' },
+    { id: 'combo-review', icon: 'layout-grid', label: 'Does this engineering change match our release notes?', multi: true,
+      activeIds: ['github', 'files'],
+      answer: 'User receives: "The change updates the login flow and matches the project notes, but the error-state copy still needs review."' },
+    { id: 'combo-invoice', icon: 'layout-grid', label: 'Which customer needs a follow-up today?', multi: true,
+      activeIds: ['database', 'calendar', 'files'],
+      answer: 'User receives: "Customer C-1048 needs a follow-up. There is no meeting today, and the follow-up template is ready to send."' },
+    { id: 'combo-launch', icon: 'layout-grid', label: 'Are we ready for Friday’s product launch?', multi: true,
+      activeIds: ['github', 'files', 'calendar', 'database'],
+      answer: 'User receives: "Launch prep still needs the release checklist, open engineering tasks, customer rollout list, and launch dates aligned before Friday."' },
+  ];
+
+  /* Fixed set of servers/systems, always shown in the multi-server visualization */
+  const ALL_BRANCHES = [
+    { id: 'github',   icon: 'git-branch', label: 'Engineering', serverLabel: 'Engineering Server' },
+    { id: 'files',    icon: 'file-text',  label: 'Knowledge',   serverLabel: 'Knowledge Server' },
+    { id: 'calendar', icon: 'calendar',   label: 'Operations',  serverLabel: 'Operations Server' },
+    { id: 'database', icon: 'database',   label: 'Customer',    serverLabel: 'Customer Server' },
+  ];
+
+  const SERVERS = [
+    { id: 'github',   icon: 'git-branch', label: 'Engineering MCP Server',
+      systems: [
+        { icon: 'folder-git-2',    label: 'Code work' },
+        { icon: 'circle-dot',      label: 'Tasks' },
+        { icon: 'git-pull-request', label: 'Reviews' },
+        { icon: 'layout-grid',     label: 'Release plans' },
+      ] },
+  ];
+  const serverState = {};
+  SERVERS.forEach(s => {
+    serverState[s.id] = true;
+    s.systems.forEach(sys => { sys.enabled = true; });
+  });
+
+  let currentRequestIndex = -1;
+  let flowAnimId = 0;
+
+  /* ═══════════════════════════════════════════════
+     SECTION 4: INTERACTIVE REQUEST FLOW
+  ═══════════════════════════════════════════════ */
+  function renderRequestList() {
+    const wrap = document.getElementById('requestList');
+    wrap.innerHTML = REQUESTS.map((r, i) => `
+      <button class="req-btn" id="req-${i}" onclick="selectRequest(${i})">
+        <span class="req-icon-wrap"><i data-lucide="${r.icon}" style="width:15px;height:15px;"></i></span>
+        <span>${r.label}</span>
+        ${r.multi ? `<span class="req-multi-badge">${r.activeIds.length} systems</span>` : ''}
+      </button>
+    `).join('');
+    refreshIcons(wrap);
+  }
+
+  function selectRequest(idx) {
+    currentRequestIndex = idx;
+    document.querySelectorAll('.req-btn').forEach((btn, i) => btn.classList.toggle('req-active', i === idx));
+    const req = REQUESTS[idx];
+    renderFlowMulti(req);
+    animateFlowMulti(req);
+  }
+
+  /* ═══════════════════════════════════════════════
+     SECTION 4b: MULTI-SERVER FLOW (fan-out / fan-in)
+  ═══════════════════════════════════════════════ */
+  function renderFlowMulti(req) {
+    const wrap = document.getElementById('fmChain');
+    const activeSet = new Set(req.activeIds);
+
+    const serverCols = ALL_BRANCHES.map(b => {
+      const idle = !activeSet.has(b.id);
+      return `
+      <div class="fm-col">
+        <div class="fm-node fm-branch-node ${idle ? 'node-idle' : ''}" id="fm-server-${b.id}">
+          <span class="fm-node-icon"><i data-lucide="${b.icon}" style="width:14px;height:14px;"></i></span>
+          <span>${b.serverLabel}</span>
+          ${idle ? '<span class="fm-idle-tag">Not used</span>' : ''}
+        </div>
+      </div>`;
+    }).join('');
+    const stubCols = ALL_BRANCHES.map(b => `
+      <div class="fm-col"><div class="fm-vline-small ${activeSet.has(b.id) ? '' : 'line-idle'}"></div></div>
+    `).join('');
+
+    wrap.innerHTML = `
+      <div class="fm-node" id="fm-user">
+        <span class="fm-node-icon"><i data-lucide="user" style="width:14px;height:14px;"></i></span>
+        <span>User</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="fm-ai">
+        <span class="fm-node-icon"><i data-lucide="bot" style="width:14px;height:14px;"></i></span>
+        <span>LLM</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="fm-client">
+        <span class="fm-node-icon"><i data-lucide="monitor" style="width:14px;height:14px;"></i></span>
+        <span>MCP Client(s)</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-hline-full"></div>
+      <div class="fm-branch-row">${stubCols}</div>
+      <div class="fm-branch-row">${serverCols}</div>
+    `;
+    refreshIcons(wrap);
+  }
+
+  const STATUS_MESSAGES_MULTI = (req) => {
+    const labels = req.activeIds.map(id => ALL_BRANCHES.find(b => b.id === id).label);
+    const namesJoined = labels.length > 2
+      ? labels.slice(0, -1).join(', ') + ', and ' + labels[labels.length - 1]
+      : labels.join(' and ');
+    return [
+      `1. User asks: "${req.label}."`,
+      `2. LLM decides it needs ${namesJoined}.`,
+      `3. A dedicated MCP client opens a connection to each server that's needed.`,
+      `4. ${labels.length} separate MCP servers each connect to their own external system, all at once.`,
+      `5. Each server returns its own results, passed back through its own client.`,
+      `6. LLM combines everything into one answer.`,
+      `7. ${req.answer}`,
+    ];
+  };
+
+  function animateFlowMulti(req) {
+    const myId = ++flowAnimId;
+    const messages = STATUS_MESSAGES_MULTI(req);
+    const statusEl = document.getElementById('flowStatus');
+    const dirEl = document.getElementById('flowDirection');
+    const payloadEl = document.getElementById('flowPayload');
+    const activeIds = req.activeIds;
+
+    statusEl.className = 'flow-status flow-status-active';
+    statusEl.textContent = 'Watching the request travel…';
+
+    const allNodeIds = ['fm-user', 'fm-ai', 'fm-client', ...activeIds.map(id => `fm-server-${id}`)];
+    const STEPS = [
+      ['fm-user'],
+      ['fm-ai'],
+      ['fm-client'],
+      activeIds.map(id => `fm-server-${id}`),
+      ['fm-client'],
+      ['fm-ai'],
+      ['fm-user'],
+    ];
+    const SHORT_TIPS = [
+      'Asks the question',
+      'Decides what it needs',
+      'Opens a client per server',
+      `Reaches ${activeIds.length} MCP servers`,
+      'Returns via its client',
+      'Composes the answer',
+      'Gets the final answer',
+    ];
+    const visited = new Set();
+
+    STEPS.forEach((activeElIds, i) => {
+      setTimeout(() => {
+        if (myId !== flowAnimId) return;
+        const isLast = i === STEPS.length - 1;
+
+        allNodeIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('node-current', 'node-visited');
+          if (visited.has(id)) el.classList.add('node-visited');
+          const oldBadge = el.querySelector('.fm-packet-badge');
+          if (oldBadge) oldBadge.remove();
+          const oldTip = el.querySelector('.fm-step-tip');
+          if (oldTip) oldTip.remove();
+        });
+        activeElIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.add(isLast ? 'node-visited' : 'node-current');
+          visited.add(id);
+          const badge = document.createElement('span');
+          badge.className = 'fm-packet-badge';
+          badge.textContent = i <= 3 ? '📨' : '📩';
+          el.appendChild(badge);
+
+          const tip = document.createElement('span');
+          tip.className = 'fm-step-tip';
+          tip.textContent = SHORT_TIPS[i];
+          el.appendChild(tip);
+        });
+
+        if (i === 0) { dirEl.textContent = ''; dirEl.className = 'flow-direction'; }
+        else if (i === 1 || i === 2) { dirEl.textContent = '→ Request traveling out'; dirEl.className = 'flow-direction dir-out'; }
+        else if (i === 3) { dirEl.textContent = `→ Fanning out to ${activeIds.length} MCP servers`; dirEl.className = 'flow-direction dir-out'; }
+        else { dirEl.textContent = '← Response traveling back'; dirEl.className = 'flow-direction dir-in'; }
+
+        if (i === 3) {
+          payloadEl.style.display = 'block';
+          payloadEl.innerHTML = `
+            <div class="fm-fetch-row">
+              ${activeIds.map(id => {
+                const b = ALL_BRANCHES.find(x => x.id === id);
+                return `<div class="fm-fetch-item"><span class="fm-fetch-dot"></span>Fetching ${b.label} data…</div>`;
+              }).join('')}
+            </div>`;
+        } else {
+          payloadEl.style.display = 'none';
+        }
+
+        statusEl.className = 'flow-status ' + (isLast ? 'flow-status-success' : 'flow-status-active');
+        statusEl.textContent = messages[i];
+      }, i * 2000);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════
+     SECTION 5: HOST, CLIENT & SERVER
+  ═══════════════════════════════════════════════ */
+  function renderManyServers() {
+    const wrap = document.getElementById('manyBranches');
+    wrap.innerHTML = SERVERS.map(s => `
+      <div class="many-branch">
+        <div class="many-stub" id="many-stub-${s.id}"></div>
+        <div class="many-client" id="many-client-${s.id}">
+          <i data-lucide="monitor" style="width:12px;height:12px;"></i>
+          <span>MCP Client</span>
+        </div>
+        <div class="many-stub"></div>
+        <div class="many-server" id="many-server-${s.id}">
+          <i data-lucide="${s.icon}" style="width:14px;height:14px;"></i>
+          <span>${s.label}</span>
+          <label class="many-checkbox-row">
+            <input type="checkbox" id="many-check-${s.id}" checked onchange="toggleServer('${s.id}')" />
+            Enabled
+          </label>
+          <div class="many-unavailable" id="many-unavail-${s.id}" style="display:none;">This system is not available to the assistant.</div>
+        </div>
+        <div class="many-system-vline"></div>
+        <div class="many-systems" id="many-systems-${s.id}">
+          ${s.systems.map((sys, i) => `
+            <label class="many-system" id="many-system-${s.id}-${i}">
+              <input type="checkbox" checked onchange="toggleSystem('${s.id}', ${i})" />
+              <i data-lucide="${sys.icon}" style="width:11px;height:11px;"></i>
+              <span>${sys.label}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+    refreshIcons(wrap);
+  }
+
+  function toggleServer(id) {
+    serverState[id] = !serverState[id];
+    const enabled = serverState[id];
+    document.getElementById(`many-server-${id}`).classList.toggle('many-disabled', !enabled);
+    document.getElementById(`many-client-${id}`).classList.toggle('many-disabled', !enabled);
+    document.getElementById(`many-unavail-${id}`).style.display = enabled ? 'none' : 'block';
+    // Turning the server off dims all its systems, regardless of their individual toggle state.
+    // Turning it back on restores each system's own checkbox state.
+    document.getElementById(`many-systems-${id}`).classList.toggle('server-off', !enabled);
+  }
+
+  function toggleSystem(serverId, idx) {
+    const sys = SERVERS.find(s => s.id === serverId).systems[idx];
+    sys.enabled = !sys.enabled;
+    document.getElementById(`many-system-${serverId}-${idx}`)
+      .classList.toggle('system-disabled', !sys.enabled);
+  }
+
+  /* ═══════════════════════════════════════════════
+     HELPERS
+  ═══════════════════════════════════════════════ */
+  function refreshIcons(el) {
+    if (typeof lucide === 'undefined') return;
+    el ? lucide.createIcons({ nodes: [el] }) : lucide.createIcons();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderRequestList();
+    renderManyServers();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+    }
+  });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Understand what the Model Context Protocol (MCP) is and why it exists, an interactive beginner demo." />
+  <title>What is MCP? · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%8C</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #7c3aed; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a78bfa; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #7c3aed; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.25); background: rgba(124,58,237,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(124,58,237,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #a78bfa; border-color: rgba(167,139,250,0.28); background: rgba(124,58,237,0.1); }
+
+    /* ── Segmented toggle ─────────────────────── */
+    .seg-toggle {
+      display: inline-flex; padding: 0.25rem; border-radius: 9999px;
+      background: #f1f5f9; border: 1px solid #e2e8f0; gap: 0.25rem;
+    }
+    html.dark .seg-toggle { background: rgba(15,23,42,0.6); border-color: #334155; }
+    .seg-btn {
+      padding: 0.5rem 1.1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 700;
+      color: #64748b; background: transparent; border: none; cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    html.dark .seg-btn { color: #94a3b8; }
+    .seg-btn.seg-active { background: white; color: #ef4444; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .seg-btn.seg-active.seg-with { color: #7c3aed; }
+    html.dark .seg-btn.seg-active { background: #334155; color: #f87171; }
+    html.dark .seg-btn.seg-active.seg-with { color: #a78bfa; }
+
+    /* ── Request chip buttons ─────────────────── */
+    .req-btn {
+      display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
+      padding: 0.75rem 0.9rem; border-radius: 0.9rem; border: 1.5px solid #e2e8f0;
+      background: #f8fafc; font-size: 0.83rem; font-weight: 700; color: #334155;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .req-btn:hover { border-color: #c4b5fd; background: #faf5ff; }
+    .req-btn.req-active { background: rgba(124,58,237,0.08); border-color: #7c3aed; color: #6d28d9; }
+    html.dark .req-btn { background: rgba(15,23,42,0.5); border-color: #334155; color: #cbd5e1; }
+    html.dark .req-btn:hover { background: rgba(124,58,237,0.1); border-color: #6d28d9; }
+    html.dark .req-btn.req-active { background: rgba(124,58,237,0.16); border-color: #a78bfa; color: #e9d5ff; }
+    .req-icon-wrap {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .req-icon-wrap { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    /* ── Flow nodes ────────────────────────────── */
+    .flow-row { display: flex; align-items: stretch; gap: 0.4rem; flex-wrap: wrap; }
+    .mcp-node {
+      flex: 1; min-width: 84px; border-radius: 0.85rem; padding: 0.6rem 0.5rem;
+      border: 2px solid #e2e8f0; background: #f8fafc; text-align: center; transition: all 0.4s;
+    }
+    html.dark .mcp-node { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .mcp-node-emoji { font-size: 1.1rem; line-height: 1; margin-bottom: 0.25rem; }
+    .mcp-node-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #94a3b8; }
+    .mcp-node.node-active { background: rgba(124,58,237,0.09); border-color: #7c3aed; }
+    html.dark .mcp-node.node-active { background: rgba(167,139,250,0.14); border-color: #a78bfa; }
+    .mcp-node.node-active .mcp-node-label { color: #6d28d9; }
+    html.dark .mcp-node.node-active .mcp-node-label { color: #ddd6fe; }
+    .mcp-node.node-blocked { background: rgba(239,68,68,0.08); border-color: #ef4444; }
+    html.dark .mcp-node.node-blocked { background: rgba(239,68,68,0.12); border-color: #f87171; }
+    .mcp-node.node-blocked .mcp-node-label { color: #b91c1c; }
+    html.dark .mcp-node.node-blocked .mcp-node-label { color: #fca5a5; }
+    .mcp-node.node-success { background: rgba(16,185,129,0.08); border-color: #10b981; }
+    html.dark .mcp-node.node-success { background: rgba(16,185,129,0.12); border-color: #34d399; }
+    .mcp-node.node-success .mcp-node-label { color: #047857; }
+    html.dark .mcp-node.node-success .mcp-node-label { color: #6ee7b7; }
+    .mcp-node.node-idle {
+      opacity: 0.45;
+      border-style: dashed;
+      background: #f8fafc;
+      filter: grayscale(0.35);
+    }
+    html.dark .mcp-node.node-idle {
+      background: rgba(15,23,42,0.35);
+      border-color: #334155;
+    }
+    .flow-arrow { display: flex; align-items: center; color: #cbd5e1; font-size: 0.85rem; flex-shrink: 0; }
+    html.dark .flow-arrow { color: #475569; }
+
+    .outcome-bubble {
+      margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 0.85rem;
+      font-size: 0.8rem; font-weight: 600; line-height: 1.5; min-height: 20px;
+      border: 1.5px dashed #e2e8f0; color: #94a3b8; background: transparent;
+      transition: all 0.35s;
+    }
+    html.dark .outcome-bubble { border-color: #334155; color: #64748b; }
+    .outcome-bubble.outcome-blocked {
+      border-style: solid; background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.3); color: #b91c1c;
+    }
+    html.dark .outcome-bubble.outcome-blocked { background: rgba(239,68,68,0.1); color: #fca5a5; }
+    .outcome-bubble.outcome-success {
+      border-style: solid; background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.3); color: #047857;
+    }
+    html.dark .outcome-bubble.outcome-success { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+
+    .flow-panel-title {
+      display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.7rem;
+    }
+    @media (min-width: 900px) {
+      .what-mcp-playground {
+        grid-template-columns: minmax(230px, 30%) minmax(0, 1fr);
+      }
+    }
+    .what-mcp-playground .pg-grid-right .module-card {
+      padding: 2rem;
+    }
+    .what-mcp-playground .flow-row {
+      gap: 0.55rem;
+    }
+    .what-mcp-playground .mcp-node {
+      min-width: 96px;
+      padding: 0.72rem 0.62rem;
+    }
+    .what-mcp-playground .mcp-node-emoji {
+      font-size: 1.25rem;
+    }
+    .what-mcp-playground .mcp-node-label {
+      font-size: 0.64rem;
+    }
+    .what-mcp-playground .outcome-bubble {
+      font-size: 0.84rem;
+      padding: 0.82rem 1rem;
+    }
+    .what-mcp-compare {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      align-items: start;
+    }
+    @media (min-width: 720px) {
+      .what-mcp-compare {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .what-mcp-compare-panel {
+      min-width: 0;
+    }
+
+    /* ── Waiter analogy tree ───────────────────── */
+    .waiter-wrap {
+      display: flex; flex-direction: column; align-items: center; padding: 1rem 0.75rem 1.1rem;
+      border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .waiter-wrap { background: rgba(15,23,42,0.4); border-color: #334155; }
+    .waiter-wrap.wd-without { border-color: #fecaca; background: rgba(254,242,242,0.6); }
+    html.dark .waiter-wrap.wd-without { border-color: rgba(248,113,113,0.3); background: rgba(127,29,29,0.12); }
+    .waiter-wrap.wd-with { border-color: #bbf7d0; background: rgba(240,253,244,0.6); }
+    html.dark .waiter-wrap.wd-with { border-color: rgba(74,222,128,0.3); background: rgba(20,83,45,0.14); }
+    .wd-scenario-label { font-size: 0.8rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .wd-label-without { color: #dc2626; }
+    html.dark .wd-label-without { color: #f87171; }
+    .wd-label-with { color: #16a34a; }
+    html.dark .wd-label-with { color: #4ade80; }
+    .wd-scenario-sub { font-size: 0.76rem; color: #64748b; text-align: center; margin-bottom: 0.85rem; max-width: 20rem; line-height: 1.5; }
+    html.dark .wd-scenario-sub { color: #94a3b8; }
+    .wd-node {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 0.85rem; border-radius: 0.9rem; font-size: 0.8rem; font-weight: 800;
+      border: 1.5px solid #e2e8f0; background: #ffffff; color: #334155; white-space: nowrap;
+    }
+    html.dark .wd-node { background: rgba(15,23,42,0.6); border-color: #334155; color: #e2e8f0; }
+    .wd-node.wd-waiter { background: rgba(124,58,237,0.1); border-color: #7c3aed; color: #6d28d9; }
+    html.dark .wd-node.wd-waiter { background: rgba(167,139,250,0.16); border-color: #a78bfa; color: #ede9fe; }
+    .wd-vline { width: 2px; height: 20px; background: #cbd5e1; }
+    html.dark .wd-vline { background: #334155; }
+    .wd-branches { display: flex; justify-content: center; gap: 0.9rem; position: relative; padding-top: 20px; flex-wrap: wrap; }
+    .wd-branches::before {
+      content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 2px; background: #cbd5e1;
+    }
+    html.dark .wd-branches::before { background: #334155; }
+    .wd-branch { display: flex; flex-direction: column; align-items: center; }
+    .wd-vstub { width: 2px; height: 20px; background: #cbd5e1; }
+    html.dark .wd-vstub { background: #334155; }
+    .wd-shop { font-size: 0.74rem; margin-top: 0.5rem; padding: 0.45rem 0.65rem; }
+    .wd-caption {
+      margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center; max-width: 22rem;
+      line-height: 1.6;
+    }
+    html.dark .wd-caption { color: #94a3b8; }
+
+    /* ── Stat boxes ──────────────────────────── */
+    .stat-box {
+      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
+      text-align: center; border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
+    .stat-val { font-size: 0.95rem; font-weight: 900; line-height: 1.2; word-break: break-word; }
+    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem; }
+
+    /* ── How it works flow ────────────────────── */
+    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
+    .flow-pill-box {
+      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
+      text-align: center; border: 1.5px solid #e2e8f0; background: white;
+      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
+    }
+    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
+    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
+    html.dark .flow-sep { color: #334155; }
+
+    /* ── Explainer cards ───────────────────────── */
+    .explain-card {
+      display: flex; gap: 0.8rem; padding: 1rem; border-radius: 1rem;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+    }
+    html.dark .explain-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .explain-icon {
+      width: 34px; height: 34px; border-radius: 0.7rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .explain-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    /* ── Takeaway checklist ─────────────────────── */
+    .takeaway {
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+    .takeaway-item { display: flex; align-items: flex-start; gap: 0.6rem; }
+    .takeaway-item + .takeaway-item { margin-top: 0.6rem; }
+
+    /* ── Animate / reveal buttons ─────────────── */
+    .mf-reveal-btn {
+      font-size: 0.72rem; font-weight: 800; color: #7c3aed;
+      background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.25);
+      padding: 0.35rem 0.75rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s;
+    }
+    .mf-reveal-btn:hover { background: rgba(124,58,237,0.15); }
+    html.dark .mf-reveal-btn { color: #c4b5fd; border-color: rgba(167,139,250,0.3); background: rgba(124,58,237,0.14); }
+
+    /* ── Analogy taglines ──────────────────────── */
+    .wd-tagline {
+      margin-top: 0.7rem; font-size: 0.76rem; font-weight: 800; text-align: center;
+      padding: 0.45rem 0.8rem; border-radius: 9999px;
+    }
+    .wd-tagline-without { color: #b91c1c; background: rgba(239,68,68,0.08); }
+    html.dark .wd-tagline-without { color: #fca5a5; background: rgba(239,68,68,0.12); }
+    .wd-tagline-with { color: #047857; background: rgba(16,185,129,0.08); }
+    html.dark .wd-tagline-with { color: #6ee7b7; background: rgba(16,185,129,0.12); }
+
+    /* ── Mapping table ─────────────────────────── */
+    .map-table-wrap { border-radius: 0.8rem; overflow: hidden; border: 1px solid #e2e8f0; }
+    html.dark .map-table-wrap { border-color: #334155; }
+    .map-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .map-table th, .map-table td {
+      padding: 0.6rem 0.9rem; text-align: left; font-size: 0.85rem; font-weight: 600; color: #334155;
+      background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+    }
+    html.dark .map-table th, html.dark .map-table td { background: rgba(15,23,42,0.5); color: #cbd5e1; border-bottom-color: #334155; }
+    .map-table tbody tr:last-child th, .map-table tbody tr:last-child td { border-bottom: none; }
+    .map-table thead tr.map-row-head th {
+      background: rgba(124,58,237,0.07); font-weight: 800;
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: #7c3aed;
+      border-bottom: 1px solid rgba(124,58,237,0.2);
+    }
+    html.dark .map-table thead tr.map-row-head th { background: rgba(167,139,250,0.12); color: #c4b5fd; border-bottom-color: rgba(167,139,250,0.3); }
+    .map-table th:first-child, .map-table td:first-child { border-right: 1px solid #e2e8f0; }
+    html.dark .map-table th:first-child, html.dark .map-table td:first-child { border-right-color: #334155; }
+
+
+    /* ── Summary panel ─────────────────────────── */
+    .summary-panel {
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem; text-align: center;
+      padding: 2rem 1.75rem; border-radius: 1.25rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.03));
+      border: 1.5px solid rgba(124,58,237,0.2);
+    }
+    html.dark .summary-panel { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(167,139,250,0.03)); border-color: rgba(167,139,250,0.25); }
+    .summary-text { font-size: 1rem; font-weight: 600; color: #334155; line-height: 1.7; max-width: 40rem; }
+    html.dark .summary-text { color: #e2e8f0; }
+    .summary-text strong { color: #6d28d9; }
+    html.dark .summary-text strong { color: #c4b5fd; }
+
+
+    /* ── Next module (coming soon) pill ─────────── */
+    .next-soon {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.5rem; border-radius: 9999px;
+      border: 1.5px dashed rgba(148,163,184,0.4); color: #94a3b8;
+      font-size: 0.875rem; font-weight: 700; cursor: not-allowed; background: rgba(148,163,184,0.05);
+    }
+    html.dark .next-soon { border-color: rgba(100,116,139,0.4); color: #64748b; }
+    @keyframes slideIn {
+      from { opacity:0; transform:translateY(8px) scale(0.98); }
+      to   { opacity:1; transform:translateY(0)   scale(1); }
+    }
+    .slide-in { animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30">
+          <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+          <span class="text-violet-700 dark:text-violet-400 text-xs font-bold tracking-wide">Model Context Protocol (MCP)</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="plug" class="w-7 h-7 text-violet-600 dark:text-violet-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">What is MCP?</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          Model Context Protocol, or <strong class="text-slate-800 dark:text-slate-200">MCP</strong>, is a standard way for AI applications to connect with external domains and systems. Instead of every AI app learning a different way to reach every domain, MCP provides one common approach.
+        </p>
+
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="badge badge-beginner">🟢 Beginner</span>
+          <span class="badge" style="background:rgba(124,58,237,0.1); color:#7c3aed;">
+            <i data-lucide="clock" style="width:11px;height:11px;margin-right:4px;"></i> 5–7 min
+          </span>
+        </div>
+
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simplified learning demo</strong>. No code or technical details, just the core idea.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. WHY THIS MATTERS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="lightbulb" style="width:12px;height:12px;"></i>
+          Why This Matters
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Without a common standard, every AI application needs a different way to connect to every shop or service. That becomes hard to build, hard to maintain, and hard to scale. MCP makes this simpler by providing a shared communication approach, just like a food court has one waiter who can bring your order from any stall, so you don't need to walk up to each one yourself.
+        </p>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="waiter-wrap wd-without">
+            <p class="wd-scenario-label wd-label-without">🚫 Without MCP</p>
+            <div class="grid grid-cols-3 gap-2 py-2">
+              <div class="flex flex-col items-center gap-1">
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person 1</div>
+                <div class="wd-vstub"></div>
+                <div class="flex flex-col gap-1 items-stretch">
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-1">
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person 2</div>
+                <div class="wd-vstub"></div>
+                <div class="flex flex-col gap-1 items-stretch">
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-1">
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person N</div>
+                <div class="wd-vstub"></div>
+                <div class="flex flex-col gap-1 items-stretch">
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                </div>
+              </div>
+            </div>
+            <p class="wd-caption">Every person needs their own custom-built connection to every shop.</p>
+          </div>
+          <div class="waiter-wrap wd-with">
+            <p class="wd-scenario-label wd-label-with">✅ With MCP</p>
+            <div class="flex flex-col items-center gap-2 py-2">
+              <div class="flex flex-wrap justify-center gap-2">
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person 1</div>
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person 2</div>
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person N</div>
+              </div>
+              <div class="wd-vline"></div>
+              <div class="wd-node wd-waiter">🧑‍🍳 Food Court Waiter (MCP)</div>
+              <div class="wd-vline"></div>
+              <div class="flex flex-wrap justify-center gap-2">
+                <div class="wd-node wd-shop">🍕 Pizza Shop</div>
+                <div class="wd-node wd-shop">🍔 Burger Shop</div>
+                <div class="wd-node wd-shop">🍦 Ice Cream Shop</div>
+                <div class="wd-node wd-shop">🥪 Sandwich Shop</div>
+              </div>
+            </div>
+            <p class="wd-caption">Every person uses the same food-court process to reach the shops.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <div class="pg-grid what-mcp-playground">
+
+        <!-- ── LEFT ─────────────────────────── -->
+        <div class="flex flex-col gap-5">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
+              Interactive Playground
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+              Click a request below. Watch what happens without MCP compared to with MCP, side by side.
+            </p>
+            <div class="flex flex-col gap-2.5" id="requestList"></div>
+          </section>
+        </div><!-- /LEFT -->
+
+        <!-- ── RIGHT ────────────────────────── -->
+        <div class="pg-grid-right">
+          <section class="module-card">
+            <div class="mod-label">
+              <i data-lucide="eye" style="width:12px;height:12px;"></i>
+              Live Visualization
+            </div>
+
+            <div class="what-mcp-compare">
+              <div class="what-mcp-compare-panel">
+                <div class="flow-panel-title text-red-500 dark:text-red-400">🚫 Without MCP</div>
+                <div class="flow-row mb-1" id="pgFlowWithout"></div>
+                <div class="outcome-bubble" id="pgOutcomeWithout">Pick a request to see what happens.</div>
+              </div>
+              <div class="what-mcp-compare-panel">
+                <div class="flow-panel-title text-violet-600 dark:text-violet-400">✅ With MCP</div>
+                <div class="flow-row mb-1" id="pgFlowWith"></div>
+                <div class="outcome-bubble" id="pgOutcomeWith">Pick a request to see what happens.</div>
+              </div>
+            </div>
+          </section>
+        </div><!-- /RIGHT -->
+
+      </div><!-- /pg-grid -->
+
+
+
+      <!-- ══════════════════════════════════════
+           5. CONNECT THE ANALOGY TO MCP + WHAT IS HAPPENING?
+      ══════════════════════════════════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="link" style="width:12px;height:12px;"></i>
+            Connect the Analogy to MCP
+          </div>
+          <div class="map-table-wrap mb-4">
+            <table class="map-table">
+              <thead>
+                <tr class="map-row-head">
+                  <th>🍽️ Food Court World</th>
+                  <th>🤖 AI World</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>You</td>
+                  <td>User</td>
+                </tr>
+                <tr>
+                  <td>Food Court Waiter</td>
+                  <td>MCP connection layer</td>
+                </tr>
+                <tr>
+                  <td>Stalls</td>
+                  <td>External systems</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            MCP plays a similar role for AI applications. Instead of building a different connection pattern for every external domain, the AI app can use <strong class="text-slate-800 dark:text-slate-200">one standard way</strong> to communicate with many domains.
+          </p>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="help-circle" style="width:12px;height:12px;"></i>
+            What is Happening?
+          </div>
+          <div class="flex flex-col gap-3">
+            <div class="explain-card">
+              <div class="explain-icon"><i data-lucide="brain" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">The <strong class="text-slate-800 dark:text-slate-200">LLM still does the thinking</strong>. It decides what to ask for and how to explain the result.</p>
+            </div>
+            <div class="explain-card">
+              <div class="explain-icon"><i data-lucide="shield-off" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"><strong class="text-slate-800 dark:text-slate-200">MCP does not replace the LLM.</strong> It gives the AI app a standard path to reach outside systems.</p>
+            </div>
+            <div class="explain-card">
+              <div class="explain-icon"><i data-lucide="link-2" style="width:16px;height:16px;"></i></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">MCP is a <strong class="text-slate-800 dark:text-slate-200">standard way to communicate</strong>, so any AI app can connect to any MCP-ready tool.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           7. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xl">💡</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Key Takeaways</span>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP is a <strong class="text-slate-900 dark:text-white">standard way</strong> for AI applications to connect with external domains and systems.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">It <strong class="text-slate-900 dark:text-white">reduces the need</strong> for many custom integrations.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">It helps AI applications work with <strong class="text-slate-900 dark:text-white">business domains and data sources</strong>.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP <strong class="text-slate-900 dark:text-white">does not replace</strong> the AI model.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP makes external connections <strong class="text-slate-900 dark:text-white">easier to understand and manage</strong>.</p>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           8. TRY THIS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-8 open" id="tipsTryThis">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="true">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🧪</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Try This</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">5 ideas</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Switch between "Without MCP" and "With MCP."</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Select different requests in the playground.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Watch where the request goes in each mode.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Count how many connections are needed in each mode.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Think of another real-world app that works like a common interface.</span>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           9. SUMMARY
+      ══════════════════════════════════════ -->
+      <div class="summary-panel mb-8">
+        <span class="text-2xl">🍽️🧑‍🍳</span>
+        <p class="summary-text">
+          Just like a food court has one process for ordering from different stalls, <strong>MCP gives AI applications one standard way to connect with many external domains.</strong>
+        </p>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           10. NEXT MODULE
+      ══════════════════════════════════════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="why-mcp.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Why MCP?
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Model Context Protocol (MCP)');</script>
+
+
+  <script src="../../js/utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     DATA
+  ═══════════════════════════════════════════════ */
+  const REQUESTS = [
+    { id:'combo1', icon:'shopping-bag', label:'Order a pizza & a burger',              systems:['Pizza Shop','Burger Shop'] },
+    { id:'combo2', icon:'shopping-bag', label:'Order ice cream & a sandwich',          systems:['Ice Cream Shop','Sandwich Shop'] },
+    { id:'combo3', icon:'shopping-bag', label:'Order pizza, ice cream & a sandwich',   systems:['Pizza Shop','Ice Cream Shop','Sandwich Shop'] },
+    { id:'comboAll', icon:'shopping-bag', label:'Order from all 4 stalls',             systems:['Pizza Shop','Burger Shop','Ice Cream Shop','Sandwich Shop'] },
+  ];
+
+  const ALL_STALLS = ['Pizza Shop', 'Burger Shop', 'Ice Cream Shop', 'Sandwich Shop'];
+
+  const FOOD_MAP = {
+    'Pizza Shop': 'a pepperoni pizza',
+    'Burger Shop': 'a cheeseburger',
+    'Ice Cream Shop': 'a scoop of chocolate ice cream',
+    'Sandwich Shop': 'a club sandwich',
+  };
+
+  function joinList(arr) {
+    if (arr.length === 1) return arr[0];
+    if (arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+    return `${arr.slice(0, -1).join(', ')} and ${arr[arr.length - 1]}`;
+  }
+
+  let currentRequestIndex = -1;
+  let pgAnimId = 0;
+
+  /* ═══════════════════════════════════════════════
+     RENDER: node chain markup (hub-and-spoke layout)
+  ═══════════════════════════════════════════════ */
+  function mcpNodeHTML(id, emoji, label, extraClass = '', idle = false) {
+    return `<div class="mcp-node ${extraClass}" id="${id}" data-idle="${idle ? 'true' : 'false'}"><div class="mcp-node-emoji">${emoji}</div><div class="mcp-node-label">${label}</div></div>`;
+  }
+
+  function branchesHTML(prefix, groupIdx, systems, emoji, activeSystems = systems, showIdle = false) {
+    const activeSet = new Set(activeSystems);
+    return `<div class="wd-branches">${systems.map((s, i) => `
+      <div class="wd-branch">
+        <div class="wd-vstub"></div>
+        ${mcpNodeHTML(`${prefix}-${groupIdx}-${i}`, emoji, s, showIdle && !activeSet.has(s) ? 'node-idle' : '', showIdle && !activeSet.has(s))}
+      </div>
+    `).join('')}</div>`;
+  }
+
+  function nodeChainHTML(mode, prefix, systems) {
+    if (mode === 'without') {
+      // No shared hub: LLM must branch out with a separate direct connection to every stall.
+      return `
+        <div class="flex flex-col items-center">
+          ${mcpNodeHTML(prefix + '-0', '💬', 'User')}
+          <div class="wd-vline"></div>
+          ${mcpNodeHTML(prefix + '-1', '🤖', 'AI App / Host')}
+          ${branchesHTML(prefix, 2, systems, '🧩')}
+        </div>
+      `;
+    }
+    // With MCP: one shared hub (the waiter) reaches every stall, then a single response returns.
+    return `
+      <div class="flex flex-col items-center">
+        ${mcpNodeHTML(prefix + '-0', '💬', 'User')}
+        <div class="wd-vline"></div>
+        ${mcpNodeHTML(prefix + '-1', '🤖', 'AI App / Host')}
+        <div class="wd-vline"></div>
+        ${mcpNodeHTML(prefix + '-2', '🧑\u200d🍳', 'Food Court Waiter (MCP)')}
+        ${branchesHTML(prefix, 3, ALL_STALLS, '🗂️', systems, true)}
+        <div class="wd-vline"></div>
+        ${mcpNodeHTML(prefix + '-4', '✅', 'Response')}
+      </div>
+    `;
+  }
+
+  function idsForChain(mode, prefix, systems) {
+    return mode === 'without'
+      ? [prefix + '-0', prefix + '-1', ...Array.from({ length: systems.length }, (_, i) => `${prefix}-2-${i}`)]
+      : [prefix + '-0', prefix + '-1', prefix + '-2', ...systems.map(s => `${prefix}-3-${ALL_STALLS.indexOf(s)}`), prefix + '-4'];
+  }
+
+  function allIdsForChain(mode, prefix, systems) {
+    return mode === 'without'
+      ? idsForChain(mode, prefix, systems)
+      : [prefix + '-0', prefix + '-1', prefix + '-2', ...ALL_STALLS.map((_, i) => `${prefix}-3-${i}`), prefix + '-4'];
+  }
+
+  function resetChain(ids) {
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.className = 'mcp-node' + (el.dataset.idle === 'true' ? ' node-idle' : '');
+    });
+  }
+
+
+  /* ═══════════════════════════════════════════════
+     SECTION 3: INTERACTIVE PLAYGROUND (both flows)
+  ═══════════════════════════════════════════════ */
+  function renderRequestList() {
+    const wrap = document.getElementById('requestList');
+    wrap.innerHTML = REQUESTS.map((r, i) => `
+      <button class="req-btn" id="req-${i}" onclick="selectRequest(${i})">
+        <span class="req-icon-wrap"><i data-lucide="${r.icon}" style="width:15px;height:15px;"></i></span>
+        <span>${r.label}</span>
+      </button>
+    `).join('');
+    refreshIcons(wrap);
+  }
+
+  function selectRequest(idx) {
+    currentRequestIndex = idx;
+    document.querySelectorAll('.req-btn').forEach((btn, i) => btn.classList.toggle('req-active', i === idx));
+
+    const req = REQUESTS[idx];
+
+    document.getElementById('pgFlowWithout').innerHTML = nodeChainHTML('without', 'pgw', req.systems);
+    document.getElementById('pgFlowWith').innerHTML = nodeChainHTML('with', 'pgm', req.systems);
+    document.getElementById('pgOutcomeWithout').className = 'outcome-bubble';
+    document.getElementById('pgOutcomeWithout').textContent = 'Watching the request travel…';
+    document.getElementById('pgOutcomeWith').className = 'outcome-bubble';
+    document.getElementById('pgOutcomeWith').textContent = 'Watching the request travel…';
+
+    animatePlayground(req);
+  }
+
+  function animatePlayground(req) {
+    const myId = ++pgAnimId;
+    const systems = req.systems;
+    const withoutIds = idsForChain('without', 'pgw', systems);
+    const withIds = idsForChain('with', 'pgm', systems);
+
+    resetChain(withoutIds);
+    resetChain(allIdsForChain('with', 'pgm', systems));
+
+    // Without MCP: User → AI app appear first, then each stall lights up one at a time,
+    // as separate, disconnected connections, no shared hub (you walk to each one yourself).
+    withoutIds.forEach((id, i) => {
+      setTimeout(() => {
+        if (myId !== pgAnimId) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = 'mcp-node ' + (i >= 2 ? 'node-blocked' : 'node-active') + ' slide-in';
+      }, i * 400);
+    });
+    setTimeout(() => {
+      if (myId !== pgAnimId) return;
+      const outcome = document.getElementById('pgOutcomeWithout');
+      outcome.className = 'outcome-bubble outcome-blocked';
+      outcome.textContent = `🤖 AI App: "I need a separate custom connection to ${joinList(systems)} and must handle each one differently."`;
+    }, withoutIds.length * 400);
+
+    // With MCP: User → AI app → Waiter (hub) appear one at a time, then the waiter reaches
+    // every stall through a shared process, then the
+    // response returns as a single result.
+    const preShopSteps = 3; // User, LLM, Waiter
+    const shopStart = preShopSteps * 400;
+    const responseStart = shopStart + 400;
+    withIds.forEach((id, i) => {
+      const isResponse = i === withIds.length - 1;
+      const delay = i < preShopSteps ? i * 400 : (isResponse ? responseStart : shopStart);
+      setTimeout(() => {
+        if (myId !== pgAnimId) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = 'mcp-node ' + (isResponse ? 'node-success' : 'node-active') + ' slide-in';
+      }, 300 + delay);
+    });
+    setTimeout(() => {
+      if (myId !== pgAnimId) return;
+      const outcome = document.getElementById('pgOutcomeWith');
+      outcome.className = 'outcome-bubble outcome-success';
+      const foods = systems.map(s => FOOD_MAP[s] || 'your order');
+      outcome.textContent = `✅ You ask through the waiter, and the same ordering process brings back ${joinList(foods)}.`;
+    }, 300 + responseStart + 400);
+  }
+
+  /* ═══════════════════════════════════════════════
+     HELPERS
+  ═══════════════════════════════════════════════ */
+  function refreshIcons(el) {
+    if (typeof lucide === 'undefined') return;
+    el ? lucide.createIcons({ nodes: [el] }) : lucide.createIcons();
+  }
+
+  /* ═══════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderRequestList();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+    }
+  });
+  </script>
+
+</body>
+</html>

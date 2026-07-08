@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Learn the conceptual difference between MCP and Function Calling with interactive diagrams." />
+  <title>MCP vs Function Calling · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A9</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    .module-card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b;
+      border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #7c3aed;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a78bfa; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #7c3aed;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.25);
+      background: rgba(124,58,237,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(124,58,237,0.13); transform: translateX(-2px); }
+    html.dark .back-btn {
+      color: #a78bfa;
+      border-color: rgba(167,139,250,0.28);
+      background: rgba(124,58,237,0.1);
+    }
+
+    .flow-chain {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.65rem 0;
+    }
+    .flow-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.9rem;
+      border-radius: 0.9rem;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 0.8rem;
+      font-weight: 800;
+      white-space: nowrap;
+      position: relative;
+      transition: all 0.28s ease;
+    }
+    html.dark .flow-node {
+      background: rgba(15,23,42,0.5);
+      border-color: #334155;
+      color: #94a3b8;
+    }
+    .flow-node.current {
+      border-color: #a78bfa;
+      background: rgba(124,58,237,0.12);
+      color: #5b21b6;
+      transform: scale(1.03);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.1);
+      animation: nodePulse 0.9s ease-in-out infinite;
+      z-index: 2;
+    }
+    .flow-node.current.phase-function {
+      border-color: #93c5fd;
+      background: rgba(59,130,246,0.12);
+      color: #1d4ed8;
+      box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+      animation: nodePulseBlue 0.9s ease-in-out infinite;
+    }
+    .flow-node.current.phase-mcp {
+      border-color: #c4b5fd;
+      background: rgba(124,58,237,0.12);
+      color: #6d28d9;
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.1);
+    }
+    .flow-node.current.phase-system {
+      border-color: #6ee7b7;
+      background: rgba(16,185,129,0.12);
+      color: #047857;
+      box-shadow: 0 0 0 4px rgba(16,185,129,0.1);
+      animation: nodePulseGreen 0.9s ease-in-out infinite;
+    }
+    .flow-node.done {
+      border-color: #a78bfa;
+      background: rgba(124,58,237,0.06);
+      color: #6d28d9;
+    }
+    html.dark .flow-node.done {
+      border-color: #7c3aed;
+      background: rgba(167,139,250,0.1);
+      color: #ddd6fe;
+    }
+    .flow-node .node-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    .flow-node.current .node-icon { background: rgba(255,255,255,0.55); }
+    html.dark .flow-node .node-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+    .flow-line {
+      width: 2px;
+      height: 18px;
+      background: #cbd5e1;
+    }
+    html.dark .flow-line { background: #334155; }
+    .server-branches {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.15rem;
+      padding-top: 0.85rem;
+      border-top: 2px solid #cbd5e1;
+    }
+    @media (min-width: 760px) {
+      .server-branches { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    html.dark .server-branches { border-top-color: #334155; }
+    .server-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      opacity: 0.5;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .server-branch.active {
+      opacity: 1;
+      transform: translateY(-2px);
+    }
+    .server-branch .flow-node {
+      width: 100%;
+      justify-content: center;
+      white-space: normal;
+      text-align: center;
+      font-size: 0.72rem;
+      padding: 0.5rem 0.55rem;
+    }
+    .packet {
+      position: absolute;
+      right: -0.55rem;
+      top: -0.55rem;
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 9999px;
+      display: grid;
+      place-items: center;
+      background: #f5f3ff;
+      border: 2px solid #7c3aed;
+      font-size: 0.72rem;
+      animation: popIn 0.25s ease-out;
+    }
+    html.dark .packet { background: #1e1b2e; border-color: #c4b5fd; }
+    .step-tip {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 0.7rem);
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: 220px;
+      padding: 0.5rem 0.65rem;
+      border-radius: 0.7rem;
+      background: #1e293b;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 750;
+      line-height: 1.35;
+      text-align: center;
+      box-shadow: 0 10px 22px rgba(15,23,42,0.18);
+      z-index: 5;
+      animation: tipPop 0.22s ease-out;
+      pointer-events: none;
+    }
+    .step-tip::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: #1e293b;
+    }
+    .step-tip.phase-function { background: #2563eb; }
+    .step-tip.phase-function::after { border-top-color: #2563eb; }
+    .step-tip.phase-mcp { background: #7c3aed; }
+    .step-tip.phase-mcp::after { border-top-color: #7c3aed; }
+    .step-tip.phase-system { background: #059669; }
+    .step-tip.phase-system::after { border-top-color: #059669; }
+
+    .status-box {
+      margin-top: 0.9rem;
+      padding: 0.75rem 0.95rem;
+      border-radius: 0.9rem;
+      border: 1.5px dashed #e2e8f0;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 650;
+      line-height: 1.55;
+      min-height: 52px;
+      transition: all 0.3s ease;
+    }
+    html.dark .status-box { border-color: #334155; color: #64748b; }
+    .status-box.active {
+      border-style: solid;
+      border-color: rgba(124,58,237,0.3);
+      background: rgba(124,58,237,0.06);
+      color: #6d28d9;
+    }
+    html.dark .status-box.active { background: rgba(167,139,250,0.1); color: #ede9fe; }
+    .status-box.success {
+      border-style: solid;
+      border-color: rgba(16,185,129,0.3);
+      background: rgba(16,185,129,0.07);
+      color: #047857;
+    }
+    html.dark .status-box.success { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+
+    .pill-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      padding: 0.35rem;
+      border-radius: 0.95rem;
+      background: rgba(148,163,184,0.08);
+      border: 1px solid rgba(148,163,184,0.18);
+      margin-bottom: 1rem;
+    }
+    html.dark .pill-toggle { background: rgba(51,65,85,0.35); border-color: rgba(71,85,105,0.45); }
+    .pill-toggle button {
+      border: 0;
+      border-radius: 0.75rem;
+      background: transparent;
+      color: #64748b;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.7rem 0.8rem;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .pill-toggle button.active {
+      background: #fff;
+      color: #6d28d9;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.08);
+    }
+    html.dark .pill-toggle button { color: #94a3b8; }
+    html.dark .pill-toggle button.active {
+      background: rgba(124,58,237,0.2);
+      color: #ede9fe;
+      box-shadow: none;
+    }
+
+    .compare-panel {
+      border-radius: 1.05rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 1rem;
+    }
+    html.dark .compare-panel { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .purpose-card {
+      margin-bottom: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem;
+      background: rgba(124,58,237,0.06);
+      border: 1px solid rgba(124,58,237,0.18);
+      color: #6d28d9;
+      font-size: 0.83rem;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    html.dark .purpose-card { background: rgba(167,139,250,0.08); border-color: rgba(167,139,250,0.25); color: #ddd6fe; }
+    .compare-panel.focused {
+      border-color: rgba(124,58,237,0.42);
+      background: rgba(124,58,237,0.05);
+      box-shadow: 0 0 0 4px rgba(124,58,237,0.08);
+    }
+    html.dark .compare-panel.focused {
+      border-color: rgba(167,139,250,0.42);
+      background: rgba(167,139,250,0.08);
+      box-shadow: 0 0 0 4px rgba(167,139,250,0.08);
+    }
+    .same-request {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      text-align: center;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      border: 1.5px solid rgba(124,58,237,0.18);
+      background: rgba(124,58,237,0.05);
+      color: #6d28d9;
+      font-size: 0.9rem;
+      font-weight: 850;
+    }
+    html.dark .same-request { border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.08); color: #ddd6fe; }
+    .job-question {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(124,58,237,0.1);
+      color: #6d28d9;
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+    html.dark .job-question { background: rgba(167,139,250,0.15); color: #ddd6fe; }
+    .job-answer {
+      padding: 0.85rem 0.95rem;
+      border-radius: 0.95rem;
+      border: 1.5px solid #e2e8f0;
+      background: rgba(255,255,255,0.7);
+      color: #334155;
+      font-size: 0.92rem;
+      font-weight: 850;
+      line-height: 1.55;
+      margin-bottom: 0.8rem;
+    }
+    html.dark .job-answer { border-color: #334155; background: rgba(15,23,42,0.35); color: #e2e8f0; }
+    .job-note {
+      color: #64748b;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+    html.dark .job-note { color: #94a3b8; }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      margin-bottom: 1.25rem;
+    }
+    @media (min-width: 900px) {
+      .example-grid { grid-template-columns: 260px 1fr; }
+    }
+    .request-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      color: #334155;
+      font-size: 0.83rem;
+      font-weight: 750;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .request-btn:hover { border-color: #c4b5fd; background: #faf5ff; }
+    .request-btn.active { background: rgba(124,58,237,0.08); border-color: #7c3aed; color: #6d28d9; }
+    html.dark .request-btn { background: rgba(15,23,42,0.5); border-color: #334155; color: #cbd5e1; }
+    html.dark .request-btn:hover { background: rgba(124,58,237,0.1); border-color: #6d28d9; }
+    html.dark .request-btn.active { background: rgba(124,58,237,0.16); border-color: #a78bfa; color: #e9d5ff; }
+    .request-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 0.6rem;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    html.dark .request-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 720px) {
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .result-card {
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 1rem;
+      min-height: 260px;
+    }
+    html.dark .result-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .result-head {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #7c3aed;
+      margin-bottom: 0.75rem;
+    }
+    html.dark .result-head { color: #a78bfa; }
+    .selected-chip {
+      padding: 0.65rem 0.8rem;
+      border-radius: 0.85rem;
+      border: 1.5px dashed #e2e8f0;
+      background: rgba(255,255,255,0.65);
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 750;
+      line-height: 1.5;
+      transition: all 0.3s ease;
+    }
+    html.dark .selected-chip { background: rgba(15,23,42,0.35); border-color: #334155; color: #94a3b8; }
+    .selected-chip.active {
+      border-style: solid;
+      border-color: rgba(124,58,237,0.32);
+      background: rgba(124,58,237,0.08);
+      color: #6d28d9;
+      animation: softPop 0.28s ease-out;
+    }
+    html.dark .selected-chip.active { background: rgba(167,139,250,0.1); color: #ede9fe; }
+
+    .combined-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    @media (min-width: 860px) {
+      .combined-wrap { grid-template-columns: minmax(0, 1fr) 280px; }
+    }
+    .what-card {
+      padding: 1rem;
+      border-radius: 1rem;
+      border: 1.5px solid rgba(124,58,237,0.18);
+      background: rgba(124,58,237,0.05);
+    }
+    html.dark .what-card { border-color: rgba(167,139,250,0.25); background: rgba(167,139,250,0.07); }
+    .what-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      padding: 0.8rem 0;
+      border-bottom: 1px dashed rgba(148,163,184,0.3);
+    }
+    .what-row:last-child { border-bottom: 0; }
+    .what-dot {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.75rem;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+      font-weight: 900;
+    }
+    html.dark .what-dot { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    html.dark .comparison-table { border-color: #334155; }
+    .comparison-table th {
+      background: rgba(124,58,237,0.08);
+      color: #6d28d9;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    html.dark .comparison-table th { background: rgba(167,139,250,0.12); color: #ddd6fe; }
+    .comparison-table td {
+      padding: 0.9rem 1rem;
+      border-top: 1px solid #e2e8f0;
+      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    html.dark .comparison-table td { border-color: #334155; color: #cbd5e1; }
+
+    .takeaway {
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22);
+      border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16);
+      border-left-color: #f59e0b;
+    }
+    .takeaway-item { display: flex; align-items: flex-start; gap: 0.6rem; }
+    .takeaway-item + .takeaway-item { margin-top: 0.6rem; }
+    .summary-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+      padding: 2rem 1.75rem;
+      border-radius: 1.25rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.03));
+      border: 1.5px solid rgba(124,58,237,0.2);
+    }
+    html.dark .summary-panel { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(167,139,250,0.03)); border-color: rgba(167,139,250,0.25); }
+    .summary-text { font-size: 1rem; font-weight: 600; color: #334155; line-height: 1.7; max-width: 42rem; }
+    html.dark .summary-text { color: #e2e8f0; }
+    .summary-text strong { color: #6d28d9; }
+    html.dark .summary-text strong { color: #c4b5fd; }
+    .next-soon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.5rem;
+      border-radius: 9999px;
+      border: 1.5px dashed rgba(148,163,184,0.4);
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-weight: 700;
+      cursor: not-allowed;
+      background: rgba(148,163,184,0.05);
+    }
+    html.dark .next-soon { border-color: rgba(100,116,139,0.4); color: #64748b; }
+
+    @keyframes nodePulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(124,58,237,0.1); }
+      50% { box-shadow: 0 0 0 7px rgba(124,58,237,0.05); }
+    }
+    @keyframes nodePulseBlue {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(59,130,246,0.1); }
+      50% { box-shadow: 0 0 0 7px rgba(59,130,246,0.05); }
+    }
+    @keyframes nodePulseGreen {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(16,185,129,0.1); }
+      50% { box-shadow: 0 0 0 7px rgba(16,185,129,0.05); }
+    }
+    @keyframes tipPop {
+      from { opacity: 0; transform: translateX(-50%) translateY(4px) scale(0.96); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.4); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes softPop {
+      from { opacity: 0.7; transform: translateY(5px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30">
+          <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+          <span class="text-violet-700 dark:text-violet-400 text-xs font-bold tracking-wide">Model Context Protocol (MCP)</span>
+        </div>
+      </div>
+
+      <!-- 1. OVERVIEW -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="blocks" class="w-7 h-7 text-violet-600 dark:text-violet-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">MCP vs Function Calling</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          Function Calling and MCP are different concepts. Function Calling helps an AI model decide what action to perform. MCP provides a standard way to communicate with external systems.
+        </p>
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="badge badge-intermediate">🟡 Intermediate</span>
+          <span class="badge" style="background:rgba(124,58,237,0.1); color:#7c3aed;">
+            <i data-lucide="clock" style="width:11px;height:11px;margin-right:4px;"></i> 8–10 min
+          </span>
+        </div>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This lesson stays conceptual and uses simple diagrams only.
+          </p>
+        </div>
+      </header>
+
+      <!-- 2. INTERACTIVE EXAMPLES -->
+      <div class="example-grid">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="mouse-pointer-click" style="width:12px;height:12px;"></i>
+            Interactive Examples
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+            Pick a request. Function Calling happens at the model step: the model chooses an action, then the host maps that action to the right MCP path.
+          </p>
+          <div class="flex flex-col gap-2.5" id="requestList"></div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="route" style="width:12px;height:12px;"></i>
+            Connected Result
+          </div>
+          <div class="result-card">
+            <div class="result-grid mb-4">
+              <div>
+                <div class="result-head">
+                  <i data-lucide="sparkle" style="width:14px;height:14px;"></i>
+                  Function Calling chooses
+                </div>
+                <div class="selected-chip" id="selectedFunction"></div>
+              </div>
+              <div>
+                <div class="result-head">
+                  <i data-lucide="network" style="width:14px;height:14px;"></i>
+                  Host maps to MCP
+                </div>
+                <div class="selected-chip" id="selectedMcpPath"></div>
+              </div>
+            </div>
+            <div class="flow-chain" id="exampleConnectedFlow"></div>
+            <div class="status-box" id="exampleStatus"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 3. COMPARISON + KEY TAKEAWAYS -->
+      <div class="grid lg:grid-cols-2 gap-5 mb-5">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="table-2" style="width:12px;height:12px;"></i>
+            Comparison Table
+          </div>
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Function Calling</th>
+                <th>MCP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Decides an action</td>
+                <td>Provides a communication standard</td>
+              </tr>
+              <tr>
+                <td>Used by the model</td>
+                <td>Used by the AI application</td>
+              </tr>
+              <tr>
+                <td>Focuses on actions</td>
+                <td>Focuses on external connections</td>
+              </tr>
+              <tr>
+                <td>Can be used without MCP</td>
+                <td>Can be used without Function Calling</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <div class="takeaway">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xl">💡</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Key Takeaways</span>
+          </div>
+          <div class="takeaway-item">
+            <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+            <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">Function Calling helps the model choose the action.</p>
+          </div>
+          <div class="takeaway-item">
+            <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+            <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">The host can map that action to the right MCP client.</p>
+          </div>
+          <div class="takeaway-item">
+            <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+            <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP carries the request to the MCP server and external system.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. TRY THIS -->
+      <div class="tips-panel mb-8 open" id="tipsTryThis">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="true">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🧪</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Try This</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">3 ideas</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Select different user requests.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Watch where Function Calling ends and MCP begins.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Observe what changes and what stays the same.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. SUMMARY -->
+      <div class="summary-panel mb-8">
+        <span class="text-2xl">🧠🔌</span>
+        <p class="summary-text">
+          Function Calling helps the AI model decide what to do. <strong>MCP provides a standard way to communicate with external domains and systems. They solve different problems and can work together.</strong>
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+        <a href="mcp-vs-apis.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: MCP vs Traditional APIs
+        </a>
+        <a href="where-mcp-fits.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-300/40">
+          Next: Where MCP Fits in AI Apps
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>writeSiteFooter('Model Context Protocol (MCP)');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  const REQUESTS = [
+    {
+      serverKey: 'operations',
+      icon: 'cloud-sun',
+      label: 'Is the office open for visitors today?',
+      functionChoice: 'Selected action: check operations status',
+      mcpPath: 'Path: Host → Operations Client → Operations Server → Workplace Systems',
+      functionMessage: 'Function Calling decides that an operations check is needed.',
+      mcpMessage: 'MCP provides the communication path to the operations domain.',
+      finalAnswer: 'The office is open for visitors today from 9 AM to 5 PM.',
+      mcpServer: 'Operations Server',
+      system: 'Workplace Systems',
+      systemIcon: 'building-2'
+    },
+    {
+      serverKey: 'knowledge',
+      icon: 'file-text',
+      label: 'What does the onboarding guide say about access setup?',
+      functionChoice: 'Selected action: read knowledge article',
+      mcpPath: 'Path: Host → Knowledge Client → Knowledge Server → Knowledge Sources',
+      functionMessage: 'Function Calling decides that a knowledge lookup is needed.',
+      mcpMessage: 'MCP provides the communication path to the knowledge domain.',
+      finalAnswer: 'The onboarding guide says new users need email, device, and app access set up before their first team session.',
+      mcpServer: 'Knowledge Server',
+      system: 'Knowledge Sources',
+      systemIcon: 'folder-open'
+    },
+    {
+      serverKey: 'engineering',
+      icon: 'git-branch',
+      label: 'Which engineering tasks are blocking checkout?',
+      functionChoice: 'Selected action: find blocking engineering tasks',
+      mcpPath: 'Path: Host → Engineering Client → Engineering Server → Engineering Tools',
+      functionMessage: 'Function Calling decides that engineering task lookup is the right action.',
+      mcpMessage: 'MCP provides the communication path to the engineering domain.',
+      finalAnswer: 'Two engineering tasks are blocking checkout: payment validation and error-state handling.',
+      mcpServer: 'Engineering Server',
+      system: 'Engineering Tools',
+      systemIcon: 'folder-git-2'
+    },
+    {
+      serverKey: 'customer',
+      icon: 'calendar',
+      label: 'What is the status of customer C-1048?',
+      functionChoice: 'Selected action: search customer record',
+      mcpPath: 'Path: Host → Customer Client → Customer Server → Customer Systems',
+      functionMessage: 'Function Calling decides that a customer lookup is needed.',
+      mcpMessage: 'MCP provides the communication path to the customer domain.',
+      finalAnswer: 'Customer C-1048 is active and has 2 open support cases.',
+      mcpServer: 'Customer Server',
+      system: 'Customer Systems',
+      systemIcon: 'users'
+    }
+  ];
+
+  const SERVER_OPTIONS = [
+    { key: 'operations', icon: 'building-2', server: 'Operations Server', system: 'Workplace Systems', systemIcon: 'building-2' },
+    { key: 'knowledge', icon: 'file-text', server: 'Knowledge Server', system: 'Knowledge Sources', systemIcon: 'folder-open' },
+    { key: 'engineering', icon: 'git-branch', server: 'Engineering Server', system: 'Engineering Tools', systemIcon: 'folder-git-2' },
+    { key: 'customer', icon: 'users', server: 'Customer Server', system: 'Customer Systems', systemIcon: 'users' }
+  ];
+
+  let currentRequestIndex = 0;
+  const flowRunIds = {};
+
+  function flowNode(id, label, icon) {
+    return `
+      <div class="flow-node" id="${id}">
+        <span class="node-icon"><i data-lucide="${icon}" style="width:14px;height:14px;"></i></span>
+        <span>${label}</span>
+      </div>
+    `;
+  }
+
+  function renderFlow(targetId, prefix, flow) {
+    const el = document.getElementById(targetId);
+    el.innerHTML = flow.map(([key, label, icon], i) => `
+      ${flowNode(`${prefix}-${key}`, label, icon)}
+      ${i < flow.length - 1 ? '<div class="flow-line"></div>' : ''}
+    `).join('');
+    refreshIcons(el);
+  }
+
+  function stepPhase(key) {
+    if (key === 'llm' || key === 'action') return 'function';
+    if (key === 'host' || key === 'client' || key.startsWith('server')) return 'mcp';
+    if (key.startsWith('system')) return 'system';
+    return 'neutral';
+  }
+
+  function stepTip(key) {
+    if (key.startsWith('server')) return 'Only the selected MCP server is used.';
+    if (key.startsWith('system')) return 'The selected server reaches its external system.';
+    const tips = {
+      user: 'The user asks for something.',
+      llm: 'Function Calling happens here, at the model decision step.',
+      action: 'The model selects the action to use.',
+      host: 'The host maps the action to an MCP client.',
+      client: 'The MCP client manages this connection.',
+    };
+    return tips[key] || '';
+  }
+
+  function animateFlow(prefix, keys, statusId, messages, speed = 650) {
+    const run = (flowRunIds[prefix] || 0) + 1;
+    flowRunIds[prefix] = run;
+    const status = statusId ? document.getElementById(statusId) : null;
+    if (status) {
+      status.className = 'status-box active';
+      status.textContent = messages.start;
+    }
+    const visited = new Set();
+    keys.forEach((key, index) => {
+      setTimeout(() => {
+        if (run !== flowRunIds[prefix]) return;
+        keys.forEach(k => {
+          const node = document.getElementById(`${prefix}-${k}`);
+          if (!node) return;
+          node.classList.remove('current', 'done', 'phase-function', 'phase-mcp', 'phase-system');
+          if (visited.has(k)) node.classList.add('done');
+          const packet = node.querySelector('.packet');
+          if (packet) packet.remove();
+          const tip = node.querySelector('.step-tip');
+          if (tip) tip.remove();
+        });
+        const current = document.getElementById(`${prefix}-${key}`);
+        if (current) {
+          const phase = stepPhase(key);
+          current.classList.add('current');
+          if (phase !== 'neutral') current.classList.add(`phase-${phase}`);
+          visited.add(key);
+          const packet = document.createElement('span');
+          packet.className = 'packet';
+          packet.textContent = '→';
+          current.appendChild(packet);
+          const tipText = stepTip(key);
+          if (tipText) {
+            const tip = document.createElement('span');
+            tip.className = `step-tip ${phase !== 'neutral' ? `phase-${phase}` : ''}`;
+            tip.textContent = tipText;
+            current.appendChild(tip);
+          }
+        }
+        if (status && index === keys.length - 1) {
+          status.className = 'status-box success';
+          status.textContent = messages.done;
+        }
+      }, index * speed);
+    });
+  }
+
+  function renderRequestList() {
+    const wrap = document.getElementById('requestList');
+    wrap.innerHTML = REQUESTS.map((req, i) => `
+      <button class="request-btn" id="request-${i}" onclick="selectRequest(${i})">
+        <span class="request-icon"><i data-lucide="${req.icon}" style="width:15px;height:15px;"></i></span>
+        <span>${req.label}</span>
+      </button>
+    `).join('');
+    refreshIcons(wrap);
+    syncRequestButtons();
+  }
+
+  function syncRequestButtons() {
+    document.querySelectorAll('.request-btn').forEach((btn, i) => btn.classList.toggle('active', i === currentRequestIndex));
+  }
+
+  function selectRequest(index) {
+    currentRequestIndex = index;
+    syncRequestButtons();
+    renderExample();
+    animateExample();
+  }
+
+  function renderExample() {
+    const req = REQUESTS[currentRequestIndex];
+    document.getElementById('selectedFunction').className = 'selected-chip active';
+    document.getElementById('selectedFunction').textContent = req.functionChoice;
+    document.getElementById('selectedMcpPath').className = 'selected-chip active';
+    document.getElementById('selectedMcpPath').textContent = req.mcpPath;
+
+    const flow = document.getElementById('exampleConnectedFlow');
+    flow.innerHTML = `
+      ${flowNode('ex-connected-user', 'User', 'user')}
+      <div class="flow-line"></div>
+      ${flowNode('ex-connected-llm', 'LLM decides action', 'brain')}
+      <div class="flow-line"></div>
+      ${flowNode('ex-connected-action', `Function Calling: ${req.functionChoice.replace('Selected action: ', '')}`, req.icon)}
+      <div class="flow-line"></div>
+      ${flowNode('ex-connected-host', 'Host maps action', 'bot')}
+      <div class="flow-line"></div>
+      ${flowNode('ex-connected-client', 'MCP Client', 'monitor')}
+      <div class="server-branches">
+        ${SERVER_OPTIONS.map(option => `
+          <div class="server-branch ${option.key === req.serverKey ? 'active' : ''}" id="branch-${option.key}">
+            ${flowNode(`ex-connected-server-${option.key}`, option.server, 'server')}
+            <div class="flow-line"></div>
+            ${flowNode(`ex-connected-system-${option.key}`, option.system, option.systemIcon)}
+          </div>
+        `).join('')}
+      </div>
+    `;
+    refreshIcons(flow);
+    document.getElementById('exampleStatus').className = 'status-box';
+    document.getElementById('exampleStatus').textContent = 'Function Calling happens at the model step. The host then maps the chosen action to the right MCP path.';
+  }
+
+  function animateExample() {
+    const req = REQUESTS[currentRequestIndex];
+    animateFlow('ex-connected', ['user', 'llm', 'action', 'host', 'client', `server-${req.serverKey}`, `system-${req.serverKey}`], 'exampleStatus', {
+      start: 'Function Calling happens at the model step. Then the host maps the selected action to an MCP client…',
+      done: `${req.functionMessage} The host maps that action to the ${req.mcpServer}. ${req.mcpMessage} Answer: "${req.finalAnswer}"`
+    }, 1000);
+  }
+
+  function renderAll() {
+    renderRequestList();
+    renderExample();
+  }
+
+  function refreshIcons(el) {
+    if (typeof lucide === 'undefined') return;
+    el ? lucide.createIcons({ nodes: [el] }) : lucide.createIcons();
+  }
+
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el => el.classList.toggle('hidden', dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderAll();
+    refreshIcons();
+    setTimeout(animateExample, 900);
+
+    if (window.Animations) {
+      Animations.init?.();
+    }
+  });
+  </script>
+</body>
+</html>

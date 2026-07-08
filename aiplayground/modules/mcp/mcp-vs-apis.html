@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Compare how traditional API integrations work versus MCP's common communication standard, an interactive intermediate demo." />
+  <title>MCP vs Traditional APIs · AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%80</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    .module-card {
+      background: white;
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b;
+      border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #7c3aed;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #a78bfa; }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #7c3aed;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(124,58,237,0.25);
+      background: rgba(124,58,237,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(124,58,237,0.13); transform: translateX(-2px); }
+    html.dark .back-btn {
+      color: #a78bfa;
+      border-color: rgba(167,139,250,0.28);
+      background: rgba(124,58,237,0.1);
+    }
+
+    .compare-note {
+      margin-top: 1rem;
+      padding: 0.8rem 1rem;
+      border-radius: 0.95rem;
+      border: 1px solid rgba(124,58,237,0.18);
+      background: rgba(124,58,237,0.06);
+      color: #6d28d9;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    html.dark .compare-note {
+      background: rgba(167,139,250,0.08);
+      border-color: rgba(167,139,250,0.25);
+      color: #ede9fe;
+    }
+
+    .many-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem 0.35rem 0.2rem;
+    }
+    .many-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.05rem;
+      border-radius: 1rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 2px solid #7c3aed;
+      background: rgba(124,58,237,0.1);
+      color: #6d28d9;
+      position: relative;
+    }
+    html.dark .many-node {
+      background: rgba(167,139,250,0.16);
+      border-color: #a78bfa;
+      color: #ede9fe;
+    }
+    .many-node.many-soft {
+      border-color: #ddd6fe;
+      background: rgba(237,233,254,0.75);
+    }
+    html.dark .many-node.many-soft {
+      border-color: rgba(167,139,250,0.35);
+      background: rgba(76,29,149,0.18);
+    }
+    .many-vline { width: 2px; height: 18px; background: #cbd5e1; }
+    html.dark .many-vline { background: #334155; }
+    .many-hline {
+      width: 100%;
+      max-width: 38rem;
+      height: 2px;
+      background: #cbd5e1;
+    }
+    html.dark .many-hline { background: #334155; }
+    .many-branches {
+      display: flex;
+      justify-content: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 42rem;
+      padding-top: 0.1rem;
+    }
+    .many-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1 1 140px;
+      min-width: 130px;
+      max-width: 180px;
+    }
+    .many-stub { width: 2px; height: 16px; background: #cbd5e1; }
+    html.dark .many-stub { background: #334155; }
+    .many-api {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      text-align: center;
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.95rem;
+      border: 1.5px solid #bfdbfe;
+      background: rgba(239,246,255,0.85);
+      color: #1d4ed8;
+      font-size: 0.75rem;
+      font-weight: 800;
+      width: 100%;
+      animation: nodeFloat 3.2s ease-in-out infinite;
+    }
+    html.dark .many-api {
+      border-color: rgba(96,165,250,0.35);
+      background: rgba(30,58,138,0.16);
+      color: #93c5fd;
+    }
+    .many-api small,
+    .many-system-label {
+      font-size: 0.64rem;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+    .many-api:nth-child(2) { animation-delay: 0.2s; }
+    .many-api:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── Format contrast: heterogeneous (Traditional) vs uniform (MCP) ── */
+    .many-api-a { border-color: #bfdbfe; background: rgba(239,246,255,0.85); color: #1d4ed8; }
+    html.dark .many-api-a { border-color: rgba(96,165,250,0.35); background: rgba(30,58,138,0.16); color: #93c5fd; }
+    .many-api-b { border-color: #fde68a; background: rgba(255,251,235,0.85); color: #b45309; }
+    html.dark .many-api-b { border-color: rgba(251,191,36,0.35); background: rgba(120,53,15,0.18); color: #fcd34d; }
+    .many-api-c { border-color: #fecdd3; background: rgba(255,241,242,0.85); color: #be123c; }
+    html.dark .many-api-c { border-color: rgba(251,113,133,0.35); background: rgba(136,19,55,0.18); color: #fda4af; }
+    .many-api-d { border-color: #a7f3d0; background: rgba(236,253,245,0.85); color: #047857; }
+    html.dark .many-api-d { border-color: rgba(52,211,153,0.35); background: rgba(6,78,59,0.18); color: #6ee7b7; }
+    .many-api-uniform { border-color: #ddd6fe; background: rgba(245,243,255,0.85); color: #6d28d9; }
+    html.dark .many-api-uniform { border-color: rgba(167,139,250,0.4); background: rgba(76,29,149,0.2); color: #ede9fe; }
+
+    .fm-chain {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .fm-node {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 0.85rem;
+      border: 2px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #94a3b8;
+      transition: all 0.3s;
+      white-space: nowrap;
+      position: relative;
+    }
+    html.dark .fm-node {
+      background: rgba(15,23,42,0.5);
+      border-color: #334155;
+      color: #64748b;
+    }
+    .fm-node.node-current {
+      border-color: #7c3aed;
+      background: #7c3aed;
+      color: #fff;
+      box-shadow: 0 0 0 6px rgba(124,58,237,0.22), 0 6px 16px rgba(124,58,237,0.45);
+      transform: scale(1.08);
+      animation: fmPulse 0.9s ease-in-out infinite;
+      z-index: 2;
+    }
+    .fm-node.node-current .fm-node-icon { background: rgba(255,255,255,0.25); color: #fff; }
+    html.dark .fm-node.node-current {
+      border-color: #c4b5fd;
+      background: #7c3aed;
+      color: #fff;
+      box-shadow: 0 0 0 6px rgba(167,139,250,0.28), 0 6px 16px rgba(124,58,237,0.55);
+    }
+    html.dark .fm-node.node-current .fm-node-icon { background: rgba(255,255,255,0.22); color: #fff; }
+    .fm-node.node-visited {
+      border-color: #a78bfa;
+      background: rgba(124,58,237,0.06);
+      color: #7c3aed;
+    }
+    html.dark .fm-node.node-visited {
+      border-color: #7c3aed;
+      background: rgba(167,139,250,0.1);
+      color: #c4b5fd;
+    }
+    .fm-node.node-idle { opacity: 0.45; }
+    .fm-node-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 0.55rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    html.dark .fm-node-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+    .fm-vline { width: 2px; height: 16px; background: #cbd5e1; }
+    html.dark .fm-vline { background: #334155; }
+    .fm-hline-full {
+      width: 100%;
+      max-width: 32rem;
+      height: 2px;
+      background: #cbd5e1;
+    }
+    html.dark .fm-hline-full { background: #334155; }
+    .fm-branch-row {
+      display: flex;
+      width: 100%;
+      max-width: 32rem;
+      gap: 0.7rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .fm-col {
+      flex: 1 1 130px;
+      min-width: 130px;
+      max-width: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .fm-vline-small { width: 2px; height: 14px; background: #cbd5e1; }
+    html.dark .fm-vline-small { background: #334155; }
+    .fm-branch-node {
+      width: 100%;
+      flex-direction: column;
+      gap: 0.3rem;
+      justify-content: center;
+      text-align: center;
+      white-space: normal;
+      padding: 0.55rem 0.35rem;
+      font-size: 0.66rem;
+    }
+    .fm-branch-node .fm-node-icon { margin: 0 auto; }
+    .fm-node-seq {
+      animation: diagramStep 5s ease-in-out infinite;
+    }
+    .fm-node-seq:nth-of-type(1) { animation-delay: 0s; }
+    .fm-node-seq:nth-of-type(3) { animation-delay: 0.8s; }
+    .fm-node-seq:nth-of-type(5) { animation-delay: 1.6s; }
+    .fm-node-seq:nth-of-type(7) { animation-delay: 2.4s; }
+    .fm-node-seq:nth-of-type(9) { animation-delay: 3.2s; }
+
+    .fm-packet-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 1.35rem;
+      height: 1.35rem;
+      line-height: 1.35rem;
+      text-align: center;
+      font-size: 0.8rem;
+      border-radius: 9999px;
+      background: #fff;
+      border: 2px solid #7c3aed;
+      box-shadow: 0 2px 6px rgba(124,58,237,0.35);
+      z-index: 3;
+      animation: fmPacketPop 0.35s ease-out;
+    }
+    html.dark .fm-packet-badge { background: #1e1b2e; border-color: #c4b5fd; }
+    .fm-step-tip {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #fff;
+      background: #6d28d9;
+      padding: 0.28rem 0.55rem;
+      border-radius: 0.45rem;
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(109,40,217,0.35);
+      z-index: 4;
+      animation: fmTipPop 0.3s ease-out forwards;
+      pointer-events: none;
+    }
+    .fm-step-tip::before {
+      content: '';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-bottom-color: #6d28d9;
+    }
+    html.dark .fm-step-tip { background: #a78bfa; color: #1e1b2e; }
+    html.dark .fm-step-tip::before { border-bottom-color: #a78bfa; }
+
+    .req-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .req-btn:hover { border-color: #c4b5fd; background: #faf5ff; }
+    .req-btn.req-active { background: rgba(124,58,237,0.08); border-color: #7c3aed; color: #6d28d9; }
+    html.dark .req-btn { background: rgba(15,23,42,0.5); border-color: #334155; color: #cbd5e1; }
+    html.dark .req-btn:hover { background: rgba(124,58,237,0.1); border-color: #6d28d9; }
+    html.dark .req-btn.req-active { background: rgba(124,58,237,0.16); border-color: #a78bfa; color: #e9d5ff; }
+    .req-icon-wrap {
+      width: 30px;
+      height: 30px;
+      border-radius: 0.6rem;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    html.dark .req-icon-wrap { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      margin-bottom: 1.25rem;
+    }
+    @media (min-width: 900px) {
+      .compare-grid { grid-template-columns: 230px 1fr; }
+    }
+    .live-viz-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 640px) {
+      .live-viz-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .live-viz-col {
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 0.9rem 0.75rem 1rem;
+    }
+    html.dark .live-viz-col { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .live-viz-head {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #7c3aed;
+      margin-bottom: 0.6rem;
+    }
+    html.dark .live-viz-head { color: #a78bfa; }
+    .live-viz-output {
+      margin-top: 0.85rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 0.8rem;
+      font-size: 0.76rem;
+      font-weight: 700;
+      line-height: 1.5;
+      min-height: 2.6rem;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all 0.35s ease;
+      border: 1.5px dashed #e2e8f0;
+      color: #94a3b8;
+    }
+    html.dark .live-viz-output { border-color: #334155; color: #64748b; }
+    .live-viz-output.show { opacity: 1; transform: translateY(0); }
+    .live-viz-output strong { display: block; font-weight: 900; margin-bottom: 0.2rem; }
+    .format-card {
+      margin-top: 0.5rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 0.7rem;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(148,163,184,0.28);
+      color: #334155;
+      font-size: 0.7rem;
+      line-height: 1.55;
+    }
+    .format-pre {
+      margin: 0;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.68rem;
+      line-height: 1.55;
+    }
+    .output-answer {
+      margin-top: 0.55rem;
+      padding: 0.55rem 0.65rem;
+      border-radius: 0.7rem;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(148,163,184,0.28);
+      color: #334155;
+      font-size: 0.72rem;
+      line-height: 1.55;
+    }
+    html.dark .output-answer {
+      background: rgba(15,23,42,0.35);
+      border-color: rgba(100,116,139,0.35);
+      color: #cbd5e1;
+    }
+    .output-answer span {
+      display: block;
+      margin-bottom: 0.15rem;
+      font-weight: 900;
+      color: #475569;
+    }
+    html.dark .output-answer span { color: #e2e8f0; }
+    html.dark .format-card {
+      background: rgba(15,23,42,0.35);
+      border-color: rgba(100,116,139,0.35);
+      color: #cbd5e1;
+    }
+    .format-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.12rem 0;
+      border-bottom: 1px dashed rgba(148,163,184,0.24);
+    }
+    .format-row:last-child { border-bottom: 0; }
+    .format-key { font-weight: 900; color: #475569; }
+    html.dark .format-key { color: #e2e8f0; }
+    .format-value { text-align: right; color: #64748b; }
+    html.dark .format-value { color: #94a3b8; }
+    .live-viz-output.output-cost {
+      border-style: solid;
+      background: rgba(248,113,113,0.08);
+      border-color: rgba(248,113,113,0.28);
+      color: #b91c1c;
+    }
+    html.dark .live-viz-output.output-cost { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.32); color: #fca5a5; }
+    .live-viz-output.output-value {
+      border-style: solid;
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.28);
+      color: #047857;
+    }
+    html.dark .live-viz-output.output-value { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.32); color: #6ee7b7; }
+
+    .flow-direction {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #cbd5e1;
+      margin-top: 1.15rem;
+      margin-bottom: 0.75rem;
+      min-height: 1rem;
+      transition: color 0.3s;
+    }
+    html.dark .flow-direction { color: #475569; }
+    .flow-direction.dir-out { color: #7c3aed; }
+    html.dark .flow-direction.dir-out { color: #a78bfa; }
+    .flow-status {
+      margin-top: 0.75rem;
+      padding: 0.75rem 0.95rem;
+      border-radius: 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      line-height: 1.55;
+      min-height: 52px;
+      border: 1.5px dashed #e2e8f0;
+      color: #94a3b8;
+      background: transparent;
+      transition: all 0.35s;
+    }
+    html.dark .flow-status { border-color: #334155; color: #64748b; }
+    .flow-status.flow-status-active {
+      border-style: solid;
+      background: rgba(124,58,237,0.06);
+      border-color: rgba(124,58,237,0.3);
+      color: #6d28d9;
+    }
+    html.dark .flow-status.flow-status-active { background: rgba(167,139,250,0.1); color: #ede9fe; }
+    .flow-status.flow-status-success {
+      border-style: solid;
+      background: rgba(16,185,129,0.06);
+      border-color: rgba(16,185,129,0.3);
+      color: #047857;
+    }
+    html.dark .flow-status.flow-status-success { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+
+    .compare-caption {
+      margin-top: 0.75rem;
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.6;
+      text-align: center;
+    }
+    html.dark .compare-caption { color: #94a3b8; }
+
+    .bullet-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .bullet-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+      border-radius: 1rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    html.dark .bullet-row { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .bullet-dot {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 9999px;
+      background: #7c3aed;
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+    html.dark .bullet-dot { background: #c4b5fd; }
+
+    .use-card {
+      height: 100%;
+      border-radius: 1.15rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 1.2rem;
+    }
+    html.dark .use-card { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .use-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+      margin-bottom: 0.8rem;
+    }
+    html.dark .use-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+
+    .helper-select-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    @media (min-width: 768px) {
+      .helper-select-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    .helper-btn {
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      color: #475569;
+      border-radius: 0.95rem;
+      padding: 0.8rem 0.9rem;
+      font-size: 0.84rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .helper-btn:hover { border-color: #c4b5fd; background: #faf5ff; }
+    .helper-btn.active {
+      border-color: #7c3aed;
+      background: rgba(124,58,237,0.08);
+      color: #6d28d9;
+    }
+    html.dark .helper-btn { background: rgba(15,23,42,0.45); border-color: #334155; color: #cbd5e1; }
+    html.dark .helper-btn:hover { background: rgba(124,58,237,0.1); border-color: #6d28d9; }
+    html.dark .helper-btn.active { background: rgba(124,58,237,0.16); border-color: #a78bfa; color: #ede9fe; }
+
+    .scale-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 900px) {
+      .scale-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .scale-panel {
+      border-radius: 1.1rem;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 1rem;
+      min-height: 340px;
+    }
+    html.dark .scale-panel { background: rgba(15,23,42,0.5); border-color: #334155; }
+    .scale-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .scale-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+    }
+    html.dark .scale-count { background: rgba(167,139,250,0.16); color: #ddd6fe; }
+    .scale-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      min-height: 235px;
+    }
+    .scale-core {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 0.95rem;
+      border-radius: 0.95rem;
+      border: 2px solid #7c3aed;
+      background: rgba(124,58,237,0.1);
+      color: #6d28d9;
+      font-size: 0.8rem;
+      font-weight: 800;
+      transition: all 0.25s ease;
+    }
+    html.dark .scale-core { background: rgba(167,139,250,0.16); border-color: #a78bfa; color: #ede9fe; }
+    .scale-core.scale-active {
+      transform: scale(1.05);
+      box-shadow: 0 0 0 6px rgba(124,58,237,0.14);
+    }
+    .scale-user {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.85rem; border-radius: 0.95rem;
+      border: 1.5px solid #cbd5e1; background: #f8fafc; color: #94a3b8;
+      font-size: 0.74rem; font-weight: 700;
+    }
+    html.dark .scale-user { background: rgba(15,23,42,0.5); border-color: #334155; color: #64748b; }
+    .scale-vline { width: 2px; height: 18px; background: #cbd5e1; }
+    html.dark .scale-vline { background: #334155; }
+    .scale-hline {
+      width: 100%;
+      max-width: 16rem;
+      height: 2px;
+      background: #cbd5e1;
+    }
+    html.dark .scale-hline { background: #334155; }
+    .scale-branches {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .scale-branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 1 100px;
+      min-width: 86px;
+      max-width: 104px;
+      opacity: 0.35;
+      transform: translateY(8px) scale(0.96);
+      transition: all 0.28s ease;
+    }
+    .scale-branch.branch-on {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .scale-stub { width: 2px; height: 14px; background: #cbd5e1; }
+    html.dark .scale-stub { background: #334155; }
+
+    /* ── Multiple apps scenario ─────────────────── */
+    .scale-apps-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .scale-app-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 1 120px;
+      opacity: 0.35;
+      transform: translateY(8px) scale(0.96);
+      transition: all 0.28s ease;
+    }
+    .scale-app-col.branch-on {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .scale-merge-lines {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 14rem;
+    }
+    .scale-merge-line {
+      flex: 1;
+      height: 2px;
+      background: #cbd5e1;
+      margin-top: 9px;
+    }
+    html.dark .scale-merge-line { background: #334155; }
+    .scale-app-systems {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .scale-system-sm {
+      padding: 0.4rem 0.55rem;
+      font-size: 0.66rem;
+    }
+    .scale-shared-branches {
+      opacity: 0.35;
+      transform: translateY(8px) scale(0.96);
+      transition: all 0.28s ease;
+    }
+    .scale-shared-branches.branch-on {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .scale-system {
+      width: 100%;
+      text-align: center;
+      padding: 0.55rem 0.45rem;
+      border-radius: 0.8rem;
+      border: 1.5px solid #bfdbfe;
+      background: rgba(239,246,255,0.85);
+      color: #1d4ed8;
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    html.dark .scale-system { border-color: rgba(96,165,250,0.35); background: rgba(30,58,138,0.16); color: #93c5fd; }
+    .scale-layer {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.48rem 0.85rem;
+      border-radius: 0.85rem;
+      border: 1.5px solid #ddd6fe;
+      background: rgba(237,233,254,0.7);
+      color: #6d28d9;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    html.dark .scale-layer { border-color: rgba(167,139,250,0.35); background: rgba(76,29,149,0.18); color: #ddd6fe; }
+    .helper-note {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.95rem;
+      background: rgba(124,58,237,0.05);
+      border: 1px solid rgba(124,58,237,0.18);
+      color: #5b21b6;
+      font-size: 0.83rem;
+      line-height: 1.6;
+    }
+    html.dark .helper-note { background: rgba(167,139,250,0.08); border-color: rgba(167,139,250,0.24); color: #ddd6fe; }
+
+    .mini-fade-in {
+      animation: slideIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+
+    @keyframes fmPulse {
+      0%, 100% { box-shadow: 0 0 0 6px rgba(124,58,237,0.22), 0 6px 16px rgba(124,58,237,0.45); }
+      50% { box-shadow: 0 0 0 11px rgba(124,58,237,0.1), 0 6px 20px rgba(124,58,237,0.55); }
+    }
+    @keyframes fmPacketPop {
+      from { transform: scale(0.4); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes fmTipPop {
+      from { transform: translateX(-50%) scale(0.4); opacity: 0; }
+      to { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+    @keyframes diagramStep {
+      0%, 14%, 100% { transform: scale(1); box-shadow: none; }
+      7% { transform: scale(1.06); box-shadow: 0 0 0 6px rgba(124,58,237,0.14); }
+    }
+    @keyframes nodeFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Takeaway checklist ─────────────────────── */
+    .takeaway {
+      padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02));
+      border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b;
+    }
+    .takeaway-item { display: flex; align-items: flex-start; gap: 0.6rem; }
+    .takeaway-item + .takeaway-item { margin-top: 0.6rem; }
+
+    /* ── Summary panel ─────────────────────────── */
+    .summary-panel {
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem; text-align: center;
+      padding: 2rem 1.75rem; border-radius: 1.25rem;
+      background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.03));
+      border: 1.5px solid rgba(124,58,237,0.2);
+    }
+    html.dark .summary-panel { background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(167,139,250,0.03)); border-color: rgba(167,139,250,0.25); }
+    .summary-text { font-size: 1rem; font-weight: 600; color: #334155; line-height: 1.7; max-width: 40rem; }
+    html.dark .summary-text { color: #e2e8f0; }
+    .summary-text strong { color: #6d28d9; }
+    html.dark .summary-text strong { color: #c4b5fd; }
+
+    /* ── Next module pill ─────────────────────── */
+    .next-soon {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.5rem; border-radius: 9999px;
+      border: 1.5px dashed rgba(148,163,184,0.4); color: #94a3b8;
+      font-size: 0.875rem; font-weight: 700; cursor: not-allowed; background: rgba(148,163,184,0.05);
+    }
+    html.dark .next-soon { border-color: rgba(100,116,139,0.4); color: #64748b; }
+
+    .explain-icon {
+      width: 34px; height: 34px; border-radius: 0.7rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(124,58,237,0.1); color: #7c3aed;
+    }
+    html.dark .explain-icon { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-6xl mx-auto px-5 md:px-8">
+
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30">
+          <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+          <span class="text-violet-700 dark:text-violet-400 text-xs font-bold tracking-wide">Model Context Protocol (MCP)</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="git-fork" class="w-7 h-7 text-violet-600 dark:text-violet-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">MCP vs Traditional APIs</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          Before MCP, AI applications usually connected directly to every external system. MCP introduces a common communication standard between AI applications and external systems.
+        </p>
+
+        <div class="flex items-center gap-2 mb-4 flex-wrap">
+          <span class="badge badge-intermediate">🟡 Intermediate</span>
+          <span class="badge" style="background:rgba(124,58,237,0.1); color:#7c3aed;">
+            <i data-lucide="clock" style="width:11px;height:11px;margin-right:4px;"></i> 8–10 min
+          </span>
+        </div>
+
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simplified learning demo</strong>. It avoids technical details, code, and setup steps so you can focus on the core idea.
+          </p>
+        </div>
+      </header>
+
+      <!-- ══════════════════════════════════════
+           2. TRADITIONAL API APPROACH  +  3. MCP APPROACH
+      ══════════════════════════════════════ -->
+      <div class="grid md:grid-cols-2 gap-5 mb-5">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="git-fork" style="width:12px;height:12px;"></i>
+            Traditional API Approach
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            The host can already call many APIs directly, that part was never the problem. But every API has its own format, so the host must learn a new pattern for each system it adds.
+          </p>
+          <div class="many-wrap">
+            <div class="many-node many-soft"><i data-lucide="user" style="width:16px;height:16px;"></i> User</div>
+            <div class="many-vline"></div>
+            <div class="many-node"><i data-lucide="bot" style="width:16px;height:16px;"></i> Host</div>
+            <div class="many-vline"></div>
+            <div class="many-hline"></div>
+            <div class="many-branches mt-0.5">
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-a mini-fade-in"><i data-lucide="git-branch" style="width:16px;height:16px;"></i><span>Engineering APIs</span><span class="many-system-label">Own formats</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-b mini-fade-in" style="animation-delay:0.12s;"><i data-lucide="calendar" style="width:16px;height:16px;"></i><span>Operations APIs</span><span class="many-system-label">Own formats</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-c mini-fade-in" style="animation-delay:0.24s;"><i data-lucide="database" style="width:16px;height:16px;"></i><span>Customer APIs</span><span class="many-system-label">Own formats</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-d mini-fade-in" style="animation-delay:0.36s;"><i data-lucide="file-text" style="width:16px;height:16px;"></i><span>Knowledge APIs</span><span class="many-system-label">Own formats</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
+            If another AI application is created, those same four formats often need to be learned again, from scratch, inside that new application too.
+          </p>
+          <div class="compare-note">4 systems. 4 different formats to learn.</div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="layers-3" style="width:12px;height:12px;"></i>
+            MCP Approach
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+            With MCP, every system is reached through the same MCP pattern. The host learns that pattern once, then uses MCP clients and servers to reach different systems.
+          </p>
+          <div class="many-wrap">
+            <div class="many-node many-soft"><i data-lucide="user" style="width:16px;height:16px;"></i> User</div>
+            <div class="many-vline"></div>
+            <div class="many-node"><i data-lucide="bot" style="width:16px;height:16px;"></i> Host</div>
+            <div class="many-vline"></div>
+            <div class="many-hline"></div>
+            <div class="many-branches mt-0.5">
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-uniform mini-fade-in"><i data-lucide="git-branch" style="width:16px;height:16px;"></i><span>Engineering Server</span><span class="many-system-label">Same pattern</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-uniform mini-fade-in" style="animation-delay:0.12s;"><i data-lucide="calendar" style="width:16px;height:16px;"></i><span>Operations Server</span><span class="many-system-label">Same pattern</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-uniform mini-fade-in" style="animation-delay:0.24s;"><i data-lucide="database" style="width:16px;height:16px;"></i><span>Customer Server</span><span class="many-system-label">Same pattern</span></div>
+              </div>
+              <div class="many-branch">
+                <div class="many-stub"></div>
+                <div class="many-api many-api-uniform mini-fade-in" style="animation-delay:0.36s;"><i data-lucide="file-text" style="width:16px;height:16px;"></i><span>Knowledge Server</span><span class="many-system-label">Same pattern</span></div>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
+            Each MCP server is reached through an MCP client, but the pattern looks consistent to the host, no matter which system is on the other end.
+          </p>
+          <div class="compare-note">4 systems. 1 consistent MCP pattern.</div>
+        </section>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           4. INTERACTIVE COMPARISON
+      ══════════════════════════════════════ -->
+      <div class="compare-grid" id="compareGrid">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
+            Interactive Comparison
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+            Pick a request and watch both approaches happen at once.
+          </p>
+          <div class="flex flex-col gap-2.5" id="scenarioList"></div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="eye" style="width:12px;height:12px;"></i>
+            Live Visualization
+          </div>
+          <div class="live-viz-grid">
+            <div class="live-viz-col">
+              <div class="live-viz-head">Traditional APIs</div>
+              <div class="fm-chain py-2" id="tradChain"></div>
+              <div class="live-viz-output" id="tradOutput"></div>
+            </div>
+            <div class="live-viz-col">
+              <div class="live-viz-head">MCP</div>
+              <div class="fm-chain py-2" id="mcpChain"></div>
+              <div class="live-viz-output" id="mcpOutput"></div>
+            </div>
+          </div>
+          <div class="flow-status" id="compareStatus">Pick a request to compare both approaches.</div>
+        </section>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           5. SIDE-BY-SIDE COMPARISON
+      ══════════════════════════════════════ -->
+      <div class="grid md:grid-cols-2 gap-5 mb-5">
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="x-circle" style="width:12px;height:12px;"></i>
+            Traditional APIs
+          </div>
+          <div class="bullet-stack">
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Every integration is different.</p>
+            </div>
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Host understands every API.</p>
+            </div>
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">More custom integration work.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="module-card">
+          <div class="mod-label">
+            <i data-lucide="check-square" style="width:12px;height:12px;"></i>
+            MCP
+          </div>
+          <div class="bullet-stack">
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Uses one communication standard.</p>
+            </div>
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Host communicates through MCP.</p>
+            </div>
+            <div class="bullet-row">
+              <div class="bullet-dot"></div>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">Easier to organize external connections.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           6. WHEN WOULD YOU USE MCP?
+      ══════════════════════════════════════ -->
+      <div class="grid md:grid-cols-3 gap-4 mb-5">
+        <section class="module-card">
+          <div class="use-icon"><i data-lucide="sparkles" style="width:18px;height:18px;"></i></div>
+          <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">Small AI App</h2>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">Needs one external system.</p>
+          <p class="text-sm font-semibold text-violet-700 dark:text-violet-300">Traditional APIs may be enough.</p>
+        </section>
+        <section class="module-card">
+          <div class="use-icon"><i data-lucide="bot" style="width:18px;height:18px;"></i></div>
+          <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">AI Assistant</h2>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">Needs engineering, operations, knowledge, customer, and finance domains.</p>
+          <p class="text-sm font-semibold text-violet-700 dark:text-violet-300">MCP helps organize multiple external domains.</p>
+        </section>
+        <section class="module-card">
+          <div class="use-icon"><i data-lucide="building-2" style="width:18px;height:18px;"></i></div>
+          <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">Enterprise AI Platform</h2>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-2">Needs many business systems.</p>
+          <p class="text-sm font-semibold text-violet-700 dark:text-violet-300">MCP provides a consistent integration approach.</p>
+        </section>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           7. INTERACTIVE DECISION HELPER
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+          Interactive Decision Helper
+        </div>
+        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          See how the setup changes as your needs grow.
+        </p>
+        <div class="helper-select-row" id="helperButtons"></div>
+        <div class="scale-grid">
+          <div class="scale-panel">
+            <div class="scale-head">
+              <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Traditional APIs</h3>
+              <span class="scale-count" id="traditionalCount"></span>
+            </div>
+            <div id="traditionalScale"></div>
+          </div>
+          <div class="scale-panel">
+            <div class="scale-head">
+              <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">MCP</h3>
+              <span class="scale-count" id="mcpCount"></span>
+            </div>
+            <div id="mcpScale"></div>
+          </div>
+        </div>
+        <div class="helper-note" id="helperNote">
+          More systems means more direct API integrations. MCP keeps a consistent client-server pattern as more systems are added.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════
+           8. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-xl">💡</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Key Takeaways</span>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">Traditional APIs connect directly to external systems.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP introduces a common communication standard.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP helps organize connections to multiple systems.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP does not replace APIs.</p>
+        </div>
+        <div class="takeaway-item">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP works together with existing APIs.</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           9. TRY THIS
+      ══════════════════════════════════════ -->
+      <div class="tips-panel mb-8 open" id="tipsTryThis">
+        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="true">
+          <div class="flex items-center gap-2.5">
+            <span style="font-size:1.1rem;">🧪</span>
+            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Try This</span>
+            <span class="px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold">5 ideas</span>
+          </div>
+          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <div class="tips-panel-body">
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Select each request and compare both paths side by side.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Compare the number of connections.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Try different scenarios.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Increase the number of external domains.</span>
+          </div>
+          <div class="tip-item">
+            <div class="tip-dot"></div>
+            <span>Observe how the architecture changes.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           10. SUMMARY
+      ══════════════════════════════════════ -->
+      <div class="summary-panel mb-8">
+        <span class="text-2xl">🔀🧩</span>
+        <p class="summary-text">
+          Traditional APIs connect applications directly to external systems. <strong>MCP adds a common communication layer that helps AI applications work with many external systems in a more consistent way.</strong>
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="mcp-architecture.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: MCP Architecture
+        </a>
+        <a href="mcp-vs-function-calling.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-violet-300/40">
+          Next: MCP vs Function Calling
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <script>writeSiteFooter('Model Context Protocol (MCP)');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  const SCENARIOS = [
+    {
+      id: 'knowledge',
+      icon: 'file-text',
+      label: 'What does the refund policy say?',
+      traditionalLabel: 'Knowledge APIs',
+      mcpServerLabel: 'Knowledge MCP Server',
+      externalLabel: 'Knowledge Sources',
+      externalIcon: 'folder-open',
+      apiOutput: [
+        ['document', 'Refund Policy'],
+        ['section', 'Return window'],
+        ['raw result', 'Unused orders can be refunded within 30 days with receipt']
+      ],
+      mcpAnswer: 'Refunds are allowed within 30 days when the order is unused and the receipt is available.'
+    },
+    {
+      id: 'engineering',
+      icon: 'git-branch',
+      label: 'Which engineering tasks block checkout?',
+      traditionalLabel: 'Engineering APIs',
+      mcpServerLabel: 'Engineering MCP Server',
+      externalLabel: 'Engineering Tools',
+      externalIcon: 'folder-git-2',
+      apiOutput: [
+        ['task IDs', 'ENG-421, ENG-418'],
+        ['area', 'Checkout'],
+        ['status', 'Blocking release']
+      ],
+      mcpAnswer: 'Two engineering tasks are blocking checkout: ENG-421 and ENG-418.'
+    },
+    {
+      id: 'customer',
+      icon: 'database',
+      label: 'What is the status of customer C-1048?',
+      traditionalLabel: 'Customer Support APIs',
+      mcpServerLabel: 'Customer Support MCP Server',
+      externalLabel: 'Customer Records',
+      externalIcon: 'users',
+      apiOutput: [
+        ['customer ID', 'C-1048'],
+        ['account status', 'Active'],
+        ['open support cases', '2']
+      ],
+      mcpAnswer: 'Customer C-1048 is active and currently has 2 open support cases.'
+    },
+    {
+      id: 'operations',
+      icon: 'calendar',
+      label: "What is on today’s operations schedule?",
+      traditionalLabel: 'Operations APIs',
+      mcpServerLabel: 'Operations MCP Server',
+      externalLabel: "Operations Schedule",
+      externalIcon: 'calendar-days',
+      apiOutput: [
+        ['schedule item', 'Design sync'],
+        ['time', '10:00 AM'],
+        ['timezone', 'Asia/Kolkata']
+      ],
+      mcpAnswer: 'The operations schedule has Design sync today at 10:00 AM.'
+    }
+  ];
+
+  const SCALE_CHOICES = [
+    { id: 'one', label: 'One system', mode: 'systems', count: 1 },
+    { id: 'two', label: 'Two systems', mode: 'systems', count: 2 },
+    { id: 'five', label: 'Five systems', mode: 'systems', count: 5 },
+    { id: 'multi', label: 'Multiple apps', mode: 'apps', count: 3 }
+  ];
+
+  let currentScenarioIndex = 0;
+  let flowAnimId = 0;
+  let decisionAnimId = 0;
+  let currentScaleId = 'one';
+
+  function renderScenarioList() {
+    const wrap = document.getElementById('scenarioList');
+    wrap.innerHTML = SCENARIOS.map((s, i) => `
+      <button class="req-btn" id="scenario-${i}" onclick="selectScenario(${i})">
+        <span class="req-icon-wrap"><i data-lucide="${s.icon}" style="width:15px;height:15px;"></i></span>
+        <span>${s.label}</span>
+      </button>
+    `).join('');
+    refreshIcons(wrap);
+    syncScenarioButtons();
+  }
+
+  function syncScenarioButtons() {
+    document.querySelectorAll('.req-btn').forEach((btn, i) => btn.classList.toggle('req-active', i === currentScenarioIndex));
+  }
+
+  function selectScenario(idx) {
+    currentScenarioIndex = idx;
+    syncScenarioButtons();
+    renderCompareChain();
+    animateCompareChain();
+  }
+
+  function renderCompareChain() {
+    const scenario = SCENARIOS[currentScenarioIndex];
+
+    document.getElementById('tradChain').innerHTML = `
+      <div class="fm-node" id="trad-cmp-user">
+        <span class="fm-node-icon"><i data-lucide="user" style="width:14px;height:14px;"></i></span>
+        <span>User</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="trad-cmp-app">
+        <span class="fm-node-icon"><i data-lucide="bot" style="width:14px;height:14px;"></i></span>
+        <span>Host</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="trad-cmp-api">
+        <span class="fm-node-icon"><i data-lucide="${scenario.icon}" style="width:14px;height:14px;"></i></span>
+        <span>${scenario.traditionalLabel}</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="trad-cmp-system">
+        <span class="fm-node-icon"><i data-lucide="${scenario.externalIcon}" style="width:14px;height:14px;"></i></span>
+        <span>${scenario.externalLabel}</span>
+      </div>
+    `;
+
+    document.getElementById('mcpChain').innerHTML = `
+      <div class="fm-node" id="mcp-cmp-user">
+        <span class="fm-node-icon"><i data-lucide="user" style="width:14px;height:14px;"></i></span>
+        <span>User</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="mcp-cmp-host">
+        <span class="fm-node-icon"><i data-lucide="bot" style="width:14px;height:14px;"></i></span>
+        <span>Host</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="mcp-cmp-client">
+        <span class="fm-node-icon"><i data-lucide="monitor" style="width:14px;height:14px;"></i></span>
+        <span>MCP Client</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="mcp-cmp-server">
+        <span class="fm-node-icon"><i data-lucide="server" style="width:14px;height:14px;"></i></span>
+        <span>${scenario.mcpServerLabel}</span>
+      </div>
+      <div class="fm-vline"></div>
+      <div class="fm-node" id="mcp-cmp-system">
+        <span class="fm-node-icon"><i data-lucide="${scenario.externalIcon}" style="width:14px;height:14px;"></i></span>
+        <span>${scenario.externalLabel}</span>
+      </div>
+    `;
+
+    const tradOutput = document.getElementById('tradOutput');
+    const mcpOutput = document.getElementById('mcpOutput');
+    tradOutput.className = 'live-viz-output';
+    tradOutput.textContent = '';
+    mcpOutput.className = 'live-viz-output';
+    mcpOutput.textContent = '';
+
+    document.getElementById('compareStatus').className = 'flow-status';
+    document.getElementById('compareStatus').textContent = 'Watching both paths...';
+    refreshIcons(document.getElementById('tradChain'));
+    refreshIcons(document.getElementById('mcpChain'));
+  }
+
+  function runChainSteps(myId, allNodeIds, steps, onDone) {
+    const visited = new Set();
+    steps.forEach((step, i) => {
+      setTimeout(() => {
+        if (myId !== flowAnimId) return;
+        const isLast = i === steps.length - 1;
+        allNodeIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('node-current', 'node-visited');
+          if (visited.has(id)) el.classList.add('node-visited');
+          const oldBadge = el.querySelector('.fm-packet-badge');
+          if (oldBadge) oldBadge.remove();
+        });
+        step.ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.add(isLast ? 'node-visited' : 'node-current');
+          visited.add(id);
+          const badge = document.createElement('span');
+          badge.className = 'fm-packet-badge';
+          badge.textContent = '📨';
+          el.appendChild(badge);
+        });
+        if (isLast && onDone) onDone();
+      }, i * 900);
+    });
+  }
+
+  function renderOutputText(rows) {
+    return rows.map(([key, value]) => `${key}: ${value}`).join('\n');
+  }
+
+  function animateCompareChain() {
+    const myId = ++flowAnimId;
+    const scenario = SCENARIOS[currentScenarioIndex];
+    const statusEl = document.getElementById('compareStatus');
+
+    statusEl.className = 'flow-status flow-status-active';
+    statusEl.textContent = `Watching "${scenario.label}" travel through both approaches…`;
+
+    const tradIds = ['trad-cmp-user', 'trad-cmp-app', 'trad-cmp-api', 'trad-cmp-system'];
+    const tradSteps = [
+      { ids: ['trad-cmp-user'] },
+      { ids: ['trad-cmp-app'] },
+      { ids: ['trad-cmp-api'] },
+      { ids: ['trad-cmp-system'] }
+    ];
+
+    const mcpIds = ['mcp-cmp-user', 'mcp-cmp-host', 'mcp-cmp-client', 'mcp-cmp-server', 'mcp-cmp-system'];
+    const mcpSteps = [
+      { ids: ['mcp-cmp-user'] },
+      { ids: ['mcp-cmp-host'] },
+      { ids: ['mcp-cmp-client'] },
+      { ids: ['mcp-cmp-server'] },
+      { ids: ['mcp-cmp-system'] }
+    ];
+
+    let tradDone = false, mcpDone = false;
+    const checkBothDone = () => {
+      if (myId !== flowAnimId || !tradDone || !mcpDone) return;
+      statusEl.className = 'flow-status flow-status-success';
+      statusEl.textContent = `Both requests reached ${scenario.externalLabel}, but the paths behind them were very different.`;
+    };
+
+    runChainSteps(myId, tradIds, tradSteps, () => {
+      tradDone = true;
+      const el = document.getElementById('tradOutput');
+      el.className = 'live-viz-output output-cost show';
+      el.innerHTML = `
+        <strong>Raw API fields</strong>
+        <div class="format-card" aria-label="API output example">
+          <pre class="format-pre">${renderOutputText(scenario.apiOutput)}</pre>
+        </div>
+      `;
+      checkBothDone();
+    });
+
+    runChainSteps(myId, mcpIds, mcpSteps, () => {
+      mcpDone = true;
+      const el = document.getElementById('mcpOutput');
+      el.className = 'live-viz-output output-value show';
+      el.innerHTML = `
+        <strong>MCP answer</strong>
+        <div class="output-answer">
+          "${scenario.mcpAnswer}"
+        </div>
+      `;
+      checkBothDone();
+    });
+  }
+
+  function renderHelperButtons() {
+    const wrap = document.getElementById('helperButtons');
+    wrap.innerHTML = SCALE_CHOICES.map(choice => `
+      <button class="helper-btn" id="helper-${choice.id}" onclick="selectScale('${choice.id}')">${choice.label}</button>
+    `).join('');
+    syncHelperButtons();
+  }
+
+  function syncHelperButtons() {
+    SCALE_CHOICES.forEach(choice => {
+      const btn = document.getElementById(`helper-${choice.id}`);
+      if (btn) btn.classList.toggle('active', choice.id === currentScaleId);
+    });
+  }
+
+  function makeSystemLabels(count) {
+    return Array.from({ length: count }, (_, i) => `System ${i + 1}`);
+  }
+
+  function selectScale(id) {
+    currentScaleId = id;
+    syncHelperButtons();
+    renderScaleComparison();
+    animateScaleComparison();
+  }
+
+  function renderScaleComparison() {
+    const choice = SCALE_CHOICES.find(c => c.id === currentScaleId);
+
+    if (choice.mode === 'apps') {
+      renderAppsScaleComparison(choice.count);
+      return;
+    }
+
+    const labels = makeSystemLabels(choice.count);
+    const clientLabel = choice.count === 1 ? 'MCP Client' : 'MCP Clients';
+    document.getElementById('traditionalCount').textContent = `${choice.count} direct ${choice.count === 1 ? 'connection' : 'connections'}`;
+    document.getElementById('mcpCount').textContent = `${choice.count} ${choice.count === 1 ? 'client' : 'clients'} + ${choice.count} ${choice.count === 1 ? 'server' : 'servers'}`;
+
+    document.getElementById('traditionalScale').innerHTML = `
+      <div class="scale-stack">
+        <div class="scale-user"><i data-lucide="user" style="width:13px;height:13px;"></i> User</div>
+        <div class="scale-vline"></div>
+        <div class="scale-core" id="trad-core"><i data-lucide="bot" style="width:14px;height:14px;"></i> Host</div>
+        <div class="scale-vline"></div>
+        <div class="scale-hline"></div>
+        <div class="scale-branches" id="trad-branches">
+          ${labels.map((label, i) => `
+            <div class="scale-branch" id="trad-branch-${i}">
+              <div class="scale-stub"></div>
+              <div class="scale-system">${label}<br><span class="many-system-label">Direct API</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('mcpScale').innerHTML = `
+      <div class="scale-stack">
+        <div class="scale-user"><i data-lucide="user" style="width:13px;height:13px;"></i> User</div>
+        <div class="scale-vline"></div>
+        <div class="scale-core" id="mcp-core"><i data-lucide="bot" style="width:14px;height:14px;"></i> Host</div>
+        <div class="scale-vline"></div>
+        <div class="scale-layer" id="mcp-layer"><i data-lucide="layers-3" style="width:13px;height:13px;"></i> ${clientLabel}</div>
+        <div class="scale-vline"></div>
+        <div class="scale-hline"></div>
+        <div class="scale-branches" id="mcp-branches">
+          ${labels.map((label, i) => `
+            <div class="scale-branch" id="mcp-branch-${i}">
+              <div class="scale-stub"></div>
+              <div class="scale-system">${label}<br><span class="many-system-label">MCP Server</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('helperNote').textContent = `More systems means more direct API integrations. MCP keeps the same host-to-client-to-server pattern whether you connect ${choice.count} system${choice.count === 1 ? '' : 's'}.`;
+    refreshIcons(document.getElementById('traditionalScale'));
+    refreshIcons(document.getElementById('mcpScale'));
+  }
+
+  function renderAppsScaleComparison(appCount) {
+    const apps = Array.from({ length: appCount }, (_, i) => String.fromCharCode(65 + i));
+    const systems = [
+      { icon: 'git-branch', label: 'Engineering' },
+      { icon: 'calendar', label: 'Operations' },
+      { icon: 'database', label: 'Customer' },
+      { icon: 'file-text', label: 'Knowledge' }
+    ];
+
+    document.getElementById('traditionalCount').textContent = `${appCount * systems.length} separate builds`;
+    document.getElementById('mcpCount').textContent = `${systems.length} shared servers`;
+
+    document.getElementById('traditionalScale').innerHTML = `
+      <div class="scale-stack">
+        <div class="scale-apps-row" id="trad-branches">
+          ${apps.map((app, i) => `
+            <div class="scale-app-col" id="trad-branch-${i}">
+              <div class="scale-user"><i data-lucide="user" style="width:13px;height:13px;"></i> User ${app}</div>
+              <div class="scale-vline"></div>
+              <div class="scale-core"><i data-lucide="bot" style="width:14px;height:14px;"></i> Host ${app}</div>
+              <div class="scale-vline"></div>
+              <div class="scale-app-systems">
+                ${systems.map(sys => `
+                  <div class="scale-system scale-system-sm"><i data-lucide="${sys.icon}" style="width:12px;height:12px;"></i> ${sys.label} API<br><span class="many-system-label">Own build</span></div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('mcpScale').innerHTML = `
+      <div class="scale-stack">
+        <div class="scale-apps-row" id="mcp-branches">
+          ${apps.map((app, i) => `
+            <div class="scale-app-col" id="mcp-branch-${i}">
+              <div class="scale-user"><i data-lucide="user" style="width:13px;height:13px;"></i> User ${app}</div>
+              <div class="scale-vline"></div>
+              <div class="scale-core"><i data-lucide="bot" style="width:14px;height:14px;"></i> Host ${app}</div>
+              <div class="scale-vline"></div>
+              <div class="scale-layer"><i data-lucide="monitor" style="width:13px;height:13px;"></i> MCP Clients</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="scale-merge-lines">
+          ${apps.map(() => `<div class="scale-merge-line"></div>`).join('')}
+        </div>
+        <div class="scale-hline"></div>
+        <div class="scale-branches scale-shared-branches" id="mcp-shared-branches">
+          ${systems.map(sys => `
+            <div class="scale-branch branch-on">
+              <div class="scale-stub"></div>
+              <div class="scale-system"><i data-lucide="${sys.icon}" style="width:14px;height:14px;"></i> ${sys.label} MCP Server<br><span class="many-system-label">Reusable server</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    document.getElementById('helperNote').textContent = `All ${appCount} hosts need the same ${systems.length} systems. With traditional APIs, each host builds its own connection to each system, ${appCount * systems.length} separate builds in total. With MCP, the hosts can use MCP clients that connect to the same ${systems.length} reusable MCP servers.`;
+    refreshIcons(document.getElementById('traditionalScale'));
+    refreshIcons(document.getElementById('mcpScale'));
+  }
+
+  function animateScaleComparison() {
+    const myId = ++decisionAnimId;
+    const choice = SCALE_CHOICES.find(c => c.id === currentScaleId);
+
+    if (choice.mode === 'apps') {
+      animateAppsScaleComparison(myId, choice.count);
+      return;
+    }
+
+    const count = choice.count;
+    const tradCore = document.getElementById('trad-core');
+    const mcpCore = document.getElementById('mcp-core');
+    const mcpLayer = document.getElementById('mcp-layer');
+
+    if (tradCore) tradCore.classList.remove('scale-active');
+    if (mcpCore) mcpCore.classList.remove('scale-active');
+    if (mcpLayer) mcpLayer.classList.remove('scale-active');
+    Array.from({ length: count }, (_, i) => i).forEach(i => {
+      const tradBranch = document.getElementById(`trad-branch-${i}`);
+      const mcpBranch = document.getElementById(`mcp-branch-${i}`);
+      if (tradBranch) tradBranch.classList.remove('branch-on');
+      if (mcpBranch) mcpBranch.classList.remove('branch-on');
+    });
+
+    setTimeout(() => {
+      if (myId !== decisionAnimId) return;
+      if (tradCore) tradCore.classList.add('scale-active');
+      if (mcpCore) mcpCore.classList.add('scale-active');
+    }, 120);
+
+    setTimeout(() => {
+      if (myId !== decisionAnimId) return;
+      if (mcpLayer) mcpLayer.classList.add('scale-active');
+    }, 420);
+
+    Array.from({ length: count }, (_, i) => i).forEach(i => {
+      setTimeout(() => {
+        if (myId !== decisionAnimId) return;
+        const tradBranch = document.getElementById(`trad-branch-${i}`);
+        const mcpBranch = document.getElementById(`mcp-branch-${i}`);
+        if (tradBranch) tradBranch.classList.add('branch-on');
+        if (mcpBranch) mcpBranch.classList.add('branch-on');
+      }, 650 + (i * 100));
+    });
+  }
+
+  function animateAppsScaleComparison(myId, appCount) {
+    const sharedBranches = document.getElementById('mcp-shared-branches');
+    if (sharedBranches) sharedBranches.classList.remove('branch-on');
+    Array.from({ length: appCount }, (_, i) => i).forEach(i => {
+      const tradBranch = document.getElementById(`trad-branch-${i}`);
+      const mcpBranch = document.getElementById(`mcp-branch-${i}`);
+      if (tradBranch) tradBranch.classList.remove('branch-on');
+      if (mcpBranch) mcpBranch.classList.remove('branch-on');
+    });
+
+    Array.from({ length: appCount }, (_, i) => i).forEach(i => {
+      setTimeout(() => {
+        if (myId !== decisionAnimId) return;
+        const tradBranch = document.getElementById(`trad-branch-${i}`);
+        const mcpBranch = document.getElementById(`mcp-branch-${i}`);
+        if (tradBranch) tradBranch.classList.add('branch-on');
+        if (mcpBranch) mcpBranch.classList.add('branch-on');
+      }, 150 + (i * 220));
+    });
+
+    setTimeout(() => {
+      if (myId !== decisionAnimId) return;
+      if (sharedBranches) sharedBranches.classList.add('branch-on');
+    }, 150 + (appCount * 220) + 200);
+  }
+
+  function refreshIcons(el) {
+    if (typeof lucide === 'undefined') return;
+    el ? lucide.createIcons({ nodes: [el] }) : lucide.createIcons();
+  }
+
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el => el.classList.toggle('hidden', dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderScenarioList();
+    renderCompareChain();
+    animateCompareChain();
+    renderHelperButtons();
+    renderScaleComparison();
+    animateScaleComparison();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+    }
+  });
+  </script>
+
+</body>
+</html>
