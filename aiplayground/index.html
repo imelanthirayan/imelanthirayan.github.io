@@ -110,6 +110,9 @@
     .lesson-card:hover .lesson-arrow {
       background: var(--lc-color, #6366f1); color: white; transform: translateX(2px);
     }
+    /* Coming-soon cards: same grid look, not clickable */
+    .lesson-card-soon { cursor: default; }
+    .lesson-card-soon:hover .lesson-arrow { background: transparent; color: #cbd5e1; transform: none; }
 
     /* ── Module section wrapper (available, collapsible) ─── */
     .mod-section { margin-bottom: 1rem; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); }
@@ -608,6 +611,14 @@
               </div>
               <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
             </a>
+            <a href="#learn" class="path-step">
+              <div class="path-dot" style="background:#db2777;"><i data-lucide="message-square" class="w-4 h-4"></i></div>
+              <div>
+                <div class="path-name">Prompt Engineering</div>
+                <div class="path-desc">Write clearer prompts and guide AI responses.</div>
+              </div>
+              <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
+            </a>
           </div>
         </div>
         <div class="showcase-note">
@@ -651,6 +662,7 @@
           <button class="filter-chip" data-filter="Embeddings & Search">Embeddings & Search</button>
           <button class="filter-chip" data-filter="RAG">RAG</button>
           <button class="filter-chip" data-filter="MCP">MCP</button>
+          <button class="filter-chip" data-filter="Prompt Engineering">Prompt Engineering</button>
           <button class="filter-chip" data-filter="Vector Index Explorer">Vector Index Explorer</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner">Beginner</button>
@@ -691,7 +703,7 @@
         <a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener"
           class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
           <i data-lucide="user" class="w-3.5 h-3.5"></i>
-          About the Author
+          Developed by Elanthirayan Madhavan
         </a>
         <button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">
           <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
@@ -768,7 +780,16 @@
       { num:5,  id:'mcp-vs-func',   title:'MCP vs Function Calling',      desc:'Learn the difference between function calling and MCP, and understand how they complement each other.', status:'available',   diff:'Intermediate', dur:'8–10 min', mod:'Model Context Protocol (MCP)', page:'modules/mcp/mcp-vs-function-calling.html', icon:'code', color:'#7c3aed' },
       { num:6,  id:'mcp-fits',      title:'Where MCP Fits in AI Apps',    desc:'See how MCP fits into modern AI applications alongside LLMs, RAG, vector databases, and external domains.', status:'available',   diff:'Beginner',     dur:'7–10 min', mod:'Model Context Protocol (MCP)', page:'modules/mcp/where-mcp-fits.html', icon:'puzzle', color:'#7c3aed' },
 
-      // ── Module 5: Vector Index Explorer ──────────────────────────────────────────────
+      // ── Module 5: Prompt Engineering ──────────────────────────────────────────
+      { num:1,  id:'pe-what',       title:'What is Prompt Engineering?',      desc:'Learn what prompt engineering is and why the way you ask shapes the answer you get.', status:'available', diff:'Beginner',     dur:'5–7 min',  mod:'Prompt Engineering', page:'modules/prompt-engineering/what-is-prompt-engineering.html', icon:'message-square', color:'#db2777' },
+      { num:2,  id:'pe-zero-shot',  title:'Zero-shot Prompting',              desc:'Ask the model to do a task with no examples and see how far clear instructions alone can go.', status:'available', diff:'Beginner',     dur:'5–7 min',  mod:'Prompt Engineering', page:'modules/prompt-engineering/zero-shot-prompting.html', icon:'zap', color:'#db2777' },
+      { num:3,  id:'pe-few-shot',   title:'One-shot vs Few-shot Prompting',   desc:'See how adding one or a few examples guides the model toward the format and style you want.', status:'available', diff:'Beginner',     dur:'7–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/one-shot-vs-few-shot.html', icon:'list', color:'#db2777' },
+      { num:4,  id:'pe-role',       title:'Role Prompting',                   desc:'Give the model a role, like teacher or reviewer, to shape its tone and focus.', status:'available', diff:'Beginner',     dur:'5–7 min',  mod:'Prompt Engineering', page:'modules/prompt-engineering/role-prompting.html', icon:'user-check', color:'#db2777' },
+      { num:5,  id:'pe-structured', title:'Structured Output',                desc:'Ask for answers in formats like JSON or tables so results are easy to use.', status:'available', diff:'Intermediate', dur:'7–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/structured-output.html', icon:'braces', color:'#db2777' },
+      { num:6,  id:'pe-chaining',   title:'Prompt Chaining',                  desc:'Break a complex task into smaller prompts that build on each other, step by step.', status:'available', diff:'Intermediate', dur:'8–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/prompt-chaining.html', icon:'link', color:'#db2777' },
+      { num:7,  id:'pe-mistakes',   title:'Common Prompt Mistakes',           desc:'Spot the mistakes that make prompts weak, and learn simple fixes that get better answers.', status:'available', diff:'Beginner',     dur:'8–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/common-prompt-mistakes.html', icon:'alert-triangle', color:'#db2777' },
+
+      // ── Module 6: Vector Index Explorer ──────────────────────────────────────────────
       { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
       { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
       { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
@@ -783,6 +804,7 @@
       'Embeddings & Search':              { icon:'search',   color:'#2563eb', bg:'rgba(37,99,235,0.07)',   border:'rgba(37,99,235,0.2)',   iconBg:'rgba(37,99,235,0.1)'   },
       'Retrieval-Augmented Generation (RAG)':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
       'Model Context Protocol (MCP)':            { icon:'plug',     color:'#7c3aed', bg:'rgba(124,58,237,0.07)', border:'rgba(124,58,237,0.2)',  iconBg:'rgba(124,58,237,0.1)'  },
+      'Prompt Engineering':                      { icon:'message-square', color:'#db2777', bg:'rgba(219,39,119,0.07)', border:'rgba(219,39,119,0.2)', iconBg:'rgba(219,39,119,0.1)' },
       'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
     };
 
@@ -822,6 +844,7 @@
         if (activeFilter === 'Vector Index Explorer')      return l.mod === 'Vector Index Explorer';
         if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation (RAG)';
         if (activeFilter === 'MCP')               return l.mod === 'Model Context Protocol (MCP)';
+        if (activeFilter === 'Prompt Engineering') return l.mod === 'Prompt Engineering';
         return true;
       });
     }
@@ -915,34 +938,42 @@
         const lessons = seen.get(mod);
         const cfg = MODULE_CONFIGS[mod] || { icon:'book-open', color:'#6366f1', bg:'rgba(99,102,241,0.07)', border:'rgba(99,102,241,0.2)', iconBg:'rgba(99,102,241,0.1)' };
         const isSearch = !!searchText;
+        const accId = `cs-acc-${esc(mod.replace(/\s+/g,'-'))}`;
 
         const cards = lessons.map(l => {
           const diff = DIFF_CONFIG[l.diff] ?? DIFF_CONFIG.Beginner;
           return `
-            <div class="cs-mini">
-              <div class="cs-mini-num">${l.num}</div>
-              <div class="cs-mini-title">${esc(l.title)}</div>
-              <div class="cs-mini-desc">${esc(l.desc)}</div>
-              <div class="cs-mini-meta">${diff.emoji} ${l.diff} · ${esc(l.dur)}</div>
+            <div class="lesson-card lesson-card-soon" style="--lc-color:${esc(l.color)};">
+              <div class="lesson-num" style="background:${esc(l.color)};">${l.num}</div>
+              <div class="lesson-body">
+                <div class="lesson-title">${esc(l.title)}</div>
+                <div class="lesson-desc">${esc(l.desc)}</div>
+                <div class="lesson-meta">${esc(l.dur)} · ${diff.emoji} ${l.diff}</div>
+              </div>
+              <div class="lesson-arrow">
+                <i data-lucide="clock" style="width:14px;height:14px;"></i>
+              </div>
             </div>`;
         }).join('');
 
-        // Auto-open first accordion (or all when searching)
+        // Auto-open first section (or all when searching)
         const openClass = (modIdx === 0 || isSearch) ? ' open' : '';
 
         return `
-          <div class="cs-accordion${openClass}" id="acc-${modIdx}">
-            <button class="cs-accordion-btn" onclick="toggleAccordion('acc-${modIdx}')">
-              <div class="cs-mod-badge" style="background:${cfg.iconBg};">
-                <i data-lucide="${cfg.icon}" style="width:14px;height:14px;color:${cfg.color};"></i>
+          <div class="mod-section${openClass}" id="${accId}">
+            <div class="mod-section-head" style="background:${cfg.bg};" onclick="toggleModSection('${accId}')">
+              <div class="mod-section-icon" style="background:${cfg.iconBg};">
+                <i data-lucide="${cfg.icon}" style="width:13px;height:13px;color:${cfg.color};"></i>
               </div>
-              <span class="cs-accordion-name">${esc(mod)}</span>
+              <span class="mod-section-name" style="color:${cfg.color};">${esc(mod)}</span>
               <span class="cs-soon-badge">🚀 Coming Soon</span>
-              <span class="cs-accordion-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
-              <i data-lucide="chevron-down" style="width:15px;height:15px;" class="cs-accordion-chevron"></i>
-            </button>
-            <div class="cs-accordion-body">
-              ${cards}
+              <span class="mod-section-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
+              <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
+            </div>
+            <div class="mod-section-body">
+              <div class="lesson-grid">
+                ${cards}
+              </div>
             </div>
           </div>`;
       }).join('');

@@ -78,7 +78,7 @@
   }
 
   // Richer footer variant used by the Vector Index Explorer pages
-  // (adds an "About the Author" link + inline dark-mode toggle).
+  // (adds a "Developed by Elanthirayan Madhavan" link + inline dark-mode toggle).
   function writeSiteFooterVI() {
     var base = relPrefix();
     document.write(
@@ -94,7 +94,7 @@
           '<div class="flex items-center gap-4">' +
             '<a href="https://imelanthirayan.github.io/" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">' +
               '<i data-lucide="user" class="w-3.5 h-3.5"></i>' +
-              'About the Author' +
+              'Developed by Elanthirayan Madhavan' +
             '</a>' +
             '<button data-dark-toggle class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Toggle dark mode">' +
               '<i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>' +
