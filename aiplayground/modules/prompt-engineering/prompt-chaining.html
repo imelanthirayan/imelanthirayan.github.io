@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prompt Chaining explained: break a big task into smaller connected prompts, where each step feeds the next. A beginner-friendly interactive lesson." />
+  <title>Prompt Chaining, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #db2777; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #f472b6; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #db2777; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(219,39,119,0.25); background: rgba(219,39,119,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(219,39,119,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #f9a8d4; border-color: rgba(244,114,182,0.28); background: rgba(219,39,119,0.1); }
+
+    /* ── Idea banner ─────────────────────────── */
+    .zero-banner {
+      display: flex; align-items: center; gap: 0.9rem; padding: 1rem 1.2rem;
+      border-radius: 1rem; border: 1.5px dashed rgba(219,39,119,0.4);
+      background: rgba(219,39,119,0.05);
+    }
+    html.dark .zero-banner { background: rgba(219,39,119,0.08); border-color: rgba(244,114,182,0.35); }
+    .zero-banner .big { font-size: 1.6rem; }
+
+    /* ── One-big vs many-small compare ───────── */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:640px){ .split { grid-template-columns: 1fr; } }
+    .split-box { border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+    .split-box .hd { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.4rem; }
+    .split-box.big  { background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.28); }
+    html.dark .split-box.big { background: rgba(239,68,68,0.08); }
+    .split-box.chain{ background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.3); }
+    html.dark .split-box.chain { background: rgba(16,185,129,0.08); }
+    .split-box .hd.rd { color: #b91c1c; } html.dark .split-box .hd.rd { color: #fca5a5; }
+    .split-box .hd.gr { color: #047857; } html.dark .split-box .hd.gr { color: #6ee7b7; }
+    .mini-list { list-style: none; font-size: 0.85rem; line-height: 1.5; display: flex; flex-direction: column; gap: 0.45rem; }
+    .mini-list li { display: flex; gap: 0.5rem; align-items: flex-start; color: #475569; }
+    html.dark .mini-list li { color: #cbd5e1; }
+    .mini-list .m { flex-shrink: 0; font-weight: 900; }
+    .mini-list.rd .m { color: #ef4444; } .mini-list.gr .m { color: #10b981; }
+
+    /* ═══ CHAIN RUNNER ═══ */
+    .chain-task {
+      display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem 1rem; border-radius: 0.9rem;
+      background: rgba(99,102,241,0.08); border: 1.5px solid rgba(99,102,241,0.25); font-size: 0.9rem;
+    }
+    html.dark .chain-task { background: rgba(99,102,241,0.14); border-color: rgba(99,102,241,0.3); }
+
+    .chain { display: flex; flex-direction: column; gap: 0; margin-top: 0.4rem; }
+    .step {
+      display: flex; gap: 0.9rem; align-items: flex-start; padding: 0.9rem 1rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.35s ease; opacity: 0.55;
+    }
+    html.dark .step { background: rgba(15,23,42,0.6); border-color: #334155; }
+    .step.next { opacity: 1; border-color: rgba(219,39,119,0.5); box-shadow: 0 0 0 3px rgba(219,39,119,0.1); }
+    .step.done { opacity: 1; border-color: rgba(16,185,129,0.45); background: rgba(16,185,129,0.05); }
+    html.dark .step.done { background: rgba(16,185,129,0.08); }
+    .step .num {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+      font-weight: 900; font-size: 0.9rem; background: #e2e8f0; color: #64748b; transition: all 0.35s;
+    }
+    html.dark .step .num { background: #334155; color: #94a3b8; }
+    .step.next .num { background: #db2777; color: #fff; }
+    .step.done .num { background: #10b981; color: #fff; }
+    .step .sbody { flex: 1; min-width: 0; }
+    .step .sname { font-weight: 800; font-size: 0.92rem; display: flex; align-items: center; gap: 0.4rem; }
+    .step .sio { font-size: 0.8rem; margin-top: 0.3rem; line-height: 1.5; }
+    .step .sio .lab { font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.64rem; color: #94a3b8; }
+    .step .in-txt { color: #64748b; } html.dark .step .in-txt { color: #94a3b8; }
+    .step .out-txt { color: #065f46; font-weight: 600; white-space: pre-line; } html.dark .step .out-txt { color: #6ee7b7; }
+    .step .pending-txt { color: #94a3b8; font-style: italic; }
+
+    .connector { height: 22px; margin-left: 1.9rem; border-left: 2px dashed #cbd5e1; position: relative; }
+    html.dark .connector { border-color: #475569; }
+    .connector.flow { border-left-style: solid; border-color: #10b981; }
+    .connector.flow::after {
+      content: '▼ output'; position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%);
+      font-size: 0.6rem; font-weight: 800; color: #10b981; white-space: nowrap;
+      background: inherit; padding-right: 2px;
+    }
+    @keyframes popIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .popIn { animation: popIn 0.35s ease; }
+
+    .final-box {
+      margin-top: 0.8rem; padding: 1rem 1.2rem; border-radius: 1rem;
+      background: linear-gradient(135deg, rgba(219,39,119,0.08), rgba(139,92,246,0.06));
+      border: 1.5px solid rgba(219,39,119,0.3); display: none;
+    }
+    .final-box.show { display: block; }
+
+    .runbar { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.9rem; }
+
+    /* ── Signal lists ────────────────────────── */
+    .signal { display: grid; grid-template-columns: 1fr; gap: 0.65rem; }
+    .signal-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.8rem 1rem; border-radius: 1rem; border: 1px solid; font-size: 0.86rem; }
+    .signal-item .m { flex-shrink: 0; font-weight: 900; font-size: 1rem; line-height: 1.3; }
+    .signal-item.good { background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.28); }
+    html.dark .signal-item.good { background: rgba(16,185,129,0.08); }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
+      border: 1.5px solid rgba(251,191,36,0.22); border-left: 4px solid #f59e0b; border-radius: 1.25rem;
+    }
+    html.dark .takeaway { background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(245,158,11,0.02)); border-color: rgba(251,191,36,0.16); border-left-color: #f59e0b; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pink-100 dark:bg-pink-900/30">
+          <span class="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
+          <span class="text-pink-700 dark:text-pink-400 text-xs font-bold tracking-wide">Prompt Engineering</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 8–10 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="link" class="w-7 h-7 text-pink-600 dark:text-pink-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Prompt Chaining</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Prompt chaining means breaking one big task into <strong class="text-slate-800 dark:text-slate-200">smaller connected steps</strong>. Each step does one job, and its output becomes the input for the next.
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simple learning demo</strong>. The AI outputs below are predefined to show the idea, not a real AI model.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══ 1. OVERVIEW ══ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="compass" style="width:12px;height:12px;"></i>
+          Overview
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Small steps, connected together</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          Imagine cooking a big meal. You don't do everything in one motion, you chop, then cook, then plate. Each step builds on the last. Prompt chaining works the same way with AI.
+        </p>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Instead of one giant prompt, you write a <strong class="text-slate-800 dark:text-slate-200">series of small prompts</strong>. The answer from step 1 is handed to step 2, step 2's answer goes to step 3, and so on, until the task is done.
+        </p>
+      </section>
+
+
+      <!-- ══ 2. WHY LARGE PROMPTS CAN FAIL ══ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="alert-triangle" style="width:12px;height:12px;"></i>
+          Why large prompts can fail
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Too much at once is hard to control</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          When you ask for everything in a single prompt, the AI has to juggle many goals at the same time. That is where things slip:
+        </p>
+        <div class="zero-banner">
+          <span class="big">🎯</span>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            One huge prompt often means <strong>missed parts</strong>, <strong>uneven quality</strong>, and <strong>little control</strong>, if the result is wrong, you must redo the whole thing.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══ 3. ONE BIG vs MANY SMALL ══ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="git-compare" style="width:12px;height:12px;"></i>
+          One big prompt vs multiple smaller prompts
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same goal, two ways to get there</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Goal: <strong class="text-slate-800 dark:text-slate-200">write a blog post about AI safety</strong>. Compare doing it in one shot versus a chain of steps.
+        </p>
+        <div class="split">
+          <div class="split-box big">
+            <div class="hd rd">🧱 One big prompt</div>
+            <p class="text-sm italic mb-3 text-slate-600 dark:text-slate-300">“Write a complete blog post about AI safety.”</p>
+            <ul class="mini-list rd">
+              <li><span class="m">✕</span> Tries to do outline, writing, editing, and title all at once.</li>
+              <li><span class="m">✕</span> Weak spots are hard to fix without redoing everything.</li>
+              <li><span class="m">✕</span> Quality is uneven, some parts thin, some off-topic.</li>
+            </ul>
+          </div>
+          <div class="split-box chain">
+            <div class="hd gr">🔗 A prompt chain</div>
+            <p class="text-sm italic mb-3 text-slate-600 dark:text-slate-300">Outline → expand → polish → title → summary.</p>
+            <ul class="mini-list gr">
+              <li><span class="m">✓</span> Each step has one clear, easy job.</li>
+              <li><span class="m">✓</span> You can check and fix a single step, not the whole post.</li>
+              <li><span class="m">✓</span> Every part gets proper attention, so quality is steadier.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══ 4. INTERACTIVE CHAIN RUNNER ══ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="mouse-pointer-click" style="width:12px;height:12px;"></i>
+          Interactive: run the chain
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Watch output flow from step to step</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Run the chain one step at a time. Each step takes the <strong class="text-slate-800 dark:text-slate-200">previous step's output</strong> as its input, until the task is complete. Hit <strong class="text-slate-800 dark:text-slate-200">Try another task</strong> to see the same idea on a different job.
+        </p>
+
+        <div class="chain-task mb-3">
+          <span style="font-size:1.3rem;">🎯</span>
+          <span class="text-slate-700 dark:text-slate-200"><strong>Task:</strong> <span id="runTask"></span> &nbsp;<span class="text-slate-500 dark:text-slate-400">Starting input: <span id="runStart"></span>.</span></span>
+        </div>
+
+        <div class="runbar">
+          <button id="stepBtn" class="btn-primary text-sm px-5 py-2.5 flex items-center justify-center gap-1.5">
+            <i data-lucide="play" style="width:14px;height:14px;"></i>
+            Run next step
+          </button>
+          <button id="allBtn" class="btn-secondary text-sm px-5 py-2.5 flex items-center justify-center gap-1.5">
+            <i data-lucide="fast-forward" style="width:14px;height:14px;"></i>
+            Run all
+          </button>
+          <button id="newBtn" class="btn-secondary text-sm px-5 py-2.5 flex items-center justify-center gap-1.5">
+            <i data-lucide="shuffle" style="width:14px;height:14px;"></i>
+            Try another task
+          </button>
+        </div>
+
+        <div class="chain" id="chain"></div>
+
+        <div class="final-box" id="finalBox">
+          <div class="text-xs font-bold uppercase tracking-widest text-pink-600 dark:text-pink-400 mb-1">🎉 Chain complete</div>
+          <p id="doneTxt" class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed"></p>
+        </div>
+      </section>
+
+
+      <!-- ══ 5. WHEN PROMPT CHAINING HELPS ══ -->
+      <section class="module-card mb-5">
+        <div class="mod-label">
+          <i data-lucide="thumbs-up" style="width:12px;height:12px;"></i>
+          When prompt chaining helps
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Reach for a chain when…</h2>
+        <div class="signal">
+          <div class="signal-item good"><span class="m">✓</span><span class="text-slate-700 dark:text-slate-300">The task has <strong>clear stages</strong> (plan, write, review).</span></div>
+          <div class="signal-item good"><span class="m">✓</span><span class="text-slate-700 dark:text-slate-300">One prompt keeps <strong>missing parts</strong> or losing quality.</span></div>
+          <div class="signal-item good"><span class="m">✓</span><span class="text-slate-700 dark:text-slate-300">You want to <strong>check or fix</strong> one step without redoing it all.</span></div>
+          <div class="signal-item good"><span class="m">✓</span><span class="text-slate-700 dark:text-slate-300">Later steps <strong>depend on</strong> the result of earlier ones.</span></div>
+        </div>
+        <div class="zero-banner mt-4">
+          <span class="big">⚖️</span>
+          <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+            For <strong>small, simple tasks</strong>, one good prompt is still best, chaining shines when the work is big or has real stages.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══ 6. KEY TAKEAWAYS ══ -->
+      <div class="takeaway mb-8">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Prompt chaining = splitting a big task into <strong class="text-slate-900 dark:text-white">small connected steps</strong>.</li>
+            <li>• Each step's <strong class="text-slate-900 dark:text-white">output becomes the next step's input</strong>.</li>
+            <li>• Chains give you <strong class="text-slate-900 dark:text-white">more control</strong>, fix one step, not the whole task.</li>
+            <li>• Quality is steadier because each step has <strong class="text-slate-900 dark:text-white">one clear job</strong>.</li>
+            <li>• Use chains for <strong class="text-slate-900 dark:text-white">big, multi-stage tasks</strong>; keep simple tasks as one prompt.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══ 7. NEXT LESSON ══ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="structured-output.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Structured Output
+        </a>
+        <a href="common-prompt-mistakes.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-pink-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Common Prompt Mistakes
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Prompt Engineering');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     CHAIN RUNNER
+     Several example tasks. Each step consumes the previous step's output.
+     A "New example" button loads a random one.
+  ═══════════════════════════════════════════════ */
+  const RUNS = [
+    {
+      task:'Create a blog post about <strong>AI safety</strong>',
+      start:'the topic “AI safety”',
+      done:'Five small steps produced a <strong>finished blog post</strong>, with an outline, full sections, polished wording, a title, and a summary, each built on the step before it.',
+      steps:[
+        { icon:'📝', name:'Generate outline',   input:'the topic “AI safety”',
+          output:'Outline:\n1. What AI safety means\n2. Main risks: bias, misuse, mistakes\n3. How we lower the risk: testing + human review\n4. Why it matters for everyone' },
+        { icon:'🧩', name:'Expand each section', input:'the 4-point outline',
+          output:'Draft (point 2 of 4):\n“AI can copy bias from its training data, be misused to spread false info, and sometimes give confident but wrong answers.”\n…and a paragraph like this for every point.' },
+        { icon:'✨', name:'Improve clarity',     input:'the rough draft',
+          output:'Before: “AI systems may occasionally produce outputs that are factually inaccurate.”\nAfter:  “Sometimes AI gives wrong answers.”' },
+        { icon:'🏷️', name:'Create title',        input:'the polished draft',
+          output:'Title:\n“AI Safety Made Simple: The Real Risks and How We Handle Them”' },
+        { icon:'🔖', name:'Create summary',      input:'the finished post',
+          output:'Summary:\n“AI safety means lowering the risks of bias, misuse, and mistakes, using testing and human review. It matters because AI now touches everyday life.”' },
+      ]
+    },
+    {
+      task:'Reply to an <strong>angry customer email</strong>',
+      start:'the customer’s email',
+      done:'Four small steps turned a raw complaint into a <strong>ready-to-send reply</strong>, understood, drafted, softened, and closed with clear next steps.',
+      steps:[
+        { icon:'🔍', name:'Understand the problem', input:'the customer’s email',
+          output:'Issue found:\nOrder #4821 arrived 6 days late and the box was damaged. Customer wants a refund.' },
+        { icon:'✍️', name:'Draft a reply',          input:'the issue summary',
+          output:'Draft:\n“We’re sorry your order was late and damaged. We can offer a full refund or a free replacement.”' },
+        { icon:'🙂', name:'Make the tone warm',      input:'the plain draft',
+          output:'Warmer version:\n“I’m really sorry for the trouble, Elanthirayan, this isn’t the experience we want for you. I’d like to make it right.”' },
+        { icon:'✅', name:'Add next steps',          input:'the warm reply',
+          output:'Closing:\n“Reply REFUND or REPLACE and I’ll process it today. Your feedback helps us pack orders better.”' },
+      ]
+    },
+    {
+      task:'Plan a <strong>weekend trip</strong>',
+      start:'the destination “Goa”',
+      done:'Four small steps grew a single place name into a <strong>complete weekend plan</strong>, activities, a day-by-day schedule, a budget, and a final itinerary.',
+      steps:[
+        { icon:'📍', name:'Pick key details',   input:'the destination “Goa”',
+          output:'Basics:\n2 nights, beach + food focus, mid-range budget, travelling by flight.' },
+        { icon:'🎯', name:'List activities',     input:'the trip basics',
+          output:'Ideas:\nBaga beach, a sunset cruise, a spice-farm lunch, a Saturday night market.' },
+        { icon:'🗓️', name:'Build a schedule',    input:'the activity list',
+          output:'Plan:\nDay 1 — beach + cruise. Day 2 — spice farm + market. Day 3 — brunch, then fly home.' },
+        { icon:'💰', name:'Estimate the budget', input:'the day-by-day plan',
+          output:'Budget:\n~₹12,000 per person: flights, stay, food, and activities added up.' },
+      ]
+    },
+  ];
+
+  let runIdx = 0;
+  let STEPS = RUNS[0].steps;
+
+  const chainEl  = document.getElementById('chain');
+  const finalBox = document.getElementById('finalBox');
+  const stepBtn  = document.getElementById('stepBtn');
+  const allBtn   = document.getElementById('allBtn');
+  const resetBtn = document.getElementById('newBtn');
+  const runTaskEl  = document.getElementById('runTask');
+  const runStartEl = document.getElementById('runStart');
+  const doneTxtEl  = document.getElementById('doneTxt');
+  let revealed = 0;      // how many steps have produced output
+  let running  = false;  // "run all" in progress
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function renderChain(){
+    chainEl.innerHTML = '';
+    STEPS.forEach((s, i) => {
+      // connector above every step except the first
+      if (i > 0) {
+        const c = document.createElement('div');
+        c.className = 'connector' + (i <= revealed ? ' flow' : '');
+        chainEl.appendChild(c);
+      }
+      const state = i < revealed ? 'done' : (i === revealed ? 'next' : 'pending');
+      const step = document.createElement('div');
+      step.className = 'step ' + state + (i === revealed - 1 ? ' popIn' : '');
+
+      let io;
+      if (state === 'done') {
+        io = '<div class="sio"><span class="lab">Output</span><br><span class="out-txt">' + esc(s.output) + '</span></div>';
+      } else if (state === 'next') {
+        io = '<div class="sio"><span class="lab">Will use</span> <span class="in-txt">' + esc(s.input) +
+             '</span><br><span class="pending-txt">Press “Run next step” to produce its output…</span></div>';
+      } else {
+        io = '<div class="sio"><span class="pending-txt">Waiting for step ' + i + ' to finish…</span></div>';
+      }
+
+      step.innerHTML =
+        '<div class="num">' + (state === 'done' ? '✓' : (i + 1)) + '</div>' +
+        '<div class="sbody"><div class="sname">' + s.icon + ' ' + esc(s.name) + '</div>' + io + '</div>';
+      chainEl.appendChild(step);
+    });
+
+    finalBox.classList.toggle('show', revealed >= STEPS.length);
+    stepBtn.disabled = revealed >= STEPS.length;
+    stepBtn.style.opacity = revealed >= STEPS.length ? '0.5' : '1';
+  }
+
+  function nextStep(){
+    if (revealed < STEPS.length) { revealed++; renderChain(); }
+  }
+
+  function loadRun(i){
+    runIdx = ((i % RUNS.length) + RUNS.length) % RUNS.length;
+    const run = RUNS[runIdx];
+    STEPS = run.steps;
+    running = false;
+    revealed = 0;
+    runTaskEl.innerHTML  = run.task;
+    runStartEl.innerHTML = run.start;
+    doneTxtEl.innerHTML  = run.done;
+    renderChain();
+  }
+
+  stepBtn.addEventListener('click', () => { if (!running) nextStep(); });
+  resetBtn.addEventListener('click', () => {
+    // pick a different example at random
+    let n = runIdx;
+    if (RUNS.length > 1) { while (n === runIdx) n = Math.floor(Math.random() * RUNS.length); }
+    loadRun(n);
+  });
+  allBtn.addEventListener('click', () => {
+    if (running) return;
+    running = true;
+    const tick = () => {
+      if (revealed < STEPS.length) { nextStep(); setTimeout(tick, 650); }
+      else running = false;
+    };
+    tick();
+  });
+
+  loadRun(0);
+
+
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderChain();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+      gsap.from('.module-card', { y: 30, opacity: 0, duration: 0.5, stagger: 0.08, ease: 'power2.out', delay: 0.2 });
+    }
+  });
+  </script>
+
+</body>
+</html>
