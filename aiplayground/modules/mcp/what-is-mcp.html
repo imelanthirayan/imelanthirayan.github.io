@@ -177,7 +177,7 @@
       min-width: 0;
     }
 
-    /* ── Waiter analogy tree ───────────────────── */
+    /* ── USB hub analogy tree ──────────────────── */
     .waiter-wrap {
       display: flex; flex-direction: column; align-items: center; padding: 1rem 0.75rem 1.1rem;
       border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
@@ -370,7 +370,7 @@
           <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">What is MCP?</h1>
         </div>
         <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
-          Model Context Protocol, or <strong class="text-slate-800 dark:text-slate-200">MCP</strong>, is a standard way for AI applications to connect with external domains and systems. Instead of every AI app learning a different way to reach every domain, MCP provides one common approach.
+          Model Context Protocol, or <strong class="text-slate-800 dark:text-slate-200">MCP</strong>, is a standard way for AI applications to connect with external systems. Instead of every AI app learning a different way to reach every system, MCP provides one common approach.
         </p>
 
         <div class="flex items-center gap-2 mb-4 flex-wrap">
@@ -398,64 +398,64 @@
           Why This Matters
         </div>
         <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-          Without a common standard, every AI application needs a different way to connect to every shop or service. That becomes hard to build, hard to maintain, and hard to scale. MCP makes this simpler by providing a shared communication approach, just like a food court has one waiter who can bring your order from any stall, so you don't need to walk up to each one yourself.
+          Without a common standard, every AI application needs a different way to connect to every external system. That becomes hard to build, hard to maintain, and hard to scale. MCP makes this simpler by providing a shared communication approach, just like a USB port lets any device plug into your computer the same way, so you don't need a different cable for each one.
         </p>
         <div class="grid md:grid-cols-2 gap-4">
           <div class="waiter-wrap wd-without">
             <p class="wd-scenario-label wd-label-without">🚫 Without MCP</p>
             <div class="grid grid-cols-3 gap-2 py-2">
               <div class="flex flex-col items-center gap-1">
-                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person 1</div>
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">💻 Laptop 1</div>
                 <div class="wd-vstub"></div>
                 <div class="flex flex-col gap-1 items-stretch">
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">⌨️ Keyboard</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖱️ Mouse</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖨️ Printer</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">📷 Camera</div></div>
                 </div>
               </div>
               <div class="flex flex-col items-center gap-1">
-                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person 2</div>
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">💻 Laptop 2</div>
                 <div class="wd-vstub"></div>
                 <div class="flex flex-col gap-1 items-stretch">
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">⌨️ Keyboard</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖱️ Mouse</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖨️ Printer</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">📷 Camera</div></div>
                 </div>
               </div>
               <div class="flex flex-col items-center gap-1">
-                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">🧑 Person N</div>
+                <div class="wd-node" style="font-size:0.68rem;padding:0.35rem 0.5rem;">💻 Laptop N</div>
                 <div class="wd-vstub"></div>
                 <div class="flex flex-col gap-1 items-stretch">
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍕 Pizza Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍔 Burger Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🍦 Ice Cream Shop</div></div>
-                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🥪 Sandwich Shop</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">⌨️ Keyboard</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖱️ Mouse</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">🖨️ Printer</div></div>
+                  <div class="flex items-center gap-1"><span class="text-red-500 dark:text-red-400 font-black text-xs">×</span><div class="wd-node wd-shop" style="font-size:0.62rem;padding:0.28rem 0.4rem;">📷 Camera</div></div>
                 </div>
               </div>
             </div>
-            <p class="wd-caption">Every person needs their own custom-built connection to every shop.</p>
+            <p class="wd-caption">Every laptop needs its own special connector for every device.</p>
           </div>
           <div class="waiter-wrap wd-with">
             <p class="wd-scenario-label wd-label-with">✅ With MCP</p>
             <div class="flex flex-col items-center gap-2 py-2">
               <div class="flex flex-wrap justify-center gap-2">
-                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person 1</div>
-                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person 2</div>
-                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">🧑 Person N</div>
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">💻 Laptop 1</div>
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">💻 Laptop 2</div>
+                <div class="wd-node" style="font-size:0.7rem;padding:0.35rem 0.55rem;">💻 Laptop N</div>
               </div>
               <div class="wd-vline"></div>
-              <div class="wd-node wd-waiter">🧑‍🍳 Food Court Waiter (MCP)</div>
+              <div class="wd-node wd-waiter">🔌 USB Hub (MCP)</div>
               <div class="wd-vline"></div>
               <div class="flex flex-wrap justify-center gap-2">
-                <div class="wd-node wd-shop">🍕 Pizza Shop</div>
-                <div class="wd-node wd-shop">🍔 Burger Shop</div>
-                <div class="wd-node wd-shop">🍦 Ice Cream Shop</div>
-                <div class="wd-node wd-shop">🥪 Sandwich Shop</div>
+                <div class="wd-node wd-shop">⌨️ Keyboard</div>
+                <div class="wd-node wd-shop">🖱️ Mouse</div>
+                <div class="wd-node wd-shop">🖨️ Printer</div>
+                <div class="wd-node wd-shop">📷 Camera</div>
               </div>
             </div>
-            <p class="wd-caption">Every person uses the same food-court process to reach the shops.</p>
+            <p class="wd-caption">Every laptop uses the same USB standard to reach the devices.</p>
           </div>
         </div>
       </section>
@@ -521,7 +521,7 @@
             <table class="map-table">
               <thead>
                 <tr class="map-row-head">
-                  <th>🍽️ Food Court World</th>
+                  <th>🔌 USB World</th>
                   <th>🤖 AI World</th>
                 </tr>
               </thead>
@@ -531,18 +531,18 @@
                   <td>User</td>
                 </tr>
                 <tr>
-                  <td>Food Court Waiter</td>
+                  <td>USB Hub</td>
                   <td>MCP connection layer</td>
                 </tr>
                 <tr>
-                  <td>Stalls</td>
+                  <td>Devices</td>
                   <td>External systems</td>
                 </tr>
               </tbody>
             </table>
           </div>
           <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            MCP plays a similar role for AI applications. Instead of building a different connection pattern for every external domain, the AI app can use <strong class="text-slate-800 dark:text-slate-200">one standard way</strong> to communicate with many domains.
+            MCP plays a similar role for AI applications. Instead of building a different connection pattern for every external system, the AI app can use <strong class="text-slate-800 dark:text-slate-200">one standard way</strong> to communicate with many systems.
           </p>
         </section>
 
@@ -562,7 +562,7 @@
             </div>
             <div class="explain-card">
               <div class="explain-icon"><i data-lucide="link-2" style="width:16px;height:16px;"></i></div>
-              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">MCP is a <strong class="text-slate-800 dark:text-slate-200">standard way to communicate</strong>, so any AI app can connect to any MCP-ready tool.</p>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">MCP provides a <strong class="text-slate-800 dark:text-slate-200">standard way for AI apps to communicate</strong> with MCP-ready tools and systems.</p>
             </div>
           </div>
         </section>
@@ -580,7 +580,7 @@
         </div>
         <div class="takeaway-item">
           <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
-          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP is a <strong class="text-slate-900 dark:text-white">standard way</strong> for AI applications to connect with external domains and systems.</p>
+          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed">MCP is a <strong class="text-slate-900 dark:text-white">standard way</strong> for AI applications to connect with external systems.</p>
         </div>
         <div class="takeaway-item">
           <i data-lucide="check-circle-2" style="width:16px;height:16px;flex-shrink:0;margin-top:2px;" class="text-amber-600 dark:text-amber-400"></i>
@@ -644,9 +644,9 @@
            9. SUMMARY
       ══════════════════════════════════════ -->
       <div class="summary-panel mb-8">
-        <span class="text-2xl">🍽️🧑‍🍳</span>
+        <span class="text-2xl">🔌💻</span>
         <p class="summary-text">
-          Just like a food court has one process for ordering from different stalls, <strong>MCP gives AI applications one standard way to connect with many external domains.</strong>
+          Just like a USB port lets one computer connect to many different devices, <strong>MCP gives AI applications one standard way to connect with many external systems.</strong>
         </p>
       </div>
 
@@ -678,19 +678,26 @@
      DATA
   ═══════════════════════════════════════════════ */
   const REQUESTS = [
-    { id:'combo1', icon:'shopping-bag', label:'Order a pizza & a burger',              systems:['Pizza Shop','Burger Shop'] },
-    { id:'combo2', icon:'shopping-bag', label:'Order ice cream & a sandwich',          systems:['Ice Cream Shop','Sandwich Shop'] },
-    { id:'combo3', icon:'shopping-bag', label:'Order pizza, ice cream & a sandwich',   systems:['Pizza Shop','Ice Cream Shop','Sandwich Shop'] },
-    { id:'comboAll', icon:'shopping-bag', label:'Order from all 4 stalls',             systems:['Pizza Shop','Burger Shop','Ice Cream Shop','Sandwich Shop'] },
+    { id:'combo1', icon:'usb', label:'Connect a keyboard & a mouse',              systems:['Keyboard','Mouse'] },
+    { id:'combo2', icon:'usb', label:'Connect a printer & a camera',              systems:['Printer','Camera'] },
+    { id:'combo3', icon:'usb', label:'Connect a keyboard, printer & camera',      systems:['Keyboard','Printer','Camera'] },
+    { id:'comboAll', icon:'usb', label:'Connect all 4 devices',                   systems:['Keyboard','Mouse','Printer','Camera'] },
   ];
 
-  const ALL_STALLS = ['Pizza Shop', 'Burger Shop', 'Ice Cream Shop', 'Sandwich Shop'];
+  const ALL_DEVICES = ['Keyboard', 'Mouse', 'Printer', 'Camera'];
 
-  const FOOD_MAP = {
-    'Pizza Shop': 'a pepperoni pizza',
-    'Burger Shop': 'a cheeseburger',
-    'Ice Cream Shop': 'a scoop of chocolate ice cream',
-    'Sandwich Shop': 'a club sandwich',
+  const DEVICE_MAP = {
+    'Keyboard': 'a keyboard',
+    'Mouse': 'a mouse',
+    'Printer': 'a printer',
+    'Camera': 'a camera',
+  };
+
+  const DEVICE_EMOJI = {
+    'Keyboard': '🔺',
+    'Mouse': '🔷',
+    'Printer': '🟧',
+    'Camera': '🟢',
   };
 
   function joinList(arr) {
@@ -711,35 +718,36 @@
 
   function branchesHTML(prefix, groupIdx, systems, emoji, activeSystems = systems, showIdle = false) {
     const activeSet = new Set(activeSystems);
+    const emojiFor = (s) => (typeof emoji === 'object' ? (emoji[s] || '🔌') : emoji);
     return `<div class="wd-branches">${systems.map((s, i) => `
       <div class="wd-branch">
         <div class="wd-vstub"></div>
-        ${mcpNodeHTML(`${prefix}-${groupIdx}-${i}`, emoji, s, showIdle && !activeSet.has(s) ? 'node-idle' : '', showIdle && !activeSet.has(s))}
+        ${mcpNodeHTML(`${prefix}-${groupIdx}-${i}`, emojiFor(s), s, showIdle && !activeSet.has(s) ? 'node-idle' : '', showIdle && !activeSet.has(s))}
       </div>
     `).join('')}</div>`;
   }
 
   function nodeChainHTML(mode, prefix, systems) {
     if (mode === 'without') {
-      // No shared hub: LLM must branch out with a separate direct connection to every stall.
+      // No shared hub: each device needs its own different, incompatible plug.
       return `
         <div class="flex flex-col items-center">
           ${mcpNodeHTML(prefix + '-0', '💬', 'User')}
           <div class="wd-vline"></div>
-          ${mcpNodeHTML(prefix + '-1', '🤖', 'AI App / Host')}
-          ${branchesHTML(prefix, 2, systems, '🧩')}
+          ${mcpNodeHTML(prefix + '-1', '💻', 'Laptop (AI App)')}
+          ${branchesHTML(prefix, 2, systems, DEVICE_EMOJI)}
         </div>
       `;
     }
-    // With MCP: one shared hub (the waiter) reaches every stall, then a single response returns.
+    // With MCP: one shared hub (the USB standard) reaches every device with the same standard plug.
     return `
       <div class="flex flex-col items-center">
         ${mcpNodeHTML(prefix + '-0', '💬', 'User')}
         <div class="wd-vline"></div>
-        ${mcpNodeHTML(prefix + '-1', '🤖', 'AI App / Host')}
+        ${mcpNodeHTML(prefix + '-1', '💻', 'Laptop (AI App)')}
         <div class="wd-vline"></div>
-        ${mcpNodeHTML(prefix + '-2', '🧑\u200d🍳', 'Food Court Waiter (MCP)')}
-        ${branchesHTML(prefix, 3, ALL_STALLS, '🗂️', systems, true)}
+        ${mcpNodeHTML(prefix + '-2', '🔌', 'USB Hub (MCP)')}
+        ${branchesHTML(prefix, 3, ALL_DEVICES, '🔌', systems, true)}
         <div class="wd-vline"></div>
         ${mcpNodeHTML(prefix + '-4', '✅', 'Response')}
       </div>
@@ -749,13 +757,13 @@
   function idsForChain(mode, prefix, systems) {
     return mode === 'without'
       ? [prefix + '-0', prefix + '-1', ...Array.from({ length: systems.length }, (_, i) => `${prefix}-2-${i}`)]
-      : [prefix + '-0', prefix + '-1', prefix + '-2', ...systems.map(s => `${prefix}-3-${ALL_STALLS.indexOf(s)}`), prefix + '-4'];
+      : [prefix + '-0', prefix + '-1', prefix + '-2', ...systems.map(s => `${prefix}-3-${ALL_DEVICES.indexOf(s)}`), prefix + '-4'];
   }
 
   function allIdsForChain(mode, prefix, systems) {
     return mode === 'without'
       ? idsForChain(mode, prefix, systems)
-      : [prefix + '-0', prefix + '-1', prefix + '-2', ...ALL_STALLS.map((_, i) => `${prefix}-3-${i}`), prefix + '-4'];
+      : [prefix + '-0', prefix + '-1', prefix + '-2', ...ALL_DEVICES.map((_, i) => `${prefix}-3-${i}`), prefix + '-4'];
   }
 
   function resetChain(ids) {
@@ -805,8 +813,8 @@
     resetChain(withoutIds);
     resetChain(allIdsForChain('with', 'pgm', systems));
 
-    // Without MCP: User → AI app appear first, then each stall lights up one at a time,
-    // as separate, disconnected connections, no shared hub (you walk to each one yourself).
+    // Without MCP: User → AI app appear first, then each device lights up one at a time,
+    // as separate, disconnected connections, no shared hub (a different cable for each one).
     withoutIds.forEach((id, i) => {
       setTimeout(() => {
         if (myId !== pgAnimId) return;
@@ -822,10 +830,10 @@
       outcome.textContent = `🤖 AI App: "I need a separate custom connection to ${joinList(systems)} and must handle each one differently."`;
     }, withoutIds.length * 400);
 
-    // With MCP: User → AI app → Waiter (hub) appear one at a time, then the waiter reaches
-    // every stall through a shared process, then the
+    // With MCP: User → AI app → USB Hub appear one at a time, then the hub reaches
+    // every device through a shared standard, then the
     // response returns as a single result.
-    const preShopSteps = 3; // User, LLM, Waiter
+    const preShopSteps = 3; // User, LLM, USB Hub
     const shopStart = preShopSteps * 400;
     const responseStart = shopStart + 400;
     withIds.forEach((id, i) => {
@@ -842,8 +850,8 @@
       if (myId !== pgAnimId) return;
       const outcome = document.getElementById('pgOutcomeWith');
       outcome.className = 'outcome-bubble outcome-success';
-      const foods = systems.map(s => FOOD_MAP[s] || 'your order');
-      outcome.textContent = `✅ You ask through the waiter, and the same ordering process brings back ${joinList(foods)}.`;
+      const devices = systems.map(s => DEVICE_MAP[s] || 'a device');
+      outcome.textContent = `✅ You connect through one USB hub, and the same standard port lets you use ${joinList(devices)}.`;
     }, 300 + responseStart + 400);
   }
 
