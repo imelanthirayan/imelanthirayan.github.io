@@ -65,7 +65,7 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [Prompt Chaining](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/prompt-chaining.html): Break a complex task into smaller prompts that build on each other, step by step.
 - [Common Prompt Mistakes](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/common-prompt-mistakes.html): Spot the mistakes that make prompts weak, and learn simple fixes that get better answers.
 
-## Inside a Transformer
+## Transformer Internals
 
 - [How a Transformer Reads Text](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/how-a-transformer-reads-text.html): Play with how a transformer turns text into tokens it can work with.
 - [Word Order & Positional Encoding](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/positional-encoding.html): See why word order matters and how position is added to each token.
@@ -74,6 +74,14 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [Residual Connections & Layer Normalization](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/residual-and-layer-norm.html): See how shortcuts and normalization keep information flowing smoothly.
 - [One Transformer Layer](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/one-transformer-layer.html): Put the pieces together and step through a single transformer layer.
 - [Stacking Transformer Layers](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/stacking-transformer-layers.html): Stack layers and watch how understanding deepens layer by layer.
+
+## Transformer Architectures
+
+- [What are Encoder and Decoder?](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-and-decoder.html): Meet the two transformer roles, the encoder reads and understands, the decoder generates output.
+- [Encoder-only Models (BERT)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-only-bert.html): See why encoder-only models like BERT are great at understanding text but not built to generate long responses.
+- [Decoder-only Models (GPT)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/decoder-only-gpt.html): Watch how decoder-only models like GPT generate text one token at a time.
+- [Why do we need Encoder-Decoder Models?](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/why-encoder-decoder.html): Explore why some tasks need both understanding and generation working together.
+- [Encoder-Decoder Models (T5)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-decoder-t5.html): See how T5 combines an encoder and decoder to read input and generate new output.
 
 ## Vector Index Explorer
 
@@ -85,6 +93,16 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [HNSW Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/hnsw.html): Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.
 - [DiskANN Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/diskann.html): Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.
 
+## AI Agent Fundamentals
+
+- [What is an AI Agent?](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/what-is-an-ai-agent.html): See how an AI agent differs from a chatbot by working toward a goal and taking actions.
+- [Components of an AI Agent](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/components-of-an-ai-agent.html): Explore the goal, model, tools, memory, action, and result that make up an AI agent.
+- [Tool Calling](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/tool-calling.html): See how an agent chooses the right tool, like a calendar, calculator, files, or search, to complete a task.
+- [Agent Memory](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/agent-memory.html): Compare an agent with and without memory, and see what useful information it can remember.
+- [Single-Agent vs Multi-Agent](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/single-vs-multi-agent.html): See how the same task flows through one agent or a team of agents with different roles.
+- [Real-World AI Agents](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/real-world-ai-agents.html): Explore everyday agents like travel, email, coding, research, and support, and the building blocks they share.
+
 ## Coming soon
 
-- Transformer Architectures: encoder, decoder, and encoder-decoder models (BERT, GPT, T5) — modules in progress.
+- AI Agent Fundamentals is complete. Agentic AI and later sections are in progress.
+- Agentic AI: 8 modules on agentic AI, the agent loop, planning, reflection, human in the loop, autonomous workflows, multi-step reasoning, and orchestration - in progress.

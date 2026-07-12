@@ -1,5 +1,5 @@
 /**
- * AI Concepts Playground — UI Components + App Controller
+ * AI Concepts Playground - UI Components + App Controller
  * Namespaces: Components, AIPlayground
  */
 
@@ -34,7 +34,7 @@ const Components = {
       id: 'embeddings',
       icon: 'map-pin',
       title: 'Embeddings',
-      description: 'See how AI maps words to points in space — similar words land closer together.',
+      description: 'See how AI maps words to points in space - similar words land closer together.',
       time: '10 min',
       difficulty: 'Beginner',
       color: 'teal',
@@ -64,7 +64,7 @@ const Components = {
       id: 'top-k',
       icon: 'filter',
       title: 'Top-K Search',
-      description: 'See how AI scores every item and returns only the best K results — the secret behind fast, relevant search.',
+      description: 'See how AI scores every item and returns only the best K results - the secret behind fast, relevant search.',
       time: '8 min',
       difficulty: 'Beginner',
       color: 'green',
@@ -74,7 +74,7 @@ const Components = {
       id: 'clustering',
       icon: 'circle-dot',
       title: 'Clustering',
-      description: 'Watch items group themselves into clusters based on similarity — no labels needed.',
+      description: 'Watch items group themselves into clusters based on similarity - no labels needed.',
       time: '10 min',
       difficulty: 'Beginner',
       color: 'blue',
@@ -104,7 +104,7 @@ const Components = {
       id: 'activation-functions',
       icon: 'zap',
       title: 'Activation Functions',
-      description: 'Explore how neurons decide to fire — the switch that gives AI non-linear power.',
+      description: 'Explore how neurons decide to fire - the switch that gives AI non-linear power.',
       time: '8 min',
       difficulty: 'Beginner',
       color: 'yellow',
@@ -159,7 +159,7 @@ const Components = {
     card.setAttribute('data-id', topic.id);
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
-    card.setAttribute('aria-label', `${topic.title} — ${topic.difficulty}`);
+    card.setAttribute('aria-label', `${topic.title} - ${topic.difficulty}`);
 
     card.innerHTML = `
       <!-- Top row: icon + badges -->
@@ -366,31 +366,31 @@ const AIPlayground = {
   _cleanups: [],
 
   init() {
-    /* 1 — Theme */
+    /* 1 - Theme */
     Utils.loadDarkPreference();
 
-    /* 2 — GSAP */
+    /* 2 - GSAP */
     Animations.init();
 
-    /* 3 — Cards */
+    /* 3 - Cards */
     Components.renderCards();
 
-    /* 4 — Hero canvas */
+    /* 4 - Hero canvas */
     const cleanCanvas = Visualizations.heroNeuralNet('heroCanvas');
     if (cleanCanvas) this._cleanups.push(cleanCanvas);
 
-    /* 5 — Hero entrance + counters */
+    /* 5 - Hero entrance + counters */
     Animations.heroEntrance();
     Animations.heroCounters();
 
-    /* 6 — Scroll effects (after a tick so cards are in DOM) */
+    /* 6 - Scroll effects (after a tick so cards are in DOM) */
     Animations.navbarScroll();
     requestAnimationFrame(() => {
       Animations.cardsReveal();
       Animations.sectionReveal();
     });
 
-    /* 7 — UI bindings */
+    /* 7 - UI bindings */
     this._bindDarkMode();
     this._bindMobileMenu();
     this._bindSmoothScroll();

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   SHARED SITE CHROME — Nav + Footer
+   SHARED SITE CHROME - Nav + Footer
    Included once per module page via:
      <script src="../js/partials.js"></script><script>writeSiteNav();</script>
      …
@@ -109,5 +109,26 @@
   global.writeSiteNav       = writeSiteNav;
   global.writeSiteFooter    = writeSiteFooter;
   global.writeSiteFooterVI  = writeSiteFooterVI;
+
+  /* ═══════════════════════════════════════════════════════════════
+     GOOGLE ANALYTICS (GA4) - loaded once on every page
+     partials.js is included site-wide, so this covers all pages.
+  ═══════════════════════════════════════════════════════════════ */
+  (function injectAnalytics() {
+    var GA_ID = 'G-QGE8F1L665';
+    if (global.__gaLoaded) return;
+    global.__gaLoaded = true;
+
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+
+    global.dataLayer = global.dataLayer || [];
+    function gtag() { global.dataLayer.push(arguments); }
+    global.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+  })();
 
 })(window);

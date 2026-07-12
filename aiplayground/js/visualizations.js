@@ -1,5 +1,5 @@
 /**
- * AI Concepts Playground — Visualization Utilities  (Canvas + D3)
+ * AI Concepts Playground - Visualization Utilities  (Canvas + D3)
  * Namespace: Visualizations
  */
 
@@ -157,7 +157,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Base SVG Factory
+     D3 - Base SVG Factory
   ───────────────────────────────────────── */
 
   /**
@@ -191,7 +191,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Scale Factory
+     D3 - Scale Factory
   ───────────────────────────────────────── */
 
   /** type: 'linear' | 'log' | 'sqrt' | 'ordinal' | 'band' | 'time' */
@@ -209,7 +209,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Axis Helper
+     D3 - Axis Helper
   ───────────────────────────────────────── */
 
   /** orientation: 'bottom' | 'top' | 'left' | 'right' */
@@ -246,7 +246,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Grid Lines
+     D3 - Grid Lines
   ───────────────────────────────────────── */
 
   drawGrid(svg, xScale, yScale, { W, H } = {}) {
@@ -269,7 +269,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Animated Transition Helper
+     D3 - Animated Transition Helper
   ───────────────────────────────────────── */
 
   transition(selection, duration = 600) {
@@ -278,7 +278,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     D3 — Colour Scales
+     D3 - Colour Scales
   ───────────────────────────────────────── */
 
   colorScale(type = 'categorical') {
@@ -293,7 +293,7 @@ const Visualizations = {
   },
 
   /* ─────────────────────────────────────────
-     Canvas — Round Rect Helper
+     Canvas - Round Rect Helper
   ───────────────────────────────────────── */
 
   roundRect(ctx, x, y, w, h, r = 8) {

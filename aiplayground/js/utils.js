@@ -1,5 +1,5 @@
 /**
- * AI Concepts Playground — Shared Utilities
+ * AI Concepts Playground - Shared Utilities
  * Namespace: Utils
  */
 

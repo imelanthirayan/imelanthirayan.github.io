@@ -1,5 +1,5 @@
 /* =====================================================
-   AI Concepts Playground — Custom Styles
+   AI Concepts Playground - Custom Styles
    ===================================================== */
 
 /* Base font */
@@ -542,7 +542,7 @@ html.dark .glass {
 .animate-pulse-glow { animation: pulseGlow 2s cubic-bezier(0,0,0.2,1) infinite; }
 
 /* =====================================================
-   Module Page — 2-column layout
+   Module Page - 2-column layout
    ===================================================== */
 
 /* Playground (left) + Visualization/Stats (right) */

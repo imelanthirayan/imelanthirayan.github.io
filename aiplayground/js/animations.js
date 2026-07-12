@@ -1,5 +1,5 @@
 /**
- * AI Concepts Playground — Animation Utilities  (GSAP)
+ * AI Concepts Playground - Animation Utilities  (GSAP)
  * Namespace: Animations
  */
 
