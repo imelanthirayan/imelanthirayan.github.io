@@ -255,9 +255,9 @@
       color: #4f46e5;
     }
     .hero-title {
-      font-size: clamp(3.5rem, 8vw, 7.25rem);
-      line-height: 0.92;
-      letter-spacing: -0.065em;
+      font-size: clamp(2.75rem, 6vw, 5.25rem);
+      line-height: 0.95;
+      letter-spacing: -0.03em;
     }
     .hero-subtitle {
       max-width: 36rem;
@@ -607,7 +607,7 @@
               <div class="path-dot" style="background:#7c3aed;"><i data-lucide="plug" class="w-4 h-4"></i></div>
               <div>
                 <div class="path-name">Model Context Protocol</div>
-                <div class="path-desc">Understand how AI apps connect to outside domains.</div>
+                <div class="path-desc">Understand how AI apps connect to external systems.</div>
               </div>
               <i data-lucide="arrow-right" class="path-arrow w-4 h-4"></i>
             </a>
@@ -663,6 +663,8 @@
           <button class="filter-chip" data-filter="RAG">RAG</button>
           <button class="filter-chip" data-filter="MCP">MCP</button>
           <button class="filter-chip" data-filter="Prompt Engineering">Prompt Engineering</button>
+          <button class="filter-chip" data-filter="Inside a Transformer">Inside a Transformer</button>
+          <button class="filter-chip" data-filter="Transformer Architectures">Transformer Architectures</button>
           <button class="filter-chip" data-filter="Vector Index Explorer">Vector Index Explorer</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner">Beginner</button>
@@ -789,7 +791,24 @@
       { num:6,  id:'pe-chaining',   title:'Prompt Chaining',                  desc:'Break a complex task into smaller prompts that build on each other, step by step.', status:'available', diff:'Intermediate', dur:'8–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/prompt-chaining.html', icon:'link', color:'#db2777' },
       { num:7,  id:'pe-mistakes',   title:'Common Prompt Mistakes',           desc:'Spot the mistakes that make prompts weak, and learn simple fixes that get better answers.', status:'available', diff:'Beginner',     dur:'8–10 min', mod:'Prompt Engineering', page:'modules/prompt-engineering/common-prompt-mistakes.html', icon:'alert-triangle', color:'#db2777' },
 
-      // ── Module 6: Vector Index Explorer ──────────────────────────────────────────────
+      // ── Module 6: Inside a Transformer ────────────────────────────────────────
+      { num:1,  id:'it-reads',      title:'How a Transformer Reads Text',              desc:'Play with how a transformer turns text into tokens it can work with.',            status:'available', diff:'Beginner',     dur:'7–10 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/how-a-transformer-reads-text.html', icon:'book-open',  color:'#0891b2' },
+      { num:2,  id:'it-position',   title:'Word Order & Positional Encoding',          desc:'See why word order matters and how position is added to each token.',              status:'available', diff:'Intermediate', dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/positional-encoding.html',          icon:'move-horizontal', color:'#0891b2' },
+      { num:3,  id:'it-attention',  title:'Attention & Multi-Head Attention',          desc:'Watch words look at each other, and see why many attention heads help.',           status:'available', diff:'Intermediate', dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/multi-head-attention.html',         icon:'eye',        color:'#0891b2' },
+      { num:4,  id:'it-ffn',        title:'Thinking Step (Feed Forward Network)',      desc:'Explore the layer where each token is processed and refined on its own.',          status:'available', diff:'Intermediate', dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/feed-forward-network.html',         icon:'cpu',        color:'#0891b2' },
+      { num:5,  id:'it-residual',   title:'Residual Connections & Layer Normalization',desc:'See how shortcuts and normalization keep information flowing smoothly.',           status:'available', diff:'Intermediate', dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/residual-and-layer-norm.html',      icon:'git-merge',  color:'#0891b2' },
+      { num:6,  id:'it-layer',      title:'One Transformer Layer',                     desc:'Put the pieces together and step through a single transformer layer.',             status:'available', diff:'Intermediate', dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/one-transformer-layer.html',        icon:'layers',     color:'#0891b2' },
+      { num:7,  id:'it-stack',      title:'Stacking Transformer Layers',               desc:'Stack layers and watch how understanding deepens layer by layer.',                 status:'available', diff:'Advanced',     dur:'6–8 min', mod:'Inside a Transformer', page:'modules/inside-a-transformer/stacking-transformer-layers.html',  icon:'layers-3',   color:'#0891b2' },
+
+      // ── Module 7: Transformer Architectures ───────────────────────────────────
+      { num:1,  id:'ta-enc-dec',    title:'What are Encoder and Decoder?',             desc:'Meet the two building blocks that make up transformer models.',                    status:'coming-soon', diff:'Beginner',     dur:'7–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/encoder-and-decoder.html', icon:'split',      color:'#be123c' },
+      { num:2,  id:'ta-vs',         title:'Encoder vs Decoder',                        desc:'Compare how encoders read and decoders write, side by side.',                      status:'coming-soon', diff:'Beginner',     dur:'7–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/encoder-vs-decoder.html',   icon:'arrow-left-right', color:'#be123c' },
+      { num:3,  id:'ta-bert',       title:'Encoder-only Models (BERT)',                desc:'Explore how encoder-only models understand text for tasks like search.',           status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/encoder-only-bert.html',    icon:'scan-text',  color:'#be123c' },
+      { num:4,  id:'ta-gpt',        title:'Decoder-only Models (GPT)',                 desc:'See how decoder-only models generate text one word at a time.',                    status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/decoder-only-gpt.html',     icon:'pen-tool',   color:'#be123c' },
+      { num:5,  id:'ta-t5',         title:'Encoder-Decoder Models (T5)',               desc:'Discover how models pair reading and writing for tasks like translation.',         status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/encoder-decoder-t5.html',   icon:'repeat',     color:'#be123c' },
+      { num:6,  id:'ta-choose',     title:'Choosing the Right Architecture',           desc:'Match a task to the architecture that fits it best.',                              status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Transformer Architectures', page:'modules/transformer-architectures/choosing-architecture.html', icon:'git-compare', color:'#be123c' },
+
+      // ── Module 8: Vector Index Explorer ──────────────────────────────────────────────
       { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
       { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
       { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
@@ -805,6 +824,8 @@
       'Retrieval-Augmented Generation (RAG)':   { icon:'database', color:'#0d9488', bg:'rgba(13,148,136,0.07)', border:'rgba(13,148,136,0.2)',  iconBg:'rgba(13,148,136,0.1)'  },
       'Model Context Protocol (MCP)':            { icon:'plug',     color:'#7c3aed', bg:'rgba(124,58,237,0.07)', border:'rgba(124,58,237,0.2)',  iconBg:'rgba(124,58,237,0.1)'  },
       'Prompt Engineering':                      { icon:'message-square', color:'#db2777', bg:'rgba(219,39,119,0.07)', border:'rgba(219,39,119,0.2)', iconBg:'rgba(219,39,119,0.1)' },
+      'Inside a Transformer':                    { icon:'boxes',    color:'#0891b2', bg:'rgba(8,145,178,0.07)',   border:'rgba(8,145,178,0.2)',   iconBg:'rgba(8,145,178,0.1)'   },
+      'Transformer Architectures':               { icon:'landmark', color:'#be123c', bg:'rgba(190,18,60,0.07)',   border:'rgba(190,18,60,0.2)',   iconBg:'rgba(190,18,60,0.1)'   },
       'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
     };
 
@@ -845,6 +866,8 @@
         if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation (RAG)';
         if (activeFilter === 'MCP')               return l.mod === 'Model Context Protocol (MCP)';
         if (activeFilter === 'Prompt Engineering') return l.mod === 'Prompt Engineering';
+        if (activeFilter === 'Inside a Transformer') return l.mod === 'Inside a Transformer';
+        if (activeFilter === 'Transformer Architectures') return l.mod === 'Transformer Architectures';
         return true;
       });
     }
@@ -897,7 +920,7 @@
                 <i data-lucide="${cfg.icon}" style="width:13px;height:13px;color:${cfg.color};"></i>
               </div>
               <span class="mod-section-name" style="color:${cfg.color};">${esc(mod)}</span>
-              <span class="mod-section-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
+              <span class="mod-section-count">${lessons.length} Interactive Module${lessons.length !== 1 ? 's' : ''}</span>
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
             </div>
             <div class="mod-section-body">
@@ -967,7 +990,7 @@
               </div>
               <span class="mod-section-name" style="color:${cfg.color};">${esc(mod)}</span>
               <span class="cs-soon-badge">🚀 Coming Soon</span>
-              <span class="mod-section-count">${lessons.length} module${lessons.length !== 1 ? 's' : ''}</span>
+              <span class="mod-section-count">${lessons.length} Interactive Module${lessons.length !== 1 ? 's' : ''}</span>
               <i data-lucide="chevron-down" style="width:15px;height:15px;" class="mod-section-chevron"></i>
             </div>
             <div class="mod-section-body">
