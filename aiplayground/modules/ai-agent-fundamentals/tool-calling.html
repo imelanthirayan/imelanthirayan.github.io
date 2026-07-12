@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Tool Calling, an interactive beginner lesson on how an AI agent uses external tools like a calendar, calculator, files, or search to complete tasks." />
+  <title>Tool Calling, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%A7</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Request chooser ─────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+    .goal-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.7rem; }
+    .goal-card {
+      cursor: pointer; text-align: left; display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.85rem 1rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; color: #1e293b; font-size: 0.9rem; transition: all 0.22s ease;
+    }
+    .goal-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .goal-card.active { border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .goal-card { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    html.dark .goal-card.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .goal-emoji { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+
+    /* ── Step counter ────────────────────────── */
+    .step-count {
+      font-size: 0.78rem; font-weight: 800; color: #16a34a;
+      padding: 0.3rem 0.8rem; border-radius: 9999px; background: rgba(22,163,74,0.08);
+      border: 1.5px solid rgba(22,163,74,0.2);
+    }
+    html.dark .step-count { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.24); }
+
+    /* ── Control buttons ─────────────────────── */
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-size: 0.85rem; font-weight: 800; padding: 0.6rem 1.25rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .ctrl-primary { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    .ctrl-primary:hover { box-shadow: 0 8px 24px rgba(22,163,74,0.42); }
+    .ctrl-primary:disabled { box-shadow: none; }
+    html.dark .ctrl-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+    html.dark .ctrl-primary { color: white; }
+
+    /* ── Tool chips (main interaction) ───────── */
+    .tool-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 0.7rem; }
+    .tool-chip {
+      text-align: center; padding: 1rem 0.8rem; border-radius: 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease;
+      opacity: 0.5;
+    }
+    .tool-chip.active { opacity: 1; border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    .tool-chip.faded { opacity: 0.28; }
+    html.dark .tool-chip { background: #0f172a; border-color: #334155; }
+    html.dark .tool-chip.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .tool-ic {
+      width: 34px; height: 34px; margin: 0 auto 0.5rem; border-radius: 0.7rem; display: flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: #16a34a;
+      transition: all 0.3s ease;
+    }
+    .tool-chip.active .tool-ic { background: linear-gradient(135deg,#22c55e,#16a34a); color: white; transform: scale(1.06); }
+    html.dark .tool-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .tool-name { font-weight: 800; font-size: 0.9rem; color: #1e293b; }
+    html.dark .tool-name { color: #f1f5f9; }
+    .tool-badge {
+      display: inline-block; margin-top: 0.4rem; font-size: 0.62rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.05em; color: #16a34a;
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .tool-chip.active .tool-badge { opacity: 1; }
+    html.dark .tool-badge { color: #86efac; }
+
+    /* ── Run step strip ──────────────────────── */
+    .run-steps {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 0.2rem;
+      margin: 0.3rem 0 1rem;
+    }
+    .run-step { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; flex: 0 0 auto; width: 62px; }
+    .run-step-ic {
+      width: 40px; height: 40px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #94a3b8; transition: all 0.3s ease;
+    }
+    html.dark .run-step-ic { background: #0f172a; border-color: #334155; color: #64748b; }
+    .run-step.done .run-step-ic { background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.35); color: #16a34a; }
+    .run-step.active .run-step-ic {
+      background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; color: white;
+      box-shadow: 0 8px 20px rgba(22,163,74,0.4); animation: stepPulse 1.1s ease infinite;
+    }
+    html.dark .run-step.done .run-step-ic { color: #86efac; }
+    @keyframes stepPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    .run-step-name {
+      font-size: 0.62rem; font-weight: 700; text-align: center; line-height: 1.2; color: #94a3b8;
+      transition: color 0.3s ease;
+    }
+    .run-step.done .run-step-name, .run-step.active .run-step-name { color: #16a34a; }
+    html.dark .run-step.done .run-step-name, html.dark .run-step.active .run-step-name { color: #86efac; }
+    .run-conn { flex: 1 1 auto; height: 2px; margin-top: 19px; background: #e2e8f0; transition: background 0.3s ease; }
+    html.dark .run-conn { background: #334155; }
+    .run-conn.lit { background: #16a34a; }
+    html.dark .run-conn.lit { background: #4ade80; }
+
+    /* ── Output feed ─────────────────────────── */
+    .output-label {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .output-label { color: #4ade80; }
+    .output-feed {
+      border-radius: 1.2rem; padding: 1.1rem 1.2rem; min-height: 96px;
+      background: rgba(22,163,74,0.04); border: 1.5px dashed rgba(22,163,74,0.3);
+      display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    html.dark .output-feed { background: rgba(15,23,42,0.5); border-color: rgba(74,222,128,0.28); }
+    .output-empty {
+      display: flex; align-items: center; gap: 0.6rem; justify-content: center;
+      color: #64748b; font-size: 0.9rem; font-weight: 600; padding: 0.8rem 0;
+    }
+    html.dark .output-empty { color: #94a3b8; }
+    .out-row {
+      display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem; background: white; border: 1.5px solid #e2e8f0;
+      animation: outIn 0.35s ease;
+    }
+    html.dark .out-row { background: #1e293b; border-color: #334155; }
+    .out-row.result { background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 8px 22px rgba(22,163,74,0.3); }
+    @keyframes outIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .out-ic {
+      width: 32px; height: 32px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.12); color: #16a34a;
+    }
+    html.dark .out-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .out-row.result .out-ic { background: rgba(255,255,255,0.22); color: white; }
+    .out-name { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #16a34a; }
+    html.dark .out-name { color: #4ade80; }
+    .out-row.result .out-name { color: rgba(255,255,255,0.85); }
+    .out-text { font-size: 0.93rem; font-weight: 600; color: #334155; margin-top: 0.15rem; line-height: 1.5; }
+    html.dark .out-text { color: #cbd5e1; }
+    .out-row.result .out-text { color: white; font-weight: 700; }
+
+    /* ── Why-tools cards (section 2) ─────────── */
+    .why-card {
+      border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .why-card { background: #0f172a; border-color: #334155; }
+    .why-card.good { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.06); }
+    html.dark .why-card.good { border-color: rgba(74,222,128,0.35); background: rgba(22,163,74,0.12); }
+    .why-head { display: flex; align-items: center; gap: 0.6rem; font-weight: 900; font-size: 1.05rem; margin-bottom: 0.6rem; }
+    .why-tag {
+      display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.7rem;
+      border-radius: 9999px; font-size: 0.8rem; font-weight: 700; margin: 0.25rem 0.35rem 0 0;
+      background: rgba(22,163,74,0.1); color: #16a34a; border: 1.5px solid rgba(22,163,74,0.22);
+    }
+    html.dark .why-tag { background: rgba(74,222,128,0.12); color: #86efac; border-color: rgba(74,222,128,0.28); }
+
+    /* ── Tool quiz (section 3) ───────────────── */
+    .quiz-task {
+      display: flex; align-items: center; gap: 0.7rem; padding: 1.1rem 1.3rem; margin-bottom: 1rem;
+      border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; font-size: 1.05rem; color: #1e293b;
+    }
+    html.dark .quiz-task { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    .quiz-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 0.7rem; }
+    .quiz-opt {
+      cursor: pointer; text-align: center; padding: 1rem 0.8rem; border-radius: 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    .quiz-opt:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .quiz-opt.correct { border-color: #16a34a; background: rgba(22,163,74,0.1); box-shadow: 0 8px 22px rgba(22,163,74,0.18); }
+    .quiz-opt.wrong { border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .quiz-opt.locked { cursor: default; }
+    .quiz-opt.locked:hover { transform: none; }
+    .quiz-opt.dim { opacity: 0.4; }
+    html.dark .quiz-opt { background: #0f172a; border-color: #334155; }
+    html.dark .quiz-opt.correct { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .quiz-ic {
+      width: 40px; height: 40px; margin: 0 auto 0.5rem; border-radius: 0.8rem; display: flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: #16a34a;
+    }
+    .quiz-opt.wrong .quiz-ic { background: rgba(239,68,68,0.14); color: #ef4444; }
+    html.dark .quiz-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .quiz-optname { font-weight: 800; font-size: 0.88rem; color: #1e293b; }
+    html.dark .quiz-optname { color: #f1f5f9; }
+    .quiz-panel {
+      margin-top: 1rem; border-radius: 1.1rem; padding: 1.1rem 1.3rem;
+      background: rgba(22,163,74,0.05); border: 1.5px dashed rgba(22,163,74,0.3);
+    }
+    html.dark .quiz-panel { background: rgba(15,23,42,0.5); border-color: rgba(74,222,128,0.28); }
+    .sel-empty { color: #64748b; font-size: 0.9rem; font-weight: 600; text-align: center; padding: 0.6rem 0; }
+    html.dark .sel-empty { color: #94a3b8; }
+    .quiz-verdict { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 900; font-size: 0.95rem; }
+    .quiz-verdict.ok { color: #16a34a; }
+    .quiz-verdict.no { color: #ef4444; }
+    html.dark .quiz-verdict.ok { color: #4ade80; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–10 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="wrench" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Tool Calling</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          <strong class="text-slate-800 dark:text-slate-200">Tool calling</strong> means the AI Agent reaches for an external tool, like a <strong class="text-slate-800 dark:text-slate-200">calendar</strong>, <strong class="text-slate-800 dark:text-slate-200">calculator</strong>, <strong class="text-slate-800 dark:text-slate-200">files</strong>, or <strong class="text-slate-800 dark:text-slate-200">search</strong>, to get real information or perform an action it cannot do on its own.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Watch the agent pick a tool</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a request, then press <strong class="text-slate-800 dark:text-slate-200">Next</strong> to run the agent step by step. Watch it choose the right <strong class="text-slate-800 dark:text-slate-200">tool</strong> and use the result to answer.
+        </p>
+
+        <!-- request chooser -->
+        <div class="goal-label">1 · Choose a request</div>
+        <div class="goal-grid mb-5" id="reqGrid"></div>
+
+        <!-- available tools -->
+        <div class="goal-label">2 · The agent's toolbox <span class="normal-case font-semibold text-slate-400">(it will pick one)</span></div>
+        <div class="tool-grid" id="toolGrid"></div>
+
+        <!-- output feed -->
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-2 mt-5">
+          <div class="output-label" style="margin-bottom:0;"><i data-lucide="terminal" style="width:13px;height:13px;"></i> 3 · Agent run</div>
+          <div class="step-count" id="stepCount">Step 0 of 5</div>
+        </div>
+        <!-- run step strip -->
+        <div class="run-steps" id="runSteps"></div>
+        <div class="output-feed" id="outputFeed">
+          <div class="output-empty">
+            <i data-lucide="mouse-pointer-click" style="width:20px;height:20px;"></i>
+            Press <strong>&nbsp;Next&nbsp;</strong> to run the first step.
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="flex items-center justify-center gap-3 flex-wrap mt-6">
+          <button class="ctrl-btn ctrl-primary" id="nextBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> <span id="nextLabel">Run agent</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Reset</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. WHY TOOLS ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="unplug" style="width:12px;height:12px;"></i>Why tools are needed</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same question, very different answers</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Ask <em>"What meetings do I have tomorrow?"</em> Without a tool the agent can only guess. With a tool it can check the real calendar.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3 mb-5">
+          <div class="why-card">
+            <div class="why-head text-slate-900 dark:text-white"><i data-lucide="x-circle" class="w-5 h-5 text-slate-400"></i> Without a tool</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The agent can only guess or say <strong class="text-slate-800 dark:text-slate-200">"I don't know."</strong> It has no way to see your real calendar.</p>
+          </div>
+          <div class="why-card good">
+            <div class="why-head text-slate-900 dark:text-white"><i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 dark:text-green-400"></i> With a tool</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The agent checks the real system and gives a <strong class="text-slate-800 dark:text-slate-200">useful, accurate answer</strong> based on live data.</p>
+          </div>
+        </div>
+        <div class="goal-label">Each tool unlocks something new</div>
+        <div>
+          <span class="why-tag"><i data-lucide="calendar-clock" style="width:14px;height:14px;"></i> Calendar → meetings</span>
+          <span class="why-tag"><i data-lucide="calculator" style="width:14px;height:14px;"></i> Calculator → math</span>
+          <span class="why-tag"><i data-lucide="file-text" style="width:14px;height:14px;"></i> File Tool → documents</span>
+          <span class="why-tag"><i data-lucide="search" style="width:14px;height:14px;"></i> Search Tool → fresh info</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. TOOL QUIZ ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Your turn</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">You pick the tool</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Read the task and tap the tool the agent should call. New tasks, not the ones above.
+        </p>
+
+        <div class="quiz-task" id="quizTask"></div>
+        <div class="quiz-grid" id="quizGrid"></div>
+        <div class="quiz-panel" id="quizPanel">
+          <div class="sel-empty">Tap a tool above to check your answer.</div>
+        </div>
+        <div class="flex items-center justify-between gap-3 flex-wrap mt-5">
+          <div class="step-count" id="quizScore">Score 0 / 0</div>
+          <button class="ctrl-btn" id="quizNext" disabled><span id="quizNextLabel">Next task</span> <i data-lucide="arrow-right" style="width:15px;height:15px;"></i></button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Tool calling lets agents use <strong class="text-slate-900 dark:text-white">external abilities</strong>.</li>
+            <li>• The agent <strong class="text-slate-900 dark:text-white">chooses a tool</strong> based on the task.</li>
+            <li>• Tools can <strong class="text-slate-900 dark:text-white">retrieve information</strong> or <strong class="text-slate-900 dark:text-white">perform actions</strong>.</li>
+            <li>• Tool results help the agent produce a <strong class="text-slate-900 dark:text-white">better answer</strong>.</li>
+            <li>• The agent still creates the <strong class="text-slate-900 dark:text-white">final response</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Run each request and watch which tool lights up.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Compare a math task with a calendar task.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Notice tasks that need fresh info pick Search.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of a tool your own AI agent might need.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Tool calling lets an AI Agent move beyond only answering from memory. It can use the <strong>right tool</strong> to get information, perform actions, and complete tasks.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="components-of-an-ai-agent.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Components of an AI Agent
+        </a>
+        <a href="agent-memory.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Agent Memory
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     SHARED DATA - the four tools
+  ═══════════════════════════════════════════════ */
+  const TOOLS = [
+    { id:'calendar',   icon:'calendar-clock', name:'Calendar',   for:'meetings' },
+    { id:'calculator', icon:'calculator',     name:'Calculator', for:'math' },
+    { id:'file',       icon:'file-text',      name:'File Tool',  for:'documents' },
+    { id:'search',     icon:'search',         name:'Search',     for:'fresh info' }
+  ];
+
+  /* requests, the tool each one needs, and the step-by-step story */
+  const REQUESTS = [
+    { emoji:'📅', text:'What meetings do I have tomorrow?', tool:'calendar',
+      reason:'The task needs live calendar information.',
+      out:{
+        understand: 'The agent reads the request and sees it needs your schedule.',
+        choose:     'It picks the Calendar Tool because the task needs calendar information.',
+        run:        'Calendar Tool returns: 2 meetings, Design Sync 11:00 AM and Client Call 3:00 PM.',
+        answer:     '✅ Tomorrow you have 2 meetings: Design Sync at 11:00 AM and Client Call at 3:00 PM.'
+      } },
+    { emoji:'➗', text:'Add 45 + 78', tool:'calculator',
+      reason:'The task is a math calculation.',
+      out:{
+        understand: 'The agent sees this is a math problem, not a memory question.',
+        choose:     'It picks the Calculator Tool because the task needs exact math.',
+        run:        'Calculator Tool returns: 123.',
+        answer:     '✅ 45 + 78 = 123.'
+      } },
+    { emoji:'📄', text:'Find my project notes', tool:'file',
+      reason:'The answer lives inside your files.',
+      out:{
+        understand: 'The agent understands it must look inside your saved documents.',
+        choose:     'It picks the File Tool because the notes are stored in a file.',
+        run:        'File Tool returns: found "Project-Notes.md", last edited yesterday.',
+        answer:     '✅ Found your notes in "Project-Notes.md", last edited yesterday.'
+      } },
+    { emoji:'📰', text:'Find the latest AI news', tool:'search',
+      reason:'The task needs fresh, up-to-date information.',
+      out:{
+        understand: 'The agent knows its own memory may be out of date.',
+        choose:     'It picks the Search Tool because the task needs fresh information.',
+        run:        'Search Tool returns: 3 top headlines from today about new AI models.',
+        answer:     '✅ Here are today\'s 3 top AI headlines about the newest models.'
+      } }
+  ];
+
+  /* icon shown per output step */
+  const STEP_META = {
+    request:    { name:'User request', icon:'message-circle' },
+    understand: { name:'Agent understands', icon:'brain' },
+    choose:     { name:'Chooses a tool', icon:'wrench' },
+    run:        { name:'Tool returns', icon:'download' },
+    answer:     { name:'Final answer', icon:'check-circle-2' }
+  };
+  const STEPS = ['request','understand','choose','run','answer'];
+
+  /* ═══════════════════════════════════════════════
+     1. PLAYGROUND
+  ═══════════════════════════════════════════════ */
+  const reqGrid    = document.getElementById('reqGrid');
+  const toolGrid   = document.getElementById('toolGrid');
+  const runSteps   = document.getElementById('runSteps');
+  const outputFeed = document.getElementById('outputFeed');
+  const stepCount  = document.getElementById('stepCount');
+  const nextBtn    = document.getElementById('nextBtn');
+  const nextLabel  = document.getElementById('nextLabel');
+  const resetBtn   = document.getElementById('resetBtn');
+
+  let reqIdx   = 0;
+  let revealed = 0;   // 0..5 steps run so far
+
+  // build request chooser
+  reqGrid.innerHTML = REQUESTS.map((r, i) =>
+    '<button class="goal-card' + (i === 0 ? ' active' : '') + '" data-req="' + i + '">' +
+      '<span class="goal-emoji">' + r.emoji + '</span> ' + r.text +
+    '</button>'
+  ).join('');
+
+  // build tool chips (display-only, one lights up when chosen)
+  toolGrid.innerHTML = TOOLS.map(t =>
+    '<div class="tool-chip" data-tool="' + t.id + '">' +
+      '<div class="tool-ic"><i data-lucide="' + t.icon + '" style="width:18px;height:18px;"></i></div>' +
+      '<div class="tool-name">' + t.name + '</div>' +
+      '<div class="tool-badge">Chosen</div>' +
+    '</div>'
+  ).join('');
+
+  // build the 5-step run strip (icons + connectors)
+  runSteps.innerHTML = STEPS.map((key, i) => {
+    const m = STEP_META[key];
+    const step =
+      '<div class="run-step" data-step="' + i + '">' +
+        '<div class="run-step-ic"><i data-lucide="' + m.icon + '" style="width:19px;height:19px;"></i></div>' +
+        '<div class="run-step-name">' + m.name + '</div>' +
+      '</div>';
+    return i < STEPS.length - 1 ? step + '<div class="run-conn" data-conn="' + i + '"></div>' : step;
+  }).join('');
+
+  function paintSteps(){
+    runSteps.querySelectorAll('.run-step').forEach(el => {
+      const i = +el.dataset.step;           // 0-based
+      el.classList.toggle('active', i === revealed - 1);
+      el.classList.toggle('done',   i < revealed - 1);
+    });
+    runSteps.querySelectorAll('.run-conn').forEach(el => {
+      el.classList.toggle('lit', +el.dataset.conn < revealed - 1);
+    });
+  }
+
+  function paintTools(){
+    const chosen = REQUESTS[reqIdx].tool;
+    // the tool is revealed once we reach the "choose" step (index 3, 1-based)
+    const chosenShown = revealed >= 3;
+    toolGrid.querySelectorAll('.tool-chip').forEach(el => {
+      const isChosen = el.dataset.tool === chosen;
+      el.classList.toggle('active', chosenShown && isChosen);
+      el.classList.toggle('faded', chosenShown && !isChosen);
+    });
+    stepCount.textContent = 'Step ' + revealed + ' of 5';
+    nextLabel.textContent = revealed === 0 ? 'Run agent' : (revealed >= 5 ? 'Done' : 'Next');
+    nextBtn.disabled = revealed >= 5;
+    paintSteps();
+  }
+
+  function stepText(key){
+    const r = REQUESTS[reqIdx];
+    if (key === 'request') return 'You asked: "' + r.text + '"';
+    return r.out[key];
+  }
+
+  function showStep(key){
+    const meta = STEP_META[key];
+    const isResult = key === 'answer';
+    const row = document.createElement('div');
+    row.className = 'out-row' + (isResult ? ' result' : '');
+    row.innerHTML =
+      '<span class="out-ic"><i data-lucide="' + meta.icon + '" style="width:17px;height:17px;"></i></span>' +
+      '<div><div class="out-name">' + meta.name + '</div><div class="out-text">' + stepText(key) + '</div></div>';
+    outputFeed.innerHTML = '';
+    outputFeed.appendChild(row);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function resetPlayground(){
+    revealed = 0;
+    toolGrid.querySelectorAll('.tool-chip').forEach(el => el.classList.remove('active','faded'));
+    outputFeed.innerHTML =
+      '<div class="output-empty">' +
+        '<i data-lucide="mouse-pointer-click" style="width:20px;height:20px;"></i>' +
+        'Press <strong>&nbsp;Run agent&nbsp;</strong> to start.' +
+      '</div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    paintTools();
+  }
+
+  function nextStep(){
+    if (revealed >= 5) return;
+    revealed++;
+    showStep(STEPS[revealed - 1]);
+    paintTools();
+  }
+
+  reqGrid.querySelectorAll('[data-req]').forEach(b =>
+    b.addEventListener('click', () => {
+      reqGrid.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      reqIdx = +b.dataset.req;
+      resetPlayground();
+    })
+  );
+  nextBtn.addEventListener('click', nextStep);
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ═══════════════════════════════════════════════
+     3. TOOL QUIZ - new tasks, you pick the tool
+  ═══════════════════════════════════════════════ */
+  /* the quiz uses a DIFFERENT toolset than the playground */
+  const QUIZ_TOOLS = [
+    { id:'email',     icon:'mail',        name:'Email' },
+    { id:'weather',   icon:'cloud-sun',   name:'Weather' },
+    { id:'maps',      icon:'map-pin',     name:'Maps' },
+    { id:'translate', icon:'languages',   name:'Translate' },
+    { id:'reminder',  icon:'bell',        name:'Reminder' },
+    { id:'payment',   icon:'credit-card', name:'Payment' }
+  ];
+
+  const QUIZ = [
+    { emoji:'📧', task:'Send a thank-you note to my manager', answer:'email',
+      why:'Writing and sending a message needs the Email Tool.' },
+    { emoji:'☔', task:'Will it rain in Mumbai this evening?', answer:'weather',
+      why:'A live forecast comes from the Weather Tool.' },
+    { emoji:'🧭', task:'Give me directions to the nearest petrol pump', answer:'maps',
+      why:'Directions and locations come from the Maps Tool.' },
+    { emoji:'🌐', task:'Translate "good morning" into Japanese', answer:'translate',
+      why:'Changing text between languages needs the Translate Tool.' },
+    { emoji:'⏰', task:'Remind me to take medicine at 9 PM', answer:'reminder',
+      why:'Setting an alert for later needs the Reminder Tool.' },
+    { emoji:'💳', task:'Pay my electricity bill', answer:'payment',
+      why:'Completing a payment needs the Payment Tool.' }
+  ];
+
+  const quizTaskEl  = document.getElementById('quizTask');
+  const quizGrid    = document.getElementById('quizGrid');
+  const quizPanel   = document.getElementById('quizPanel');
+  const quizScoreEl = document.getElementById('quizScore');
+  const quizNext    = document.getElementById('quizNext');
+  const quizNextLbl = document.getElementById('quizNextLabel');
+
+  let qIdx = 0, qScore = 0, qAnswered = 0, qLocked = false;
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  let qOrder = shuffle(QUIZ.map((_, i) => i));   // random question order
+
+  function renderQuiz(){
+    qLocked = false;
+    const q = QUIZ[qOrder[qIdx]];
+    quizTaskEl.innerHTML = '<span class="goal-emoji">' + q.emoji + '</span> ' + q.task;
+    quizGrid.innerHTML = shuffle(QUIZ_TOOLS).map(t =>   // random option order
+      '<button class="quiz-opt" data-opt="' + t.id + '">' +
+        '<div class="quiz-ic"><i data-lucide="' + t.icon + '" style="width:21px;height:21px;"></i></div>' +
+        '<div class="quiz-optname">' + t.name + '</div>' +
+      '</button>'
+    ).join('');
+    quizPanel.innerHTML = '<div class="sel-empty">Tap a tool above to check your answer.</div>';
+    quizNext.disabled = true;
+    quizNextLbl.textContent = qIdx >= QUIZ.length - 1 ? 'Start over' : 'Next task';
+    quizGrid.querySelectorAll('[data-opt]').forEach(b => b.addEventListener('click', () => answerQuiz(b.dataset.opt)));
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function answerQuiz(pick){
+    if (qLocked) return;
+    qLocked = true;
+    const q = QUIZ[qOrder[qIdx]];
+    const correct = pick === q.answer;
+    qAnswered++;
+    if (correct) qScore++;
+    const rightTool = QUIZ_TOOLS.find(t => t.id === q.answer);
+    quizGrid.querySelectorAll('.quiz-opt').forEach(el => {
+      el.classList.add('locked');
+      if (el.dataset.opt === q.answer) el.classList.add('correct');
+      else if (el.dataset.opt === pick) el.classList.add('wrong');
+      else el.classList.add('dim');
+    });
+    quizPanel.innerHTML =
+      '<div class="quiz-verdict ' + (correct ? 'ok' : 'no') + '">' +
+        '<i data-lucide="' + (correct ? 'check-circle-2' : 'x-circle') + '" style="width:18px;height:18px;"></i>' +
+        (correct ? 'Correct!' : 'Not quite, the agent uses the ' + rightTool.name + '.') +
+      '</div>' +
+      '<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-2">' + q.why + '</p>';
+    quizScoreEl.textContent = 'Score ' + qScore + ' / ' + qAnswered;
+    quizNext.disabled = false;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  quizNext.addEventListener('click', () => {
+    if (qIdx >= QUIZ.length - 1) {
+      qIdx = 0; qScore = 0; qAnswered = 0;
+      qOrder = shuffle(QUIZ.map((_, i) => i));   // new random order each round
+      quizScoreEl.textContent = 'Score 0 / 0';
+    }
+    else qIdx++;
+    renderQuiz();
+  });
+  renderQuiz();
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    resetPlayground();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

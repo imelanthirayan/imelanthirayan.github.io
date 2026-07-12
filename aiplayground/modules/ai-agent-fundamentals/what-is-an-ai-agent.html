@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="What is an AI Agent? An interactive beginner lesson on how AI agents differ from chatbots and take actions to complete goals." />
+  <title>What is an AI Agent?, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A4%96</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Mode toggle (main interaction) ──────── */
+    .mode-toggle {
+      display: inline-flex; gap: 0.35rem; padding: 0.35rem; border-radius: 9999px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-weight: 800; font-size: 0.9rem; padding: 0.55rem 1.15rem; border-radius: 9999px;
+      color: #64748b; background: transparent; border: none; transition: all 0.22s ease;
+    }
+    .mode-btn:hover { color: #16a34a; }
+    .mode-btn.active { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    html.dark .mode-btn { color: #94a3b8; }
+    html.dark .mode-btn.active { color: white; }
+
+    /* ── Goal chooser ────────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+    .goal-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.7rem; }
+    .goal-card {
+      cursor: pointer; text-align: left; display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.85rem 1rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; color: #1e293b; font-size: 0.9rem; transition: all 0.22s ease;
+    }
+    .goal-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .goal-card.active { border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .goal-card { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    html.dark .goal-card.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .goal-emoji { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+
+    /* ── Step counter + progress ─────────────── */
+    .step-count {
+      font-size: 0.78rem; font-weight: 800; color: #16a34a;
+      padding: 0.3rem 0.8rem; border-radius: 9999px; background: rgba(22,163,74,0.08);
+      border: 1.5px solid rgba(22,163,74,0.2);
+    }
+    html.dark .step-count { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.24); }
+    .progress-track { height: 7px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .progress-track { background: #334155; }
+    .progress-fill {
+      height: 100%; width: 0%; border-radius: 9999px;
+      background: linear-gradient(90deg,#22c55e,#16a34a); transition: width 0.45s ease;
+    }
+
+    /* ── Flow steps ──────────────────────────── */
+    .flow { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+    .flow-step {
+      width: 100%; max-width: 380px; display: flex; align-items: center; gap: 0.7rem;
+      font-weight: 700; font-size: 0.92rem; padding: 0.85rem 1.15rem; border-radius: 0.95rem;
+      background: #f8fafc; border: 1.5px solid #e2e8f0; color: #64748b;
+      opacity: 0.35; transform: translateY(6px); transition: all 0.4s ease;
+    }
+    html.dark .flow-step { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .flow-step.lit {
+      opacity: 1; transform: translateY(0); color: white;
+      background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent;
+      box-shadow: 0 8px 22px rgba(22,163,74,0.28);
+    }
+    .flow-step.active { animation: stepPulse 1.4s ease-in-out infinite; }
+    @keyframes stepPulse {
+      0%,100% { box-shadow: 0 8px 22px rgba(22,163,74,0.28); }
+      50%     { box-shadow: 0 8px 30px rgba(22,163,74,0.55); }
+    }
+    .flow-step .step-ic {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.12); color: #16a34a;
+      transition: all 0.4s ease;
+    }
+    .flow-step.lit .step-ic { background: rgba(255,255,255,0.2); color: white; }
+    html.dark .flow-step .step-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .flow-arrow { color: #cbd5e1; line-height: 0; padding: 0.1rem 0; opacity: 0.35; transition: all 0.4s ease; }
+    .flow-arrow.lit { color: #16a34a; opacity: 1; }
+    html.dark .flow-arrow { color: #475569; }
+    html.dark .flow-arrow.lit { color: #4ade80; }
+    .flow-caption {
+      text-align: center; margin-top: 1.1rem; font-weight: 700; font-size: 0.95rem; color: #15803d;
+    }
+    html.dark .flow-caption { color: #86efac; }
+
+    /* ── Control buttons ─────────────────────── */
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-size: 0.85rem; font-weight: 800; padding: 0.6rem 1.25rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .ctrl-primary { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    .ctrl-primary:hover { box-shadow: 0 8px 24px rgba(22,163,74,0.42); }
+    .ctrl-primary:disabled { box-shadow: none; }
+    html.dark .ctrl-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+    html.dark .ctrl-primary { color: white; }
+
+    /* ── Result card ─────────────────────────── */
+    .result-card {
+      max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease;
+      border-radius: 1.1rem; border: 1.5px solid transparent;
+    }
+    .result-card.show {
+      max-height: 260px; opacity: 1; margin-top: 1.3rem; padding: 1.15rem 1.3rem;
+      background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.25);
+    }
+    html.dark .result-card.show { background: rgba(22,163,74,0.1); border-color: rgba(74,222,128,0.26); }
+    .result-head {
+      display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.9rem;
+      color: #15803d; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    html.dark .result-head { color: #86efac; }
+    .result-body { margin-top: 0.6rem; font-size: 0.95rem; font-weight: 600; color: #334155; line-height: 1.55; }
+    html.dark .result-body { color: #cbd5e1; }
+
+    /* ── Makes-an-agent cards ────────────────── */
+    .make-card {
+      padding: 1.2rem 1.25rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.22s ease;
+    }
+    .make-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(22,163,74,0.12); }
+    html.dark .make-card { background: #0f172a; border-color: #334155; }
+    .make-head { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; color: #1e293b; font-size: 0.98rem; }
+    html.dark .make-head { color: #f1f5f9; }
+    .make-ic {
+      width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: #16a34a;
+    }
+    html.dark .make-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .make-line { margin-top: 0.6rem; font-size: 0.86rem; color: #475569; line-height: 1.5; }
+    html.dark .make-line { color: #cbd5e1; }
+    .make-step-badge {
+      font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #16a34a; margin-left: auto;
+    }
+    html.dark .make-step-badge { color: #4ade80; }
+
+    /* ── Real-world example cards ────────────── */
+    .ex-card {
+      cursor: pointer; padding: 1.15rem 1.25rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.22s ease;
+    }
+    .ex-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .ex-card.active { border-color: #16a34a; background: rgba(22,163,74,0.06); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .ex-card { background: #0f172a; border-color: #334155; }
+    html.dark .ex-card.active { border-color: #4ade80; background: rgba(22,163,74,0.14); }
+    .ex-head { display: flex; align-items: center; gap: 0.55rem; font-weight: 800; color: #1e293b; font-size: 0.95rem; }
+    html.dark .ex-head { color: #f1f5f9; }
+    .ex-emoji { font-size: 1.35rem; line-height: 1; }
+    .ex-sub { margin-top: 0.4rem; font-size: 0.82rem; color: #64748b; font-weight: 600; }
+    html.dark .ex-sub { color: #94a3b8; }
+    .ex-seq {
+      max-height: 0; opacity: 0; overflow: hidden; transition: all 0.35s ease;
+      display: flex; align-items: center; justify-content: center; gap: 0.45rem; flex-wrap: wrap;
+    }
+    .ex-card.active .ex-seq { max-height: 120px; opacity: 1; margin-top: 0.9rem; }
+    .seq-node {
+      font-weight: 700; font-size: 0.78rem; padding: 0.4rem 0.7rem; border-radius: 0.65rem;
+      background: white; border: 1.5px solid rgba(22,163,74,0.25); color: #15803d;
+    }
+    html.dark .seq-node { background: #1e293b; border-color: rgba(74,222,128,0.28); color: #86efac; }
+    .seq-arrow { color: #16a34a; line-height: 0; }
+    html.dark .seq-arrow { color: #4ade80; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="bot" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">What is an AI Agent?</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          A chatbot mainly <strong class="text-slate-800 dark:text-slate-200">answers questions</strong>. An AI Agent can understand a <strong class="text-slate-800 dark:text-slate-200">goal</strong>, decide what needs to be done, and <strong class="text-slate-800 dark:text-slate-200">take actions</strong> to complete the task.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same goal, two approaches</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a goal, choose <strong class="text-slate-800 dark:text-slate-200">Chatbot</strong> or <strong class="text-slate-800 dark:text-slate-200">AI Agent</strong>, then press <strong class="text-slate-800 dark:text-slate-200">Next step</strong> to drive it forward one action at a time.
+        </p>
+
+        <!-- goal chooser -->
+        <div class="goal-label">1 · Choose a goal</div>
+        <div class="goal-grid mb-5" id="goalGrid"></div>
+
+        <!-- mode toggle -->
+        <div class="goal-label">2 · Pick who solves it</div>
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
+          <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="chatbot"><i data-lucide="message-circle" style="width:16px;height:16px;"></i> Chatbot</button>
+            <button class="mode-btn" data-mode="agent"><i data-lucide="bot" style="width:16px;height:16px;"></i> AI Agent</button>
+          </div>
+          <div class="step-count" id="stepCount">Step 0 of 0</div>
+        </div>
+
+        <!-- progress bar -->
+        <div class="progress-track mb-5"><div class="progress-fill" id="progressFill"></div></div>
+
+        <!-- flow -->
+        <div class="flow" id="flow"></div>
+
+        <!-- result card -->
+        <div class="result-card" id="resultCard">
+          <div class="result-head"><i data-lucide="sparkles" style="width:16px;height:16px;"></i> <span id="resultTitle"></span></div>
+          <div class="result-body" id="resultBody"></div>
+        </div>
+
+        <p class="flow-caption" id="flowCaption"></p>
+
+        <!-- controls -->
+        <div class="flex items-center justify-center gap-3 flex-wrap mt-6">
+          <button class="ctrl-btn ctrl-primary" id="nextBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> <span id="nextLabel">Next step</span></button>
+          <button class="ctrl-btn" id="runBtn"><i data-lucide="fast-forward" style="width:15px;height:15px;"></i> Run all</button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Reset</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. WHAT MAKES AN AGENT ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="puzzle" style="width:12px;height:12px;"></i>What makes an AI agent?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The loop an agent follows</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Every agent keeps repeating four simple steps until the goal is done.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3" id="makeGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. REAL-WORLD EXAMPLES ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="globe" style="width:12px;height:12px;"></i>Real-world examples</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Agents you may already use</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click a card to see its <strong class="text-slate-800 dark:text-slate-200">Goal → Actions → Result</strong> flow.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3" id="exGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• AI Agents work toward a <strong class="text-slate-900 dark:text-white">goal</strong>.</li>
+            <li>• They can <strong class="text-slate-900 dark:text-white">perform actions</strong>, not just answer questions.</li>
+            <li>• Agents usually complete tasks in <strong class="text-slate-900 dark:text-white">multiple steps</strong>.</li>
+            <li>• Chatbots mainly <strong class="text-slate-900 dark:text-white">generate responses</strong>.</li>
+            <li>• Many modern AI applications are built using agents.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Switch between Chatbot and AI Agent.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Compare how each solves the same task.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Click different real-world examples.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of a task where an agent beats a chatbot.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          An AI Agent is more than a chatbot. Instead of only answering questions, it works toward <strong>completing a goal</strong> by performing <strong>one or more actions</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="../transformer-architectures/encoder-decoder-t5.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Transformer Architectures
+        </a>
+        <a href="components-of-an-ai-agent.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Components of an AI Agent
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     MAIN PLAYGROUND - pick a goal, step through it
+  ═══════════════════════════════════════════════ */
+  const GOALS = [
+    {
+      id:'trip', emoji:'🗺️', name:'Plan a one-day trip to Chennai',
+      chatbot: {
+        steps: [
+          { icon:'user',           label:'You ask a question' },
+          { icon:'message-circle', label:'It replies with some suggestions' },
+          { icon:'check',          label:'Done' }
+        ],
+        result:'A general list of places to see, left for you to organise into a plan yourself.'
+      },
+      agent: {
+        steps: [
+          { icon:'target',      label:'Understand the goal' },
+          { icon:'search',      label:'Find places to visit' },
+          { icon:'clock',       label:'Check opening hours' },
+          { icon:'list-checks', label:'Create an itinerary' },
+          { icon:'sparkles',    label:'Present the final plan' }
+        ],
+        result:'A ready one-day itinerary: Marina Beach at 8am, Kapaleeshwarar Temple at 11am, lunch, then Fort St. George.'
+      }
+    },
+    {
+      id:'email', emoji:'📧', name:'Write and send a birthday email',
+      chatbot: {
+        steps: [
+          { icon:'user',           label:'You ask for a birthday message' },
+          { icon:'message-circle', label:'It writes a sample message' },
+          { icon:'check',          label:'Done' }
+        ],
+        result:'A nice sample message. You still copy it, open your email, and send it yourself.'
+      },
+      agent: {
+        steps: [
+          { icon:'target',   label:'Understand the goal' },
+          { icon:'pen-line', label:'Draft the birthday email' },
+          { icon:'user-check', label:'Pick the right contact' },
+          { icon:'send',     label:'Send the email' },
+          { icon:'sparkles', label:'Confirm it was sent' }
+        ],
+        result:'The birthday email is written and actually sent to the right person, with a confirmation.'
+      }
+    },
+    {
+      id:'laptop', emoji:'🛒', name:'Find a good laptop under budget',
+      chatbot: {
+        steps: [
+          { icon:'user',           label:'You ask for laptop advice' },
+          { icon:'message-circle', label:'It lists a few options' },
+          { icon:'check',          label:'Done' }
+        ],
+        result:'A few general suggestions. Checking prices and stock is still up to you.'
+      },
+      agent: {
+        steps: [
+          { icon:'target',   label:'Understand the goal' },
+          { icon:'search',   label:'Search current laptops' },
+          { icon:'scale',    label:'Compare specs and prices' },
+          { icon:'filter',   label:'Filter within your budget' },
+          { icon:'sparkles', label:'Recommend the best pick' }
+        ],
+        result:'One clear recommendation that fits the budget, with the reason it beat the others.'
+      }
+    }
+  ];
+
+  const flowEl      = document.getElementById('flow');
+  const flowCap     = document.getElementById('flowCaption');
+  const goalGrid    = document.getElementById('goalGrid');
+  const modeBtns    = document.querySelectorAll('[data-mode]');
+  const nextBtn     = document.getElementById('nextBtn');
+  const nextLabel   = document.getElementById('nextLabel');
+  const runBtn      = document.getElementById('runBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const stepCount   = document.getElementById('stepCount');
+  const progressFill= document.getElementById('progressFill');
+  const resultCard  = document.getElementById('resultCard');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultBody  = document.getElementById('resultBody');
+
+  let goalIdx = 0;
+  let mode    = 'chatbot';
+  let revealed = 0;          // how many steps are lit
+  let runTimers = [];
+
+  function activeCfg(){ return GOALS[goalIdx][mode]; }
+  function clearRunTimers(){ runTimers.forEach(t => clearTimeout(t)); runTimers = []; }
+
+  // build goal cards once
+  goalGrid.innerHTML = GOALS.map((g, i) =>
+    '<button class="goal-card' + (i === 0 ? ' active' : '') + '" data-goal="' + i + '">' +
+      '<span class="goal-emoji">' + g.emoji + '</span> ' + g.name +
+    '</button>'
+  ).join('');
+
+  function buildFlow(){
+    const cfg = activeCfg();
+    let html = '';
+    cfg.steps.forEach((s, i) => {
+      html +=
+        '<div class="flow-step" data-step="' + i + '">' +
+          '<span class="step-ic"><i data-lucide="' + s.icon + '" style="width:16px;height:16px;"></i></span>' +
+          '<span>' + s.label + '</span>' +
+        '</div>';
+      if (i < cfg.steps.length - 1) {
+        html += '<span class="flow-arrow" data-arrow="' + i + '"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></span>';
+      }
+    });
+    flowEl.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function refresh(){
+    const cfg   = activeCfg();
+    const total = cfg.steps.length;
+    const steps = flowEl.querySelectorAll('.flow-step');
+    const arrows= flowEl.querySelectorAll('.flow-arrow');
+
+    steps.forEach((step, i) => {
+      step.classList.toggle('lit', i < revealed);
+      // pulse only the most-recently revealed step while more steps remain
+      step.classList.toggle('active', i === revealed - 1 && revealed < total);
+      if (arrows[i]) arrows[i].classList.toggle('lit', i < revealed - 1);
+    });
+
+    stepCount.textContent = 'Step ' + revealed + ' of ' + total;
+    progressFill.style.width = (revealed / total * 100) + '%';
+
+    const done = revealed >= total;
+    nextLabel.textContent = revealed === 0 ? 'Start' : (done ? 'Done' : 'Next step');
+    nextBtn.disabled = done;
+    runBtn.disabled  = done;
+
+    if (done) {
+      flowCap.textContent = mode === 'chatbot'
+        ? 'The chatbot answered, and it is done.'
+        : 'The AI Agent took several actions to complete the goal.';
+      resultTitle.textContent = mode === 'chatbot' ? 'Chatbot result' : 'AI Agent result';
+      resultBody.textContent = cfg.result;
+      resultCard.classList.add('show');
+    } else {
+      flowCap.textContent = '';
+      resultCard.classList.remove('show');
+    }
+  }
+
+  function resetFlow(rebuild){
+    clearRunTimers();
+    revealed = 0;
+    resultCard.classList.remove('show');
+    if (rebuild) buildFlow();
+    refresh();
+  }
+
+  function nextStep(){
+    const total = activeCfg().steps.length;
+    if (revealed < total) { revealed++; refresh(); }
+  }
+
+  function runAll(){
+    clearRunTimers();
+    const total = activeCfg().steps.length;
+    for (let n = revealed + 1; n <= total; n++) {
+      const target = n;
+      runTimers.push(setTimeout(() => { revealed = target; refresh(); }, (n - revealed) * 520));
+    }
+  }
+
+  // wiring
+  goalGrid.querySelectorAll('[data-goal]').forEach(b =>
+    b.addEventListener('click', () => {
+      goalGrid.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      goalIdx = +b.dataset.goal;
+      resetFlow(true);
+    })
+  );
+  modeBtns.forEach(b =>
+    b.addEventListener('click', () => {
+      modeBtns.forEach(x => x.classList.toggle('active', x === b));
+      mode = b.dataset.mode;
+      resetFlow(true);
+    })
+  );
+  nextBtn.addEventListener('click', nextStep);
+  runBtn.addEventListener('click', runAll);
+  resetBtn.addEventListener('click', () => resetFlow(false));
+
+  /* ═══════════════════════════════════════════════
+     SECTION 2 - what makes an agent (4 cards)
+  ═══════════════════════════════════════════════ */
+  const MAKE = [
+    { icon:'target',         name:'Goal',     line:'The agent starts with a goal to reach.' },
+    { icon:'git-branch',     name:'Decision', line:'The agent decides what to do next.' },
+    { icon:'zap',            name:'Action',   line:'The agent performs actions to move toward the goal.' },
+    { icon:'check-circle-2', name:'Result',   line:'The agent checks whether the goal is complete.' }
+  ];
+  document.getElementById('makeGrid').innerHTML = MAKE.map((m, i) =>
+    '<div class="make-card">' +
+      '<div class="make-head"><span class="make-ic"><i data-lucide="' + m.icon + '" style="width:18px;height:18px;"></i></span> ' + m.name +
+        '<span class="make-step-badge">Step ' + (i + 1) + '</span></div>' +
+      '<div class="make-line">' + m.line + '</div>' +
+    '</div>'
+  ).join('');
+
+  /* ═══════════════════════════════════════════════
+     SECTION 3 - real-world examples (click to reveal flow)
+  ═══════════════════════════════════════════════ */
+  const EXAMPLES = [
+    { emoji:'📅', name:'Travel Planner',   sub:'Plans an itinerary.',            seq:['Goal','Find places','Itinerary'] },
+    { emoji:'💻', name:'Coding Assistant', sub:'Writes and updates code.',       seq:['Goal','Write code','Working app'] },
+    { emoji:'📧', name:'Email Assistant',  sub:'Drafts and organizes emails.',   seq:['Goal','Draft & sort','Inbox ready'] },
+    { emoji:'🛒', name:'Shopping Assistant',sub:'Finds products, compares prices.',seq:['Goal','Compare prices','Best pick'] }
+  ];
+  const exGrid = document.getElementById('exGrid');
+  exGrid.innerHTML = EXAMPLES.map((e, i) => {
+    const seqHtml = e.seq.map((n, j) =>
+      '<span class="seq-node">' + n + '</span>' +
+      (j < e.seq.length - 1 ? '<span class="seq-arrow"><i data-lucide="arrow-right" style="width:15px;height:15px;"></i></span>' : '')
+    ).join('');
+    return '<div class="ex-card" data-ex="' + i + '" tabindex="0">' +
+        '<div class="ex-head"><span class="ex-emoji">' + e.emoji + '</span> ' + e.name + '</div>' +
+        '<div class="ex-sub">' + e.sub + '</div>' +
+        '<div class="ex-seq">' + seqHtml + '</div>' +
+      '</div>';
+  }).join('');
+  exGrid.querySelectorAll('.ex-card').forEach(card => {
+    const toggle = () => {
+      const wasActive = card.classList.contains('active');
+      exGrid.querySelectorAll('.ex-card').forEach(c => c.classList.remove('active'));
+      if (!wasActive) card.classList.add('active');
+    };
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    resetFlow(true);
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

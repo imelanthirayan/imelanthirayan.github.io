@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Agent Memory, an interactive beginner lesson on how an AI agent remembers useful information to continue tasks and personalize responses." />
+  <title>Agent Memory, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Section labels ──────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+
+    /* ── Memory on/off toggle ────────────────── */
+    .mem-toggle {
+      display: inline-flex; padding: 0.3rem; border-radius: 9999px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0; gap: 0.25rem;
+    }
+    html.dark .mem-toggle { background: #0f172a; border-color: #334155; }
+    .mem-opt {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 800; padding: 0.5rem 1.1rem; border-radius: 9999px;
+      color: #64748b; transition: all 0.22s ease;
+    }
+    .mem-opt:hover { color: #16a34a; }
+    .mem-opt.active { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 6px 16px rgba(22,163,74,0.3); }
+    html.dark .mem-opt { color: #94a3b8; }
+    html.dark .mem-opt.active { color: white; }
+
+    /* ── Chat bubbles ────────────────────────── */
+    .chat { display: flex; flex-direction: column; gap: 0.8rem; }
+    .bubble {
+      max-width: 85%; padding: 0.85rem 1.1rem; border-radius: 1.1rem; font-size: 0.95rem;
+      line-height: 1.55; animation: bubbleIn 0.35s ease;
+    }
+    @keyframes bubbleIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .bubble.user {
+      align-self: flex-end; border-bottom-right-radius: 0.3rem; font-weight: 600;
+      background: linear-gradient(135deg,#22c55e,#16a34a); color: white;
+      box-shadow: 0 6px 16px rgba(22,163,74,0.28);
+    }
+    .bubble.agent {
+      align-self: flex-start; border-bottom-left-radius: 0.3rem;
+      background: #f1f5f9; color: #334155; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .bubble.agent { background: #0f172a; color: #cbd5e1; border-color: #334155; }
+    .bubble-who {
+      font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      opacity: 0.75; margin-bottom: 0.25rem;
+    }
+
+    /* ── Memory panel ────────────────────────── */
+    .mem-panel {
+      border-radius: 1.1rem; padding: 1.1rem 1.2rem; margin-top: 1rem;
+      border: 1.5px dashed rgba(22,163,74,0.35); background: rgba(22,163,74,0.05);
+      transition: all 0.3s ease;
+    }
+    html.dark .mem-panel { background: rgba(15,23,42,0.5); border-color: rgba(74,222,128,0.3); }
+    .mem-panel.off { border-color: #e2e8f0; background: #f8fafc; opacity: 0.85; }
+    html.dark .mem-panel.off { border-color: #334155; background: #0f172a; }
+    .mem-panel-head {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.7rem;
+    }
+    html.dark .mem-panel-head { color: #4ade80; }
+    .mem-panel.off .mem-panel-head { color: #94a3b8; }
+    .mem-item {
+      display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.75rem; margin-bottom: 0.45rem;
+      border-radius: 0.7rem; background: white; border: 1.5px solid #e2e8f0;
+      font-size: 0.88rem; font-weight: 600; color: #334155; animation: bubbleIn 0.35s ease;
+    }
+    html.dark .mem-item { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .mem-item i { color: #16a34a; flex-shrink: 0; }
+    html.dark .mem-item i { color: #86efac; }
+    .mem-item strong { color: #16a34a; }
+    html.dark .mem-item strong { color: #86efac; }
+    .mem-empty {
+      display: flex; align-items: center; gap: 0.55rem; color: #94a3b8; font-size: 0.88rem; font-weight: 600;
+      padding: 0.4rem 0;
+    }
+    .mem-note {
+      display: flex; align-items: center; gap: 0.55rem; margin-top: 1rem; padding: 0.8rem 1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700;
+    }
+    .mem-note.good { color: #16a34a; background: rgba(22,163,74,0.1); border: 1.5px solid rgba(22,163,74,0.25); }
+    .mem-note.bad { color: #64748b; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .mem-note.good { color: #86efac; background: rgba(22,163,74,0.16); border-color: rgba(74,222,128,0.28); }
+    html.dark .mem-note.bad { color: #94a3b8; background: #0f172a; border-color: #334155; }
+
+    /* ── Control buttons ─────────────────────── */
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-size: 0.85rem; font-weight: 800; padding: 0.6rem 1.25rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .ctrl-primary { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    .ctrl-primary:hover { box-shadow: 0 8px 24px rgba(22,163,74,0.42); }
+    .ctrl-primary:disabled { box-shadow: none; }
+    html.dark .ctrl-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+    html.dark .ctrl-primary { color: white; }
+
+    /* ── Why-memory cards (section 2) ────────── */
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.9rem; }
+    .why-card {
+      border-radius: 1.1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.25s ease;
+    }
+    .why-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(22,163,74,0.12); }
+    html.dark .why-card { background: #0f172a; border-color: #334155; }
+    .why-ic {
+      width: 44px; height: 44px; border-radius: 0.9rem; display: flex; align-items: center; justify-content: center;
+      background: rgba(22,163,74,0.1); color: #16a34a; margin-bottom: 0.9rem;
+    }
+    html.dark .why-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .why-title { font-weight: 900; font-size: 1.05rem; color: #1e293b; margin-bottom: 0.4rem; }
+    html.dark .why-title { color: #f1f5f9; }
+
+    /* ── Memory-type cards (section 3) ───────── */
+    .type-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.8rem; }
+    .type-card {
+      cursor: pointer; text-align: left; padding: 1.1rem 1.2rem; border-radius: 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    .type-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .type-card.active { border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .type-card { background: #0f172a; border-color: #334155; }
+    html.dark .type-card.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .type-head { display: flex; align-items: center; gap: 0.6rem; font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .type-head { color: #f1f5f9; }
+    .type-ic {
+      width: 36px; height: 36px; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center;
+      background: rgba(22,163,74,0.1); color: #16a34a; flex-shrink: 0;
+    }
+    html.dark .type-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .type-ex { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+    html.dark .type-ex { color: #94a3b8; }
+    .type-panel {
+      margin-top: 1rem; border-radius: 1.1rem; padding: 1.2rem 1.3rem;
+      background: rgba(22,163,74,0.05); border: 1.5px dashed rgba(22,163,74,0.3);
+    }
+    html.dark .type-panel { background: rgba(15,23,42,0.5); border-color: rgba(74,222,128,0.28); }
+    .type-empty { color: #64748b; font-size: 0.9rem; font-weight: 600; text-align: center; padding: 0.6rem 0; }
+    html.dark .type-empty { color: #94a3b8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–10 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="database" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Agent Memory</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          <strong class="text-slate-800 dark:text-slate-200">Agent memory</strong> lets an AI Agent keep useful information, so it can continue a task or <strong class="text-slate-800 dark:text-slate-200">personalize</strong> future responses instead of starting from scratch every time.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same chat, memory on vs off</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The user shares a preference, then asks a question. Flip <strong class="text-slate-800 dark:text-slate-200">memory</strong> on or off and watch how the answer changes.
+        </p>
+
+        <!-- toggle -->
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
+          <div class="goal-label" style="margin-bottom:0;">Memory</div>
+          <div class="mem-toggle" id="memToggle">
+            <button class="mem-opt" data-mem="off"><i data-lucide="database-zap" style="width:15px;height:15px;"></i> Off</button>
+            <button class="mem-opt active" data-mem="on"><i data-lucide="database" style="width:15px;height:15px;"></i> On</button>
+          </div>
+        </div>
+
+        <!-- chat -->
+        <div class="chat" id="chat"></div>
+
+        <!-- memory panel -->
+        <div class="mem-panel" id="memPanel"></div>
+
+        <!-- note -->
+        <div class="mem-note good" id="memNote"></div>
+
+        <!-- controls -->
+        <div class="flex items-center justify-center gap-3 flex-wrap mt-6">
+          <button class="ctrl-btn ctrl-primary" id="replayBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Replay chat</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. WHY MEMORY MATTERS ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="sparkles" style="width:12px;height:12px;"></i>Why memory matters</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Three things memory unlocks</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          With memory, an agent gets more helpful in three clear ways.
+        </p>
+        <div class="why-grid">
+          <div class="why-card">
+            <div class="why-ic"><i data-lucide="git-branch" style="width:22px;height:22px;"></i></div>
+            <div class="why-title">Continue tasks</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The agent remembers what happened earlier in the task and keeps going.</p>
+          </div>
+          <div class="why-card">
+            <div class="why-ic"><i data-lucide="user-check" style="width:22px;height:22px;"></i></div>
+            <div class="why-title">Personalize replies</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The agent remembers your preferences and answers in the way you like.</p>
+          </div>
+          <div class="why-card">
+            <div class="why-ic"><i data-lucide="repeat" style="width:22px;height:22px;"></i></div>
+            <div class="why-title">Avoid repetition</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">The agent does not need to ask you the same thing again and again.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHAT AGENTS REMEMBER ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="mouse-pointer-click" style="width:12px;height:12px;"></i>What agents can remember</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Four kinds of memory</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Tap a card to see how that piece of memory helps the agent.
+        </p>
+        <div class="type-grid" id="typeGrid"></div>
+        <div class="type-panel" id="typePanel">
+          <div class="type-empty">Tap a memory type above to see how it helps.</div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Memory helps agents <strong class="text-slate-900 dark:text-white">keep useful information</strong>.</li>
+            <li>• Memory improves <strong class="text-slate-900 dark:text-white">continuity</strong> across steps.</li>
+            <li>• Memory makes responses more <strong class="text-slate-900 dark:text-white">personal</strong>.</li>
+            <li>• Memory helps agents <strong class="text-slate-900 dark:text-white">avoid repeating work</strong>.</li>
+            <li>• Memory should be used <strong class="text-slate-900 dark:text-white">carefully</strong>, only when helpful.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Switch memory on and off.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Compare the two answers to the same question.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Tap the different memory types.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of what an email or travel agent should remember.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Agent memory helps an AI Agent <strong>continue tasks</strong>, remember <strong>useful context</strong>, and respond in a more helpful, personal way.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="tool-calling.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Tool Calling
+        </a>
+        <a href="single-vs-multi-agent.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Single-Agent vs Multi-Agent
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     1. PLAYGROUND - memory on vs off
+  ═══════════════════════════════════════════════ */
+  const CONVO = [
+    { who:'user',  text:'My name is Ela. I prefer short explanations.' },
+    { who:'user',  text:'Explain RAG to me.' }
+  ];
+
+  const ANSWERS = {
+    on:  'Ela, RAG means the AI first searches useful documents, then uses them to answer.',
+    off: 'RAG is a Retrieval-Augmented Generation technique that combines external knowledge retrieval with language model generation across multiple stages...'
+  };
+
+  const MEMORY = [
+    { icon:'user',        label:'Name',       value:'Ela' },
+    { icon:'sliders-horizontal', label:'Preference', value:'short explanations' }
+  ];
+
+  const chat     = document.getElementById('chat');
+  const memPanel = document.getElementById('memPanel');
+  const memNote  = document.getElementById('memNote');
+  const memToggle= document.getElementById('memToggle');
+  const replayBtn= document.getElementById('replayBtn');
+
+  let mode = 'on';
+  let chatTimers = [];
+  function clearChatTimers(){ chatTimers.forEach(t => clearTimeout(t)); chatTimers = []; }
+
+  function bubble(who, text){
+    const b = document.createElement('div');
+    b.className = 'bubble ' + who;
+    b.innerHTML = '<div class="bubble-who">' + (who === 'user' ? 'User' : 'Agent') + '</div>' + text;
+    chat.appendChild(b);
+  }
+
+  function renderMemoryPanel(){
+    if (mode === 'on') {
+      memPanel.classList.remove('off');
+      memPanel.innerHTML =
+        '<div class="mem-panel-head"><i data-lucide="database" style="width:14px;height:14px;"></i> Agent memory</div>' +
+        MEMORY.map(m =>
+          '<div class="mem-item"><i data-lucide="' + m.icon + '" style="width:16px;height:16px;"></i>' +
+            '<span><strong>' + m.label + ':</strong> ' + m.value + '</span></div>'
+        ).join('');
+    } else {
+      memPanel.classList.add('off');
+      memPanel.innerHTML =
+        '<div class="mem-panel-head"><i data-lucide="database-zap" style="width:14px;height:14px;"></i> Agent memory</div>' +
+        '<div class="mem-empty"><i data-lucide="ban" style="width:16px;height:16px;"></i> Nothing remembered, memory is off.</div>';
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function renderNote(){
+    if (mode === 'on') {
+      memNote.className = 'mem-note good';
+      memNote.innerHTML = '<i data-lucide="check-circle-2" style="width:17px;height:17px;"></i> The agent used memory to personalize the response.';
+    } else {
+      memNote.className = 'mem-note bad';
+      memNote.innerHTML = '<i data-lucide="x-circle" style="width:17px;height:17px;"></i> The agent did not remember the user\'s preference.';
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function playChat(){
+    clearChatTimers();
+    chat.innerHTML = '';
+    memNote.style.opacity = '0';
+    // show the two user messages, then the agent answer
+    CONVO.forEach((m, i) => {
+      chatTimers.push(setTimeout(() => { bubble(m.who, m.text); }, 250 + i * 700));
+    });
+    chatTimers.push(setTimeout(() => {
+      bubble('agent', ANSWERS[mode]);
+      memNote.style.opacity = '1';
+      renderNote();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }, 250 + CONVO.length * 700));
+  }
+
+  function setMode(next){
+    mode = next;
+    memToggle.querySelectorAll('.mem-opt').forEach(b => b.classList.toggle('active', b.dataset.mem === mode));
+    renderMemoryPanel();
+    playChat();
+  }
+
+  memToggle.querySelectorAll('.mem-opt').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.mem))
+  );
+  replayBtn.addEventListener('click', playChat);
+
+  /* ═══════════════════════════════════════════════
+     3. WHAT AGENTS CAN REMEMBER
+  ═══════════════════════════════════════════════ */
+  const TYPES = [
+    { id:'pref',    icon:'sliders-horizontal', name:'User preferences', ex:'Prefers short explanations.',
+      help:'The agent keeps its answers short for you, without being told again.' },
+    { id:'state',   icon:'list-checks',        name:'Task state',       ex:'Step 2 of 4 is complete.',
+      help:'The agent knows where it stopped, so it continues instead of restarting.' },
+    { id:'results', icon:'history',            name:'Past results',     ex:'Calendar was checked already.',
+      help:'The agent reuses the earlier result instead of doing the same work twice.' },
+    { id:'context', icon:'bookmark',           name:'Important context',ex:'Project name is AI Concepts Playground.',
+      help:'The agent uses this fact later so its answers stay on topic.' }
+  ];
+
+  const typeGrid  = document.getElementById('typeGrid');
+  const typePanel = document.getElementById('typePanel');
+
+  typeGrid.innerHTML = TYPES.map(t =>
+    '<button class="type-card" data-type="' + t.id + '">' +
+      '<div class="type-head"><span class="type-ic"><i data-lucide="' + t.icon + '" style="width:19px;height:19px;"></i></span>' + t.name + '</div>' +
+      '<div class="type-ex">"' + t.ex + '"</div>' +
+    '</button>'
+  ).join('');
+
+  function showType(id){
+    const t = TYPES.find(x => x.id === id);
+    typePanel.innerHTML =
+      '<div class="mem-panel-head" style="margin-bottom:0.5rem;"><i data-lucide="' + t.icon + '" style="width:14px;height:14px;"></i> ' + t.name + '</div>' +
+      '<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed"><strong class="text-slate-900 dark:text-white">Remembered:</strong> "' + t.ex + '"</p>' +
+      '<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-2"><strong class="text-green-700 dark:text-green-400">How it helps:</strong> ' + t.help + '</p>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  typeGrid.querySelectorAll('[data-type]').forEach(b =>
+    b.addEventListener('click', () => {
+      typeGrid.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      showType(b.dataset.type);
+    })
+  );
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    renderMemoryPanel();
+    playChat();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

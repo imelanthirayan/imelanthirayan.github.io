@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Why do we need Encoder-Decoder Models? An interactive lesson on why some AI tasks need both understanding and generation." />
+  <title>Why do we need Encoder-Decoder Models?, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8F%9B%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #be123c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb7185; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #be123c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(190,18,60,0.25); background: rgba(190,18,60,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(190,18,60,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fda4af; border-color: rgba(251,113,133,0.28); background: rgba(190,18,60,0.1); }
+
+    /* ── Task cards (main interaction) ───────── */
+    .task-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 0.8rem; }
+    .task-card {
+      cursor: pointer; text-align: left; padding: 1.1rem 1.2rem; border-radius: 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    .task-card:hover { border-color: rgba(190,18,60,0.4); transform: translateY(-2px); }
+    .task-card.active { border-color: #be123c; background: rgba(190,18,60,0.07); box-shadow: 0 8px 22px rgba(190,18,60,0.16); }
+    html.dark .task-card { background: #0f172a; border-color: #334155; }
+    html.dark .task-card.active { border-color: #fb7185; background: rgba(190,18,60,0.16); }
+    .task-name { display: flex; align-items: center; gap: 0.5rem; font-weight: 800; font-size: 0.95rem; color: #1e293b; }
+    html.dark .task-name { color: #f1f5f9; }
+    .task-ex { margin-top: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #64748b; font-style: italic; }
+    html.dark .task-ex { color: #94a3b8; }
+    .task-goal { margin-top: 0.5rem; font-size: 0.78rem; font-weight: 700; color: #9f1239; }
+    html.dark .task-goal { color: #fda4af; }
+    .task-ic {
+      width: 32px; height: 32px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(190,18,60,0.1); color: #be123c;
+    }
+    html.dark .task-ic { background: rgba(190,18,60,0.2); color: #fda4af; }
+
+    /* ── Architecture stage ──────────────────── */
+    .stage {
+      margin-top: 1.4rem; padding: 1.5rem 1.3rem; border-radius: 1.2rem;
+      background: rgba(190,18,60,0.04); border: 1.5px dashed rgba(190,18,60,0.3);
+    }
+    html.dark .stage { background: rgba(190,18,60,0.08); border-color: rgba(251,113,133,0.28); }
+    .stage-flow { display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: wrap; }
+    .block {
+      font-weight: 800; font-size: 0.9rem; padding: 0.8rem 1.1rem; border-radius: 0.9rem;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0; color: #64748b;
+      display: flex; align-items: center; gap: 0.45rem; opacity: 0.4; transition: all 0.4s ease;
+    }
+    html.dark .block { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .block.lit {
+      opacity: 1; color: white; background: linear-gradient(135deg,#f43f5e,#be123c); border-color: transparent;
+      box-shadow: 0 8px 22px rgba(190,18,60,0.32); transform: translateY(-2px);
+    }
+    .block .chk { display: none; }
+    .block.lit .chk { display: inline-flex; }
+    .stage-arrow { color: #cbd5e1; line-height: 0; transition: color 0.4s ease; }
+    .stage-arrow.lit { color: #be123c; }
+    html.dark .stage-arrow { color: #475569; }
+    html.dark .stage-arrow.lit { color: #fb7185; }
+    .stage-caption {
+      text-align: center; margin-top: 1.1rem; font-weight: 700; font-size: 0.95rem; color: #9f1239;
+    }
+    html.dark .stage-caption { color: #fda4af; }
+    .verdict {
+      display: inline-flex; align-items: center; gap: 0.45rem; margin-top: 0.6rem;
+      font-weight: 800; font-size: 0.85rem; padding: 0.5rem 1.1rem; border-radius: 9999px;
+      background: rgba(16,185,129,0.12); color: #065f46; border: 1.5px solid rgba(16,185,129,0.3);
+    }
+    html.dark .verdict { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+
+    /* ── Why-both flow ───────────────────────── */
+    .app-card {
+      cursor: pointer; padding: 1.1rem 1.2rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .app-card:hover { border-color: rgba(190,18,60,0.4); transform: translateY(-2px); }
+    html.dark .app-card { background: #0f172a; border-color: #334155; }
+    .app-head { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; color: #1e293b; font-size: 0.95rem; }
+    html.dark .app-head { color: #f1f5f9; }
+    .app-ic {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(190,18,60,0.1); color: #be123c;
+    }
+    html.dark .app-ic { background: rgba(190,18,60,0.2); color: #fda4af; }
+    .app-line {
+      margin-top: 0.6rem; font-size: 0.86rem; color: #9f1239; font-weight: 600;
+      max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .app-card.open .app-line { max-height: 60px; opacity: 1; margin-top: 0.7rem; }
+    html.dark .app-line { color: #fda4af; }
+
+    .pipe {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
+      padding: 1.1rem; border-radius: 1rem; background: rgba(190,18,60,0.04); border: 1.5px solid rgba(190,18,60,0.18);
+    }
+    html.dark .pipe { background: rgba(190,18,60,0.08); border-color: rgba(251,113,133,0.22); }
+    .pipe-node {
+      font-weight: 700; font-size: 0.88rem; padding: 0.6rem 1rem; border-radius: 0.8rem;
+      background: white; border: 1.5px solid #e2e8f0; color: #475569; display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .pipe-node { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .pipe-arrow { color: #be123c; line-height: 0; }
+    html.dark .pipe-arrow { color: #fb7185; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(190,18,60,0.3); background: rgba(190,18,60,0.08); color: #be123c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(190,18,60,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fda4af; border-color: rgba(251,113,133,0.3); background: rgba(190,18,60,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(190,18,60,0.5); color: #be123c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(190,18,60,0.08), rgba(244,63,94,0.04));
+      border: 1.5px solid rgba(190,18,60,0.22); border-left: 4px solid #be123c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(190,18,60,0.06), rgba(244,63,94,0.03));
+      border-color: rgba(251,113,133,0.16); border-left-color: #fb7185;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30">
+          <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+          <span class="text-rose-700 dark:text-rose-400 text-xs font-bold tracking-wide">Transformer Architectures</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="git-merge" class="w-7 h-7 text-rose-600 dark:text-rose-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Why do we need Encoder-Decoder Models?</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Some tasks only need <strong class="text-slate-800 dark:text-slate-200">understanding</strong>. Some only need <strong class="text-slate-800 dark:text-slate-200">generation</strong>. A few need <strong class="text-slate-800 dark:text-slate-200">both</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Which architecture fits the task?</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click a task below. Watch which parts light up - an <strong class="text-slate-800 dark:text-slate-200">encoder</strong> to understand, a <strong class="text-slate-800 dark:text-slate-200">decoder</strong> to generate, or <strong class="text-slate-800 dark:text-slate-200">both</strong>.
+        </p>
+
+        <!-- three task cards -->
+        <div class="task-grid" id="taskGrid"></div>
+
+        <!-- architecture stage -->
+        <div class="stage">
+          <div class="stage-flow" id="stageFlow">
+            <div class="block" id="blkEnc">
+              <i data-lucide="scan-text" style="width:15px;height:15px;"></i> Encoder
+              <span class="chk"><i data-lucide="check" style="width:14px;height:14px;"></i></span>
+            </div>
+            <span class="stage-arrow" id="stageArrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></span>
+            <div class="block" id="blkDec">
+              <i data-lucide="pen-tool" style="width:15px;height:15px;"></i> Decoder
+              <span class="chk"><i data-lucide="check" style="width:14px;height:14px;"></i></span>
+            </div>
+          </div>
+          <p class="stage-caption" id="stageCaption">Pick a task to see which parts it needs.</p>
+          <div class="text-center">
+            <span class="verdict" id="stageVerdict" style="display:none;"><i data-lucide="check-circle-2" style="width:15px;height:15px;"></i> <span id="verdictText"></span></span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. WHY BOTH MATTER ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-merge" style="width:12px;height:12px;"></i>Why both matter</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Tasks that read <em>and</em> write</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">Some of the most useful tasks follow the same pipeline - first read, then understand, then generate.</p>
+        <div class="pipe mb-6">
+          <div class="pipe-node"><i data-lucide="book-open" style="width:15px;height:15px;"></i> Read</div>
+          <span class="pipe-arrow"><i data-lucide="arrow-right" style="width:18px;height:18px;"></i></span>
+          <div class="pipe-node"><i data-lucide="scan-text" style="width:15px;height:15px;"></i> Understand</div>
+          <span class="pipe-arrow"><i data-lucide="arrow-right" style="width:18px;height:18px;"></i></span>
+          <div class="pipe-node"><i data-lucide="pen-tool" style="width:15px;height:15px;"></i> Generate</div>
+        </div>
+        <div class="grid sm:grid-cols-3 gap-3" id="appGrid"></div>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mt-5">
+          Each of these needs to <strong class="text-slate-800 dark:text-slate-200">understand the input</strong> and then <strong class="text-slate-800 dark:text-slate-200">generate new text</strong>. That's why <strong class="text-slate-800 dark:text-slate-200">encoder-decoder models</strong> exist.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Some tasks only need <strong class="text-slate-900 dark:text-white">understanding</strong>.</li>
+            <li>• Some tasks only need <strong class="text-slate-900 dark:text-white">generation</strong>.</li>
+            <li>• Some tasks require <strong class="text-slate-900 dark:text-white">both</strong>.</li>
+            <li>• Encoder-decoder models combine both strengths.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-rose-500 mt-0.5">→</span> Switch between the three tasks.</li>
+            <li class="flex items-start gap-2.5"><span class="text-rose-500 mt-0.5">→</span> Notice which architecture fits each task.</li>
+            <li class="flex items-start gap-2.5"><span class="text-rose-500 mt-0.5">→</span> Compare understanding-only and generation-only tasks.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(190,18,60,0.3);background:linear-gradient(135deg,rgba(190,18,60,0.05),rgba(244,63,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Some AI problems need <strong>both understanding and generation</strong>. Encoder-decoder models combine these two abilities into <strong>one architecture</strong> - the idea behind models like T5.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="decoder-only-gpt.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Decoder-only Models (GPT)
+        </a>
+        <a href="encoder-decoder-t5.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Encoder-Decoder Models (T5)
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Transformer Architectures');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     MAIN PLAYGROUND - three tasks → architecture
+  ═══════════════════════════════════════════════ */
+  const TASKS = [
+    {
+      id:'review', icon:'star', name:'Movie Review', ex:'"The movie was fantastic."',
+      goal:'Goal: Positive or Negative?', need:'enc',
+      caption:'The model only needs to read and understand the sentence.',
+      verdict:'Understanding → Encoder works well'
+    },
+    {
+      id:'write', icon:'pen-line', name:'Continue Writing', ex:'"Once upon a time…"',
+      goal:'Goal: Continue the story', need:'dec',
+      caption:'The model just keeps generating new words.',
+      verdict:'Generation → Decoder works well'
+    },
+    {
+      id:'translate', icon:'languages', name:'Translate', ex:'"I love AI" → "Me encanta la IA"',
+      goal:'Goal: Read one language, write another', need:'both',
+      caption:'First understand the input, then generate a new sentence.',
+      verdict:'This task needs both → Encoder + Decoder'
+    }
+  ];
+
+  const taskGrid   = document.getElementById('taskGrid');
+  const blkEnc     = document.getElementById('blkEnc');
+  const blkDec     = document.getElementById('blkDec');
+  const stageArrow = document.getElementById('stageArrow');
+  const caption    = document.getElementById('stageCaption');
+  const verdict    = document.getElementById('stageVerdict');
+  const verdictTxt = document.getElementById('verdictText');
+
+  taskGrid.innerHTML = TASKS.map(t =>
+    '<button class="task-card" data-task="' + t.id + '">' +
+      '<div class="task-name"><span class="task-ic"><i data-lucide="' + t.icon + '" style="width:17px;height:17px;"></i></span>' + t.name + '</div>' +
+      '<div class="task-ex">' + t.ex + '</div>' +
+      '<div class="task-goal">' + t.goal + '</div>' +
+    '</button>'
+  ).join('');
+
+  function selectTask(id){
+    const t = TASKS.find(x => x.id === id);
+    taskGrid.querySelectorAll('.task-card').forEach(el => el.classList.toggle('active', el.dataset.task === id));
+
+    const encOn = t.need === 'enc' || t.need === 'both';
+    const decOn = t.need === 'dec' || t.need === 'both';
+
+    // reset then animate in
+    blkEnc.classList.remove('lit'); blkDec.classList.remove('lit'); stageArrow.classList.remove('lit');
+    setTimeout(() => {
+      blkEnc.classList.toggle('lit', encOn);
+      setTimeout(() => {
+        stageArrow.classList.toggle('lit', t.need === 'both');
+        setTimeout(() => blkDec.classList.toggle('lit', decOn), t.need === 'both' ? 250 : 0);
+      }, 200);
+    }, 120);
+
+    caption.textContent = t.caption;
+    verdictTxt.textContent = t.verdict;
+    verdict.style.display = 'inline-flex';
+  }
+
+  taskGrid.querySelectorAll('[data-task]').forEach(b => b.addEventListener('click', () => selectTask(b.dataset.task)));
+
+  /* ═══════════════════════════════════════════════
+     SECTION 3 - why both matter (real tasks)
+  ═══════════════════════════════════════════════ */
+  const APPS = [
+    { icon:'languages',   name:'Translation',      line:'Read one language, write another.' },
+    { icon:'file-text',   name:'Summarization',    line:'Read a long text, write a short one.' },
+    { icon:'help-circle', name:'Question Answering', line:'Read a passage, write an answer.' }
+  ];
+
+  const appGrid = document.getElementById('appGrid');
+  appGrid.innerHTML = APPS.map(a =>
+    '<div class="app-card" tabindex="0">' +
+      '<div class="app-head"><span class="app-ic"><i data-lucide="' + a.icon + '" style="width:16px;height:16px;"></i></span> ' + a.name + '</div>' +
+      '<div class="app-line"><i data-lucide="corner-down-right" style="width:15px;height:15px;"></i> ' + a.line + '</div>' +
+    '</div>'
+  ).join('');
+  appGrid.querySelectorAll('.app-card').forEach(card => {
+    const toggle = () => card.classList.toggle('open');
+    card.addEventListener('click', toggle);
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    selectTask('review');
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

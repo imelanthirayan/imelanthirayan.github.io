@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Real-World AI Agents, an interactive beginner lesson exploring everyday AI agents like travel, email, coding, research, and support agents, and what makes each one an agent." />
+  <title>Real-World AI Agents, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8C%8D</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Section labels ──────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+
+    /* ── Agent picker (selectable) ───────────── */
+    .agent-picker {
+      display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+    .agent-btn {
+      cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.55rem;
+      text-align: center; padding: 1rem 0.7rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    .agent-btn:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    html.dark .agent-btn { background: #0f172a; border-color: #334155; }
+    .agent-btn.active {
+      border-color: #16a34a; background: rgba(22,163,74,0.08);
+      box-shadow: 0 8px 22px rgba(22,163,74,0.16);
+    }
+    html.dark .agent-btn.active { background: rgba(22,163,74,0.16); border-color: #4ade80; }
+    .agent-ic {
+      width: 44px; height: 44px; border-radius: 0.9rem; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; background: #e2e8f0; color: #64748b;
+      transition: all 0.22s ease;
+    }
+    .agent-btn.active .agent-ic { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.35); }
+    html.dark .agent-ic { background: #334155; color: #94a3b8; }
+    .agent-nm { font-weight: 800; font-size: 0.82rem; color: #1e293b; line-height: 1.2; }
+    html.dark .agent-nm { color: #f1f5f9; }
+    .agent-btn.active .agent-nm { color: #16a34a; }
+    html.dark .agent-btn.active .agent-nm { color: #86efac; }
+
+    /* ── Detail panel ────────────────────────── */
+    .detail-panel { animation: fadeSwap 0.35s ease; }
+    @keyframes fadeSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .detail-head {
+      display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; margin-bottom: 1.1rem;
+      border-radius: 1rem; border: 1.5px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.06);
+    }
+    html.dark .detail-head { background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.26); }
+    .detail-emoji { font-size: 1.6rem; line-height: 1; }
+    .detail-name { font-weight: 900; font-size: 1.15rem; color: #1e293b; }
+    html.dark .detail-name { color: #f1f5f9; }
+    .detail-goal { font-size: 0.85rem; color: #16a34a; font-weight: 700; }
+    html.dark .detail-goal { color: #86efac; }
+
+    .aspect-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.9rem; }
+    .aspect {
+      border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      animation: fadeSwap 0.4s ease both;
+    }
+    html.dark .aspect { background: #0f172a; border-color: #334155; }
+    .aspect-lbl {
+      display: flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.05em; color: #16a34a; margin-bottom: 0.7rem;
+    }
+    html.dark .aspect-lbl { color: #4ade80; }
+    .aspect-ic {
+      width: 30px; height: 30px; border-radius: 0.65rem; display: flex; align-items: center; justify-content: center;
+      background: rgba(22,163,74,0.1); color: #16a34a; flex-shrink: 0;
+    }
+    html.dark .aspect-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .pill {
+      font-size: 0.78rem; font-weight: 700; padding: 0.3rem 0.7rem; border-radius: 9999px;
+      background: white; border: 1.5px solid #e2e8f0; color: #334155;
+    }
+    html.dark .pill { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .result-line { font-size: 0.92rem; font-weight: 700; color: #1e293b; }
+    html.dark .result-line { color: #f1f5f9; }
+
+    /* ── Example cards (section 3) ───────────── */
+    .ex-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 0.9rem; }
+    .ex-card {
+      border-radius: 1.1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.25s ease;
+    }
+    .ex-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(22,163,74,0.12); }
+    html.dark .ex-card { background: #0f172a; border-color: #334155; }
+    .ex-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.7rem; }
+    .ex-ic {
+      width: 40px; height: 40px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center;
+      background: rgba(22,163,74,0.1); color: #16a34a; flex-shrink: 0;
+    }
+    html.dark .ex-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .ex-title { font-weight: 900; font-size: 1.02rem; color: #1e293b; }
+    html.dark .ex-title { color: #f1f5f9; }
+    .ex-desc { font-size: 0.85rem; color: #64748b; margin-bottom: 0.9rem; }
+    html.dark .ex-desc { color: #94a3b8; }
+    .ex-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; font-size: 0.76rem; font-weight: 700; }
+    .ex-step {
+      padding: 0.25rem 0.6rem; border-radius: 9999px; background: rgba(22,163,74,0.08);
+      border: 1.5px solid rgba(22,163,74,0.2); color: #16a34a;
+    }
+    html.dark .ex-step { background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.24); color: #86efac; }
+    .ex-arrow { color: #cbd5e1; }
+    html.dark .ex-arrow { color: #475569; }
+
+    /* ── Checklist (section 4) ───────────────── */
+    .check-hint {
+      display: flex; align-items: center; gap: 0.55rem; margin-bottom: 1.2rem; padding: 0.75rem 1rem;
+      border-radius: 0.9rem; font-size: 0.85rem; font-weight: 700;
+      color: #16a34a; background: rgba(22,163,74,0.08); border: 1.5px solid rgba(22,163,74,0.22);
+    }
+    html.dark .check-hint { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.26); }
+    .check-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 0.8rem; }
+    .check-item {
+      display: flex; align-items: flex-start; gap: 0.8rem; padding: 1rem 1.1rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.35s ease;
+    }
+    html.dark .check-item { background: #0f172a; border-color: #334155; }
+    .check-item.on { border-color: #16a34a; background: rgba(22,163,74,0.07); }
+    html.dark .check-item.on { border-color: #4ade80; background: rgba(22,163,74,0.14); }
+    .check-box {
+      width: 26px; height: 26px; border-radius: 9999px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; background: #e2e8f0; color: #94a3b8;
+      transition: all 0.35s ease;
+    }
+    .check-item.on .check-box { background: #16a34a; color: white; transform: scale(1.05); }
+    html.dark .check-box { background: #334155; color: #64748b; }
+    .check-name { font-weight: 800; font-size: 0.92rem; color: #1e293b; }
+    html.dark .check-name { color: #f1f5f9; }
+    .check-detail { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; min-height: 1.1em; }
+    html.dark .check-detail { color: #94a3b8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟢 Beginner · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="globe" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Real-World AI Agents</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          AI Agents are used when an AI system needs to do more than answer a question. They can <strong class="text-slate-800 dark:text-slate-200">use tools</strong>, <strong class="text-slate-800 dark:text-slate-200">remember context</strong>, and complete tasks <strong class="text-slate-800 dark:text-slate-200">step by step</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. AGENT EXPLORER PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Agent Explorer</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Pick an agent and see how it works</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click any agent below. See its <strong class="text-slate-800 dark:text-slate-200">goal</strong>, the <strong class="text-slate-800 dark:text-slate-200">tools</strong> it uses, what it <strong class="text-slate-800 dark:text-slate-200">remembers</strong>, the <strong class="text-slate-800 dark:text-slate-200">actions</strong> it takes, and the <strong class="text-slate-800 dark:text-slate-200">result</strong> you get.
+        </p>
+
+        <!-- agent picker -->
+        <div class="goal-label">Choose an agent</div>
+        <div class="agent-picker" id="agentPicker"></div>
+
+        <!-- detail panel -->
+        <div id="detailPanel"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. AGENT EXAMPLES ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="layout-grid" style="width:12px;height:12px;"></i>Agent examples</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Five agents, five jobs</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Each agent follows the same simple idea: <strong class="text-slate-800 dark:text-slate-200">a goal, the tools it needs, and a useful result</strong>.
+        </p>
+        <div class="ex-grid" id="exGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHAT MAKES THESE AGENTS ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="list-checks" style="width:12px;height:12px;"></i>What makes these agents?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The same building blocks every time</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Different agents may use different tools, but the basic idea is the same: they all work toward a goal.
+        </p>
+        <div class="check-hint" id="checkHint"><i data-lucide="mouse-pointer-click" style="width:16px;height:16px;"></i> Pick an agent in the Explorer above to fill in each block.</div>
+        <div class="check-grid" id="checkGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• AI Agents are useful for tasks with <strong class="text-slate-900 dark:text-white">goals and actions</strong>.</li>
+            <li>• Different agents use <strong class="text-slate-900 dark:text-white">different tools</strong>.</li>
+            <li>• Memory helps agents <strong class="text-slate-900 dark:text-white">personalize and continue</strong> tasks.</li>
+            <li>• Agents can work <strong class="text-slate-900 dark:text-white">alone or with other agents</strong>.</li>
+            <li>• Real-world agents are built around <strong class="text-slate-900 dark:text-white">practical workflows</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Click each agent type.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Compare the tools they need.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Notice what each agent remembers.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of an agent that could help with your daily work.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Real-world AI Agents are built around <strong>practical workflows</strong>. Whether they plan trips, handle email, write code, research topics, or support customers, they all share the same idea: a goal, tools, memory, actions, and a useful result.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="text-center mb-5">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">
+          <i data-lucide="party-popper" style="width:14px;height:14px;"></i>
+          AI Agent Fundamentals section complete
+        </span>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="single-vs-multi-agent.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Single-Agent vs Multi-Agent
+        </a>
+        <a href="../../index.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-green-400/50 ring-offset-2 ring-offset-transparent">
+          <i data-lucide="home" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>All Modules</strong>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     REAL-WORLD AI AGENTS - data + explorer
+  ═══════════════════════════════════════════════ */
+  const AGENTS = [
+    {
+      id:'travel', name:'Travel Agent', emoji:'🧳', icon:'plane',
+      goal:'Plan a trip from start to finish.',
+      tools:['Maps','Calendar','Booking system','Weather'],
+      memory:['Budget','Preferred travel dates','Food preferences'],
+      actions:['Find places','Compare options','Create itinerary'],
+      result:'A complete trip plan.',
+      exDesc:'Plans trips and creates itineraries.',
+      flow:['Plan a trip','Maps + booking','Trip plan'],
+      blocks:{
+        model:'Understands your trip request',
+        tools:'Maps, booking, weather',
+        memory:'Budget and travel dates',
+        actions:'Builds an itinerary',
+        results:'A ready trip plan'
+      }
+    },
+    {
+      id:'email', name:'Email Agent', emoji:'✉️', icon:'mail',
+      goal:'Handle your inbox for you.',
+      tools:['Email inbox','Calendar','Contacts','Search'],
+      memory:['Your writing style','Important people','Recent threads'],
+      actions:['Draft replies','Sort messages','Summarize long threads'],
+      result:'A tidy inbox and ready-to-send drafts.',
+      exDesc:'Drafts, organizes, and summarizes emails.',
+      flow:['Sort my inbox','Email + calendar','Clean inbox'],
+      blocks:{
+        model:'Reads and understands your emails',
+        tools:'Inbox, calendar, contacts',
+        memory:'Your writing style',
+        actions:'Drafts and sorts messages',
+        results:'A tidy inbox'
+      }
+    },
+    {
+      id:'coding', name:'Coding Agent', emoji:'💻', icon:'terminal',
+      goal:'Help you build and fix software.',
+      tools:['File reader','Editor','Test runner','Search'],
+      memory:['Project structure','Coding style','Past changes'],
+      actions:['Read files','Suggest changes','Help debug'],
+      result:'Working code and clear suggestions.',
+      exDesc:'Reads files, suggests changes, and helps debug.',
+      flow:['Fix this bug','Files + tests','Working code'],
+      blocks:{
+        model:'Understands the code request',
+        tools:'Files, editor, tests',
+        memory:'Project structure and style',
+        actions:'Suggests and applies fixes',
+        results:'Working code'
+      }
+    },
+    {
+      id:'research', name:'Research Agent', emoji:'🔎', icon:'search',
+      goal:'Find and summarize information.',
+      tools:['Web search','Documents','Notes','Calculator'],
+      memory:['Your topic','Sources found','Key findings'],
+      actions:['Search sources','Compare facts','Summarize findings'],
+      result:'A short, useful summary.',
+      exDesc:'Searches information and summarizes findings.',
+      flow:['Research a topic','Search + docs','Summary'],
+      blocks:{
+        model:'Understands your question',
+        tools:'Search and documents',
+        memory:'Your topic and sources',
+        actions:'Searches and summarizes',
+        results:'A short summary'
+      }
+    },
+    {
+      id:'support', name:'Customer Support Agent', emoji:'🎧', icon:'headset',
+      goal:'Answer customer questions quickly.',
+      tools:['Help center','Order system','Ticket system','Search'],
+      memory:['Customer history','Order details','Past questions'],
+      actions:['Answer questions','Check orders','Escalate when needed'],
+      result:'A helpful answer or a handoff to a person.',
+      exDesc:'Answers customer questions and escalates when needed.',
+      flow:['Where is my order?','Orders + help center','Helpful answer'],
+      blocks:{
+        model:'Understands the customer question',
+        tools:'Help center and orders',
+        memory:'Customer and order history',
+        actions:'Answers or escalates',
+        results:'A helpful answer'
+      }
+    }
+  ];
+
+  const BLOCKS = [
+    { key:'goal',    name:'A goal',   icon:'target',    fixed:true },
+    { key:'model',   name:'A model',  icon:'brain' },
+    { key:'tools',   name:'Tools',    icon:'wrench' },
+    { key:'memory',  name:'Memory',   icon:'database' },
+    { key:'actions', name:'Actions',  icon:'zap' },
+    { key:'results', name:'Results',  icon:'check-circle-2' }
+  ];
+
+  const picker      = document.getElementById('agentPicker');
+  const detailPanel = document.getElementById('detailPanel');
+  const exGrid      = document.getElementById('exGrid');
+  const checkGrid   = document.getElementById('checkGrid');
+  const checkHint   = document.getElementById('checkHint');
+
+  let activeId = AGENTS[0].id;
+
+  /* ── Agent picker buttons ── */
+  function renderPicker(){
+    picker.innerHTML = AGENTS.map(a =>
+      '<button class="agent-btn' + (a.id === activeId ? ' active' : '') + '" data-agent="' + a.id + '">' +
+        '<span class="agent-ic"><i data-lucide="' + a.icon + '" style="width:22px;height:22px;"></i></span>' +
+        '<span class="agent-nm">' + a.name + '</span>' +
+      '</button>'
+    ).join('');
+    picker.querySelectorAll('.agent-btn').forEach(b =>
+      b.addEventListener('click', () => selectAgent(b.dataset.agent))
+    );
+  }
+
+  /* ── Detail panel for the active agent ── */
+  function renderDetail(){
+    const a = AGENTS.find(x => x.id === activeId);
+    const pills = list => list.map(t => '<span class="pill">' + t + '</span>').join('');
+    detailPanel.innerHTML =
+      '<div class="detail-panel">' +
+        '<div class="detail-head">' +
+          '<span class="detail-emoji">' + a.emoji + '</span>' +
+          '<div>' +
+            '<div class="detail-name">' + a.name + '</div>' +
+            '<div class="detail-goal"><i data-lucide="target" style="width:13px;height:13px;display:inline;vertical-align:-2px;"></i> Goal: ' + a.goal + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="aspect-grid">' +
+          '<div class="aspect" style="animation-delay:.02s">' +
+            '<div class="aspect-lbl"><span class="aspect-ic"><i data-lucide="wrench" style="width:16px;height:16px;"></i></span> Tools</div>' +
+            '<div class="pill-row">' + pills(a.tools) + '</div>' +
+          '</div>' +
+          '<div class="aspect" style="animation-delay:.08s">' +
+            '<div class="aspect-lbl"><span class="aspect-ic"><i data-lucide="database" style="width:16px;height:16px;"></i></span> Memory</div>' +
+            '<div class="pill-row">' + pills(a.memory) + '</div>' +
+          '</div>' +
+          '<div class="aspect" style="animation-delay:.14s">' +
+            '<div class="aspect-lbl"><span class="aspect-ic"><i data-lucide="zap" style="width:16px;height:16px;"></i></span> Actions</div>' +
+            '<div class="pill-row">' + pills(a.actions) + '</div>' +
+          '</div>' +
+          '<div class="aspect" style="animation-delay:.20s">' +
+            '<div class="aspect-lbl"><span class="aspect-ic"><i data-lucide="gift" style="width:16px;height:16px;"></i></span> Result</div>' +
+            '<div class="result-line">' + a.result + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Example cards (static, all 5) ── */
+  function renderExamples(){
+    exGrid.innerHTML = AGENTS.map(a =>
+      '<div class="ex-card">' +
+        '<div class="ex-head">' +
+          '<span class="ex-ic"><i data-lucide="' + a.icon + '" style="width:20px;height:20px;"></i></span>' +
+          '<span class="ex-title">' + a.name + '</span>' +
+        '</div>' +
+        '<div class="ex-desc">' + a.exDesc + '</div>' +
+        '<div class="ex-flow">' +
+          '<span class="ex-step">' + a.flow[0] + '</span>' +
+          '<span class="ex-arrow"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>' +
+          '<span class="ex-step">' + a.flow[1] + '</span>' +
+          '<span class="ex-arrow"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></span>' +
+          '<span class="ex-step">' + a.flow[2] + '</span>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Checklist (reacts to active agent) ── */
+  function renderChecklist(){
+    const a = AGENTS.find(x => x.id === activeId);
+    checkHint.innerHTML = '<i data-lucide="check-check" style="width:16px;height:16px;"></i> Showing the building blocks of the <strong style="margin:0 3px;">' + a.name + '</strong>. Pick another agent to compare.';
+    checkGrid.innerHTML = BLOCKS.map((b, i) => {
+      const detail = b.fixed ? a.goal : a.blocks[b.key];
+      return '<div class="check-item on" style="transition-delay:' + (i * 0.05) + 's">' +
+        '<span class="check-box"><i data-lucide="check" style="width:15px;height:15px;"></i></span>' +
+        '<div>' +
+          '<div class="check-name">' + b.name + '</div>' +
+          '<div class="check-detail">' + detail + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Select an agent (updates every linked view) ── */
+  function selectAgent(id){
+    activeId = id;
+    picker.querySelectorAll('.agent-btn').forEach(b => b.classList.toggle('active', b.dataset.agent === id));
+    renderDetail();
+    renderChecklist();
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderPicker();
+    renderDetail();
+    renderExamples();
+    renderChecklist();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

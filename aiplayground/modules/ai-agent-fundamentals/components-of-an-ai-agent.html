@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Components of an AI Agent, an interactive beginner lesson on the model, goal, tools, memory, action, and result that make up an AI agent." />
+  <title>Components of an AI Agent, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A9</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Task chooser ────────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+    .goal-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.7rem; }
+    .goal-card {
+      cursor: pointer; text-align: left; display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.85rem 1rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; color: #1e293b; font-size: 0.9rem; transition: all 0.22s ease;
+    }
+    .goal-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); }
+    .goal-card.active { border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .goal-card { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    html.dark .goal-card.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .goal-emoji { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+
+    /* ── Step counter ────────────────────────── */
+    .step-count {
+      font-size: 0.78rem; font-weight: 800; color: #16a34a;
+      padding: 0.3rem 0.8rem; border-radius: 9999px; background: rgba(22,163,74,0.08);
+      border: 1.5px solid rgba(22,163,74,0.2);
+    }
+    html.dark .step-count { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.24); }
+
+    /* ── Control buttons ─────────────────────── */
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-size: 0.85rem; font-weight: 800; padding: 0.6rem 1.25rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .ctrl-primary { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    .ctrl-primary:hover { box-shadow: 0 8px 24px rgba(22,163,74,0.42); }
+    .ctrl-primary:disabled { box-shadow: none; }
+    html.dark .ctrl-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+    html.dark .ctrl-primary { color: white; }
+
+    /* ── Component chips: revealed state ─────── */
+
+
+    /* ── Component chips (main interaction) ──── */
+    .comp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 0.7rem; }
+    .comp-chip {
+      text-align: center; padding: 1rem 0.8rem; border-radius: 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease;
+      opacity: 0.45;
+    }
+    .comp-chip.done { opacity: 1; }
+    .comp-chip.active { opacity: 1; border-color: #16a34a; background: rgba(22,163,74,0.07); box-shadow: 0 8px 22px rgba(22,163,74,0.16); }
+    html.dark .comp-chip { background: #0f172a; border-color: #334155; }
+    html.dark .comp-chip.active { border-color: #4ade80; background: rgba(22,163,74,0.16); }
+    .comp-ic {
+      width: 42px; height: 42px; margin: 0 auto 0.55rem; border-radius: 0.8rem; display: flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: #16a34a;
+      transition: all 0.3s ease;
+    }
+    .comp-chip.done .comp-ic { background: rgba(22,163,74,0.16); }
+    .comp-chip.active .comp-ic { background: linear-gradient(135deg,#22c55e,#16a34a); color: white; transform: scale(1.06); }
+    html.dark .comp-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .comp-name { font-weight: 800; font-size: 0.9rem; color: #1e293b; }
+    html.dark .comp-name { color: #f1f5f9; }
+
+    /* ── Output feed ─────────────────────────── */
+    .output-label {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .output-label { color: #4ade80; }
+    .output-feed {
+      border-radius: 1.2rem; padding: 1.1rem 1.2rem; min-height: 96px;
+      background: rgba(22,163,74,0.04); border: 1.5px dashed rgba(22,163,74,0.3);
+      display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    html.dark .output-feed { background: rgba(15,23,42,0.5); border-color: rgba(74,222,128,0.28); }
+    .output-empty {
+      display: flex; align-items: center; gap: 0.6rem; justify-content: center;
+      color: #64748b; font-size: 0.9rem; font-weight: 600; padding: 0.8rem 0;
+    }
+    html.dark .output-empty { color: #94a3b8; }
+    .out-row {
+      display: flex; align-items: flex-start; gap: 0.8rem; padding: 0.75rem 0.9rem;
+      border-radius: 0.9rem; background: white; border: 1.5px solid #e2e8f0;
+      animation: outIn 0.35s ease;
+    }
+    html.dark .out-row { background: #1e293b; border-color: #334155; }
+    .out-row.result { background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 8px 22px rgba(22,163,74,0.3); }
+    @keyframes outIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .out-ic {
+      width: 32px; height: 32px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.12); color: #16a34a;
+    }
+    html.dark .out-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .out-row.result .out-ic { background: rgba(255,255,255,0.22); color: white; }
+    .out-name { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #16a34a; }
+    html.dark .out-name { color: #4ade80; }
+    .out-row.result .out-name { color: rgba(255,255,255,0.85); }
+    .out-text { font-size: 0.93rem; font-weight: 600; color: #334155; margin-top: 0.15rem; line-height: 1.5; }
+    html.dark .out-text { color: #cbd5e1; }
+    .out-row.result .out-text { color: white; font-weight: 700; }
+
+    /* ── Component cards (section 3) ─────────── */
+    .card-item {
+      padding: 1.2rem 1.25rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.22s ease;
+    }
+    .card-item:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-2px); box-shadow: 0 8px 22px rgba(22,163,74,0.12); }
+    html.dark .card-item { background: #0f172a; border-color: #334155; }
+    .card-head { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; color: #1e293b; font-size: 0.98rem; }
+    html.dark .card-head { color: #f1f5f9; }
+    .card-ic {
+      width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.1); color: #16a34a;
+    }
+    html.dark .card-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .card-line { margin-top: 0.6rem; font-size: 0.86rem; color: #475569; line-height: 1.5; }
+    html.dark .card-line { color: #cbd5e1; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.7rem; }
+    .card-tag {
+      font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;
+      background: rgba(22,163,74,0.1); color: #15803d; border: 1px solid rgba(22,163,74,0.2);
+    }
+    html.dark .card-tag { background: rgba(74,222,128,0.14); color: #86efac; border-color: rgba(74,222,128,0.24); }
+
+    /* ── Agent flow (section 4) ──────────────── */
+    .flow { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+    .flow-step {
+      width: 100%; max-width: 400px; display: flex; align-items: center; gap: 0.7rem;
+      font-weight: 700; font-size: 0.92rem; padding: 0.8rem 1.15rem; border-radius: 0.95rem;
+      background: #f8fafc; border: 1.5px solid #e2e8f0; color: #64748b;
+      opacity: 0.35; transform: translateY(6px); transition: all 0.4s ease;
+    }
+    html.dark .flow-step { background: #0f172a; border-color: #334155; color: #94a3b8; }
+    .flow-step.lit {
+      opacity: 1; transform: translateY(0); color: white;
+      background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent;
+      box-shadow: 0 8px 22px rgba(22,163,74,0.28);
+    }
+    .flow-step .step-ic {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0; display: inline-flex;
+      align-items: center; justify-content: center; background: rgba(22,163,74,0.12); color: #16a34a;
+      transition: all 0.4s ease;
+    }
+    .flow-step.lit .step-ic { background: rgba(255,255,255,0.2); color: white; }
+    html.dark .flow-step .step-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .flow-arrow { color: #cbd5e1; line-height: 0; padding: 0.1rem 0; opacity: 0.35; transition: all 0.4s ease; }
+    .flow-arrow.lit { color: #16a34a; opacity: 1; }
+    .flow-loop {
+      display: inline-flex; align-items: center; gap: 0.4rem; margin: 0.35rem 0;
+      padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+      color: #16a34a; background: rgba(22,163,74,0.1);
+      border: 1.5px dashed rgba(22,163,74,0.4); opacity: 0.4; transition: all 0.4s ease;
+    }
+    .flow-loop.lit { opacity: 1; }
+    html.dark .flow-loop { color: #4ade80; background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.4); }
+    html.dark .flow-arrow { color: #475569; }
+    html.dark .flow-arrow.lit { color: #4ade80; }
+    .replay-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer;
+      font-size: 0.8rem; font-weight: 700; padding: 0.45rem 1rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .replay-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .replay-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 7–9 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="puzzle" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Components of an AI Agent</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          An AI Agent is built from a few important parts: a <strong class="text-slate-800 dark:text-slate-200">goal</strong>, a <strong class="text-slate-800 dark:text-slate-200">model</strong>, <strong class="text-slate-800 dark:text-slate-200">tools</strong>, <strong class="text-slate-800 dark:text-slate-200">memory</strong>, and a way to decide the next action.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Meet the parts of an agent</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a real task, then press <strong class="text-slate-800 dark:text-slate-200">Next</strong> to run the agent one component at a time and watch the <strong class="text-slate-800 dark:text-slate-200">output</strong> build up to a real result.
+        </p>
+
+        <!-- task chooser -->
+        <div class="goal-label">1 · Choose a task</div>
+        <div class="goal-grid mb-5" id="taskGrid"></div>
+
+        <!-- component chips (progress indicator) -->
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+          <div class="goal-label" style="margin-bottom:0;">2 · Run the agent</div>
+          <div class="step-count" id="stepCount">Step 0 of 6</div>
+        </div>
+        <div class="comp-grid" id="compGrid"></div>
+
+        <!-- output feed -->
+        <div class="output-label mt-5"><i data-lucide="terminal" style="width:13px;height:13px;"></i> Agent output</div>
+        <div class="output-feed" id="outputFeed">
+          <div class="output-empty" id="outputEmpty">
+            <i data-lucide="mouse-pointer-click" style="width:20px;height:20px;"></i>
+            Press <strong>Next</strong> to run the first component.
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="flex items-center justify-center gap-3 flex-wrap mt-6">
+          <button class="ctrl-btn ctrl-primary" id="nextBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> <span id="nextLabel">Next</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Reset</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. COMPONENT CARDS ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="layout-grid" style="width:12px;height:12px;"></i>Component cards</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">What each part does</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The same six parts appear in almost every AI agent.
+        </p>
+        <div class="grid sm:grid-cols-2 gap-3" id="cardGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. AGENT FLOW ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="workflow" style="width:12px;height:12px;"></i>Simple agent flow</div>
+          <button class="replay-btn" id="replayBtn"><i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> Replay</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The agent works in a loop</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Instead of one straight line, the agent decides, acts, and checks progress, repeating until the goal is met.
+        </p>
+        <div class="flow" id="flow"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• An AI Agent is made of <strong class="text-slate-900 dark:text-white">multiple parts</strong>.</li>
+            <li>• The <strong class="text-slate-900 dark:text-white">model</strong> understands and decides.</li>
+            <li>• <strong class="text-slate-900 dark:text-white">Tools</strong> help the agent take action.</li>
+            <li>• <strong class="text-slate-900 dark:text-white">Memory</strong> helps the agent use past information.</li>
+            <li>• The <strong class="text-slate-900 dark:text-white">result</strong> is the completed task or useful response.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Run each task with Next and read the output.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Watch the result build up, step by step.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of which tools a travel agent would need.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of what memory an email assistant might use.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          An AI Agent combines a <strong>model, goal, tools, memory, and actions</strong> to complete tasks. Each component plays a different role.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="what-is-an-ai-agent.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: What is an AI Agent?
+        </a>
+        <a href="tool-calling.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Tool Calling
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     SHARED DATA - the six components (generic)
+  ═══════════════════════════════════════════════ */
+  const COMPONENTS = [
+    { id:'goal',   icon:'target',        name:'Goal',   role:'Goal',
+      card:'What the agent is trying to complete.' },
+    { id:'model',  icon:'brain',         name:'Model',  role:'Model',
+      card:'The AI brain that understands the request and decides what to do.' },
+    { id:'tools',  icon:'wrench',        name:'Tools',  role:'Tools',
+      card:'External abilities the agent can use to get things done.',
+      tags:['calendar','email','files','search','database'] },
+    { id:'memory', icon:'database',      name:'Memory', role:'Memory',
+      card:'Information the agent can remember and reuse.' },
+    { id:'action', icon:'zap',           name:'Action', role:'Action',
+      card:'The step the agent actually performs.' },
+    { id:'result', icon:'check-circle-2',name:'Result', role:'Result',
+      card:'The final outcome given back to you.' }
+  ];
+  const ORDER = ['goal','model','tools','memory','action','result'];
+
+  /* per-task real-life output for each component */
+  const EXAMPLES = [
+    { id:'meeting', emoji:'📅', name:'Schedule a 30-min sync with the design team',
+      out:{
+        goal:   'Book a 30-minute design sync with the 4-person team for tomorrow.',
+        model:  'Figured out it needs a free slot when all 4 people are available.',
+        tools:  'Checked Google Calendar → found 3 open slots: 11:00, 15:00, 16:30.',
+        memory: 'You usually prefer afternoons, and the team works in IST.',
+        action: 'Created "Design Sync" at 3:00 PM and sent invites to all 4 members.',
+        result: '✅ Meeting booked for tomorrow 3:00 PM IST. 4 invites sent.'
+      } },
+    { id:'trip', emoji:'🗺️', name:'Plan a 2-day weekend trip to Goa',
+      out:{
+        goal:   'Plan a 2-day Goa trip for this weekend under ₹15,000.',
+        model:  'Understood: needs stay, beaches, and travel that fit the budget.',
+        tools:  'Searched hotels and maps → beach hotel ₹3,200/night, 4 top spots found.',
+        memory: 'You liked quiet beaches last time and prefer window seats.',
+        action: 'Built a day-by-day plan: Baga & Calangute Day 1, Old Goa Day 2.',
+        result: '✅ 2-day Goa plan ready, total ₹13,400. Hotel and route saved.'
+      } },
+    { id:'email', emoji:'📧', name:'Send a birthday email to Ela',
+      out:{
+        goal:   'Send Ela a warm birthday email today.',
+        model:  'Decided on a short, friendly, personal tone.',
+        tools:  'Opened the email app and found Ela in your contacts.',
+        memory: 'Remembered Ela loves hiking and you two are close friends.',
+        action: 'Wrote "Happy Birthday, Ela!" with a hiking wish and sent it.',
+        result: '✅ Birthday email delivered to ela@email.com just now.'
+      } },
+    { id:'groceries', emoji:'🛒', name:'Order this week\'s groceries',
+      out:{
+        goal:   'Order the usual weekly groceries for home delivery.',
+        model:  'Worked out the shopping list from your weekly routine.',
+        tools:  'Searched the store app and added 12 items to the cart.',
+        memory: 'Recalled your usual brands: Amul milk, brown bread, 6 eggs.',
+        action: 'Placed the order and picked the 6-8 PM delivery slot.',
+        result: '✅ Order placed, ₹1,240. Arriving today between 6-8 PM.'
+      } }
+  ];
+
+  /* ═══════════════════════════════════════════════
+     1. PLAYGROUND - pick a task, run it component by component
+  ═══════════════════════════════════════════════ */
+  const taskGrid    = document.getElementById('taskGrid');
+  const compGrid    = document.getElementById('compGrid');
+  const outputFeed  = document.getElementById('outputFeed');
+  const stepCount   = document.getElementById('stepCount');
+  const nextBtn     = document.getElementById('nextBtn');
+  const nextLabel   = document.getElementById('nextLabel');
+  const resetBtn    = document.getElementById('resetBtn');
+
+  let exIdx    = 0;
+  let revealed = 0;   // 0..6 components run so far
+
+  // build task chooser
+  taskGrid.innerHTML = EXAMPLES.map((e, i) =>
+    '<button class="goal-card' + (i === 0 ? ' active' : '') + '" data-task="' + i + '">' +
+      '<span class="goal-emoji">' + e.emoji + '</span> ' + e.name +
+    '</button>'
+  ).join('');
+
+  // build component chips (display-only progress indicator)
+  compGrid.innerHTML = COMPONENTS.map(c =>
+    '<div class="comp-chip" data-comp="' + c.id + '">' +
+      '<div class="comp-ic"><i data-lucide="' + c.icon + '" style="width:22px;height:22px;"></i></div>' +
+      '<div class="comp-name">' + c.name + '</div>' +
+    '</div>'
+  ).join('');
+
+  function paintChips(){
+    const activeId = revealed > 0 ? ORDER[revealed - 1] : null;
+    compGrid.querySelectorAll('.comp-chip').forEach(el => {
+      const idx = ORDER.indexOf(el.dataset.comp);
+      el.classList.toggle('active', el.dataset.comp === activeId);
+      el.classList.toggle('done', idx < revealed - 1);
+    });
+    stepCount.textContent = 'Step ' + revealed + ' of 6';
+    nextLabel.textContent = revealed === 0 ? 'Start' : (revealed >= 6 ? 'Done' : 'Next');
+    nextBtn.disabled = revealed >= 6;
+  }
+
+  function appendOutput(id){
+    const c = COMPONENTS.find(x => x.id === id);
+    const text = EXAMPLES[exIdx].out[id];
+    const isResult = id === 'result';
+    const row = document.createElement('div');
+    row.className = 'out-row' + (isResult ? ' result' : '');
+    row.innerHTML =
+      '<span class="out-ic"><i data-lucide="' + c.icon + '" style="width:17px;height:17px;"></i></span>' +
+      '<div><div class="out-name">' + c.name + '</div><div class="out-text">' + text + '</div></div>';
+    outputFeed.innerHTML = '';
+    outputFeed.appendChild(row);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function resetPlayground(){
+    revealed = 0;
+    compGrid.querySelectorAll('.comp-chip').forEach(el => el.classList.remove('active','done'));
+    outputFeed.innerHTML =
+      '<div class="output-empty">' +
+        '<i data-lucide="mouse-pointer-click" style="width:20px;height:20px;"></i>' +
+        'Press <strong>&nbsp;Next&nbsp;</strong> to run the first component.' +
+      '</div>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    paintChips();
+  }
+
+  function nextStep(){
+    if (revealed >= 6) return;
+    if (revealed === 0) outputFeed.innerHTML = '';   // clear the empty hint
+    revealed++;
+    appendOutput(ORDER[revealed - 1]);
+    paintChips();
+  }
+
+  taskGrid.querySelectorAll('[data-task]').forEach(b =>
+    b.addEventListener('click', () => {
+      taskGrid.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+      b.classList.add('active');
+      exIdx = +b.dataset.task;
+      resetPlayground();
+    })
+  );
+  nextBtn.addEventListener('click', nextStep);
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ═══════════════════════════════════════════════
+     2. COMPONENT CARDS
+  ═══════════════════════════════════════════════ */
+  document.getElementById('cardGrid').innerHTML = COMPONENTS.map(c => {
+    const tags = c.tags ? '<div class="card-tags">' + c.tags.map(t => '<span class="card-tag">' + t + '</span>').join('') + '</div>' : '';
+    return '<div class="card-item">' +
+        '<div class="card-head"><span class="card-ic"><i data-lucide="' + c.icon + '" style="width:18px;height:18px;"></i></span> ' + c.name + '</div>' +
+        '<div class="card-line">' + c.card + '</div>' + tags +
+      '</div>';
+  }).join('');
+
+  /* ═══════════════════════════════════════════════
+     3. AGENT FLOW - animated loop
+  ═══════════════════════════════════════════════ */
+  const FLOW = [
+    { icon:'target',         label:'Start with the goal' },
+    { icon:'brain',          label:'Decide the next step' },
+    { icon:'wrench',         label:'Use a tool or memory' },
+    { icon:'search',         label:'Check progress', loop:true },
+    { icon:'check-circle-2', label:'Goal met, return the result' }
+  ];
+  const flowEl = document.getElementById('flow');
+  let flowTimers = [];
+  function clearFlowTimers(){ flowTimers.forEach(t => clearTimeout(t)); flowTimers = []; }
+
+  function renderFlow(){
+    clearFlowTimers();
+    let html = '';
+    FLOW.forEach((s, i) => {
+      html +=
+        '<div class="flow-step" data-step="' + i + '">' +
+          '<span class="step-ic"><i data-lucide="' + s.icon + '" style="width:16px;height:16px;"></i></span>' +
+          '<span>' + s.label + '</span>' +
+        '</div>';
+      if (s.loop) {
+        html += '<span class="flow-loop" data-arrow="' + i + '"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> not done? loop back and decide again</span>';
+      } else if (i < FLOW.length - 1) {
+        html += '<span class="flow-arrow" data-arrow="' + i + '"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></span>';
+      }
+    });
+    flowEl.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const steps  = flowEl.querySelectorAll('.flow-step');
+    const arrows = flowEl.querySelectorAll('.flow-arrow, .flow-loop');
+    steps.forEach((step, i) => {
+      flowTimers.push(setTimeout(() => {
+        step.classList.add('lit');
+        if (arrows[i-1]) arrows[i-1].classList.add('lit');
+      }, 200 + i * 450));
+    });
+  }
+  document.getElementById('replayBtn').addEventListener('click', renderFlow);
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    resetPlayground();
+    renderFlow();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

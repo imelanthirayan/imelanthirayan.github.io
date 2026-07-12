@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Single-Agent vs Multi-Agent, an interactive beginner lesson comparing one AI agent doing everything with several agents that each focus on a role." />
+  <title>Single-Agent vs Multi-Agent, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%91%A5</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #16a34a; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #4ade80; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #16a34a; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(22,163,74,0.25); background: rgba(22,163,74,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(22,163,74,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #86efac; border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+
+    /* ── Section labels ──────────────────────── */
+    .goal-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #16a34a; margin-bottom: 0.6rem;
+    }
+    html.dark .goal-label { color: #4ade80; }
+
+    /* ── Mode toggle ─────────────────────────── */
+    .mode-toggle {
+      display: inline-flex; padding: 0.3rem; border-radius: 9999px;
+      background: #f1f5f9; border: 1.5px solid #e2e8f0; gap: 0.25rem;
+    }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-opt {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 800; padding: 0.5rem 1.05rem; border-radius: 9999px;
+      color: #64748b; transition: all 0.22s ease;
+    }
+    .mode-opt:hover { color: #16a34a; }
+    .mode-opt.active { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); box-shadow: 0 6px 16px rgba(22,163,74,0.3); }
+    html.dark .mode-opt { color: #94a3b8; }
+    html.dark .mode-opt.active { color: white; }
+
+    /* ── Task banner ─────────────────────────── */
+    .task-banner {
+      display: flex; align-items: center; gap: 0.7rem; padding: 0.9rem 1.15rem; margin-bottom: 1.3rem;
+      border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; color: #1e293b; font-size: 1rem;
+    }
+    html.dark .task-banner { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    .task-emoji { font-size: 1.35rem; line-height: 1; }
+
+    /* ── Cast bar (who is on the job) ────────── */
+    .cast-label {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+      color: #64748b; margin-bottom: 0.55rem;
+    }
+    html.dark .cast-label { color: #94a3b8; }
+    .cast-bar { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.4rem; }
+    .cast-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 0.85rem 0.45rem 0.5rem;
+      border-radius: 9999px; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 800; font-size: 0.85rem; color: #1e293b; animation: bubbleIn 0.35s ease;
+    }
+    html.dark .cast-chip { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+    .cast-av {
+      width: 26px; height: 26px; border-radius: 9999px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; color: white;
+    }
+    @keyframes bubbleIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Agent flow (horizontal) ─────────────── */
+    .flow {
+      display: flex; flex-direction: row; align-items: stretch; justify-content: flex-start;
+      gap: 0.2rem; overflow-x: auto; padding: 0.3rem 0.2rem 0.8rem;
+    }
+    .flow-node {
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.45rem;
+      flex: 0 0 auto; width: 132px; padding: 1rem 0.7rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+      opacity: 0.3; transform: translateY(6px); transition: all 0.4s ease;
+    }
+    .flow-node.lit {
+      opacity: 1; transform: translateY(0);
+      border-color: var(--c, #16a34a);
+      background: color-mix(in srgb, var(--c, #16a34a) 9%, white);
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--c, #16a34a) 26%, transparent);
+    }
+    html.dark .flow-node { background: #0f172a; border-color: #334155; }
+    html.dark .flow-node.lit { background: color-mix(in srgb, var(--c, #16a34a) 20%, #0f172a); }
+    .flow-node.working { animation: nodePulse 1s ease infinite; }
+    @keyframes nodePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+    .flow-av {
+      width: 46px; height: 46px; border-radius: 9999px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; font-weight: 900; font-size: 0.9rem;
+      background: #e2e8f0; color: #94a3b8; transition: all 0.4s ease;
+    }
+    .flow-node.lit .flow-av { background: var(--c, #16a34a); color: white; box-shadow: 0 4px 12px color-mix(in srgb, var(--c,#16a34a) 40%, transparent); }
+    html.dark .flow-av { background: #334155; color: #64748b; }
+    .flow-role { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c, #16a34a); line-height: 1.2; }
+    .flow-title { font-weight: 800; font-size: 0.92rem; color: #1e293b; }
+    html.dark .flow-title { color: #f1f5f9; }
+    .flow-sub { font-size: 0.72rem; color: #64748b; line-height: 1.3; }
+    html.dark .flow-sub { color: #94a3b8; }
+    .flow-status {
+      font-size: 0.64rem; font-weight: 800; padding: 0.2rem 0.55rem; border-radius: 9999px; margin-top: 0.1rem;
+      background: #e2e8f0; color: #94a3b8; transition: all 0.3s ease;
+    }
+    html.dark .flow-status { background: #334155; color: #64748b; }
+    .flow-node.working .flow-status { background: color-mix(in srgb, var(--c,#16a34a) 16%, white); color: var(--c,#16a34a); }
+    .flow-node.done .flow-status { background: color-mix(in srgb, var(--c,#16a34a) 16%, white); color: var(--c,#16a34a); }
+    .flow-arrow {
+      align-self: center; color: #cbd5e1; line-height: 0; padding: 0 0.05rem; flex: 0 0 auto;
+      opacity: 0.3; transition: all 0.4s ease;
+    }
+    .flow-arrow.lit { color: #16a34a; opacity: 1; }
+    html.dark .flow-arrow { color: #475569; }
+    html.dark .flow-arrow.lit { color: #4ade80; }
+
+    /* ── Step counter ────────────────────────── */
+    .step-count {
+      font-size: 0.78rem; font-weight: 800; color: #16a34a;
+      padding: 0.3rem 0.8rem; border-radius: 9999px; background: rgba(22,163,74,0.08);
+      border: 1.5px solid rgba(22,163,74,0.2);
+    }
+    html.dark .step-count { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.24); }
+
+    /* ── Mode note ───────────────────────────── */
+    .mode-note {
+      display: flex; align-items: center; gap: 0.55rem; margin-top: 1.2rem; padding: 0.85rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 700;
+      color: #16a34a; background: rgba(22,163,74,0.1); border: 1.5px solid rgba(22,163,74,0.25);
+    }
+    html.dark .mode-note { color: #86efac; background: rgba(22,163,74,0.16); border-color: rgba(74,222,128,0.28); }
+
+    /* ── Control buttons ─────────────────────── */
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer;
+      font-size: 0.85rem; font-weight: 800; padding: 0.6rem 1.25rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    .ctrl-primary { color: white; background: linear-gradient(135deg,#22c55e,#16a34a); border-color: transparent; box-shadow: 0 6px 18px rgba(22,163,74,0.3); }
+    .ctrl-primary:hover { box-shadow: 0 8px 24px rgba(22,163,74,0.42); }
+    html.dark .ctrl-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+    html.dark .ctrl-primary { color: white; }
+
+    /* ── When-to-use cards (sections 2 & 3) ──── */
+    .use-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.9rem; }
+    .use-card {
+      border-radius: 1.1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.25s ease;
+    }
+    .use-card:hover { border-color: rgba(22,163,74,0.4); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(22,163,74,0.12); }
+    html.dark .use-card { background: #0f172a; border-color: #334155; }
+    .use-ic {
+      width: 44px; height: 44px; border-radius: 0.9rem; display: flex; align-items: center; justify-content: center;
+      background: rgba(22,163,74,0.1); color: #16a34a; margin-bottom: 0.9rem;
+    }
+    html.dark .use-ic { background: rgba(74,222,128,0.16); color: #86efac; }
+    .use-title { font-weight: 900; font-size: 1.05rem; color: #1e293b; margin-bottom: 0.4rem; }
+    html.dark .use-title { color: #f1f5f9; }
+    .use-ex { font-size: 0.85rem; color: #64748b; font-style: italic; }
+    html.dark .use-ex { color: #94a3b8; }
+    .use-msg {
+      display: flex; align-items: center; gap: 0.55rem; margin-top: 1.2rem; padding: 0.85rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 700;
+      color: #16a34a; background: rgba(22,163,74,0.08); border: 1.5px solid rgba(22,163,74,0.22);
+    }
+    html.dark .use-msg { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.26); }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(22,163,74,0.3); background: rgba(22,163,74,0.08); color: #16a34a;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(22,163,74,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #86efac; border-color: rgba(74,222,128,0.3); background: rgba(22,163,74,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(22,163,74,0.5); color: #16a34a; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(22,163,74,0.08), rgba(34,197,94,0.04));
+      border: 1.5px solid rgba(22,163,74,0.22); border-left: 4px solid #16a34a;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(22,163,74,0.06), rgba(34,197,94,0.03));
+      border-color: rgba(74,222,128,0.16); border-left-color: #4ade80;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-900/30">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+          <span class="text-green-700 dark:text-green-400 text-xs font-bold tracking-wide">AI Agent Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 8–10 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header (overview) ─────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="users" class="w-7 h-7 text-green-600 dark:text-green-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Single-Agent vs Multi-Agent</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          A <strong class="text-slate-800 dark:text-slate-200">single-agent</strong> system uses one AI Agent to handle the whole task. A <strong class="text-slate-800 dark:text-slate-200">multi-agent</strong> system uses several agents, where each one focuses on a different role.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same task, one agent or many</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a mode and watch how the same task flows through <strong class="text-slate-800 dark:text-slate-200">one agent</strong> or a <strong class="text-slate-800 dark:text-slate-200">team of agents</strong>.
+        </p>
+
+        <!-- toggle -->
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
+          <div class="goal-label" style="margin-bottom:0;">Mode</div>
+          <div class="mode-toggle" id="modeToggle">
+            <button class="mode-opt active" data-mode="single"><i data-lucide="user" style="width:15px;height:15px;"></i> Single-Agent</button>
+            <button class="mode-opt" data-mode="multi"><i data-lucide="users" style="width:15px;height:15px;"></i> Multi-Agent</button>
+          </div>
+        </div>
+
+        <!-- task -->
+        <div class="task-banner"><span class="task-emoji">📝</span> Task: Create a blog post about RAG</div>
+
+        <!-- cast bar -->
+        <div class="cast-label" id="castLabel">Who is on the job</div>
+        <div class="cast-bar" id="castBar"></div>
+
+        <!-- step counter -->
+        <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+          <div class="goal-label" style="margin-bottom:0;">Run the task</div>
+          <div class="step-count" id="stepCount">Step 0 of 5</div>
+        </div>
+
+        <!-- flow -->
+        <div class="flow" id="flow"></div>
+
+        <!-- note -->
+        <div class="mode-note" id="modeNote"></div>
+
+        <!-- controls -->
+        <div class="flex items-center justify-center gap-3 flex-wrap mt-6">
+          <button class="ctrl-btn ctrl-primary" id="nextBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> <span id="nextLabel">Start</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Reset</button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. WHEN ONE IS ENOUGH ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="user" style="width:12px;height:12px;"></i>When one agent is enough</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Simple tasks, one agent</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          For short, clear jobs, a single agent handles everything with no extra help.
+        </p>
+        <div class="use-grid">
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="minimize-2" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Small task</div>
+            <div class="use-ex">"Summarize this paragraph."</div>
+          </div>
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="check" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Clear task</div>
+            <div class="use-ex">"Draft a short email."</div>
+          </div>
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="list" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Few steps</div>
+            <div class="use-ex">"Convert notes into bullet points."</div>
+          </div>
+        </div>
+        <div class="use-msg"><i data-lucide="info" style="width:17px;height:17px;"></i> One agent is often enough for simple tasks.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHEN MANY HELP ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="users" style="width:12px;height:12px;"></i>When multiple agents help</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Complex work, a team of agents</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          When a task is large or needs several skills, splitting it across agents can help.
+        </p>
+        <div class="use-grid">
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="layers" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Complex task</div>
+            <div class="use-ex">"Create a full research report."</div>
+          </div>
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="shapes" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Different skills</div>
+            <div class="use-ex">"Research, write, review, and improve."</div>
+          </div>
+          <div class="use-card">
+            <div class="use-ic"><i data-lucide="shield-check" style="width:22px;height:22px;"></i></div>
+            <div class="use-title">Quality check</div>
+            <div class="use-ex">"One agent creates, another reviews."</div>
+          </div>
+        </div>
+        <div class="use-msg"><i data-lucide="info" style="width:17px;height:17px;"></i> Multiple agents help when the task needs different roles or repeated checking.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• A <strong class="text-slate-900 dark:text-white">single-agent</strong> system uses one agent.</li>
+            <li>• A <strong class="text-slate-900 dark:text-white">multi-agent</strong> system uses multiple agents.</li>
+            <li>• One agent is enough for many <strong class="text-slate-900 dark:text-white">simple tasks</strong>.</li>
+            <li>• Multiple agents can <strong class="text-slate-900 dark:text-white">divide complex work</strong>.</li>
+            <li>• Multi-agent systems shine when <strong class="text-slate-900 dark:text-white">different roles</strong> are needed.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Switch between Single-Agent and Multi-Agent.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Watch how the same task is handled differently.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of a task where one agent is enough.</li>
+            <li class="flex items-start gap-2.5"><span class="text-green-500 mt-0.5">→</span> Think of a task where multiple agents would help.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(22,163,74,0.3);background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(34,197,94,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Single-agent</strong> systems are simple and useful for many tasks. <strong>Multi-agent</strong> systems are useful when work can be split across different roles.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="agent-memory.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Agent Memory
+        </a>
+        <a href="real-world-ai-agents.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          Next: Real-World AI Agents
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Agent Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     1. PLAYGROUND - single vs multi agent flow
+  ═══════════════════════════════════════════════ */
+  const FLOWS = {
+    single: {
+      note: 'One agent does every step. Notice the same avatar A does all the work.',
+      castLabel: 'One agent, doing all 4 jobs',
+      cast: [ { name:'Agent A', av:'A', color:'#16a34a', icon:'bot' } ],
+      nodes: [
+        { role:'Agent A', title:'Research',  icon:'search',       sub:'Gathers facts about RAG', av:'A', color:'#16a34a' },
+        { role:'Agent A', title:'Outline',   icon:'list',         sub:'Plans the structure',     av:'A', color:'#16a34a' },
+        { role:'Agent A', title:'Write',     icon:'pen-line',     sub:'Writes the draft',        av:'A', color:'#16a34a' },
+        { role:'Agent A', title:'Review',    icon:'search-check', sub:'Checks its own work',     av:'A', color:'#16a34a' },
+        { role:'Result',  title:'Final Blog Post', icon:'file-check-2', sub:'Made by one agent', av:'★', color:'#16a34a', final:true }
+      ]
+    },
+    multi: {
+      note: 'Four different agents each do one job. Notice a different avatar for every step.',
+      castLabel: 'Four agents, one job each',
+      cast: [
+        { name:'Research', av:'1', color:'#2563eb', icon:'search' },
+        { name:'Outline',  av:'2', color:'#7c3aed', icon:'list' },
+        { name:'Writer',   av:'3', color:'#d97706', icon:'pen-line' },
+        { name:'Reviewer', av:'4', color:'#db2777', icon:'user-check' }
+      ],
+      nodes: [
+        { role:'Research Agent', title:'Research', icon:'search',     sub:'Specialist in finding facts', av:'1', color:'#2563eb' },
+        { role:'Outline Agent',  title:'Outline',  icon:'list',       sub:'Specialist in structure',     av:'2', color:'#7c3aed' },
+        { role:'Writer Agent',   title:'Write',    icon:'pen-line',   sub:'Specialist in writing',       av:'3', color:'#d97706' },
+        { role:'Reviewer Agent', title:'Review',   icon:'user-check', sub:'Specialist in checking',      av:'4', color:'#db2777' },
+        { role:'Result',         title:'Final Blog Post', icon:'file-check-2', sub:'Built by the team',   av:'★', color:'#16a34a', final:true }
+      ]
+    }
+  };
+
+  const flowEl    = document.getElementById('flow');
+  const castBar   = document.getElementById('castBar');
+  const castLabel = document.getElementById('castLabel');
+  const modeNote  = document.getElementById('modeNote');
+  const modeToggle= document.getElementById('modeToggle');
+  const stepCount = document.getElementById('stepCount');
+  const nextBtn   = document.getElementById('nextBtn');
+  const nextLabel = document.getElementById('nextLabel');
+  const resetBtn  = document.getElementById('resetBtn');
+
+  let mode = 'single';
+  let revealed = 0;   // 0..5 nodes completed so far
+
+  function renderCast(){
+    const data = FLOWS[mode];
+    castLabel.textContent = data.castLabel;
+    castBar.innerHTML = data.cast.map(c =>
+      '<span class="cast-chip">' +
+        '<span class="cast-av" style="background:' + c.color + '"><i data-lucide="' + c.icon + '" style="width:15px;height:15px;"></i></span>' +
+        c.name +
+      '</span>'
+    ).join('');
+  }
+
+  function buildFlow(){
+    const data = FLOWS[mode];
+    let html = '';
+    data.nodes.forEach((n, i) => {
+      html +=
+        '<div class="flow-node' + (n.final ? ' final' : '') + '" data-node="' + i + '" style="--c:' + n.color + '">' +
+          '<div class="flow-av">' + n.av + '</div>' +
+          '<div class="flow-role">' + n.role + '</div>' +
+          '<div class="flow-title">' + n.title + '</div>' +
+          '<div class="flow-sub">' + n.sub + '</div>' +
+          '<div class="flow-status" data-status="' + i + '">waiting</div>' +
+        '</div>';
+      if (i < data.nodes.length - 1) {
+        html += '<span class="flow-arrow" data-arrow="' + i + '"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></span>';
+      }
+    });
+    flowEl.innerHTML = html;
+    modeNote.innerHTML = '<i data-lucide="info" style="width:17px;height:17px;"></i> ' + data.note;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function paintFlow(){
+    const data = FLOWS[mode];
+    const total = data.nodes.length;   // 5
+    const nodes  = flowEl.querySelectorAll('.flow-node');
+    const arrows = flowEl.querySelectorAll('.flow-arrow');
+    nodes.forEach((node, i) => {
+      const status = node.querySelector('.flow-status');
+      node.classList.remove('lit','working','done');
+      if (i < revealed - 1) {                 // finished steps
+        node.classList.add('lit','done');
+        status.textContent = 'done ✓';
+      } else if (i === revealed - 1) {         // current step
+        node.classList.add('lit', node.classList.contains('final') ? 'done' : 'working');
+        status.textContent = node.classList.contains('final') ? 'done ✓' : 'working...';
+      } else {                                 // not started
+        status.textContent = 'waiting';
+      }
+    });
+    arrows.forEach((a, i) => a.classList.toggle('lit', i < revealed - 1));
+
+    stepCount.textContent = 'Step ' + revealed + ' of ' + total;
+    nextLabel.textContent = revealed === 0 ? 'Start' : (revealed >= total ? 'Done' : 'Next');
+    nextBtn.disabled = revealed >= total;
+  }
+
+  function resetFlow(){
+    revealed = 0;
+    renderCast();
+    buildFlow();
+    paintFlow();
+  }
+
+  function nextStep(){
+    const total = FLOWS[mode].nodes.length;
+    if (revealed >= total) return;
+    revealed++;
+    paintFlow();
+    // bring the current node into view on small screens
+    const cur = flowEl.querySelector('.flow-node[data-node="' + (revealed - 1) + '"]');
+    if (cur && cur.scrollIntoView) cur.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+
+  function setMode(next){
+    mode = next;
+    modeToggle.querySelectorAll('.mode-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    resetFlow();
+  }
+
+  modeToggle.querySelectorAll('.mode-opt').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.mode))
+  );
+  nextBtn.addEventListener('click', nextStep);
+  resetBtn.addEventListener('click', resetFlow);
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    resetFlow();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>
