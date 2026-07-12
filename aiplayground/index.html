@@ -255,7 +255,7 @@
       color: #4f46e5;
     }
     .hero-title {
-      font-size: clamp(2.75rem, 6vw, 5.25rem);
+      font-size: clamp(3.75rem, 8vw, 6.75rem);
       line-height: 0.95;
       letter-spacing: -0.03em;
     }
@@ -277,10 +277,12 @@
     }
     .hero-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.22); }
     html:not(.dark) .hero-secondary {
-      color: #4f46e5;
-      background: rgba(255,255,255,0.72);
-      border-color: rgba(99,102,241,0.16);
+      color: #4338ca;
+      background: #ffffff;
+      border-color: rgba(99,102,241,0.35);
+      box-shadow: 0 2px 10px rgba(79,70,229,0.12);
     }
+    html:not(.dark) .hero-secondary:hover { background: #f5f3ff; border-color: rgba(99,102,241,0.5); }
     .hero-showcase {
       position: relative;
       padding: 1rem;
@@ -501,7 +503,7 @@
             <i data-lucide="moon" class="icon-moon w-4 h-4 hidden"></i>
             <i data-lucide="sun"  class="icon-sun  w-4 h-4"></i>
           </button>
-          <a href="#learn" class="ml-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold rounded-full transition-all hover:scale-105">
+          <a href="#learn" class="ml-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-full shadow-lg shadow-indigo-500/30 transition-all hover:scale-105">
             Start Learning →
           </a>
         </div>
@@ -528,7 +530,7 @@
   <!-- ══════════════════════════════════════════
        HERO, compact
   ══════════════════════════════════════════ -->
-  <section id="hero" class="bg-hero relative flex flex-col items-center justify-center min-h-[78vh] overflow-hidden">
+  <section id="hero" class="bg-hero relative flex flex-col items-center justify-center min-h-[85vh] overflow-hidden">
     <!-- Particle canvas -->
     <canvas id="heroCanvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
 
@@ -654,22 +656,22 @@
           <input id="searchInput" type="search" class="search-input" placeholder="Search modules…" autocomplete="off" spellcheck="false" />
         </div>
         <div class="chips-row" id="filterChips">
-          <button class="filter-chip active" data-filter="all">All</button>
-          <button class="filter-chip" data-filter="available">Available</button>
-          <button class="filter-chip" data-filter="coming-soon">Coming Soon</button>
+          <button class="filter-chip active" data-filter="all" data-group="all">All</button>
+          <button class="filter-chip" data-filter="available" data-group="status">Available</button>
+          <button class="filter-chip" data-filter="coming-soon" data-group="status">Coming Soon</button>
           <div class="chip-divider"></div>
-          <button class="filter-chip" data-filter="Inside an LLM">Inside an LLM</button>
-          <button class="filter-chip" data-filter="Embeddings & Search">Embeddings & Search</button>
-          <button class="filter-chip" data-filter="RAG">RAG</button>
-          <button class="filter-chip" data-filter="MCP">MCP</button>
-          <button class="filter-chip" data-filter="Prompt Engineering">Prompt Engineering</button>
-          <button class="filter-chip" data-filter="Inside a Transformer">Inside a Transformer</button>
-          <button class="filter-chip" data-filter="Transformer Architectures">Transformer Architectures</button>
-          <button class="filter-chip" data-filter="Vector Index Explorer">Vector Index Explorer</button>
+          <button class="filter-chip" data-filter="Inside an LLM" data-group="section">Inside an LLM</button>
+          <button class="filter-chip" data-filter="Embeddings & Search" data-group="section">Embeddings & Search</button>
+          <button class="filter-chip" data-filter="RAG" data-group="section">RAG</button>
+          <button class="filter-chip" data-filter="MCP" data-group="section">MCP</button>
+          <button class="filter-chip" data-filter="Prompt Engineering" data-group="section">Prompt Engineering</button>
+          <button class="filter-chip" data-filter="Inside a Transformer" data-group="section">Inside a Transformer</button>
+          <button class="filter-chip" data-filter="Transformer Architectures" data-group="section">Transformer Architectures</button>
+          <button class="filter-chip" data-filter="Vector Index Explorer" data-group="section">Vector Index Explorer</button>
           <div class="chip-divider"></div>
-          <button class="filter-chip" data-filter="Beginner">Beginner</button>
-          <button class="filter-chip" data-filter="Intermediate">Intermediate</button>
-          <button class="filter-chip" data-filter="Advanced">Advanced</button>
+          <button class="filter-chip" data-filter="Beginner" data-group="diff">Beginner</button>
+          <button class="filter-chip" data-filter="Intermediate" data-group="diff">Intermediate</button>
+          <button class="filter-chip" data-filter="Advanced" data-group="diff">Advanced</button>
         </div>
       </div>
 
@@ -835,7 +837,11 @@
       Advanced:     { cls:'badge-advanced',     emoji:'🔴' },
     };
 
-    let activeFilter = 'all';
+    const SECTION_MAP = {
+      'RAG': 'Retrieval-Augmented Generation (RAG)',
+      'MCP': 'Model Context Protocol (MCP)'
+    };
+    let filters      = { status: [], section: [], diff: [] };
     let searchText   = '';
 
     function esc(str) {
@@ -854,20 +860,12 @@
           const hay = (l.title + ' ' + l.desc + ' ' + l.mod).toLowerCase();
           if (!hay.includes(q)) return false;
         }
-        if (activeFilter === 'all')               return true;
-        if (activeFilter === 'available')         return l.status === 'available';
-        if (activeFilter === 'coming-soon')       return l.status === 'coming-soon';
-        if (activeFilter === 'Beginner')          return l.diff === 'Beginner';
-        if (activeFilter === 'Intermediate')      return l.diff === 'Intermediate';
-        if (activeFilter === 'Advanced')          return l.diff === 'Advanced';
-        if (activeFilter === 'Inside an LLM')       return l.mod === 'Inside an LLM';
-        if (activeFilter === 'Embeddings & Search') return l.mod === 'Embeddings & Search';
-        if (activeFilter === 'Vector Index Explorer')      return l.mod === 'Vector Index Explorer';
-        if (activeFilter === 'RAG')               return l.mod === 'Retrieval-Augmented Generation (RAG)';
-        if (activeFilter === 'MCP')               return l.mod === 'Model Context Protocol (MCP)';
-        if (activeFilter === 'Prompt Engineering') return l.mod === 'Prompt Engineering';
-        if (activeFilter === 'Inside a Transformer') return l.mod === 'Inside a Transformer';
-        if (activeFilter === 'Transformer Architectures') return l.mod === 'Transformer Architectures';
+        if (filters.status.length && !filters.status.includes(l.status)) return false;
+        if (filters.diff.length   && !filters.diff.includes(l.diff))     return false;
+        if (filters.section.length) {
+          const wants = filters.section.map(s => SECTION_MAP[s] || s);
+          if (!wants.includes(l.mod)) return false;
+        }
         return true;
       });
     }
@@ -878,7 +876,7 @@
       const section   = document.getElementById('availableSection');
       const container = document.getElementById('availableContainer');
 
-      if (activeFilter === 'coming-soon') { section.style.display = 'none'; return; }
+      if (filters.status.length === 1 && filters.status[0] === 'coming-soon') { section.style.display = 'none'; return; }
       section.style.display = '';
 
       if (!available.length) {
@@ -941,7 +939,7 @@
       const section   = document.getElementById('comingSoonSection');
       const container = document.getElementById('comingSoonContainer');
 
-      if (activeFilter === 'available') { section.style.display = 'none'; return; }
+      if (filters.status.length === 1 && filters.status[0] === 'available') { section.style.display = 'none'; return; }
       section.style.display = '';
 
       if (!upcoming.length) {
@@ -1038,11 +1036,30 @@
         applyFilters();
       }, 180));
 
-      document.querySelectorAll('.filter-chip').forEach(chip => {
+      const chipEls = document.querySelectorAll('.filter-chip');
+      const allChip = document.querySelector('.filter-chip[data-filter="all"]');
+
+      function syncChips() {
+        const none = !filters.status.length && !filters.section.length && !filters.diff.length;
+        chipEls.forEach(c => {
+          const g = c.dataset.group;
+          if (g === 'all') { c.classList.toggle('active', none); return; }
+          c.classList.toggle('active', filters[g].includes(c.dataset.filter));
+        });
+      }
+
+      chipEls.forEach(chip => {
         chip.addEventListener('click', () => {
-          document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          activeFilter = chip.dataset.filter;
+          const group = chip.dataset.group;
+          if (group === 'all') {
+            filters = { status: [], section: [], diff: [] };
+          } else {
+            const arr = filters[group];
+            const i = arr.indexOf(chip.dataset.filter);
+            if (i === -1) arr.push(chip.dataset.filter);
+            else arr.splice(i, 1);
+          }
+          syncChips();
           applyFilters();
         });
       });

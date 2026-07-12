@@ -81,6 +81,14 @@ html.dark #navbar.nav-scrolled .nav-link      { color: #94a3b8; }
 html.dark #navbar.nav-scrolled .nav-logo-text { color: #f1f5f9; }
 html.dark #navbar.nav-scrolled .nav-dark-btn  { color: #94a3b8; }
 
+/* Transparent nav (top of hero): adapt to hero background per theme */
+#navbar:not(.nav-scrolled) .nav-link,
+#navbar:not(.nav-scrolled) .nav-dark-btn,
+#navbar:not(.nav-scrolled) .nav-logo-text { color: #e2e8f0; }
+html:not(.dark) #navbar:not(.nav-scrolled) .nav-link,
+html:not(.dark) #navbar:not(.nav-scrolled) .nav-dark-btn,
+html:not(.dark) #navbar:not(.nav-scrolled) .nav-logo-text { color: #1e293b; }
+
 /* =====================================================
    Hero Section
    ===================================================== */
