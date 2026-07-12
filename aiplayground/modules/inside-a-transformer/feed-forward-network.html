@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Thinking Step (Feed Forward Network), an interactive lesson on how a transformer refines each token's meaning after attention." />
+  <title>Thinking Step (Feed Forward Network), AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0891b2; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #22d3ee; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0891b2; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(8,145,178,0.25); background: rgba(8,145,178,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(8,145,178,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Token chips (selectors) ─────────────── */
+    .tok-chip {
+      font: inherit; cursor: pointer; font-weight: 800; font-size: 1.05rem;
+      padding: 0.6rem 1.1rem; border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0; background: white; color: #334155;
+      transition: transform 0.18s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    }
+    html.dark .tok-chip { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .tok-chip:hover { transform: translateY(-2px); border-color: rgba(8,145,178,0.5); }
+    .tok-chip.active {
+      background: linear-gradient(90deg,#06b6d4,#0891b2); color: white; border-color: transparent;
+      box-shadow: 0 6px 18px rgba(8,145,178,0.4);
+    }
+
+    /* ── Flow (Before → Attention → Thinking → Improved) ── */
+    .flow { display: flex; flex-direction: column; gap: 0.9rem; }
+    .flow-step {
+      opacity: 0; transform: translateY(14px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .flow-step.show { opacity: 1; transform: translateY(0); }
+
+    .stage-card {
+      border-radius: 1.1rem; padding: 1.15rem 1.3rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .stage-card { background: #0f172a; border-color: #334155; }
+    .stage-card.accent { border-color: rgba(8,145,178,0.35); background: rgba(8,145,178,0.06); }
+    html.dark .stage-card.accent { background: rgba(8,145,178,0.12); border-color: rgba(34,211,238,0.3); }
+    .stage-card.final { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.07); }
+    html.dark .stage-card.final { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); }
+
+    .stage-label {
+      display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.66rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.07em; color: #0891b2;
+      padding: 0.2rem 0.6rem; border-radius: 9999px; background: rgba(8,145,178,0.12); margin-bottom: 0.7rem;
+    }
+    html.dark .stage-label { color: #67e8f9; background: rgba(8,145,178,0.2); }
+    .stage-card.final .stage-label { color: #059669; background: rgba(16,185,129,0.14); }
+    html.dark .stage-card.final .stage-label { color: #6ee7b7; background: rgba(16,185,129,0.2); }
+
+    .stage-token {
+      display: inline-block; font-weight: 800; font-size: 1.05rem;
+      padding: 0.3rem 0.7rem; border-radius: 0.6rem; margin-right: 0.5rem;
+      background: white; border: 1.5px solid #cbd5e1; color: #0f172a;
+    }
+    html.dark .stage-token { background: #1e293b; border-color: #475569; color: #f1f5f9; }
+    .stage-meaning { color: #475569; font-size: 0.98rem; }
+    html.dark .stage-meaning { color: #cbd5e1; }
+    .stage-meaning strong { color: #0f172a; }
+    html.dark .stage-meaning strong { color: #f1f5f9; }
+
+    .flow-arrow { display: flex; justify-content: center; color: #94a3b8; }
+    html.dark .flow-arrow { color: #64748b; }
+
+    /* ── Before/After comparison ─────────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 1rem; }
+    .cmp-card {
+      padding: 1.3rem 1.4rem; border-radius: 1.1rem; border: 1px solid rgba(0,0,0,0.06);
+    }
+    html.dark .cmp-card { border-color: rgba(255,255,255,0.06); }
+    .cmp-card.before { background: #f8fafc; }
+    html.dark .cmp-card.before { background: #0f172a; }
+    .cmp-card.after { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.2); }
+    html.dark .cmp-card.after { background: rgba(8,145,178,0.12); border-color: rgba(34,211,238,0.25); }
+    .cmp-head { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.6rem; color: #1e293b; display: flex; align-items: center; gap: 0.45rem; }
+    html.dark .cmp-head { color: #f1f5f9; }
+
+    /* ── Note + takeaway ─────────────────────── */
+    .note-link {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.75rem 1rem; border-radius: 0.9rem;
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2);
+      font-size: 0.85rem; color: #4338ca; text-align: center; justify-content: center;
+    }
+    html.dark .note-link { background: rgba(99,102,241,0.1); color: #c7d2fe; border-color: rgba(129,140,248,0.25); }
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.04));
+      border: 1.5px solid rgba(8,145,178,0.22); border-left: 4px solid #0891b2;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(8,145,178,0.06), rgba(99,102,241,0.03));
+      border-color: rgba(34,211,238,0.16); border-left-color: #22d3ee;
+    }
+  
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.08); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(8,145,178,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(8,145,178,0.5); color: #0891b2; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+          <span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+          <span class="text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-wide">Inside a Transformer</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="brain-circuit" class="w-7 h-7 text-cyan-600 dark:text-cyan-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Thinking Step (Feed Forward Network)</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          After attention connects the words, each token gets a quiet <strong class="text-slate-800 dark:text-slate-200">thinking step</strong> that refines what it means.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. OVERVIEW ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="compass" style="width:12px;height:12px;"></i>Overview</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Attention connects, thinking refines</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Attention helps words find each other. But after that, every token still needs to be <strong class="text-slate-800 dark:text-slate-200">tidied up</strong>. The Feed Forward Network takes each token, one at a time, and improves its internal meaning before the next step.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Pick a token and watch it get refined</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Sentence: <em class="text-slate-800 dark:text-slate-200">"The cat chased the mouse."</em> Choose a word to follow it through the thinking step.
+        </p>
+
+        <!-- token selectors -->
+        <div class="flex flex-wrap items-center justify-center gap-2.5 mb-6" id="tokPicker">
+          <button class="tok-chip active" data-tok="cat">cat</button>
+          <button class="tok-chip" data-tok="chased">chased</button>
+          <button class="tok-chip" data-tok="mouse">mouse</button>
+        </div>
+
+        <!-- flow -->
+        <div class="flow" id="flow">
+          <div class="flow-step" data-step="0">
+            <div class="stage-card">
+              <span class="stage-label"><i data-lucide="circle-dot" style="width:11px;height:11px;"></i> Before thinking step</span>
+              <div><span class="stage-token" id="s0tok">cat</span><span class="stage-meaning" id="s0txt"></span></div>
+            </div>
+          </div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>
+
+          <div class="flow-step" data-step="1">
+            <div class="stage-card accent">
+              <span class="stage-label"><i data-lucide="git-branch" style="width:11px;height:11px;"></i> After attention</span>
+              <div><span class="stage-token" id="s1tok">cat</span><span class="stage-meaning" id="s1txt"></span></div>
+            </div>
+          </div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>
+
+          <div class="flow-step" data-step="2">
+            <div class="stage-card accent">
+              <span class="stage-label"><i data-lucide="brain-circuit" style="width:11px;height:11px;"></i> Thinking step (FFN)</span>
+              <div class="stage-meaning" id="s2txt"></div>
+            </div>
+          </div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>
+
+          <div class="flow-step" data-step="3">
+            <div class="stage-card final">
+              <span class="stage-label"><i data-lucide="sparkles" style="width:11px;height:11px;"></i> Improved token representation</span>
+              <div><span class="stage-token" id="s3tok">cat</span><span class="stage-meaning" id="s3txt"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-link mt-6">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;"></i>
+          <span>The Feed Forward Network helps refine what each token means after attention has added context.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHAT IS THE FFN ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="brain-circuit" style="width:12px;height:12px;"></i>What is the Feed Forward Network?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A per-token thinking step</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          The Feed Forward Network is a processing step inside a transformer layer. It works on <strong class="text-slate-800 dark:text-slate-200">each token on its own</strong> and improves that token's internal meaning.
+        </p>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Attention decides which words matter to each other. The thinking step then takes each token and makes it more useful for the next layer.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. VISUAL COMPARISON ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Simple comparison</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Before vs after the thinking step</h2>
+        <div class="cmp-grid">
+          <div class="cmp-card before">
+            <div class="cmp-head"><i data-lucide="circle-dot" style="width:15px;height:15px;color:#94a3b8;"></i> Before FFN</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">Token has a <strong class="text-slate-800 dark:text-slate-200">basic meaning</strong>.</p>
+            <div><span class="stage-token">mouse</span></div>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">= small animal</p>
+          </div>
+          <div class="cmp-card after">
+            <div class="cmp-head"><i data-lucide="sparkles" style="width:15px;height:15px;color:#0891b2;"></i> After FFN</div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">Token meaning becomes <strong class="text-slate-800 dark:text-slate-200">more useful</strong> for the next layer.</p>
+            <div><span class="stage-token">mouse</span></div>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">= thing being chased</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 5. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Attention finds <strong class="text-slate-900 dark:text-white">relationships</strong> between words.</li>
+            <li>• The Feed Forward Network processes each token after attention.</li>
+            <li>• It improves the token's <strong class="text-slate-900 dark:text-white">internal representation</strong>.</li>
+            <li>• It prepares the token for the next transformer step.</li>
+            <li>• It is like a <strong class="text-slate-900 dark:text-white">thinking / refining step</strong> inside the model.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Click each token: <strong class="text-slate-900 dark:text-white">cat</strong>, <strong class="text-slate-900 dark:text-white">chased</strong>, <strong class="text-slate-900 dark:text-white">mouse</strong>.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Watch how its meaning changes.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Notice how attention adds context first.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Then observe how the thinking step refines it.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ NEXT LESSON ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="multi-head-attention.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>Previous:</strong> Attention &amp; Multi-Head Attention
+        </a>
+        <a href="residual-and-layer-norm.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Residual Connections &amp; Layer Normalization
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Inside a Transformer');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     THINKING STEP PLAYGROUND
+  ═══════════════════════════════════════════════ */
+  const TOKENS = {
+    cat: {
+      before:    'a plain animal word',
+      attention: 'is connected to <strong>"chased"</strong>',
+      thinking:  'The model refines <strong>"cat"</strong> using that link: it is the one <em>doing</em> the action.',
+      improved:  'the animal doing the action'
+    },
+    chased: {
+      before:    'a plain action word',
+      attention: 'links <strong>"cat"</strong> and <strong>"mouse"</strong> together',
+      thinking:  'The model refines <strong>"chased"</strong>: it is an action with a chaser and a target.',
+      improved:  'an action: cat runs after mouse'
+    },
+    mouse: {
+      before:    'a small animal word',
+      attention: 'is connected to <strong>"chased"</strong>',
+      thinking:  'The model refines <strong>"mouse"</strong> using that link: it is the one <em>being</em> chased.',
+      improved:  'the thing being chased'
+    }
+  };
+
+  const STEP_IDS = ['flow'];
+  let current = 'cat';
+  let timers = [];
+
+  const flow   = document.getElementById('flow');
+  const picker = document.getElementById('tokPicker');
+
+  function refresh(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+
+  function render(tok){
+    current = tok;
+    const d = TOKENS[tok];
+
+    // Fill content.
+    document.getElementById('s0tok').textContent = tok;
+    document.getElementById('s0txt').innerHTML = '= ' + d.before;
+
+    document.getElementById('s1tok').textContent = tok;
+    document.getElementById('s1txt').innerHTML = d.attention;
+
+    document.getElementById('s2txt').innerHTML = d.thinking;
+
+    document.getElementById('s3tok').textContent = tok;
+    document.getElementById('s3txt').innerHTML = '= ' + d.improved;
+
+    // Reveal steps one by one for a slow, clear reveal.
+    clearTimers();
+    const steps = flow.querySelectorAll('.flow-step');
+    steps.forEach(s => s.classList.remove('show'));
+    steps.forEach((s, i) => {
+      timers.push(setTimeout(() => s.classList.add('show'), 120 + i * 550));
+    });
+  }
+
+  /* ── token picker ── */
+  picker.querySelectorAll('.tok-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      picker.querySelectorAll('.tok-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(btn.dataset.tok);
+    });
+  });
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    render('cat');
+    refresh();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+
+  <script>
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+  </script>
+
+</body>
+</html>

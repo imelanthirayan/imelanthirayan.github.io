@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How a Transformer Reads Text, a beginner-friendly interactive lesson on how text becomes tokens, numbers, and representations before a transformer processes it." />
+  <title>How a Transformer Reads Text, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0891b2; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #22d3ee; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0891b2; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(8,145,178,0.25); background: rgba(8,145,178,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(8,145,178,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Text input ──────────────────────────── */
+    .text-input {
+      width: 100%; padding: 0.85rem 1rem; border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0; font-size: 1rem; color: #1e293b;
+      background: #f8fafc; outline: none; font-family: 'Inter', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .text-input:focus { border-color: #0891b2; box-shadow: 0 0 0 3px rgba(8,145,178,0.12); background: white; }
+    html.dark .text-input { background: rgba(15,23,42,0.7); border-color: #334155; color: #f1f5f9; }
+    html.dark .text-input:focus { border-color: #22d3ee; background: rgba(15,23,42,0.9); box-shadow: 0 0 0 3px rgba(34,211,238,0.1); }
+
+    /* ── Cyan action button ──────────────────── */
+    .act-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+      font-size: 0.9rem; font-weight: 700; color: white; cursor: pointer;
+      padding: 0.7rem 1.35rem; border-radius: 0.85rem; border: none;
+      background: linear-gradient(90deg,#06b6d4,#0891b2);
+      box-shadow: 0 6px 18px rgba(8,145,178,0.3);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s;
+    }
+    .act-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(8,145,178,0.4); }
+    .act-btn:disabled { opacity: 0.55; cursor: default; transform: none; box-shadow: none; }
+    .ghost-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      padding: 0.65rem 1.15rem; border-radius: 0.85rem;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.06); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .ghost-btn:hover { background: rgba(8,145,178,0.13); }
+    html.dark .ghost-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Big question ────────────────────────── */
+    .big-q {
+      font-size: 1.5rem; font-weight: 900; line-height: 1.35;
+      background: linear-gradient(90deg,#0891b2,#6366f1);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    @media(min-width:768px){ .big-q { font-size: 1.9rem; } }
+
+    /* ── Token card ──────────────────────────── */
+    .flow-wrap { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+    .sep { color: #94a3b8; font-weight: 900; font-size: 1.1rem; }
+    .token-card {
+      padding: 0.55rem 0.9rem; border-radius: 0.8rem; font-weight: 800; font-size: 0.95rem;
+      border: 1.5px solid rgba(8,145,178,0.35); background: rgba(8,145,178,0.08); color: #0e7490;
+    }
+    html.dark .token-card { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.12); }
+    .token-card.punct { color: #94a3b8; border-color: #e2e8f0; background: #f8fafc; }
+    html.dark .token-card.punct { color: #64748b; border-color: #334155; background: rgba(15,23,42,0.6); }
+
+    /* ── Number / vector cards ───────────────── */
+    .num-col { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+    .num-card {
+      min-width: 74px; text-align: center; border-radius: 0.85rem; overflow: hidden;
+      border: 1.5px solid #e2e8f0; background: white;
+    }
+    html.dark .num-card { background: #0f172a; border-color: #334155; }
+    .num-card .word { font-size: 0.82rem; font-weight: 800; padding: 0.4rem 0.6rem; background: rgba(8,145,178,0.08); color: #0e7490; }
+    html.dark .num-card .word { color: #67e8f9; background: rgba(8,145,178,0.14); }
+    .num-card .id { font-size: 1.1rem; font-weight: 900; padding: 0.5rem 0.6rem; color: #6366f1; }
+    html.dark .num-card .id { color: #a5b4fc; }
+    .vec-card {
+      display: flex; flex-direction: column; gap: 0.4rem; padding: 0.7rem 0.8rem;
+      border-radius: 0.85rem; border: 1.5px solid #e2e8f0; background: white; min-width: 92px; align-items: center;
+    }
+    html.dark .vec-card { background: #0f172a; border-color: #334155; }
+    .vec-card .vword { font-size: 0.82rem; font-weight: 800; color: #0e7490; }
+    html.dark .vec-card .vword { color: #67e8f9; }
+    .vec-row { display: flex; gap: 0.3rem; }
+    .vcell {
+      width: 26px; height: 26px; border-radius: 0.4rem; display: grid; place-items: center;
+      font-size: 0.62rem; font-weight: 800; color: #334155;
+    }
+    html.dark .vcell { color: #e2e8f0; }
+    .arrow-down { display: grid; place-items: center; color: #0891b2; }
+    html.dark .arrow-down { color: #22d3ee; }
+
+    /* ── Transformer block ───────────────────── */
+    .tblock {
+      border-radius: 1.1rem; padding: 1.1rem 1.25rem; text-align: center;
+      border: 2px solid rgba(99,102,241,0.4);
+      background: linear-gradient(135deg, rgba(8,145,178,0.1), rgba(99,102,241,0.1));
+      font-weight: 900; font-size: 1.05rem; color: #4338ca;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    }
+    html.dark .tblock { color: #c7d2fe; border-color: rgba(129,140,248,0.4); }
+    .feed-row { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; }
+    .feed-arrows { display: flex; justify-content: center; gap: 1.1rem; color: #6366f1; margin: 0.35rem 0; }
+    html.dark .feed-arrows { color: #a5b4fc; }
+    .mini-tok {
+      padding: 0.35rem 0.6rem; border-radius: 0.55rem; font-weight: 800; font-size: 0.8rem;
+      background: rgba(8,145,178,0.1); color: #0e7490; border: 1px solid rgba(8,145,178,0.25);
+    }
+    html.dark .mini-tok { color: #67e8f9; background: rgba(8,145,178,0.16); border-color: rgba(34,211,238,0.25); }
+
+    /* ── Compare boxes ───────────────────────── */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:640px){ .compare { grid-template-columns: 1fr; } }
+    .cmp { border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid; }
+    .cmp .hd { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; display:flex; align-items:center; gap:0.4rem; }
+    .cmp p { font-size: 0.88rem; line-height: 1.55; }
+    .cmp.old  { background: rgba(148,163,184,0.06); border-color: rgba(148,163,184,0.3); }
+    html.dark .cmp.old { background: rgba(15,23,42,0.4); }
+    .cmp.new  { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.3); }
+    html.dark .cmp.new { background: rgba(8,145,178,0.1); }
+
+    /* ── Example chips ───────────────────────── */
+    .ex-chip {
+      padding: 0.55rem 0.95rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700;
+      border: 1.5px solid #e2e8f0; background: white; color: #475569; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    html.dark .ex-chip { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    .ex-chip:hover { border-color: rgba(8,145,178,0.5); transform: translateY(-1px); }
+    .ex-chip.active { background: rgba(8,145,178,0.1); border-color: #0891b2; color: #0e7490; }
+    html.dark .ex-chip.active { color: #67e8f9; border-color: #22d3ee; }
+
+    /* ── Info note ───────────────────────────── */
+    .note-link {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.75rem 1rem; border-radius: 0.9rem;
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2);
+      font-size: 0.82rem; color: #4338ca;
+    }
+    html.dark .note-link { background: rgba(99,102,241,0.1); color: #c7d2fe; border-color: rgba(129,140,248,0.25); }
+
+    /* ── Count pill ──────────────────────────── */
+    .count-pill {
+      display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.85rem;
+      padding: 0.4rem 0.9rem; border-radius: 9999px; color: #0e7490;
+      background: rgba(8,145,178,0.1); border: 1px solid rgba(8,145,178,0.3);
+    }
+    html.dark .count-pill { color: #67e8f9; background: rgba(8,145,178,0.16); border-color: rgba(34,211,238,0.25); }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.04));
+      border: 1.5px solid rgba(8,145,178,0.22); border-left: 4px solid #0891b2;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(8,145,178,0.06), rgba(99,102,241,0.03));
+      border-color: rgba(34,211,238,0.16); border-left-color: #22d3ee;
+    }
+
+    /* ── Animations ──────────────────────────── */
+    @keyframes popIn { 0% { opacity: 0; transform: translateY(10px) scale(0.9); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    .pop { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity: 0; }
+    @keyframes fallIn { 0% { opacity: 0; transform: translateY(-24px); } 100% { opacity: 1; transform: translateY(0); } }
+    .fall { animation: fallIn 0.7s ease forwards; opacity: 0; }
+    @keyframes pulseGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.35); } 50% { box-shadow: 0 0 0 10px rgba(99,102,241,0); } }
+    .glow { animation: pulseGlow 1.4s ease 2; }
+  
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.08); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(8,145,178,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(8,145,178,0.5); color: #0891b2; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+          <span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+          <span class="text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-wide">Inside a Transformer</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 7–10 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="book-open" class="w-7 h-7 text-cyan-600 dark:text-cyan-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">How a Transformer Reads Text</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          A transformer does not read text the way people do. It breaks your sentence into small pieces, turns them into <strong class="text-slate-800 dark:text-slate-200">numbers</strong>, and then looks at all the pieces <strong class="text-slate-800 dark:text-slate-200">together</strong>.
+        </p>
+        <div class="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;" class="text-amber-600 dark:text-amber-400"></i>
+          <p class="text-amber-800 dark:text-amber-300/90 text-sm leading-relaxed">
+            This is a <strong>simple learning demo</strong>. The tokens and numbers below are simplified examples to build intuition, not real model output.
+          </p>
+        </div>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. START WITH A QUESTION ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Start here</div>
+        <div class="big-q mb-5">When you type a sentence, how does a transformer read it?</div>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Type a sentence and press the button. Watch what happens before the transformer can do anything clever.
+        </p>
+        <label class="block text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Your sentence</label>
+        <input id="q1Input" class="text-input mb-3" value="The cat sat on the mat." />
+        <button id="q1Btn" class="act-btn">
+          <i data-lucide="play" style="width:15px;height:15px;"></i> Read Sentence
+        </button>
+
+        <div id="q1Stage" class="mt-6 hidden">
+          <div class="flex flex-col items-center gap-3">
+            <div id="q1Sentence" class="px-4 py-3 rounded-xl border-2 font-semibold text-slate-700 dark:text-slate-200"
+                 style="border-color:rgba(8,145,178,0.35);background:rgba(8,145,178,0.06);"></div>
+            <div class="arrow-down"><i data-lucide="arrow-down" style="width:22px;height:22px;"></i></div>
+            <div id="q1Block" class="tblock"><i data-lucide="boxes" style="width:18px;height:18px;"></i> Transformer</div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 text-center mt-1">
+              But it can't read that sentence directly yet. First it has to prepare the text. Let's see how, step by step. 👇
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. INTERACTIVE PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Interactive playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Watch a transformer read your sentence</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Pick an example or type your own sentence, then move through each stage one step at a time. Each step reveals what happens and why.
+        </p>
+        <div class="flex flex-wrap gap-2 mb-4" id="pgChips">
+          <button class="ex-chip active" data-s="The cat sat on the mat.">The cat sat on the mat.</button>
+          <button class="ex-chip" data-s="The dog chased the ball.">The dog chased the ball.</button>
+          <button class="ex-chip" data-s="AI helps people learn.">AI helps people learn.</button>
+        </div>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <input id="pgInput" class="text-input" style="flex:1;min-width:220px;" value="The cat sat on the mat." />
+          <button id="pgBtn" class="act-btn"><i data-lucide="play" style="width:15px;height:15px;"></i> Start reading</button>
+        </div>
+
+        <!-- Stepper stage (steps build up here) -->
+        <div id="pgStage" class="flex flex-col gap-1"></div>
+
+        <!-- Stepper controls (kept below the stage so they stay in reach) -->
+        <div id="pgControls" class="hidden flex flex-wrap items-center gap-3 mt-5">
+          <button id="pgNext" class="act-btn"><i data-lucide="arrow-down" style="width:15px;height:15px;"></i> <span>Next step</span></button>
+          <button id="pgRestart" class="ghost-btn"><i data-lucide="rotate-ccw" style="width:14px;height:14px;"></i> Restart</button>
+          <span id="pgProgress" class="count-pill"><i data-lucide="footprints" style="width:13px;height:13px;"></i><span></span></span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 7. WHAT HAPPENS NEXT ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="milestone" style="width:12px;height:12px;"></i>What happens next?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The text is ready, now what?</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Now the transformer has tokens. Next it needs to know:
+        </p>
+        <ul class="flex flex-col gap-2 mb-5">
+          <li class="flex items-center gap-2.5 text-slate-700 dark:text-slate-300"><span class="text-cyan-500">•</span> Which word came first?</li>
+          <li class="flex items-center gap-2.5 text-slate-700 dark:text-slate-300"><span class="text-cyan-500">•</span> Which word came next?</li>
+          <li class="flex items-center gap-2.5 text-slate-700 dark:text-slate-300"><span class="text-cyan-500">•</span> Does word order change the meaning?</li>
+        </ul>
+        <a href="positional-encoding.html" class="ghost-btn">
+          Next up: Word Order &amp; Positional Encoding
+          <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 8. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Transformers do not read text like humans do.</li>
+            <li>• Text is split into <strong class="text-slate-900 dark:text-white">tokens</strong>.</li>
+            <li>• Tokens become <strong class="text-slate-900 dark:text-white">numbers</strong>.</li>
+            <li>• Numbers become internal <strong class="text-slate-900 dark:text-white">representations</strong>.</li>
+            <li>• The transformer processes tokens <strong class="text-slate-900 dark:text-white">together</strong>.</li>
+            <li>• This prepares the text for attention and deeper understanding.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Type a short sentence, then a longer one.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Compare how the token counts differ.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Watch how every token enters the transformer together.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Change one word and see how the flow updates.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ 10. SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(8,145,178,0.3);background:linear-gradient(135deg,rgba(8,145,178,0.05),rgba(99,102,241,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          A transformer reads text by converting it into <strong>tokens</strong>, <strong>numbers</strong>, and internal <strong>representations</strong>. Once the text is prepared, the model can start understanding relationships between words.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ NEXT LESSON ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="../../index.html#learn" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          All Modules
+        </a>
+        <a href="positional-encoding.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Word Order &amp; Positional Encoding
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Inside a Transformer');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     SHARED HELPERS
+  ═══════════════════════════════════════════════ */
+  // Simplified example IDs so common words show friendly numbers.
+  const KNOWN_IDS = { the:102, The:101, cat:204, sat:309, on:145, mat:411, dog:230, chased:512, ball:377, ai:900, AI:901, helps:640, people:288, learn:455 };
+
+  function tokenize(text){
+    const m = (text || '').match(/[A-Za-z0-9']+|[.,!?;:]/g);
+    return m ? m : [];
+  }
+  function isPunct(t){ return /^[.,!?;:]$/.test(t); }
+
+  // Deterministic 3-digit id for unknown tokens.
+  function tokenId(tok){
+    if (KNOWN_IDS[tok] != null) return KNOWN_IDS[tok];
+    const key = tok.toLowerCase();
+    if (KNOWN_IDS[key] != null) return KNOWN_IDS[key];
+    let h = 0;
+    for (let i = 0; i < tok.length; i++) h = (h * 31 + tok.charCodeAt(i)) % 900;
+    return 100 + h;
+  }
+  // Deterministic 3-value representation in [0.0, 0.9].
+  function tokenVec(tok){
+    const key = (tok || '').toLowerCase();
+    let h = 7;
+    for (let i = 0; i < key.length; i++) h = (h * 37 + key.charCodeAt(i)) % 1000;
+    const a = ((h) % 10) / 10;
+    const b = ((h >> 2) % 10) / 10;
+    const c = ((h >> 4) % 10) / 10;
+    return [a.toFixed(1), b.toFixed(1), c.toFixed(1)];
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function refresh(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+  function cellStyle(v){
+    const alpha = 0.15 + parseFloat(v) * 0.7;
+    return 'background:rgba(8,145,178,' + alpha.toFixed(2) + ');';
+  }
+
+  /* ═══════════════════════════════════════════════
+     1. START WITH A QUESTION
+  ═══════════════════════════════════════════════ */
+  const q1Input = document.getElementById('q1Input');
+  const q1Btn   = document.getElementById('q1Btn');
+  const q1Stage = document.getElementById('q1Stage');
+  const q1Sentence = document.getElementById('q1Sentence');
+
+  q1Btn.addEventListener('click', () => {
+    const txt = q1Input.value.trim() || 'The cat sat on the mat.';
+    q1Sentence.textContent = '\u201C' + txt + '\u201D';
+    q1Stage.classList.remove('hidden');
+    q1Sentence.classList.remove('fall'); void q1Sentence.offsetWidth; q1Sentence.classList.add('fall');
+    refresh();
+  });
+
+  /* ═══════════════════════════════════════════════
+     2. STEP-BY-STEP PLAYGROUND
+     One combined flow, revealed one step at a time.
+  ═══════════════════════════════════════════════ */
+  const pgChips    = document.getElementById('pgChips');
+  const pgInput    = document.getElementById('pgInput');
+  const pgBtn      = document.getElementById('pgBtn');
+  const pgStage    = document.getElementById('pgStage');
+  const pgControls = document.getElementById('pgControls');
+  const pgNext     = document.getElementById('pgNext');
+  const pgRestart  = document.getElementById('pgRestart');
+  const pgProgress = document.getElementById('pgProgress').querySelector('span');
+  const pgNextLbl  = pgNext.querySelector('span');
+
+  // Each step: an icon, a short beginner-friendly description, an optional
+  // note, and a builder that renders the visual for the current sentence.
+  const STEPS = [
+    {
+      icon: 'type', label: 'Text',
+      desc: 'You typed this sentence. A transformer cannot work with raw text directly, so it has to prepare it first.',
+      build: (c) => '<span class="font-semibold text-slate-700 dark:text-slate-200" style="font-size:1.05rem;">\u201C' + esc(c.text) + '\u201D</span>'
+    },
+    {
+      icon: 'scissors', label: 'Tokens',
+      desc: 'First, the sentence is split into smaller pieces called <strong class="text-slate-800 dark:text-slate-200">tokens</strong>. The transformer never reads the whole sentence at once.',
+      build: (c) => c.toks.map((t, i) =>
+          (i ? '<span class="sep">|</span>' : '') +
+          '<span class="token-card' + (isPunct(t) ? ' punct' : '') + '">' + esc(t) + '</span>'
+        ).join('') +
+        '<span class="count-pill" style="margin-left:0.5rem;"><i data-lucide="hash" style="width:13px;height:13px;"></i>' +
+        c.toks.length + ' token' + (c.toks.length !== 1 ? 's' : '') + '</span>'
+    },
+    {
+      icon: 'hash', label: 'Numbers',
+      desc: 'Models cannot understand words directly, so each token is turned into a <strong class="text-slate-800 dark:text-slate-200">number</strong> the model can process.',
+      note: 'These are simplified example numbers for learning. Real models use their own token IDs.',
+      noteIcon: 'info',
+      build: (c) => c.words.map(t =>
+        '<div class="num-col"><div class="num-card"><div class="word">' + esc(t) + '</div><div class="id">' + tokenId(t) + '</div></div></div>'
+      ).join('')
+    },
+    {
+      icon: 'grid-3x3', label: 'Representations',
+      desc: 'Those numbers become internal <strong class="text-slate-800 dark:text-slate-200">representations</strong>, small lists of values that help the model work with meaning.',
+      note: 'Simplified example values. Embeddings are explained in the <strong>Embeddings &amp; Search</strong> section.',
+      noteIcon: 'external-link',
+      build: (c) => c.words.map(t => {
+        const cells = tokenVec(t).map(v => '<span class="vcell" style="' + cellStyle(v) + '">' + v + '</span>').join('');
+        return '<div class="vec-card"><span class="vword">' + esc(t) + '</span><div class="vec-row">' + cells + '</div></div>';
+      }).join('')
+    },
+    {
+      icon: 'boxes', label: 'Transformer',
+      desc: 'Finally, all tokens are fed into the transformer <strong class="text-slate-800 dark:text-slate-200">together</strong>, so it can see how the words relate to each other.',
+      build: (c) =>
+        '<div style="width:100%">' +
+          '<div class="feed-row" style="margin-bottom:0.35rem;">' +
+            c.words.map(t => '<span class="mini-tok">' + esc(t) + '</span>').join('') + '</div>' +
+          '<div class="feed-arrows">' + c.words.map(() => '<i data-lucide="arrow-down" style="width:15px;height:15px;"></i>').join('') + '</div>' +
+          '<div class="tblock glow"><i data-lucide="boxes" style="width:16px;height:16px;"></i> Transformer Block</div>' +
+          '<div class="compare mt-5">' +
+            '<div class="cmp old"><div class="hd text-slate-500 dark:text-slate-400"><i data-lucide="rewind" style="width:13px;height:13px;"></i> Old idea</div><p class="text-slate-600 dark:text-slate-300">Read one word at a time, left to right.</p></div>' +
+            '<div class="cmp new"><div class="hd text-cyan-700 dark:text-cyan-400"><i data-lucide="boxes" style="width:13px;height:13px;"></i> Transformer idea</div><p class="text-slate-600 dark:text-slate-300">Look at all tokens at once and their relationships.</p></div>' +
+          '</div>' +
+        '</div>'
+    }
+  ];
+
+  let ctx = null;
+  let revealed = 0;
+
+  function buildContext(){
+    const text = pgInput.value.trim() || 'The cat sat on the mat.';
+    const toks = tokenize(text);
+    return { text: text, toks: toks, words: toks.filter(t => !isPunct(t)) };
+  }
+
+  function stepCardHtml(i){
+    const s = STEPS[i];
+    const note = s.note
+      ? '<div class="note-link mt-3"><i data-lucide="' + (s.noteIcon || 'info') + '" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"></i><span>' + s.note + '</span></div>'
+      : '';
+    return '<div class="module-card pop" style="padding:1.1rem 1.2rem;">' +
+        '<div class="mod-label" style="margin-bottom:0.55rem;"><i data-lucide="' + s.icon + '" style="width:12px;height:12px;"></i>Step ' + (i + 1) + ' \u00B7 ' + s.label + '</div>' +
+        '<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-3">' + s.desc + '</p>' +
+        '<div class="flow-wrap">' + s.build(ctx) + '</div>' + note +
+      '</div>';
+  }
+
+  function updateControls(){
+    const done = revealed >= STEPS.length;
+    pgProgress.textContent = done ? 'Complete \u2713' : ('Step ' + revealed + ' of ' + STEPS.length);
+    pgNext.disabled = done;
+    pgNextLbl.textContent = done ? 'Finished' : (revealed === 0 ? 'Show first step' : 'Next step');
+  }
+
+  function revealNext(){
+    if (revealed >= STEPS.length) return;
+    if (revealed > 0){
+      pgStage.insertAdjacentHTML('beforeend',
+        '<div class="arrow-down" style="margin:0.15rem 0;"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>');
+    }
+    pgStage.insertAdjacentHTML('beforeend', stepCardHtml(revealed));
+    revealed++;
+    updateControls();
+    refresh();
+    // Keep the controls (Next button) in view as the content grows.
+    if (pgControls.scrollIntoView) pgControls.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function startFlow(){
+    ctx = buildContext();
+    pgStage.innerHTML = '';
+    revealed = 0;
+    pgControls.classList.remove('hidden');
+    updateControls();
+    revealNext();          // always show the first step immediately
+  }
+
+  pgChips.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ex-chip');
+    if (!btn) return;
+    pgChips.querySelectorAll('.ex-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    pgInput.value = btn.dataset.s;
+    startFlow();
+  });
+  pgInput.addEventListener('input', () => {
+    pgChips.querySelectorAll('.ex-chip').forEach(c =>
+      c.classList.toggle('active', c.dataset.s === pgInput.value.trim()));
+  });
+  pgBtn.addEventListener('click', startFlow);
+  pgNext.addEventListener('click', revealNext);
+  pgRestart.addEventListener('click', startFlow);
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    // Reveal the first step so the page feels alive; the learner drives the rest.
+    startFlow();
+    refresh();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+
+  <script>
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Stacking Transformer Layers, an interactive lesson on why transformers use many layers to refine meaning step by step." />
+  <title>Stacking Transformer Layers, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0891b2; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #22d3ee; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0891b2; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(8,145,178,0.25); background: rgba(8,145,178,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(8,145,178,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Sentence ────────────────────────────── */
+    .sent-box {
+      text-align: center; font-weight: 700; font-size: 1.05rem; color: #0e7490;
+      padding: 0.9rem 1.1rem; border-radius: 1rem;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.06);
+    }
+    html.dark .sent-box { color: #67e8f9; background: rgba(8,145,178,0.12); border-color: rgba(34,211,238,0.25); }
+
+    /* ── Slider ──────────────────────────────── */
+    .slider-wrap { display: flex; flex-direction: column; gap: 0.75rem; }
+    .slider-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .slider-badge {
+      display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 800; font-size: 0.95rem;
+      color: white; padding: 0.4rem 0.95rem; border-radius: 9999px;
+      background: linear-gradient(90deg,#06b6d4,#0891b2); box-shadow: 0 4px 14px rgba(8,145,178,0.3);
+    }
+    input[type=range].layer-slider {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 9999px;
+      background: #e2e8f0; outline: none; cursor: pointer;
+    }
+    html.dark input[type=range].layer-slider { background: #334155; }
+    input[type=range].layer-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 9999px;
+      background: linear-gradient(135deg,#06b6d4,#0891b2); border: 3px solid white; cursor: pointer;
+      box-shadow: 0 3px 10px rgba(8,145,178,0.4);
+    }
+    html.dark input[type=range].layer-slider::-webkit-slider-thumb { border-color: #1e293b; }
+    input[type=range].layer-slider::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 9999px; border: 3px solid white;
+      background: linear-gradient(135deg,#06b6d4,#0891b2); cursor: pointer;
+    }
+    .slider-scale { display: flex; justify-content: space-between; font-size: 0.72rem; font-weight: 700; color: #94a3b8; }
+
+    /* ── Layer stack ─────────────────────────── */
+    .stack { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .stack-input {
+      width: 100%; max-width: 440px; text-align: center; font-weight: 700; font-size: 0.9rem;
+      padding: 0.65rem 1rem; border-radius: 0.85rem; border: 1.5px dashed #cbd5e1; color: #64748b; background: #f8fafc;
+    }
+    html.dark .stack-input { background: #0f172a; border-color: #475569; color: #94a3b8; }
+    .layer-card {
+      width: 100%; max-width: 440px; border-radius: 1rem; padding: 0.9rem 1.15rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+      display: flex; align-items: center; gap: 0.85rem;
+      opacity: 0; transform: translateY(12px); max-height: 0; padding-top: 0; padding-bottom: 0; margin: 0;
+      overflow: hidden; transition: opacity 0.4s ease, transform 0.4s ease, max-height 0.4s ease, padding 0.4s ease, border-color 0.35s, background 0.35s;
+    }
+    html.dark .layer-card { background: #0f172a; border-color: #334155; }
+    .layer-card.show { opacity: 1; transform: translateY(0); max-height: 120px; padding-top: 0.9rem; padding-bottom: 0.9rem; }
+    .layer-card.top { border-color: #0891b2; box-shadow: 0 8px 24px rgba(8,145,178,0.22); }
+    html.dark .layer-card.top { border-color: #22d3ee; }
+    .layer-num {
+      flex-shrink: 0; width: 34px; height: 34px; border-radius: 0.7rem;
+      display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; color: white;
+      background: linear-gradient(135deg,#06b6d4,#0891b2);
+    }
+    .layer-info .lname { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #0891b2; }
+    html.dark .layer-info .lname { color: #67e8f9; }
+    .layer-info .ldesc { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+    html.dark .layer-info .ldesc { color: #f1f5f9; }
+    .stack-arrow { color: #94a3b8; line-height: 0; }
+    html.dark .stack-arrow { color: #64748b; }
+    /* depth tint — deeper layers feel richer */
+    .layer-card.d2 { background: rgba(8,145,178,0.04); }
+    .layer-card.d3 { background: rgba(8,145,178,0.07); }
+    .layer-card.d4 { background: rgba(8,145,178,0.10); }
+    .layer-card.d5 { background: rgba(8,145,178,0.13); }
+    .layer-card.d6 { background: rgba(8,145,178,0.16); }
+    html.dark .layer-card.d2 { background: rgba(8,145,178,0.08); }
+    html.dark .layer-card.d3 { background: rgba(8,145,178,0.11); }
+    html.dark .layer-card.d4 { background: rgba(8,145,178,0.14); }
+    html.dark .layer-card.d5 { background: rgba(8,145,178,0.17); }
+    html.dark .layer-card.d6 { background: rgba(8,145,178,0.20); }
+
+    /* ── Comparison cards ────────────────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 1rem; }
+    .cmp-card { padding: 1.3rem 1.4rem; border-radius: 1.1rem; border: 1px solid rgba(0,0,0,0.06); background: #f8fafc; }
+    html.dark .cmp-card { border-color: rgba(255,255,255,0.06); background: #0f172a; }
+    .cmp-card.many { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.2); }
+    html.dark .cmp-card.many { background: rgba(8,145,178,0.12); border-color: rgba(34,211,238,0.25); }
+    .cmp-head { font-weight: 800; font-size: 0.95rem; margin-bottom: 0.9rem; color: #1e293b; display: flex; align-items: center; gap: 0.45rem; }
+    html.dark .cmp-head { color: #f1f5f9; }
+    .cmp-line { font-size: 0.88rem; color: #475569; padding: 0.35rem 0; }
+    html.dark .cmp-line { color: #cbd5e1; }
+    .cmp-line.k { font-weight: 700; color: #0e7490; }
+    html.dark .cmp-line.k { color: #67e8f9; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.08); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(8,145,178,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(8,145,178,0.5); color: #0891b2; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.04));
+      border: 1.5px solid rgba(8,145,178,0.22); border-left: 4px solid #0891b2;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(8,145,178,0.06), rgba(99,102,241,0.03));
+      border-color: rgba(34,211,238,0.16); border-left-color: #22d3ee;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+          <span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+          <span class="text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-wide">Inside a Transformer</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+          <span class="text-red-700 dark:text-red-400 text-xs font-bold tracking-wide">🔴 Advanced · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="layers-3" class="w-7 h-7 text-cyan-600 dark:text-cyan-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Stacking Transformer Layers</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          One layer refines meaning once. Stack many, and understanding gets <strong class="text-slate-800 dark:text-slate-200">deeper layer by layer</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. OVERVIEW ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="compass" style="width:12px;height:12px;"></i>Overview</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Why not just one layer?</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          A single transformer layer improves the tokens once. Real models stack <strong class="text-slate-800 dark:text-slate-200">many layers</strong>, each one refining the meaning a little more before passing it on. Let's watch that happen.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Slide to add more layers</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Move the slider and watch the sentence pass through more transformer layers. Each new layer adds a little more understanding.
+        </p>
+
+        <div class="sent-box mb-6">"The cat chased the mouse because it was hungry."</div>
+
+        <!-- slider -->
+        <div class="slider-wrap mb-7">
+          <div class="slider-top">
+            <span class="text-sm font-bold text-slate-500 dark:text-slate-400">Layers</span>
+            <span class="slider-badge"><i data-lucide="layers" style="width:15px;height:15px;"></i> <span id="layerCount">1</span> of 6</span>
+          </div>
+          <input type="range" min="1" max="6" value="1" step="1" class="layer-slider" id="layerSlider" aria-label="Number of transformer layers" />
+          <div class="slider-scale"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span></div>
+        </div>
+
+        <!-- stack -->
+        <div class="stack" id="stack">
+          <div class="stack-input"><i data-lucide="corner-down-right" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> Input sentence enters here</div>
+          <!-- layer cards injected here -->
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHY STACK ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="layers-3" style="width:12px;height:12px;"></i>Why stack layers?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Refine again and again</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          One transformer layer improves the token representations once. Stacking many layers lets the model <strong class="text-slate-800 dark:text-slate-200">refine the meaning again and again</strong>, so deeper layers can catch more complex relationships.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. VISUAL COMPARISON ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Simple comparison</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">One layer vs many layers</h2>
+        <div class="cmp-grid">
+          <div class="cmp-card">
+            <div class="cmp-head"><i data-lucide="square" style="width:15px;height:15px;color:#94a3b8;"></i> One layer</div>
+            <div class="cmp-line k">Input</div>
+            <div class="stack-arrow" style="text-align:left;"><i data-lucide="arrow-down" style="width:15px;height:15px;"></i></div>
+            <div class="cmp-line">Basic understanding</div>
+          </div>
+          <div class="cmp-card many">
+            <div class="cmp-head"><i data-lucide="layers-3" style="width:15px;height:15px;color:#0891b2;"></i> Many layers</div>
+            <div class="cmp-line k">Input</div>
+            <div class="stack-arrow" style="text-align:left;"><i data-lucide="arrow-down" style="width:15px;height:15px;"></i></div>
+            <div class="cmp-line">Refined understanding</div>
+            <div class="stack-arrow" style="text-align:left;"><i data-lucide="arrow-down" style="width:15px;height:15px;"></i></div>
+            <div class="cmp-line">Deeper context</div>
+            <div class="stack-arrow" style="text-align:left;"><i data-lucide="arrow-down" style="width:15px;height:15px;"></i></div>
+            <div class="cmp-line">Better final representation</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 5. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• One layer improves the input <strong class="text-slate-900 dark:text-white">once</strong>.</li>
+            <li>• Many layers refine the meaning <strong class="text-slate-900 dark:text-white">step by step</strong>.</li>
+            <li>• Deeper layers can understand more complex relationships.</li>
+            <li>• Large language models use many stacked transformer layers.</li>
+            <li>• Each layer passes improved representations to the next layer.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Move the layer slider.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Watch how the representation becomes deeper.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Compare one layer with many layers.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Notice how complex relationships become clearer.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(8,145,178,0.3);background:linear-gradient(135deg,rgba(8,145,178,0.05),rgba(99,102,241,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Stacking transformer layers lets the model <strong>refine meaning step by step</strong>. Each layer improves the representation before passing it to the next layer.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="text-center mb-5">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">
+          <i data-lucide="party-popper" style="width:14px;height:14px;"></i>
+          Inside a Transformer section complete
+        </span>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="one-transformer-layer.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: One Transformer Layer
+        </a>
+        <a href="../../index.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-transparent">
+          <i data-lucide="home" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>All Modules</strong>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Inside a Transformer');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     LAYER STACK SLIDER PLAYGROUND
+  ═══════════════════════════════════════════════ */
+  const LAYERS = [
+    'Basic word relationships',
+    'Better local context',
+    'Pronoun relationship starts becoming clearer',
+    '"It" connects more strongly to "cat"',
+    'Sentence meaning becomes deeper',
+    'Richer final representation'
+  ];
+
+  const stack      = document.getElementById('stack');
+  const slider     = document.getElementById('layerSlider');
+  const layerCount = document.getElementById('layerCount');
+
+  function refresh(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  function buildStack(){
+    // Cards are created once; the slider toggles how many are shown.
+    const frag = LAYERS.map((desc, i) =>
+      '<div class="stack-arrow arrow-' + i + '"><i data-lucide="arrow-down" style="width:18px;height:18px;"></i></div>' +
+      '<div class="layer-card d' + (i + 1) + '" data-i="' + i + '">' +
+        '<span class="layer-num">' + (i + 1) + '</span>' +
+        '<div class="layer-info">' +
+          '<div class="lname">Layer ' + (i + 1) + '</div>' +
+          '<div class="ldesc">' + desc + '</div>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+    stack.insertAdjacentHTML('beforeend', frag);
+  }
+
+  function render(n){
+    layerCount.textContent = n;
+    const cards  = stack.querySelectorAll('.layer-card');
+    const arrows = stack.querySelectorAll('.stack-arrow.arrow-0, .stack-arrow.arrow-1, .stack-arrow.arrow-2, .stack-arrow.arrow-3, .stack-arrow.arrow-4, .stack-arrow.arrow-5');
+    cards.forEach((card, i) => {
+      const on = i < n;
+      card.classList.toggle('show', on);
+      card.classList.toggle('top', i === n - 1);
+      arrows[i].style.display = on ? '' : 'none';
+    });
+  }
+
+  slider.addEventListener('input', () => render(parseInt(slider.value, 10)));
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    buildStack();
+    render(1);
+    refresh();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

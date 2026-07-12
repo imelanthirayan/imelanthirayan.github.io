@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Word Order & Positional Encoding, an interactive lesson on why word order matters and how transformers learn each token's position." />
+  <title>Word Order & Positional Encoding, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0891b2; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #22d3ee; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0891b2; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(8,145,178,0.25); background: rgba(8,145,178,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(8,145,178,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Cyan action button ──────────────────── */
+    .act-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+      font-size: 0.95rem; font-weight: 700; color: white; cursor: pointer;
+      padding: 0.75rem 1.5rem; border-radius: 0.85rem; border: none;
+      background: linear-gradient(90deg,#06b6d4,#0891b2);
+      box-shadow: 0 6px 18px rgba(8,145,178,0.3);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .act-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(8,145,178,0.4); }
+    .ghost-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      padding: 0.65rem 1.15rem; border-radius: 0.85rem;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.06); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .ghost-btn:hover { background: rgba(8,145,178,0.13); }
+    html.dark .ghost-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Sentence + position tokens ──────────── */
+    .sentence-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; }
+    .pos-token { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; }
+    .word-chip {
+      padding: 0.7rem 1.15rem; border-radius: 0.9rem; font-weight: 900; font-size: 1.15rem;
+      border: 1.5px solid rgba(8,145,178,0.35); background: rgba(8,145,178,0.08); color: #0e7490;
+      min-width: 72px; text-align: center;
+    }
+    html.dark .word-chip { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+    .word-chip.verb { color: #64748b; background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.3); }
+    html.dark .word-chip.verb { color: #94a3b8; background: rgba(15,23,42,0.5); border-color: #334155; }
+    .pos-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.04em; color: #6366f1;
+      padding: 0.2rem 0.6rem; border-radius: 9999px; background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.25);
+    }
+    html.dark .pos-badge { color: #a5b4fc; background: rgba(99,102,241,0.16); border-color: rgba(129,140,248,0.25); }
+    .meaning-box {
+      margin-top: 1.4rem; padding: 0.9rem 1.15rem; border-radius: 0.9rem; text-align: center;
+      font-weight: 700; font-size: 1rem; color: #0e7490;
+      background: rgba(8,145,178,0.06); border: 1.5px solid rgba(8,145,178,0.25);
+    }
+    html.dark .meaning-box { color: #67e8f9; background: rgba(8,145,178,0.1); border-color: rgba(34,211,238,0.22); }
+
+    /* ── Equation ────────────────────────────── */
+    .eq-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; }
+    .eq-card {
+      flex: 1; min-width: 130px; text-align: center; border-radius: 0.9rem; padding: 0.9rem 1rem;
+      border: 1.5px solid #e2e8f0; background: white;
+    }
+    html.dark .eq-card { background: #0f172a; border-color: #334155; }
+    .eq-card .ec-ico { font-size: 1.5rem; }
+    .eq-card .ec-t { font-weight: 800; font-size: 0.92rem; margin-top: 0.3rem; color: #1e293b; }
+    html.dark .eq-card .ec-t { color: #f1f5f9; }
+    .eq-card .ec-s { font-size: 0.75rem; color: #94a3b8; margin-top: 0.15rem; }
+    .eq-card.a { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.3); }
+    html.dark .eq-card.a { background: rgba(8,145,178,0.1); }
+    .eq-card.b { background: rgba(99,102,241,0.06); border-color: rgba(99,102,241,0.3); }
+    html.dark .eq-card.b { background: rgba(99,102,241,0.12); }
+    .eq-card.c { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.35); }
+    html.dark .eq-card.c { background: rgba(16,185,129,0.1); }
+    .eq-op { font-size: 1.5rem; font-weight: 900; color: #94a3b8; flex-shrink: 0; }
+
+    /* ── Compare boxes ───────────────────────── */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media(max-width:640px){ .compare { grid-template-columns: 1fr; } }
+    .cmp { border-radius: 1rem; padding: 1.2rem 1.3rem; border: 1.5px solid; }
+    .cmp .hd { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; display:flex; align-items:center; gap:0.4rem; }
+    .cmp .foot { font-size: 0.82rem; margin-top: 0.85rem; font-style: italic; }
+    .cmp.old  { background: rgba(148,163,184,0.06); border-color: rgba(148,163,184,0.3); }
+    html.dark .cmp.old { background: rgba(15,23,42,0.4); }
+    .cmp.new  { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.3); }
+    html.dark .cmp.new { background: rgba(8,145,178,0.1); }
+    .loose { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .loose span {
+      padding: 0.45rem 0.8rem; border-radius: 0.7rem; font-weight: 700; font-size: 0.9rem;
+      background: rgba(148,163,184,0.12); color: #64748b; border: 1px dashed rgba(148,163,184,0.5);
+    }
+    html.dark .loose span { color: #94a3b8; background: rgba(15,23,42,0.5); }
+    .ordered { display: flex; flex-direction: column; gap: 0.5rem; }
+    .ordered .ln { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 0.92rem; color: #0e7490; }
+    html.dark .ordered .ln { color: #67e8f9; }
+    .ordered .n {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+      font-size: 0.75rem; font-weight: 900; background: #0891b2; color: white;
+    }
+
+    /* ── Note + takeaway ─────────────────────── */
+    .note-link {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.75rem 1rem; border-radius: 0.9rem;
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2);
+      font-size: 0.82rem; color: #4338ca;
+    }
+    html.dark .note-link { background: rgba(99,102,241,0.1); color: #c7d2fe; border-color: rgba(129,140,248,0.25); }
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.04));
+      border: 1.5px solid rgba(8,145,178,0.22); border-left: 4px solid #0891b2;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(8,145,178,0.06), rgba(99,102,241,0.03));
+      border-color: rgba(34,211,238,0.16); border-left-color: #22d3ee;
+    }
+
+    /* ── Animations ──────────────────────────── */
+    @keyframes swapPop { 0% { transform: scale(1); } 40% { transform: scale(0.82) rotate(-3deg); opacity: 0.4; } 100% { transform: scale(1); } }
+    .swapping { animation: swapPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes flash { 0% { background: rgba(8,145,178,0.25); } 100% { background: rgba(8,145,178,0.06); } }
+    .flash { animation: flash 0.9s ease; }
+  
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.08); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(8,145,178,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(8,145,178,0.5); color: #0891b2; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+          <span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+          <span class="text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-wide">Inside a Transformer</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="move-horizontal" class="w-7 h-7 text-cyan-600 dark:text-cyan-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Word Order &amp; Positional Encoding</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          The same words in a different order can mean something completely different. A transformer needs to know <strong class="text-slate-800 dark:text-slate-200">where</strong> each word sits, that's what positional encoding is for.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. OVERVIEW ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="compass" style="width:12px;height:12px;"></i>Overview</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Order carries meaning</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          A transformer looks at all the tokens together, but on their own the tokens don't say who did what. <strong class="text-slate-800 dark:text-slate-200">"Dog bites man"</strong> and <strong class="text-slate-800 dark:text-slate-200">"Man bites dog"</strong> use the exact same words, yet they mean opposite things. The only difference is the <strong class="text-slate-800 dark:text-slate-200">order</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Swap the words, watch the meaning flip</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+          The positions stay the same (1, 2, 3). Only the words move. Press the button and see how the meaning changes.
+        </p>
+
+        <div class="sentence-row" id="sentenceRow"></div>
+        <div class="meaning-box" id="meaningBox"></div>
+
+        <div class="flex justify-center mt-6">
+          <button id="swapBtn" class="act-btn"><i data-lucide="repeat" style="width:16px;height:16px;"></i> Swap Words</button>
+        </div>
+
+        <p class="text-center text-sm text-slate-500 dark:text-slate-400 mt-5 leading-relaxed">
+          The words are the same, but the meaning changes because the <strong class="text-slate-700 dark:text-slate-200">order</strong> changes.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHAT IS POSITIONAL ENCODING ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="map-pin" style="width:12px;height:12px;"></i>What is positional encoding?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Adding a "where" to every token</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+          Positional encoding is extra <strong class="text-slate-800 dark:text-slate-200">position information</strong> added to each token. It helps the transformer know which token came first, second, third, and so on.
+        </p>
+
+        <div class="eq-row">
+          <div class="eq-card a">
+            <div class="ec-ico">🔤</div>
+            <div class="ec-t">Token meaning</div>
+            <div class="ec-s">what the word is</div>
+          </div>
+          <div class="eq-op">+</div>
+          <div class="eq-card b">
+            <div class="ec-ico">📍</div>
+            <div class="ec-t">Position info</div>
+            <div class="ec-s">where the word is</div>
+          </div>
+          <div class="eq-op">=</div>
+          <div class="eq-card c">
+            <div class="ec-ico">✅</div>
+            <div class="ec-t">Better input</div>
+            <div class="ec-s">the transformer understands</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. SIMPLE VISUAL COMPARISON ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="columns-2" style="width:12px;height:12px;"></i>Comparison</div>
+        <h2 class="text-2xl font-black mb-4 text-slate-900 dark:text-white">With vs without position</h2>
+        <div class="compare">
+          <div class="cmp old">
+            <div class="hd text-slate-500 dark:text-slate-400"><i data-lucide="shuffle" style="width:13px;height:13px;"></i> Without position</div>
+            <div class="loose">
+              <span>Dog</span><span>bites</span><span>man</span>
+            </div>
+            <p class="foot text-slate-500 dark:text-slate-400">Loose words. The order is unclear.</p>
+          </div>
+          <div class="cmp new">
+            <div class="hd text-cyan-700 dark:text-cyan-400"><i data-lucide="list-ordered" style="width:13px;height:13px;"></i> With position</div>
+            <div class="ordered">
+              <div class="ln"><span class="n">1</span> Dog</div>
+              <div class="ln"><span class="n">2</span> bites</div>
+              <div class="ln"><span class="n">3</span> man</div>
+            </div>
+            <p class="foot text-cyan-700 dark:text-cyan-400">Ordered sentence. The meaning is clearer.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 5. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Word order changes <strong class="text-slate-900 dark:text-white">meaning</strong>.</li>
+            <li>• Tokens alone are not enough.</li>
+            <li>• Transformers need <strong class="text-slate-900 dark:text-white">position information</strong>.</li>
+            <li>• Positional encoding adds order information.</li>
+            <li>• This helps the model understand the sentence better.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Click <strong class="text-slate-900 dark:text-white">Swap Words</strong>.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Watch how the words move but the position numbers stay 1, 2, 3.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Notice how the meaning changes even though the same words are used.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ NEXT LESSON ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="how-a-transformer-reads-text.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>Previous:</strong> How a Transformer Reads Text
+        </a>
+        <a href="multi-head-attention.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Attention &amp; Multi-Head Attention
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Inside a Transformer');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     WORD ORDER PLAYGROUND
+  ═══════════════════════════════════════════════ */
+  // Two states of the same three words. Only the word order changes.
+  const STATES = [
+    { words: ['Dog', 'bites', 'man'], meaning: 'A dog bites a man.' },
+    { words: ['Man', 'bites', 'dog'], meaning: 'A man bites a dog.' }
+  ];
+  let state = 0;
+
+  const sentenceRow = document.getElementById('sentenceRow');
+  const meaningBox  = document.getElementById('meaningBox');
+  const swapBtn     = document.getElementById('swapBtn');
+
+  function refresh(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  function render(animate){
+    const s = STATES[state];
+    sentenceRow.innerHTML = s.words.map((w, i) =>
+      '<div class="pos-token">' +
+        '<div class="word-chip' + (i === 1 ? ' verb' : '') + (animate ? ' swapping' : '') + '" style="animation-delay:' + (i * 0.06) + 's;">' + w + '</div>' +
+        '<span class="pos-badge"><i data-lucide="hash" style="width:11px;height:11px;"></i>Position ' + (i + 1) + '</span>' +
+      '</div>'
+    ).join('');
+    meaningBox.textContent = 'Meaning: ' + s.meaning;
+    if (animate){ meaningBox.classList.remove('flash'); void meaningBox.offsetWidth; meaningBox.classList.add('flash'); }
+    refresh();
+  }
+
+  swapBtn.addEventListener('click', () => {
+    state = (state + 1) % STATES.length;
+    render(true);
+  });
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    render(false);
+    refresh();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+
+  <script>
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+  </script>
+
+</body>
+</html>

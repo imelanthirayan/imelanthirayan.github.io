@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Residual Connections & Layer Normalization, an interactive lesson on how transformers keep earlier information and stay stable." />
+  <title>Residual Connections & Layer Normalization, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0891b2; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #22d3ee; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0891b2; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(8,145,178,0.25); background: rgba(8,145,178,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(8,145,178,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #67e8f9; border-color: rgba(34,211,238,0.28); background: rgba(8,145,178,0.1); }
+
+    /* ── Toggle buttons ──────────────────────── */
+    .toggle-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+      padding: 0.55rem 1.05rem; border-radius: 9999px;
+      border: 1.5px solid #e2e8f0; background: white; color: #475569;
+      transition: all 0.2s ease;
+    }
+    html.dark .toggle-btn { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    .toggle-btn:hover { border-color: rgba(8,145,178,0.5); }
+    .toggle-btn.active { background: linear-gradient(90deg,#06b6d4,#0891b2); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(8,145,178,0.3); }
+
+    /* ── Flow blocks ─────────────────────────── */
+    .flow { display: flex; flex-direction: column; align-items: center; gap: 0.55rem; }
+    .flow-block {
+      width: 100%; max-width: 420px; text-align: center;
+      border-radius: 1rem; padding: 0.95rem 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+      font-weight: 700; color: #334155;
+      transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.35s, background 0.35s;
+    }
+    html.dark .flow-block { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .flow-block.token { background: linear-gradient(90deg,#06b6d4,#0891b2); color: white; border-color: transparent; box-shadow: 0 6px 18px rgba(8,145,178,0.35); font-size: 1.15rem; }
+    .flow-block.process { border-color: rgba(99,102,241,0.4); background: rgba(99,102,241,0.07); color: #4338ca; }
+    html.dark .flow-block.process { background: rgba(99,102,241,0.14); color: #c7d2fe; }
+    .flow-block.orig { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.09); color: #b45309; border-style: dashed; }
+    html.dark .flow-block.orig { background: rgba(245,158,11,0.14); color: #fcd34d; }
+    .flow-block.result { border-color: rgba(16,185,129,0.45); background: rgba(16,185,129,0.09); color: #047857; }
+    html.dark .flow-block.result { background: rgba(16,185,129,0.14); color: #6ee7b7; }
+    .flow-block.hide { opacity: 0; transform: translateY(-8px); height: 0; padding: 0; margin: 0; border-width: 0; overflow: hidden; }
+
+    .flow-arrow { color: #94a3b8; line-height: 0; }
+    html.dark .flow-arrow { color: #64748b; }
+    .flow-plus {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 34px; border-radius: 9999px; font-weight: 900; font-size: 1.2rem;
+      background: rgba(245,158,11,0.15); color: #b45309;
+    }
+    html.dark .flow-plus { background: rgba(245,158,11,0.2); color: #fcd34d; }
+
+    /* ── Layer norm bars ─────────────────────── */
+    .norm-wrap { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 1rem; }
+    .norm-card { padding: 1.2rem 1.3rem; border-radius: 1.1rem; border: 1px solid rgba(0,0,0,0.06); background: #f8fafc; }
+    html.dark .norm-card { background: #0f172a; border-color: rgba(255,255,255,0.06); }
+    .norm-card.after { background: rgba(8,145,178,0.06); border-color: rgba(8,145,178,0.2); }
+    html.dark .norm-card.after { background: rgba(8,145,178,0.12); border-color: rgba(34,211,238,0.25); }
+    .norm-head { font-weight: 800; font-size: 0.9rem; margin-bottom: 1rem; color: #1e293b; display: flex; align-items: center; gap: 0.45rem; }
+    html.dark .norm-head { color: #f1f5f9; }
+    .bar-row { display: flex; align-items: flex-end; gap: 0.7rem; height: 110px; justify-content: center; }
+    .bar {
+      width: 42px; border-radius: 0.5rem 0.5rem 0.3rem 0.3rem;
+      background: linear-gradient(180deg,#06b6d4,#0891b2);
+      transition: height 0.7s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .norm-card.before .bar { background: linear-gradient(180deg,#f59e0b,#d97706); }
+    .bar-lbl { text-align: center; font-size: 0.72rem; font-weight: 700; color: #64748b; margin-top: 0.5rem; }
+    html.dark .bar-lbl { color: #94a3b8; }
+
+    /* ── Combined flow chips ─────────────────── */
+    .combo { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+    .combo-step {
+      width: 100%; max-width: 380px; text-align: center; font-weight: 700; font-size: 0.92rem;
+      padding: 0.7rem 1rem; border-radius: 0.85rem; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #334155;
+    }
+    html.dark .combo-step { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .combo-step.k { border-color: rgba(8,145,178,0.35); background: rgba(8,145,178,0.07); color: #0e7490; }
+    html.dark .combo-step.k { background: rgba(8,145,178,0.13); color: #67e8f9; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(8,145,178,0.3); background: rgba(8,145,178,0.08); color: #0891b2;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(8,145,178,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #67e8f9; border-color: rgba(34,211,238,0.3); background: rgba(8,145,178,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(8,145,178,0.5); color: #0891b2; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Note + takeaway ─────────────────────── */
+    .note-link {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.75rem 1rem; border-radius: 0.9rem;
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2);
+      font-size: 0.85rem; color: #4338ca; text-align: center; justify-content: center;
+    }
+    html.dark .note-link { background: rgba(99,102,241,0.1); color: #c7d2fe; border-color: rgba(129,140,248,0.25); }
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(8,145,178,0.08), rgba(99,102,241,0.04));
+      border: 1.5px solid rgba(8,145,178,0.22); border-left: 4px solid #0891b2;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(8,145,178,0.06), rgba(99,102,241,0.03));
+      border-color: rgba(34,211,238,0.16); border-left-color: #22d3ee;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30">
+          <span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+          <span class="text-cyan-700 dark:text-cyan-400 text-xs font-bold tracking-wide">Inside a Transformer</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ── Header ───────────────────────────── -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="git-merge" class="w-7 h-7 text-cyan-600 dark:text-cyan-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Residual Connections &amp; Layer Normalization</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Two quiet helpers that let transformers go deep: one <strong class="text-slate-800 dark:text-slate-200">keeps earlier information</strong>, the other <strong class="text-slate-800 dark:text-slate-200">keeps values stable</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════ 1. OVERVIEW ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="compass" style="width:12px;height:12px;"></i>Overview</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Keep the good, stay steady</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Each transformer step changes a token. But changing too much can lose useful details, and values can get shaky. <strong class="text-slate-800 dark:text-slate-200">Residual connections</strong> carry earlier information forward, and <strong class="text-slate-800 dark:text-slate-200">layer normalization</strong> keeps the numbers balanced so the next step works smoothly.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 2. MAIN PLAYGROUND ═════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Send a token through, with and without residual</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Watch the token <strong class="text-slate-800 dark:text-slate-200">"cat"</strong> pass through one step. Toggle the residual connection to see the difference.
+        </p>
+
+        <!-- toggle -->
+        <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+          <button class="toggle-btn" data-res="off"><i data-lucide="minus-circle" style="width:14px;height:14px;"></i> Without residual</button>
+          <button class="toggle-btn active" data-res="on"><i data-lucide="git-merge" style="width:14px;height:14px;"></i> With residual</button>
+        </div>
+
+        <!-- flow -->
+        <div class="flow" id="resFlow">
+          <div class="flow-block token">cat</div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>
+          <div class="flow-block process">Attention / Thinking step</div>
+
+          <!-- with-residual branch -->
+          <div class="flow-plus" id="resPlus">+</div>
+          <div class="flow-block orig" id="resOrig">original "cat" information</div>
+
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:20px;height:20px;"></i></div>
+          <div class="flow-block result" id="resResult">better combined representation</div>
+        </div>
+
+        <div class="note-link mt-6" id="resNote">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;"></i>
+          <span id="resNoteTxt">Residual connections help the model keep useful earlier information instead of losing it.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 3. WHAT IS A RESIDUAL ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-merge" style="width:12px;height:12px;"></i>What is a residual connection?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A shortcut for earlier information</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          A residual connection takes the token's <strong class="text-slate-800 dark:text-slate-200">original information</strong> and adds it back after the step. So the model keeps what it already knew <em>and</em> gains the new processed result.
+        </p>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          This helps the model avoid <strong class="text-slate-800 dark:text-slate-200">losing useful details</strong> as tokens pass through many steps.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 4. LAYER NORMALIZATION ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="bar-chart-3" style="width:12px;height:12px;"></i>What is layer normalization?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Bring the values into balance</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          After the residual connection, some values can be very high and others very low. Layer normalization <strong class="text-slate-800 dark:text-slate-200">balances them</strong> so the next step can process them more easily.
+        </p>
+        <div class="norm-wrap">
+          <div class="norm-card before">
+            <div class="norm-head"><i data-lucide="activity" style="width:15px;height:15px;color:#d97706;"></i> Before normalization</div>
+            <div class="bar-row">
+              <div><div class="bar" style="height:96px;"></div><div class="bar-lbl">High</div></div>
+              <div><div class="bar" style="height:52px;"></div><div class="bar-lbl">Medium</div></div>
+              <div><div class="bar" style="height:16px;"></div><div class="bar-lbl">Very low</div></div>
+            </div>
+          </div>
+          <div class="norm-card after">
+            <div class="norm-head"><i data-lucide="check-circle-2" style="width:15px;height:15px;color:#0891b2;"></i> After normalization</div>
+            <div class="bar-row">
+              <div><div class="bar" style="height:64px;"></div><div class="bar-lbl">Balanced</div></div>
+              <div><div class="bar" style="height:58px;"></div><div class="bar-lbl">Balanced</div></div>
+              <div><div class="bar" style="height:54px;"></div><div class="bar-lbl">Balanced</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="note-link mt-6">
+          <i data-lucide="info" style="width:15px;height:15px;flex-shrink:0;"></i>
+          <span>Layer normalization keeps the information stable so the next step can process it more easily.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 5. COMBINED FLOW ═════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>Putting it together</div>
+        <h2 class="text-2xl font-black mb-4 text-slate-900 dark:text-white">The full path through one step</h2>
+        <div class="combo">
+          <div class="combo-step">Input</div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:18px;height:18px;"></i></div>
+          <div class="combo-step">Process</div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:18px;height:18px;"></i></div>
+          <div class="combo-step k">Add original information back</div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:18px;height:18px;"></i></div>
+          <div class="combo-step k">Normalize</div>
+          <div class="flow-arrow"><i data-lucide="arrow-down" style="width:18px;height:18px;"></i></div>
+          <div class="combo-step">Send to next step</div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ 6. KEY TAKEAWAYS ═════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Residual connections carry <strong class="text-slate-900 dark:text-white">earlier information</strong> forward.</li>
+            <li>• They help the model avoid losing useful details.</li>
+            <li>• Layer normalization keeps values <strong class="text-slate-900 dark:text-white">balanced</strong>.</li>
+            <li>• These steps make deep transformer layers more stable.</li>
+            <li>• They help information move smoothly through the model.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Toggle the residual connection on and off.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Watch how the original information is preserved.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Compare the values before and after normalization.</li>
+            <li class="flex items-start gap-2.5"><span class="text-cyan-500 mt-0.5">→</span> Notice how the output becomes more stable.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ NEXT LESSON ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="feed-forward-network.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>Previous:</strong> Thinking Step (Feed Forward Network)
+        </a>
+        <a href="one-transformer-layer.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-cyan-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> One Transformer Layer
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Inside a Transformer');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     RESIDUAL TOGGLE PLAYGROUND
+  ═══════════════════════════════════════════════ */
+  const resPlus   = document.getElementById('resPlus');
+  const resOrig   = document.getElementById('resOrig');
+  const resResult = document.getElementById('resResult');
+  const resNoteTxt= document.getElementById('resNoteTxt');
+
+  function refresh(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  function setResidual(on){
+    if (on){
+      resPlus.classList.remove('hide');
+      resOrig.classList.remove('hide');
+      resResult.textContent = 'better combined representation';
+      resResult.classList.add('result');
+      resNoteTxt.textContent = 'Residual connections help the model keep useful earlier information instead of losing it.';
+    } else {
+      resPlus.classList.add('hide');
+      resOrig.classList.add('hide');
+      resResult.textContent = 'changed meaning only';
+      resResult.classList.remove('result');
+      resNoteTxt.textContent = 'Without a residual, only the changed result moves on. Earlier information can be lost.';
+    }
+  }
+
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      setResidual(btn.dataset.res === 'on');
+    });
+  });
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    setResidual(true);
+    refresh();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>
