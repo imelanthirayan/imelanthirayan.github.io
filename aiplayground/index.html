@@ -125,7 +125,7 @@
     .lesson-card-soon:hover .lesson-arrow { background: transparent; color: #cbd5e1; transform: none; }
 
     /* ── Module section wrapper (available, collapsible) ─── */
-    .mod-section { margin-bottom: 1rem; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); }
+    .mod-section { margin-bottom: 1rem; border-radius: 1rem; overflow: hidden; border: 1px solid rgba(0,0,0,0.07); scroll-margin-top: 90px; }
     html.dark .mod-section { border-color: rgba(255,255,255,0.07); }
     .mod-section-head {
       display: flex; align-items: center; gap: 0.75rem;
@@ -147,6 +147,59 @@
     }
     html.dark .mod-section-body { background: #1e293b; }
     .mod-section.open .mod-section-body { display: block; }
+
+    /* ── Learn layout: sticky side jump-nav + main ───────── */
+    .learn-layout { display: flex; align-items: flex-start; gap: 1.75rem; }
+    .learn-main { flex: 1; min-width: 0; }
+    .jump-nav {
+      position: sticky; top: 88px; flex-shrink: 0; width: 232px;
+      max-height: calc(100vh - 108px); overflow-y: auto;
+      padding: 0.9rem; border-radius: 1rem;
+      background: white; border: 1px solid rgba(0,0,0,0.07);
+    }
+    html.dark .jump-nav { background: #1e293b; border-color: rgba(255,255,255,0.07); }
+    .jump-nav-title {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+      color: #94a3b8; margin-bottom: 0.6rem; padding: 0 0.35rem;
+    }
+    .jump-nav-list { display: flex; flex-direction: column; gap: 0.15rem; }
+    .jump-item {
+      display: flex; align-items: center; gap: 0.6rem; width: 100%; text-align: left;
+      padding: 0.5rem 0.55rem; border-radius: 0.6rem; border: none; background: transparent; cursor: pointer;
+      font-size: 0.8rem; font-weight: 700; color: #475569; transition: background 0.16s, color 0.16s;
+      border-left: 3px solid transparent;
+    }
+    html.dark .jump-item { color: #cbd5e1; }
+    .jump-item:hover { background: rgba(99,102,241,0.08); }
+    html.dark .jump-item:hover { background: rgba(148,163,184,0.12); }
+    .jump-item.active { background: rgba(99,102,241,0.1); border-left-color: var(--jc, #6366f1); }
+    html.dark .jump-item.active { background: rgba(148,163,184,0.16); border-left-color: var(--jc, #818cf8); }
+    .jump-ic {
+      width: 24px; height: 24px; border-radius: 0.5rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .jump-label { flex: 1; min-width: 0; line-height: 1.2; word-break: break-word; }
+    .jump-count {
+      font-size: 0.62rem; font-weight: 800; color: #94a3b8; flex-shrink: 0; align-self: center;
+      background: rgba(148,163,184,0.14); padding: 0.05rem 0.4rem; border-radius: 9999px;
+    }
+    .jump-item.soon .jump-label { color: #94a3b8; }
+    .jump-soon-tag {
+      display: block; font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      color: #f59e0b; margin-top: 0.1rem;
+    }
+    @media (max-width: 1023px) {
+      .learn-layout { display: block; }
+      .jump-nav {
+        position: static; width: auto; max-height: none; overflow: visible;
+        margin-bottom: 1.25rem;
+      }
+      .jump-nav-list { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
+      .jump-item { width: auto; border-left: none; }
+      .jump-label { flex: 0 1 auto; }
+      .jump-count, .jump-soon-tag { display: none; }
+    }
 
     /* ── Coming soon accordion ───────────────── */
     .cs-accordion { border-radius: 1rem; overflow: hidden; margin-bottom: 0.625rem; border: 1px solid rgba(0,0,0,0.07); }
@@ -647,7 +700,7 @@
        LEARN  #learn
   ══════════════════════════════════════════ -->
   <section id="learn" class="learn-shell py-16 px-5 md:px-8">
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-6xl mx-auto">
 
       <div class="learn-header section-reveal">
         <div>
@@ -680,6 +733,7 @@
           <button class="filter-chip" data-filter="AI Agent Fundamentals" data-group="section">AI Agent Fundamentals</button>
           <button class="filter-chip" data-filter="Agentic AI" data-group="section">Agentic AI</button>
           <button class="filter-chip" data-filter="Vector Index Explorer" data-group="section">Vector Index Explorer</button>
+          <button class="filter-chip" data-filter="Training & Fine-Tuning" data-group="section">Training & Fine-Tuning</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner" data-group="diff">Beginner</button>
           <button class="filter-chip" data-filter="Intermediate" data-group="diff">Intermediate</button>
@@ -688,15 +742,27 @@
       </div>
 
 
-      <!-- ── AVAILABLE LESSONS ──────────────────── -->
-      <div id="availableSection" class="mb-10">
-        <div id="availableContainer"></div>
-      </div>
+      <!-- ── Results with side jump-nav ─────────── -->
+      <div class="learn-layout">
 
+        <!-- Sticky section jump nav -->
+        <aside class="jump-nav" aria-label="Jump to section">
+          <div class="jump-nav-title"><i data-lucide="compass" style="width:13px;height:13px;"></i> Jump to section</div>
+          <nav id="jumpNavList" class="jump-nav-list"></nav>
+        </aside>
 
-      <!-- ── COMING SOON (accordion) ────────────── -->
-      <div id="comingSoonSection" class="mb-6">
-        <div id="comingSoonContainer"></div>
+        <div class="learn-main">
+          <!-- ── AVAILABLE LESSONS ──────────────────── -->
+          <div id="availableSection" class="mb-10">
+            <div id="availableContainer"></div>
+          </div>
+
+          <!-- ── COMING SOON (accordion) ────────────── -->
+          <div id="comingSoonSection" class="mb-6">
+            <div id="comingSoonContainer"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -830,14 +896,14 @@
       { num:6,  id:'aaf-realworld', title:'Real-World AI Agents',                      desc:'See everyday examples of AI agents in action.',                                     status:'available', diff:'Beginner',     dur:'6–8 min',  mod:'AI Agent Fundamentals', page:'modules/ai-agent-fundamentals/real-world-ai-agents.html',      icon:'globe',        color:'#16a34a' },
 
       // ── Agentic AI ──────────────────────────────────────────────
-      { num:1,  id:'ag-what',       title:'What is Agentic AI?',                       desc:'Understand what makes an AI system truly agentic and autonomous.',                  status:'coming-soon', diff:'Intermediate', dur:'6–8 min',  mod:'Agentic AI', page:'modules/agentic-ai/what-is-agentic-ai.html',        icon:'sparkles',     color:'#c026d3' },
-      { num:2,  id:'ag-loop',       title:'Agent Loop',                                desc:'Follow the think → act → observe loop that drives an agent.',                       status:'coming-soon', diff:'Intermediate', dur:'7–10 min', mod:'Agentic AI', page:'modules/agentic-ai/agent-loop.html',                icon:'refresh-cw',   color:'#c026d3' },
-      { num:3,  id:'ag-planning',   title:'Planning',                                  desc:'See how an agent breaks a big goal into smaller steps.',                            status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/planning.html',                  icon:'list-checks',  color:'#c026d3' },
-      { num:4,  id:'ag-reflection', title:'Reflection',                                desc:'Watch an agent check its own work and fix mistakes.',                               status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/reflection.html',                icon:'rotate-ccw',   color:'#c026d3' },
-      { num:5,  id:'ag-hitl',       title:'Human in the Loop',                         desc:'Learn where people step in to guide and approve agent actions.',                    status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Agentic AI', page:'modules/agentic-ai/human-in-the-loop.html',         icon:'user-check',   color:'#c026d3' },
-      { num:6,  id:'ag-autonomous', title:'Autonomous Workflows',                      desc:'Explore agents that run multi-step workflows on their own.',                        status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/autonomous-workflows.html',      icon:'workflow',     color:'#c026d3' },
-      { num:7,  id:'ag-reasoning',  title:'Multi-Step Reasoning',                      desc:'See how agents reason through complex, multi-step problems.',                        status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/multi-step-reasoning.html',      icon:'brain',        color:'#c026d3' },
-      { num:8,  id:'ag-orchestration', title:'Agent Orchestration',                    desc:'Discover how multiple agents are coordinated to finish a task.',                    status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/agent-orchestration.html',       icon:'network',      color:'#c026d3' },
+      { num:1,  id:'ag-what',       title:'What is Agentic AI?',                       desc:'Understand what makes an AI system truly agentic and autonomous.',                  status:'available',   diff:'Intermediate', dur:'6–8 min',  mod:'Agentic AI', page:'modules/agentic-ai/what-is-agentic-ai.html',        icon:'sparkles',     color:'#c026d3' },
+      { num:2,  id:'ag-loop',       title:'Agent Loop',                                desc:'Follow the think → act → observe loop that drives an agent.',                       status:'available',   diff:'Intermediate', dur:'7–10 min', mod:'Agentic AI', page:'modules/agentic-ai/agent-loop.html',                icon:'refresh-cw',   color:'#c026d3' },
+      { num:3,  id:'ag-planning',   title:'Planning',                                  desc:'See how an agent breaks a big goal into smaller steps.',                            status:'available',   diff:'Intermediate', dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/planning.html',                  icon:'list-checks',  color:'#c026d3' },
+      { num:4,  id:'ag-reflection', title:'Reflection',                                desc:'Watch an agent check its own work and fix mistakes.',                               status:'available',   diff:'Intermediate', dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/reflection.html',                icon:'rotate-ccw',   color:'#c026d3' },
+      { num:5,  id:'ag-hitl',       title:'Human in the Loop',                         desc:'Learn where people step in to guide and approve agent actions.',                    status:'available',   diff:'Intermediate', dur:'7–9 min',  mod:'Agentic AI', page:'modules/agentic-ai/human-in-the-loop.html',         icon:'user-check',   color:'#c026d3' },
+      { num:6,  id:'ag-autonomous', title:'Autonomous Workflows',                      desc:'Explore agents that run multi-step workflows on their own.',                        status:'available',   diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/autonomous-workflows.html',      icon:'workflow',     color:'#c026d3' },
+      { num:7,  id:'ag-reasoning',  title:'Multi-Step Reasoning',                      desc:'See how agents reason through complex, multi-step problems.',                        status:'available',   diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/multi-step-reasoning.html',      icon:'brain',        color:'#c026d3' },
+      { num:8,  id:'ag-orchestration', title:'Agent Orchestration',                    desc:'Discover how multiple agents are coordinated to finish a task.',                    status:'available', diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/agent-orchestration.html',       icon:'network',      color:'#c026d3' },
 
       // ── Module 8: Vector Index Explorer ──────────────────────────────────────────────
       { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
@@ -847,6 +913,18 @@
       { num:5,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
       { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
       { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
+
+      // ── Module 10: Training & Fine-Tuning ────────────────────────────────────────────
+      { num:1,  id:'tft-pretraining',  title:'Pretraining',          desc:'See how a model first learns language from huge amounts of text.',                 status:'coming-soon', diff:'Beginner',     dur:'6–8 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/pretraining.html',       icon:'book-open',    color:'#ea580c' },
+      { num:2,  id:'tft-loss',         title:'Training Loss',        desc:'Understand how training measures whether the model is getting better.',            status:'coming-soon', diff:'Beginner',     dur:'6–8 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/training-loss.html',     icon:'trending-down', color:'#ea580c' },
+      { num:3,  id:'tft-epochs',       title:'Epochs',               desc:'Learn how a model improves by passing over the data many times.',                  status:'coming-soon', diff:'Beginner',     dur:'6–8 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/epochs.html',            icon:'repeat',       color:'#ea580c' },
+      { num:4,  id:'tft-finetuning',   title:'Fine-tuning',          desc:'See how a pretrained model is adapted for a specific task.',                       status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/fine-tuning.html',       icon:'sliders',      color:'#ea580c' },
+      { num:5,  id:'tft-instruction',  title:'Instruction Tuning',   desc:'Learn how models are taught to follow instructions well.',                         status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/instruction-tuning.html',icon:'list-checks',  color:'#ea580c' },
+      { num:6,  id:'tft-rlhf',         title:'RLHF',                 desc:'See how human feedback helps align a model\u2019s answers.',                       status:'coming-soon', diff:'Intermediate', dur:'8–10 min', mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/rlhf.html',              icon:'thumbs-up',    color:'#ea580c' },
+      { num:7,  id:'tft-adapters',     title:'Adapters',             desc:'Add small trainable parts instead of retraining the whole model.',                 status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/adapters.html',          icon:'puzzle',       color:'#ea580c' },
+      { num:8,  id:'tft-lora',         title:'LoRA',                 desc:'Fine-tune efficiently by updating only a small set of weights.',                   status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/lora.html',              icon:'git-branch',   color:'#ea580c' },
+      { num:9,  id:'tft-qlora',        title:'QLoRA',                desc:'Combine LoRA with compression to train using far less memory.',                    status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/qlora.html',             icon:'minimize-2',   color:'#ea580c' },
+      { num:10, id:'tft-inference',    title:'Inference',            desc:'Understand the difference between training a model and using it.',                 status:'coming-soon', diff:'Intermediate', dur:'6–8 min',  mod:'Training & Fine-Tuning', page:'modules/training-fine-tuning/inference.html',         icon:'play',         color:'#ea580c' },
     ];
 
     const MODULE_CONFIGS = {
@@ -860,6 +938,7 @@
       'AI Agent Fundamentals':                   { icon:'bot',      color:'#16a34a', bg:'rgba(22,163,74,0.07)',   border:'rgba(22,163,74,0.2)',   iconBg:'rgba(22,163,74,0.1)'   },
       'Agentic AI':                              { icon:'brain-circuit', color:'#c026d3', bg:'rgba(192,38,211,0.07)', border:'rgba(192,38,211,0.2)', iconBg:'rgba(192,38,211,0.1)' },
       'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
+      'Training & Fine-Tuning':                  { icon:'dumbbell', color:'#ea580c', bg:'rgba(234,88,12,0.07)',  border:'rgba(234,88,12,0.2)',   iconBg:'rgba(234,88,12,0.1)'   },
     };
 
     const DIFF_CONFIG = {
@@ -1049,6 +1128,71 @@
       const filtered = getFiltered();
       renderAvailable(filtered);
       renderComingSoon(filtered);
+      renderJumpNav(filtered);
+    }
+
+    /* ── Side jump-nav: lists visible sections, scrolls to accordion ── */
+    function renderJumpNav(filtered) {
+      const nav = document.getElementById('jumpNavList');
+      if (!nav) return;
+
+      const availSet = new Set(filtered.filter(l => l.status === 'available').map(l => l.mod));
+      const showAvail = !(filters.status.length === 1 && filters.status[0] === 'coming-soon');
+      const showSoon  = !(filters.status.length === 1 && filters.status[0] === 'available');
+
+      // Preserve LESSONS declaration order; count visible lessons per section
+      const order = [];
+      const counts = new Map();
+      const soonFlag = new Map();
+      filtered.forEach(l => {
+        if (l.status === 'available' && !showAvail) return;
+        if (l.status === 'coming-soon' && !showSoon) return;
+        if (!counts.has(l.mod)) { order.push(l.mod); counts.set(l.mod, 0); }
+        counts.set(l.mod, counts.get(l.mod) + 1);
+        if (l.status === 'available') soonFlag.set(l.mod, false);
+        else if (!soonFlag.has(l.mod)) soonFlag.set(l.mod, true);
+      });
+
+      if (!order.length) { nav.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;padding:0.35rem;">No sections</div>'; return; }
+
+      const NAV_LABELS = {
+        'Retrieval-Augmented Generation (RAG)': 'RAG',
+        'Model Context Protocol (MCP)': 'MCP'
+      };
+
+      nav.innerHTML = order.map(mod => {
+        const cfg = MODULE_CONFIGS[mod] || { color:'#6366f1', icon:'book-open', iconBg:'rgba(99,102,241,0.1)' };
+        const dashed = esc(mod.replace(/\s+/g,'-'));
+        const isAvail = availSet.has(mod) && showAvail;
+        const targetId = isAvail ? `avail-acc-${dashed}` : `cs-acc-${dashed}`;
+        const isSoon = !!soonFlag.get(mod);
+        const label = NAV_LABELS[mod] || mod;
+        return `
+          <button class="jump-item${isSoon ? ' soon' : ''}" data-target="${targetId}" title="${esc(mod)}"
+                  style="--jc:${esc(cfg.color)};">
+            <span class="jump-ic" style="background:${esc(cfg.iconBg || 'rgba(99,102,241,0.1)')};">
+              <i data-lucide="${esc(cfg.icon || 'book-open')}" style="width:13px;height:13px;color:${esc(cfg.color)};"></i>
+            </span>
+            <span class="jump-label">${esc(label)}${isSoon ? '<span class="jump-soon-tag">Coming soon</span>' : ''}</span>
+            <span class="jump-count">${counts.get(mod)}</span>
+          </button>`;
+      }).join('');
+
+      nav.querySelectorAll('.jump-item').forEach(btn => {
+        btn.addEventListener('click', () => jumpToSection(btn.dataset.target));
+      });
+      refreshIcons(nav);
+    }
+
+    function jumpToSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('open');
+      document.querySelectorAll('.jump-item').forEach(b =>
+        b.classList.toggle('active', b.dataset.target === id));
+      if (typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function syncDarkIcons() {
@@ -1096,6 +1240,23 @@
       });
 
       applyFilters();
+
+      // Scroll-spy: highlight the section currently in view
+      let spyTick = false;
+      function updateActiveJump() {
+        const items = document.querySelectorAll('.jump-item');
+        if (!items.length) return;
+        const secs = document.querySelectorAll('#learn .mod-section');
+        let currentId = null;
+        secs.forEach(s => { if (s.getBoundingClientRect().top <= 140) currentId = s.id; });
+        if (!currentId && secs.length) currentId = secs[0].id;
+        items.forEach(b => b.classList.toggle('active', b.dataset.target === currentId));
+      }
+      window.addEventListener('scroll', () => {
+        if (spyTick) return;
+        spyTick = true;
+        requestAnimationFrame(() => { updateActiveJump(); spyTick = false; });
+      }, { passive: true });
     });
   </script>
 
