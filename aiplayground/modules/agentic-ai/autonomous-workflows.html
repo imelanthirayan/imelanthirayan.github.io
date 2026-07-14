@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Autonomous Workflows, an interactive beginner lesson on how agentic AI can run a multi-step workflow with limited human involvement while still using safety checkpoints." />
+  <title>Autonomous Workflows, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9A%99%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #c026d3; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #e879f9; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #c026d3; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(192,38,211,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #f0abfc; border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+
+    /* ── Goal banner ─────────────────────────── */
+    .goal-banner {
+      display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; margin-bottom: 1.25rem;
+      border-radius: 1rem; border: 1.5px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.06);
+    }
+    html.dark .goal-banner { background: rgba(192,38,211,0.14); border-color: rgba(232,121,249,0.26); }
+    .goal-emoji { font-size: 1.5rem; line-height: 1; }
+    .goal-caption { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #c026d3; }
+    html.dark .goal-caption { color: #f0abfc; }
+    .goal-text { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .goal-text { color: #f1f5f9; }
+
+    /* ── Mode toggle ─────────────────────────── */
+    .mode-caption { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; }
+    html.dark .mode-caption { color: #94a3b8; }
+    .mode-toggle { display: inline-flex; padding: 0.3rem; gap: 0.3rem; border-radius: 9999px; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-btn {
+      cursor: pointer; font-size: 0.82rem; font-weight: 800; padding: 0.5rem 1.05rem; border-radius: 9999px;
+      color: #64748b; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.22s ease; border: none; background: transparent;
+    }
+    html.dark .mode-btn { color: #94a3b8; }
+    .mode-btn.active { background: #c026d3; color: white; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    html.dark .mode-btn.active { background: #d946ef; color: white; }
+    .mode-btn.assisted.active { background: #0ea5e9; box-shadow: 0 6px 16px rgba(14,165,233,0.3); }
+    html.dark .mode-btn.assisted.active { background: #0ea5e9; }
+    .mode-btn.autonomous.active { background: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+
+    /* ── Controls ────────────────────────────── */
+    .hl-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 0.4rem 0 1.1rem; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 800; color: #c026d3; padding: 0.6rem 1.15rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #c026d3; color: white; border-color: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #a21caf; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    html.dark .ctrl-btn.primary { background: #d946ef; border-color: #d946ef; color: white; }
+    .hl-status { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-left: auto; }
+
+    /* ── Role hint ───────────────────────────── */
+    .role-hint {
+      display: flex; align-items: center; gap: 0.55rem; margin: 1.2rem 0 1.1rem; padding: 0.7rem 0.95rem; border-radius: 0.9rem;
+      font-size: 0.84rem; font-weight: 700; color: #334155; background: #f1f5f9; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .role-hint { color: #cbd5e1; background: #0f172a; border-color: #334155; }
+    .role-hint .rh-ic { color: #c026d3; flex-shrink: 0; } html.dark .role-hint .rh-ic { color: #f0abfc; }
+
+    /* ── Workflow list ───────────────────────── */
+    .wf-list { display: flex; flex-direction: column; gap: 0.6rem; }
+    .wf-step {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0.85rem; row-gap: 0.6rem; padding: 0.8rem 1.05rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.35s ease; position: relative; opacity: 0.62;
+    }
+    html.dark .wf-step { background: #0f172a; border-color: #334155; }
+    .wf-num {
+      width: 34px; height: 34px; flex-shrink: 0; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 900; background: #e2e8f0; color: #64748b; transition: all 0.35s ease;
+    }
+    html.dark .wf-num { background: #334155; color: #94a3b8; }
+    .wf-ic { color: #94a3b8; flex-shrink: 0; transition: color 0.35s ease; }
+    .wf-body { min-width: 0; }
+    .wf-label { font-weight: 900; font-size: 0.94rem; color: #1e293b; }
+    html.dark .wf-label { color: #f1f5f9; }
+    .wf-sub { font-size: 0.76rem; font-weight: 600; color: #94a3b8; }
+    .wf-right { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+    .wf-slot { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+    .wf-tag {
+      font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.22rem 0.5rem; border-radius: 9999px; white-space: nowrap;
+    }
+    .wf-tag.tag-auto  { background: rgba(192,38,211,0.12); color: #a21caf; } html.dark .wf-tag.tag-auto { background: rgba(232,121,249,0.18); color: #f0abfc; }
+    .wf-tag.tag-human { background: rgba(245,158,11,0.16); color: #a16207; } html.dark .wf-tag.tag-human { background: rgba(161,98,7,0.24); color: #facc15; }
+    .wf-tag.tag-lock  { background: #e2e8f0; color: #64748b; } html.dark .wf-tag.tag-lock { background: #334155; color: #94a3b8; }
+    .wf-state { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; min-width: 62px; text-align: right; }
+
+    /* reached (running/waiting/done) becomes fully visible */
+    .wf-step.running, .wf-step.wait, .wf-step.done, .wf-step.stopped { opacity: 1; }
+
+    .wf-step.running { border-color: rgba(192,38,211,0.5); box-shadow: 0 8px 22px rgba(192,38,211,0.12); }
+    .wf-step.running .wf-num { background: #c026d3; color: white; animation: wfPulse 1.2s ease-in-out infinite; }
+    .wf-step.running .wf-ic { color: #c026d3; } html.dark .wf-step.running .wf-ic { color: #f0abfc; }
+    .wf-step.running .wf-state { color: #a21caf; } html.dark .wf-step.running .wf-state { color: #f0abfc; }
+    @keyframes wfPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(192,38,211,0.4); } 50% { box-shadow: 0 0 0 7px rgba(192,38,211,0); } }
+
+    .wf-step.done { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.06); }
+    html.dark .wf-step.done { background: rgba(21,128,61,0.14); border-color: rgba(34,197,94,0.3); }
+    .wf-step.done .wf-num { background: #16a34a; color: white; }
+    .wf-step.done .wf-ic { color: #16a34a; } html.dark .wf-step.done .wf-ic { color: #4ade80; }
+    .wf-step.done .wf-state { color: #15803d; } html.dark .wf-step.done .wf-state { color: #4ade80; }
+
+    .wf-step.wait { border-color: rgba(245,158,11,0.55); background: rgba(245,158,11,0.08); box-shadow: 0 8px 22px rgba(245,158,11,0.12); }
+    html.dark .wf-step.wait { background: rgba(161,98,7,0.16); border-color: rgba(245,158,11,0.4); }
+    .wf-step.wait .wf-num { background: #f59e0b; color: white; animation: wfPulseA 1.4s ease-in-out infinite; }
+    .wf-step.wait .wf-ic { color: #a16207; } html.dark .wf-step.wait .wf-ic { color: #facc15; }
+    .wf-step.wait .wf-state { color: #a16207; } html.dark .wf-step.wait .wf-state { color: #facc15; }
+    @keyframes wfPulseA { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); } 50% { box-shadow: 0 0 0 7px rgba(245,158,11,0); } }
+
+    .wf-step.stopped { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.06); }
+    html.dark .wf-step.stopped { background: rgba(153,27,27,0.18); border-color: rgba(239,68,68,0.3); }
+    .wf-step.stopped .wf-num { background: #ef4444; color: white; }
+    .wf-step.stopped .wf-state { color: #b91c1c; } html.dark .wf-step.stopped .wf-state { color: #fca5a5; }
+
+    /* action buttons + result */
+    .wf-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 1.1rem; min-height: 4px; }
+    .act-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 800;
+      padding: 0.6rem 1.1rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: white; color: #334155; transition: all 0.2s ease;
+    }
+    .act-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: #cbd5e1; }
+    html.dark .act-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .act-btn.sm { padding: 0.38rem 0.8rem; font-size: 0.78rem; }
+    .act-btn.approve { background: #16a34a; color: white; border-color: #16a34a; box-shadow: 0 6px 16px rgba(22,163,74,0.3); }
+    .act-btn.approve:hover:not(:disabled) { background: #15803d; }
+    .act-btn.hold { background: rgba(239,68,68,0.08); color: #b91c1c; border-color: rgba(239,68,68,0.3); }
+    html.dark .act-btn.hold { background: rgba(153,27,27,0.2); color: #fca5a5; }
+
+    .wf-result {
+      display: none; align-items: flex-start; gap: 0.65rem; margin-top: 1.1rem; padding: 0.95rem 1.15rem; border-radius: 1rem;
+      font-size: 0.9rem; font-weight: 700; opacity: 0; transform: translateY(8px); transition: all 0.4s ease;
+    }
+    .wf-result.show { display: flex; opacity: 1; transform: translateY(0); }
+    .wf-result .mr-ic { flex-shrink: 0; margin-top: 1px; }
+    .wf-result.safe { color: #15803d; background: rgba(34,197,94,0.1); border: 1.5px solid rgba(34,197,94,0.28); }
+    html.dark .wf-result.safe { color: #4ade80; background: rgba(21,128,61,0.22); border-color: rgba(34,197,94,0.3); }
+    .wf-result.calm { color: #475569; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .wf-result.calm { color: #cbd5e1; background: #0f172a; border-color: #334155; }
+    .mr-title { font-weight: 900; }
+    .mr-sub { font-weight: 600; opacity: 0.9; margin-top: 0.15rem; }
+
+    /* ── Example cards (section 4) ───────────── */
+    .risk-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.9rem; }
+    .risk-card {
+      cursor: pointer; text-align: left; width: 100%; border-radius: 1.1rem; padding: 1.1rem 1.25rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .risk-card { background: #0f172a; border-color: #334155; }
+    .risk-card:hover { border-color: rgba(192,38,211,0.4); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(192,38,211,0.12); }
+    .risk-card.selected { border-color: #c026d3; background: rgba(192,38,211,0.06); box-shadow: 0 12px 26px rgba(192,38,211,0.14); }
+    html.dark .risk-card.selected { border-color: #d946ef; background: rgba(192,38,211,0.14); }
+    .risk-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.55rem; }
+    .risk-ic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; background: rgba(192,38,211,0.1); color: #c026d3; }
+    html.dark .risk-ic { background: rgba(232,121,249,0.16); color: #f0abfc; }
+    .risk-title { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .risk-title { color: #f1f5f9; }
+    .risk-desc { font-size: 0.86rem; color: #64748b; line-height: 1.5; }
+    html.dark .risk-desc { color: #94a3b8; }
+
+    /* ── Mini-flow (examples + checkpoint visual) ── */
+    .appr-panel { margin-top: 1.2rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; padding: 1.2rem 1.35rem; }
+    html.dark .appr-panel { background: #0f172a; border-color: #334155; }
+    .appr-cap { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #c026d3; margin-bottom: 0.8rem; }
+    html.dark .appr-cap { color: #f0abfc; }
+    .appr-flow { display: flex; align-items: stretch; flex-wrap: wrap; gap: 0.5rem; }
+    .appr-step {
+      display: inline-flex; flex-direction: column; gap: 0.15rem; font-size: 0.82rem; font-weight: 800;
+      padding: 0.55rem 0.85rem; border-radius: 0.85rem; border: 1.5px solid #e2e8f0; background: white; color: #334155;
+      opacity: 0; transform: translateY(6px); transition: all 0.35s ease;
+    }
+    .appr-step .as-cap { font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+    .appr-step .as-txt { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .appr-step.show { opacity: 1; transform: translateY(0); }
+    html.dark .appr-step { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .appr-step.auto { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); color: #15803d; }
+    html.dark .appr-step.auto { color: #4ade80; background: rgba(21,128,61,0.18); }
+    .appr-step.human { border-color: rgba(245,158,11,0.45); background: rgba(245,158,11,0.08); color: #a16207; }
+    html.dark .appr-step.human { color: #facc15; background: rgba(161,98,7,0.16); }
+    .appr-arrow { display: flex; align-items: center; color: #cbd5e1; opacity: 0; transition: opacity 0.35s ease; }
+    .appr-arrow.show { opacity: 1; }
+    html.dark .appr-arrow { color: #475569; }
+    .appr-hint { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 700; color: #94a3b8; }
+    html.dark .appr-hint { color: #64748b; }
+
+    /* ── Checkpoint chips (section 5) ────────── */
+    .chk-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 0.7rem; margin-bottom: 1.3rem; }
+    .chk-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 0.95rem; border-radius: 0.9rem;
+      border: 1.5px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.07); font-size: 0.88rem; font-weight: 700; color: #92400e;
+    }
+    html.dark .chk-item { color: #fcd34d; background: rgba(161,98,7,0.16); border-color: rgba(245,158,11,0.3); }
+    .chk-item .chk-ic { flex-shrink: 0; color: #d97706; } html.dark .chk-item .chk-ic { color: #facc15; }
+
+    /* ── Comparison cards (section 3) ────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+    .cmp-card { border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.good { border-color: rgba(192,38,211,0.3); background: rgba(192,38,211,0.05); }
+    html.dark .cmp-card.good { border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+    .cmp-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.4rem; }
+    .cmp-ic { width: 42px; height: 42px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; flex-shrink: 0; }
+    html.dark .cmp-ic { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-ic { background: #c026d3; color: white; box-shadow: 0 4px 12px rgba(192,38,211,0.3); }
+    .cmp-card.assist .cmp-ic { background: #0ea5e9; color: white; box-shadow: 0 4px 12px rgba(14,165,233,0.3); }
+    .cmp-title { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    html.dark .cmp-title { color: #f1f5f9; }
+    .cmp-lead { font-size: 0.9rem; font-weight: 700; color: #64748b; margin: 0.1rem 0 0.2rem; }
+    html.dark .cmp-lead { color: #94a3b8; }
+    .cmp-sub { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0.7rem 0 0.55rem; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .cmp-item { display: flex; align-items: center; gap: 0.55rem; font-size: 0.9rem; font-weight: 700; color: #334155; }
+    html.dark .cmp-item { color: #cbd5e1; }
+    .cmp-item .tick { width: 20px; height: 20px; flex-shrink: 0; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; }
+    html.dark .cmp-item .tick { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-item .tick { background: rgba(192,38,211,0.14); color: #c026d3; }
+    html.dark .cmp-card.good .cmp-item .tick { background: rgba(232,121,249,0.2); color: #f0abfc; }
+    .cmp-card.assist .cmp-item .tick { background: rgba(14,165,233,0.16); color: #0369a1; }
+    html.dark .cmp-card.assist .cmp-item .tick { background: rgba(14,165,233,0.24); color: #7dd3fc; }
+
+    /* ── Try-this pill + modal ───────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); color: #c026d3; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(192,38,211,0.5); color: #c026d3; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(192,38,211,0.08), rgba(217,70,239,0.04));
+      border: 1.5px solid rgba(192,38,211,0.22); border-left: 4px solid #c026d3; border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(192,38,211,0.06), rgba(217,70,239,0.03));
+      border-color: rgba(232,121,249,0.16); border-left-color: #e879f9;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30">
+          <span class="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></span>
+          <span class="text-fuchsia-700 dark:text-fuchsia-400 text-xs font-bold tracking-wide">Agentic AI</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+          <span class="text-red-700 dark:text-red-400 text-xs font-bold tracking-wide">🔴 Advanced · 8–10 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="workflow" class="w-7 h-7 text-fuchsia-600 dark:text-fuchsia-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Autonomous Workflows</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          An autonomous workflow is a <strong class="text-slate-800 dark:text-slate-200">multi-step process</strong> where an AI agent can keep working toward a goal <strong class="text-slate-800 dark:text-slate-200">without asking the user after every step</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Workflow Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Run the same workflow two ways</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The agent has 7 steps to finish. Pick a mode, press <strong class="text-slate-800 dark:text-slate-200">Run</strong>, and watch <strong class="text-slate-800 dark:text-slate-200">which steps need your approval</strong> and which the agent handles on its own.
+        </p>
+
+        <!-- goal banner -->
+        <div class="goal-banner">
+          <span class="goal-emoji">📋</span>
+          <div>
+            <div class="goal-caption">The goal</div>
+            <div class="goal-text">Prepare and send a weekly project report.</div>
+          </div>
+        </div>
+
+        <!-- mode toggle -->
+        <div class="mode-caption">Choose how much the agent does on its own:</div>
+        <div class="mode-toggle" id="modeToggle" role="tablist">
+          <button class="mode-btn assisted active" data-mode="assisted" role="tab"><i data-lucide="hand" style="width:14px;height:14px;"></i> Assisted · asks every step</button>
+          <button class="mode-btn autonomous" data-mode="autonomous" role="tab"><i data-lucide="zap" style="width:14px;height:14px;"></i> Autonomous · runs on its own</button>
+        </div>
+
+        <!-- role hint -->
+        <div class="role-hint" id="roleHint"><i data-lucide="hand" style="width:16px;height:16px;" class="rh-ic" id="roleHintIc"></i> <span id="roleHintText"></span></div>
+
+        <!-- controls -->
+        <div class="hl-controls">
+          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> Run workflow</button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:15px;height:15px;"></i> Reset</button>
+          <span class="hl-status" id="hlStatus">Ready</span>
+        </div>
+
+        <!-- workflow steps (approve buttons appear inline on the waiting step) -->
+        <div class="wf-list" id="wfList"></div>
+
+        <!-- result banner -->
+        <div class="wf-result" id="wfResult"><i data-lucide="info" style="width:18px;height:18px;" class="mr-ic" id="wfResultIc"></i><div><div class="mr-title" id="wfResultTitle"></div><div class="mr-sub" id="wfResultSub"></div></div></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. ASSISTED vs AUTONOMOUS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Assisted vs Autonomous</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two ways to run a multi-step task</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Both are useful. The right choice depends on how clear the goal is and how risky the steps are.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card assist">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="hand" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Assisted</span>
+            </div>
+            <div class="cmp-lead">User guides each step.</div>
+            <div class="cmp-sub">Best for</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> New tasks</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Unclear goals</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> High-risk work</div>
+            </div>
+          </div>
+          <div class="cmp-card good">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="zap" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Autonomous</span>
+            </div>
+            <div class="cmp-lead">Agent continues through known steps.</div>
+            <div class="cmp-sub">Best for</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Repeated workflows</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Clear goals</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Low-risk steps</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. WHERE AUTONOMY HELPS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="sparkles" style="width:12px;height:12px;"></i>Where autonomy helps</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Pick a workflow to see how it flows</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click an example to see the same shape every time: a goal, planned steps, safe automatic work, and an approval point before anything important.
+        </p>
+
+        <div class="risk-grid" id="exGrid"></div>
+
+        <div class="appr-panel">
+          <div class="appr-cap">Workflow shape</div>
+          <div class="appr-flow" id="exFlow">
+            <span class="appr-hint"><i data-lucide="mouse-pointer-click" style="width:15px;height:15px;"></i> Pick a workflow above to see its shape.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. SAFETY CHECKPOINTS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="shield-check" style="width:12px;height:12px;"></i>Safety checkpoints</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Even autonomous workflows need checkpoints</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The agent can run the safe steps alone, but a person should still approve high-impact actions. A checkpoint is a pause before something important.
+        </p>
+
+        <div class="chk-grid">
+          <div class="chk-item"><i data-lucide="mail" style="width:17px;height:17px;" class="chk-ic"></i> Before sending an email</div>
+          <div class="chk-item"><i data-lucide="trash-2" style="width:17px;height:17px;" class="chk-ic"></i> Before deleting data</div>
+          <div class="chk-item"><i data-lucide="credit-card" style="width:17px;height:17px;" class="chk-ic"></i> Before spending money</div>
+          <div class="chk-item"><i data-lucide="server" style="width:17px;height:17px;" class="chk-ic"></i> Before changing production systems</div>
+          <div class="chk-item"><i data-lucide="lock" style="width:17px;height:17px;" class="chk-ic"></i> Before sharing sensitive information</div>
+        </div>
+
+        <div class="appr-panel">
+          <div class="appr-cap">How a checkpoint fits in</div>
+          <div class="appr-flow" id="chkFlow">
+            <span class="appr-step auto" data-s="0"><span class="as-cap">Agent</span><span class="as-txt"><i data-lucide="zap" style="width:15px;height:15px;"></i> Automatic steps</span></span>
+            <span class="appr-arrow" data-r="0"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+            <span class="appr-step human" data-s="1"><span class="as-cap">Pause</span><span class="as-txt"><i data-lucide="pause" style="width:15px;height:15px;"></i> Checkpoint</span></span>
+            <span class="appr-arrow" data-r="1"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+            <span class="appr-step human" data-s="2"><span class="as-cap">Human</span><span class="as-txt"><i data-lucide="user-check" style="width:15px;height:15px;"></i> Human approval</span></span>
+            <span class="appr-arrow" data-r="2"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+            <span class="appr-step" data-s="3"><span class="as-cap">Result</span><span class="as-txt"><i data-lucide="check-circle-2" style="width:15px;height:15px;"></i> Final action</span></span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-fuchsia-700 dark:text-fuchsia-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Autonomous workflows let agents <strong class="text-slate-900 dark:text-white">continue across multiple steps</strong>.</li>
+            <li>• They work best when the <strong class="text-slate-900 dark:text-white">goal and boundaries are clear</strong>.</li>
+            <li>• <strong class="text-slate-900 dark:text-white">Not every step</strong> should be fully automatic.</li>
+            <li>• <strong class="text-slate-900 dark:text-white">Safety checkpoints</strong> help reduce risk.</li>
+            <li>• Human approval is still important for <strong class="text-slate-900 dark:text-white">high-impact actions</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Switch between assisted and autonomous modes.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Watch which steps need approval.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Click different workflow examples.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Think about which steps should be automatic and which need review.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(192,38,211,0.3);background:linear-gradient(135deg,rgba(192,38,211,0.05),rgba(217,70,239,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Autonomous workflows allow AI agents to complete <strong>repeated multi-step tasks</strong> with less manual guidance, while still using <strong>checkpoints</strong> for important or risky actions.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="human-in-the-loop.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Human in the Loop
+        </a>
+        <a href="multi-step-reasoning.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-fuchsia-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Multi-Step Reasoning
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Agentic AI');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     AUTONOMOUS WORKFLOWS - playground
+  ═══════════════════════════════════════════════ */
+  const MODES = {
+    assisted:   { hintIc:'hand', hint:'Assisted mode: the agent pauses and asks you before every step. More control, but slower.' },
+    autonomous: { hintIc:'zap',  hint:'Autonomous mode: the agent runs the safe steps on its own and stops only at a checkpoint before an important action. Faster, but needs clear boundaries.' }
+  };
+
+  /* 7-step workflow. checkpoint = the human approval pause; final = the important action it gates. */
+  const STEPS = [
+    { icon:'inbox',        label:'Collect updates',   sub:'Gather the latest from each team' },
+    { icon:'bar-chart-2',  label:'Summarize progress',sub:'Turn updates into a short summary' },
+    { icon:'alert-circle', label:'Find blockers',     sub:'Spot anything slowing things down' },
+    { icon:'file-text',    label:'Draft report',      sub:'Write the first version' },
+    { icon:'search-check', label:'Review quality',    sub:'Check the draft for gaps' },
+    { icon:'user-check',   label:'Ask for approval',  sub:'Pause for a human decision', checkpoint:true },
+    { icon:'send',         label:'Send report',       sub:'Deliver it to leadership', final:true }
+  ];
+
+  const modeToggle  = document.getElementById('modeToggle');
+  const roleHint    = document.getElementById('roleHint');
+  const roleHintIc  = document.getElementById('roleHintIc');
+  const roleHintText= document.getElementById('roleHintText');
+  const wfList      = document.getElementById('wfList');
+  const wfResult    = document.getElementById('wfResult');
+  const wfResultIc  = document.getElementById('wfResultIc');
+  const wfResultTitle = document.getElementById('wfResultTitle');
+  const wfResultSub = document.getElementById('wfResultSub');
+  const runBtn      = document.getElementById('runBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const hlStatus    = document.getElementById('hlStatus');
+  const exGrid      = document.getElementById('exGrid');
+  const exFlow      = document.getElementById('exFlow');
+
+  let mode = 'assisted';
+  let idx = 0;            // next step to process
+  let running = false;
+  let done = false;
+  let timers = [];
+
+  function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+  function icons(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  /* which tag a step shows for the current mode */
+  function stepTag(step){
+    if (mode === 'assisted') return { txt:'Asks you', cls:'tag-human' };
+    if (step.checkpoint)     return { txt:'Checkpoint', cls:'tag-human' };
+    if (step.final)          return { txt:'After approval', cls:'tag-lock' };
+    return { txt:'Auto', cls:'tag-auto' };
+  }
+
+  /* build the step list once for the current mode */
+  function renderSteps(){
+    wfList.innerHTML = STEPS.map((s, i) => {
+      const tag = stepTag(s);
+      return '<div class="wf-step" data-i="' + i + '">' +
+        '<div class="wf-num">' + (i + 1) + '</div>' +
+        '<i data-lucide="' + s.icon + '" style="width:19px;height:19px;" class="wf-ic"></i>' +
+        '<div class="wf-body"><div class="wf-label">' + s.label + '</div><div class="wf-sub">' + s.sub + '</div></div>' +
+        '<div class="wf-right"><span class="wf-tag ' + tag.cls + '">' + tag.txt + '</span><span class="wf-slot"><span class="wf-state">Queued</span></span></div>' +
+      '</div>';
+    }).join('');
+    icons();
+  }
+
+  function setStepState(i, state, stateText){
+    const el = wfList.querySelector('.wf-step[data-i="' + i + '"]');
+    if (!el) return;
+    el.classList.remove('running','wait','done','stopped');
+    if (state) el.classList.add(state);
+    const txt = stateText || (state === 'done' ? 'Done' : state === 'running' ? 'Working…' : state === 'wait' ? 'Needs you' : state === 'stopped' ? 'Held' : 'Queued');
+    const slot = el.querySelector('.wf-slot');
+    if (slot) slot.innerHTML = '<span class="wf-state">' + txt + '</span>';
+    // swap the number for a check on done
+    const num = el.querySelector('.wf-num');
+    if (num){
+      if (state === 'done') num.innerHTML = '<i data-lucide="check" style="width:16px;height:16px;"></i>';
+      else num.textContent = (i + 1);
+    }
+    icons();
+  }
+
+  /* Put the approve/hold buttons INSIDE the waiting step's slot */
+  function stepActions(i, list){
+    const slot = wfList.querySelector('.wf-step[data-i="' + i + '"] .wf-slot');
+    if (!slot) return;
+    slot.innerHTML = list.map(b =>
+      '<button class="act-btn sm ' + (b.cls || '') + '" data-act="' + b.act + '"><i data-lucide="' + b.ic + '" style="width:14px;height:14px;"></i> ' + b.label + '</button>'
+    ).join('');
+    slot.querySelectorAll('.act-btn').forEach(b => b.addEventListener('click', () => doAct(b.getAttribute('data-act'))));
+    icons();
+  }
+
+  function showResult(tone, ic, title, sub){
+    wfResult.className = 'wf-result ' + tone;
+    wfResultIc.setAttribute('data-lucide', ic);
+    wfResultTitle.textContent = title;
+    wfResultSub.textContent = sub;
+    void wfResult.offsetWidth;
+    wfResult.classList.add('show');
+    icons();
+  }
+
+  function finishWF(){
+    running = false; done = true;
+    hlStatus.textContent = 'Workflow complete';
+    runBtn.disabled = true;
+    if (mode === 'assisted')
+      showResult('safe', 'check-circle-2', 'Done — you approved every step.', 'Full control the whole way. It took more clicks, but nothing happened without you.');
+    else
+      showResult('safe', 'check-circle-2', 'Done — the agent ran the safe steps on its own.', 'It only paused once, at the checkpoint, before sending. Faster, with a human on the important action.');
+  }
+
+  /* ── AUTONOMOUS: safe steps run automatically, pause at checkpoint ── */
+  function advanceAuto(){
+    if (idx > 0) setStepState(idx - 1, 'done');
+    if (idx >= STEPS.length){ finishWF(); return; }
+    const step = STEPS[idx];
+    if (step.checkpoint){
+      setStepState(idx, 'wait', 'Approve?');
+      hlStatus.textContent = 'Checkpoint — your approval needed';
+      showResult('calm', 'pause', 'Checkpoint reached.', 'The agent prepared everything and stopped before the important action. Approve to send, or hold.');
+      stepActions(idx, [
+        { act:'approve', label:'Approve & send', cls:'approve', ic:'check' },
+        { act:'hold',    label:'Hold',           cls:'hold',    ic:'x' }
+      ]);
+      return;
+    }
+    setStepState(idx, 'running');
+    hlStatus.textContent = 'Agent working… step ' + (idx + 1) + ' of ' + STEPS.length;
+    timers.push(setTimeout(() => { idx++; advanceAuto(); }, 780));
+  }
+
+  /* ── ASSISTED: user approves every single step ── */
+  function stepAssisted(){
+    if (idx > 0) setStepState(idx - 1, 'done');
+    if (idx >= STEPS.length){ finishWF(); return; }
+    setStepState(idx, 'wait', 'Approve?');
+    hlStatus.textContent = 'Step ' + (idx + 1) + ' of ' + STEPS.length + ' — approve to continue';
+    stepActions(idx, [{ act:'next', label:'Approve', cls:'approve', ic:'check' }]);
+  }
+
+  function doAct(act){
+    if (act === 'next'){                 // assisted: advance one step
+      wfResult.classList.remove('show');
+      idx++; stepAssisted();
+      return;
+    }
+    if (act === 'approve'){              // autonomous: approve the checkpoint, run final action
+      wfResult.classList.remove('show');
+      setStepState(idx, 'done', 'Approved');
+      idx++;
+      hlStatus.textContent = 'Approved — sending…';
+      timers.push(setTimeout(() => advanceAuto(), 200));
+      return;
+    }
+    if (act === 'hold'){                 // autonomous: stop before the important action
+      running = false; done = true;
+      setStepState(idx, 'stopped', 'Held');
+      hlStatus.textContent = 'Held by you';
+      runBtn.disabled = true;
+      showResult('calm', 'shield', 'You held it at the checkpoint.', 'Everything was ready, but nothing was sent. The checkpoint gave you the final say.');
+      return;
+    }
+  }
+
+  function runWorkflow(){
+    if (running || done) return;
+    running = true;
+    runBtn.disabled = true;
+    wfResult.classList.remove('show');
+    if (mode === 'autonomous'){ idx = 0; advanceAuto(); }
+    else { idx = 0; stepAssisted(); }
+  }
+
+  function resetWF(){
+    clearTimers();
+    idx = 0; running = false; done = false;
+    runBtn.disabled = false;
+    wfResult.classList.remove('show');
+    roleHintIc.setAttribute('data-lucide', MODES[mode].hintIc);
+    roleHintText.textContent = MODES[mode].hint;
+    hlStatus.textContent = 'Ready';
+    renderSteps();
+  }
+
+  function setMode(m){
+    if (m === mode) return;
+    mode = m;
+    modeToggle.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === m));
+    resetWF();
+  }
+
+  modeToggle.querySelectorAll('.mode-btn').forEach(b =>
+    b.addEventListener('click', () => setMode(b.getAttribute('data-mode')))
+  );
+  runBtn.addEventListener('click', runWorkflow);
+  resetBtn.addEventListener('click', resetWF);
+
+  /* ── Where autonomy helps (section 4) ── */
+  const EXAMPLES = [
+    { id:'reports',  icon:'file-text', title:'Weekly Reports',      desc:'Collect, summarize, draft, and request approval.',
+      goal:'Send the weekly report', steps:'Collect · summarize · draft', auto:'Gather updates, write draft', approval:'Before sending the report' },
+    { id:'triage',   icon:'ticket',    title:'Ticket Triage',       desc:'Read tickets, categorize, and assign priority.',
+      goal:'Sort incoming tickets', steps:'Read · categorize · rank', auto:'Label and rank tickets', approval:'Before assigning urgent ones' },
+    { id:'research', icon:'search',    title:'Research Collection', desc:'Search sources, collect notes, create a summary.',
+      goal:'Summarize a topic', steps:'Search · collect · summarize', auto:'Gather notes, draft summary', approval:'Before publishing it' },
+    { id:'cleanup',  icon:'sparkles',  title:'Data Cleanup',        desc:'Find errors, suggest fixes, prepare output.',
+      goal:'Clean a dataset', steps:'Scan · fix · prepare', auto:'Find errors, suggest fixes', approval:'Before overwriting data' }
+  ];
+
+  let exTimers = [];
+  function clearExTimers(){ exTimers.forEach(t => clearTimeout(t)); exTimers = []; }
+
+  function renderExamples(){
+    exGrid.innerHTML = EXAMPLES.map(e =>
+      '<button class="risk-card" data-id="' + e.id + '">' +
+        '<div class="risk-head">' +
+          '<span class="risk-ic"><i data-lucide="' + e.icon + '" style="width:20px;height:20px;"></i></span>' +
+          '<span class="risk-title">' + e.title + '</span>' +
+        '</div>' +
+        '<div class="risk-desc">' + e.desc + '</div>' +
+      '</button>'
+    ).join('');
+    exGrid.querySelectorAll('.risk-card').forEach(c =>
+      c.addEventListener('click', () => selectExample(c.getAttribute('data-id')))
+    );
+    icons();
+  }
+
+  function selectExample(id){
+    clearExTimers();
+    const e = EXAMPLES.find(x => x.id === id);
+    if (!e) return;
+    exGrid.querySelectorAll('.risk-card').forEach(c => c.classList.toggle('selected', c.getAttribute('data-id') === id));
+
+    exFlow.innerHTML =
+      '<span class="appr-step" data-s="0"><span class="as-cap">Goal</span><span class="as-txt"><i data-lucide="target" style="width:15px;height:15px;"></i> ' + e.goal + '</span></span>' +
+      '<span class="appr-arrow" data-r="0"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>' +
+      '<span class="appr-step" data-s="1"><span class="as-cap">Steps</span><span class="as-txt"><i data-lucide="list-checks" style="width:15px;height:15px;"></i> ' + e.steps + '</span></span>' +
+      '<span class="appr-arrow" data-r="1"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>' +
+      '<span class="appr-step auto" data-s="2"><span class="as-cap">Safe · automatic</span><span class="as-txt"><i data-lucide="zap" style="width:15px;height:15px;"></i> ' + e.auto + '</span></span>' +
+      '<span class="appr-arrow" data-r="2"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>' +
+      '<span class="appr-step human" data-s="3"><span class="as-cap">Approval point</span><span class="as-txt"><i data-lucide="user-check" style="width:15px;height:15px;"></i> ' + e.approval + '</span></span>';
+    icons();
+
+    const parts = exFlow.querySelectorAll('.appr-step, .appr-arrow');
+    parts.forEach((el, i) => exTimers.push(setTimeout(() => el.classList.add('show'), 170 * i + 60)));
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    resetWF();
+    renderExamples();
+
+    // reveal the static checkpoint visual (section 5)
+    const chkFlow = document.getElementById('chkFlow');
+    if (chkFlow){
+      chkFlow.querySelectorAll('.appr-step, .appr-arrow').forEach((el, i) =>
+        setTimeout(() => el.classList.add('show'), 170 * i + 120)
+      );
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

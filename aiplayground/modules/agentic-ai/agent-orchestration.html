@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Agent Orchestration, an interactive beginner lesson on how multiple agents, tools, and steps are coordinated to complete one larger goal." />
+  <title>Agent Orchestration, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%95%B8%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #c026d3; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #e879f9; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #c026d3; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(192,38,211,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #f0abfc; border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+
+    /* ── Goal banner ─────────────────────────── */
+    .goal-banner {
+      display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; margin-bottom: 1.25rem;
+      border-radius: 1rem; border: 1.5px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.06);
+    }
+    html.dark .goal-banner { background: rgba(192,38,211,0.14); border-color: rgba(232,121,249,0.26); }
+    .goal-emoji { font-size: 1.5rem; line-height: 1; }
+    .goal-caption { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #c026d3; }
+    html.dark .goal-caption { color: #f0abfc; }
+    .goal-text { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .goal-text { color: #f1f5f9; }
+
+    /* ── Goal selector chips ─────────────────── */
+    .sel-caption { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; }
+    html.dark .sel-caption { color: #94a3b8; }
+    .goal-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .goal-chip {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; font-weight: 800;
+      padding: 0.5rem 0.95rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569; transition: all 0.2s ease;
+    }
+    .goal-chip:hover { border-color: rgba(192,38,211,0.4); transform: translateY(-1px); }
+    html.dark .goal-chip { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    .goal-chip.active { background: #c026d3; color: white; border-color: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    html.dark .goal-chip.active { background: #d946ef; border-color: #d946ef; color: white; }
+
+    /* ── Controls ────────────────────────────── */
+    .hl-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 1.3rem 0 1.2rem; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 800; color: #c026d3; padding: 0.6rem 1.15rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #c026d3; color: white; border-color: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #a21caf; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    html.dark .ctrl-btn.primary { background: #d946ef; border-color: #d946ef; color: white; }
+    .hl-status { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-left: auto; }
+
+    /* ── Orchestration flow ──────────────────── */
+    .orch { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+    .node {
+      display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.1rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.35s ease;
+    }
+    html.dark .node { background: #0f172a; border-color: #334155; }
+    .node-av {
+      width: 40px; height: 40px; flex-shrink: 0; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center;
+      background: #e2e8f0; color: #64748b; transition: all 0.35s ease;
+    }
+    html.dark .node-av { background: #334155; color: #94a3b8; }
+    .node-body { min-width: 0; }
+    .node-name { font-weight: 900; font-size: 0.96rem; color: #1e293b; }
+    html.dark .node-name { color: #f1f5f9; }
+    .node-role { font-size: 0.78rem; font-weight: 600; color: #94a3b8; }
+    .node-state { margin-left: auto; flex-shrink: 0; font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+
+    /* coordinator gets a distinct look */
+    .node.coord { border-color: rgba(192,38,211,0.35); background: rgba(192,38,211,0.05); }
+    html.dark .node.coord { border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+    .node.coord .node-av { background: #c026d3; color: white; box-shadow: 0 4px 12px rgba(192,38,211,0.3); }
+    .node.coord .node-name { color: #a21caf; } html.dark .node.coord .node-name { color: #f0abfc; }
+
+    /* active + done states */
+    .node.active { border-color: #c026d3; box-shadow: 0 10px 26px rgba(192,38,211,0.16); transform: translateY(-1px); }
+    .node.active .node-av { background: #c026d3; color: white; animation: nodePulse 1.2s ease-in-out infinite; }
+    .node.active .node-state { color: #a21caf; } html.dark .node.active .node-state { color: #f0abfc; }
+    @keyframes nodePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(192,38,211,0.4); } 50% { box-shadow: 0 0 0 8px rgba(192,38,211,0); } }
+    .node.done { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.06); }
+    html.dark .node.done { background: rgba(21,128,61,0.14); border-color: rgba(34,197,94,0.3); }
+    .node.done .node-av { background: #16a34a; color: white; }
+    .node.done .node-state { color: #15803d; } html.dark .node.done .node-state { color: #4ade80; }
+    .node.coord.done .node-name { color: #15803d; } html.dark .node.coord.done .node-name { color: #4ade80; }
+
+    /* connectors */
+    .node-link { display: flex; justify-content: center; align-items: center; height: 26px; color: #cbd5e1; transition: color 0.35s ease; }
+    html.dark .node-link { color: #475569; }
+    .node-link.lit { color: #c026d3; } html.dark .node-link.lit { color: #e879f9; }
+
+    /* final result node */
+    .node.final { display: none; border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); opacity: 0; transform: translateY(10px); transition: all 0.45s ease; }
+    html.dark .node.final { background: rgba(21,128,61,0.18); border-color: rgba(34,197,94,0.3); }
+    .node.final.show { display: flex; opacity: 1; transform: translateY(0); }
+    .node.final .node-av { background: #16a34a; color: white; box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+    .node.final .node-name { color: #15803d; } html.dark .node.final .node-name { color: #4ade80; }
+
+    /* ── Comparison cards (sections 3 & 4) ───── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+    .cmp-card { border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.good { border-color: rgba(192,38,211,0.3); background: rgba(192,38,211,0.05); }
+    html.dark .cmp-card.good { border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+    .cmp-card.bad { border-color: rgba(239,68,68,0.28); background: rgba(239,68,68,0.05); }
+    html.dark .cmp-card.bad { border-color: rgba(239,68,68,0.28); background: rgba(153,27,27,0.14); }
+    .cmp-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.4rem; }
+    .cmp-ic { width: 42px; height: 42px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; flex-shrink: 0; }
+    html.dark .cmp-ic { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-ic { background: #c026d3; color: white; box-shadow: 0 4px 12px rgba(192,38,211,0.3); }
+    .cmp-card.bad .cmp-ic { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+    .cmp-title { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    html.dark .cmp-title { color: #f1f5f9; }
+    .cmp-lead { font-size: 0.9rem; font-weight: 700; color: #64748b; margin: 0.1rem 0 0.2rem; }
+    html.dark .cmp-lead { color: #94a3b8; }
+    .cmp-note { font-size: 0.86rem; font-weight: 700; margin-top: 0.7rem; padding: 0.6rem 0.8rem; border-radius: 0.7rem; }
+    .cmp-card.bad .cmp-note { color: #b91c1c; background: rgba(239,68,68,0.1); } html.dark .cmp-card.bad .cmp-note { color: #fca5a5; background: rgba(153,27,27,0.24); }
+    .cmp-card.good .cmp-note { color: #15803d; background: rgba(34,197,94,0.1); } html.dark .cmp-card.good .cmp-note { color: #4ade80; background: rgba(21,128,61,0.24); }
+    .cmp-sub { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0.7rem 0 0.55rem; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .cmp-item { display: flex; align-items: center; gap: 0.55rem; font-size: 0.9rem; font-weight: 700; color: #334155; }
+    html.dark .cmp-item { color: #cbd5e1; }
+    .cmp-item .tick { width: 20px; height: 20px; flex-shrink: 0; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; }
+    html.dark .cmp-item .tick { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-item .tick { background: rgba(192,38,211,0.14); color: #c026d3; }
+    html.dark .cmp-card.good .cmp-item .tick { background: rgba(232,121,249,0.2); color: #f0abfc; }
+
+    /* ── Try-this pill + modal ───────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); color: #c026d3; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(192,38,211,0.5); color: #c026d3; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(192,38,211,0.08), rgba(217,70,239,0.04));
+      border: 1.5px solid rgba(192,38,211,0.22); border-left: 4px solid #c026d3; border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(192,38,211,0.06), rgba(217,70,239,0.03));
+      border-color: rgba(232,121,249,0.16); border-left-color: #e879f9;
+    }
+
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30">
+          <span class="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></span>
+          <span class="text-fuchsia-700 dark:text-fuchsia-400 text-xs font-bold tracking-wide">Agentic AI</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+          <span class="text-red-700 dark:text-red-400 text-xs font-bold tracking-wide">🔴 Advanced · 8–10 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="network" class="w-7 h-7 text-fuchsia-600 dark:text-fuchsia-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Agent Orchestration</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Agent orchestration means <strong class="text-slate-800 dark:text-slate-200">coordinating multiple agents, tools, and steps</strong> so they work together toward <strong class="text-slate-800 dark:text-slate-200">one larger goal</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND (+ goal selector)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Orchestration Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Watch a coordinator run a team of agents</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a goal, then press <strong class="text-slate-800 dark:text-slate-200">Run workflow</strong>. A coordinator hands the work to specialist agents one by one, then combines the results. Different goals need different agents.
+        </p>
+
+        <!-- goal banner -->
+        <div class="goal-banner">
+          <span class="goal-emoji" id="goalEmoji">📊</span>
+          <div>
+            <div class="goal-caption">The goal</div>
+            <div class="goal-text" id="goalText">Create a market research report.</div>
+          </div>
+        </div>
+
+        <!-- goal selector -->
+        <div class="sel-caption">Choose a goal — the team of agents changes to match it:</div>
+        <div class="goal-chips" id="goalChips"></div>
+
+        <!-- controls -->
+        <div class="hl-controls">
+          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> Run workflow</button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:15px;height:15px;"></i> Reset</button>
+          <span class="hl-status" id="hlStatus">Ready</span>
+        </div>
+
+        <!-- orchestration flow -->
+        <div class="orch" id="orch"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHY ORCHESTRATION IS NEEDED
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Why orchestration is needed</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">What changes when someone coordinates?</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Many agents can be powerful, but only if their work is organized. A coordinator keeps everything in order.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card bad">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="shuffle" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Without orchestration</span>
+            </div>
+            <div class="cmp-lead">Agents work separately.</div>
+            <div class="cmp-note">Problem: work may be duplicated, missed, or done out of order.</div>
+          </div>
+          <div class="cmp-card good">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="network" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">With orchestration</span>
+            </div>
+            <div class="cmp-lead">A coordinator manages the flow.</div>
+            <div class="cmp-note">Benefit: each agent knows its role and when to act.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. ORCHESTRATOR vs AGENTS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="users" style="width:12px;height:12px;"></i>Orchestrator vs Agents</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two different jobs</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The orchestrator sees the whole goal. Each specialist agent focuses on one part.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card good">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="network" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Orchestrator</span>
+            </div>
+            <div class="cmp-sub">Its job</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Receives the overall goal</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Decides which agent should act</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Controls the sequence</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Combines results</div>
+            </div>
+          </div>
+          <div class="cmp-card">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="user-cog" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Specialist agents</span>
+            </div>
+            <div class="cmp-sub">Their job</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Handle specific parts of the work</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Use tools if needed</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Return results to the orchestrator</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Focus on one role</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-fuchsia-700 dark:text-fuchsia-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Agent orchestration coordinates <strong class="text-slate-900 dark:text-white">multiple agents and steps</strong>.</li>
+            <li>• It is useful for <strong class="text-slate-900 dark:text-white">complex tasks</strong>.</li>
+            <li>• An <strong class="text-slate-900 dark:text-white">orchestrator controls the flow</strong>.</li>
+            <li>• Specialist agents <strong class="text-slate-900 dark:text-white">focus on smaller parts</strong> of the task.</li>
+            <li>• Good orchestration reduces <strong class="text-slate-900 dark:text-white">confusion and duplicated work</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Click Run workflow.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Watch which agent becomes active.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Select different goals.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Notice how different tasks need different agent roles.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(192,38,211,0.3);background:linear-gradient(135deg,rgba(192,38,211,0.05),rgba(217,70,239,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Agent orchestration helps multiple agents work together in an <strong>organized way</strong>. It gives complex agentic systems a <strong>clear structure</strong> for completing large goals.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="text-center mb-5">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-400 text-xs font-bold tracking-wide">
+          <i data-lucide="party-popper" style="width:14px;height:14px;"></i>
+          🎉 Agentic AI section complete
+        </span>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="multi-step-reasoning.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Multi-Step Reasoning
+        </a>
+        <a href="../../index.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-fuchsia-400/50 ring-offset-2 ring-offset-transparent">
+          <i data-lucide="home" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>All Modules</strong>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Agentic AI');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     AGENT ORCHESTRATION - playground
+  ═══════════════════════════════════════════════ */
+  const GOALS = [
+    { id:'research', emoji:'📊', label:'Create a research report', goal:'Create a market research report.',
+      final:'Final research report', finalIcon:'file-text',
+      agents:[
+        { name:'Research Agent',  role:'Collects information', icon:'search' },
+        { name:'Analysis Agent',  role:'Finds patterns',       icon:'bar-chart-3' },
+        { name:'Writer Agent',    role:'Creates the report',   icon:'pen-tool' },
+        { name:'Reviewer Agent',  role:'Checks quality',       icon:'check-check' }
+      ] },
+    { id:'debug', emoji:'🐞', label:'Debug a software issue', goal:'Debug a software issue.',
+      final:'Final recommendation', finalIcon:'lightbulb',
+      agents:[
+        { name:'Code Reader Agent',    role:'Reads the code',    icon:'file-code' },
+        { name:'Error Analysis Agent', role:'Finds the cause',   icon:'bug' },
+        { name:'Fix Suggestion Agent', role:'Suggests a fix',    icon:'wrench' },
+        { name:'Reviewer Agent',       role:'Checks the fix',    icon:'check-check' }
+      ] },
+    { id:'event', emoji:'🎉', label:'Plan an event', goal:'Plan a company event.',
+      final:'Final event plan', finalIcon:'calendar-check',
+      agents:[
+        { name:'Venue Agent',     role:'Finds a place',     icon:'map-pin' },
+        { name:'Schedule Agent',  role:'Sets the timing',   icon:'calendar' },
+        { name:'Budget Agent',    role:'Estimates cost',    icon:'wallet' },
+        { name:'Reviewer Agent',  role:'Checks the plan',   icon:'check-check' }
+      ] },
+    { id:'complaint', emoji:'📮', label:'Handle a customer complaint', goal:'Handle a customer complaint.',
+      final:'Final resolution', finalIcon:'smile',
+      agents:[
+        { name:'Intake Agent',        role:'Reads the complaint',   icon:'inbox' },
+        { name:'Investigation Agent', role:'Checks what happened',  icon:'search' },
+        { name:'Resolution Agent',    role:'Prepares a solution',   icon:'handshake' },
+        { name:'Reviewer Agent',      role:'Checks the reply',      icon:'check-check' }
+      ] }
+  ];
+
+  const goalChips = document.getElementById('goalChips');
+  const goalEmoji = document.getElementById('goalEmoji');
+  const goalText  = document.getElementById('goalText');
+  const orch      = document.getElementById('orch');
+  const runBtn    = document.getElementById('runBtn');
+  const resetBtn  = document.getElementById('resetBtn');
+  const hlStatus  = document.getElementById('hlStatus');
+
+  let current = GOALS[0];
+  let running = false;
+  let done = false;
+  let timers = [];
+
+  function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+  function icons(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  function renderChips(){
+    goalChips.innerHTML = GOALS.map(g =>
+      '<button class="goal-chip' + (g.id === current.id ? ' active' : '') + '" data-id="' + g.id + '"><span>' + g.emoji + '</span> ' + g.label + '</button>'
+    ).join('');
+    goalChips.querySelectorAll('.goal-chip').forEach(c =>
+      c.addEventListener('click', () => selectGoal(c.getAttribute('data-id')))
+    );
+  }
+
+  /* Build the coordinator + agents + final result flow */
+  function renderFlow(){
+    let html = '';
+    // coordinator
+    html += node('coord', 'network', 'Coordinator', 'Manages the whole goal', 'Waiting');
+    html += link();
+    // agents
+    current.agents.forEach((a, i) => {
+      html += node('agent" data-i="' + i, a.icon, a.name, a.role, 'Waiting');
+      html += link();
+    });
+    // final result
+    html += '<div class="node final" id="finalNode">' +
+        '<div class="node-av"><i data-lucide="' + current.finalIcon + '" style="width:20px;height:20px;"></i></div>' +
+        '<div class="node-body"><div class="node-name">' + current.final + '</div><div class="node-role">Returned by the coordinator</div></div>' +
+        '<div class="node-state">Result</div>' +
+      '</div>';
+    orch.innerHTML = html;
+    icons();
+  }
+
+  function node(cls, icon, name, role, state){
+    return '<div class="node ' + cls + '">' +
+        '<div class="node-av"><i data-lucide="' + icon + '" style="width:20px;height:20px;"></i></div>' +
+        '<div class="node-body"><div class="node-name">' + name + '</div><div class="node-role">' + role + '</div></div>' +
+        '<div class="node-state">' + state + '</div>' +
+      '</div>';
+  }
+  function link(){ return '<div class="node-link"><i data-lucide="chevron-down" style="width:18px;height:18px;"></i></div>'; }
+
+  function coordEl(){ return orch.querySelector('.node.coord'); }
+  function agentEl(i){ return orch.querySelector('.node[data-i="' + i + '"]'); }
+  function links(){ return [...orch.querySelectorAll('.node-link')]; }
+
+  function setNode(el, state, stateText){
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (state) el.classList.add(state);
+    const st = el.querySelector('.node-state');
+    if (st && stateText) st.textContent = stateText;
+  }
+
+  /* Run the orchestration animation */
+  function run(){
+    if (running || done) return;
+    running = true; runBtn.disabled = true;
+    setGoalControlsDisabled(true);
+
+    const agents = current.agents;
+    const linkEls = links();
+    // sequence of highlight phases
+    const seq = [];
+    seq.push({ kind:'coordStart' });
+    agents.forEach((a, i) => seq.push({ kind:'agent', i }));
+    seq.push({ kind:'coordEnd' });
+    seq.push({ kind:'final' });
+
+    let k = 0;
+    function stepFn(){
+      const s = seq[k];
+      if (s.kind === 'coordStart'){
+        setNode(coordEl(), 'active', 'Receives goal');
+        hlStatus.textContent = 'Coordinator receives the goal';
+      } else if (s.kind === 'agent'){
+        if (s.i === 0) setNode(coordEl(), '', 'Delegating');   // coordinator hands off
+        else setNode(agentEl(s.i - 1), 'done', 'Done');
+        if (linkEls[s.i]) linkEls[s.i].classList.add('lit');
+        setNode(agentEl(s.i), 'active', 'Working…');
+        hlStatus.textContent = current.agents[s.i].name + ' is working';
+      } else if (s.kind === 'coordEnd'){
+        setNode(agentEl(agents.length - 1), 'done', 'Done');
+        setNode(coordEl(), 'active', 'Combining');
+        hlStatus.textContent = 'Coordinator combines the results';
+      } else if (s.kind === 'final'){
+        setNode(coordEl(), 'done', 'Done');
+        links().forEach(l => l.classList.add('lit'));
+        const fn = document.getElementById('finalNode');
+        if (fn) fn.classList.add('show');
+        hlStatus.textContent = 'Final result returned';
+        running = false; done = true;
+        return;
+      }
+      k++;
+      timers.push(setTimeout(stepFn, 850));
+    }
+    stepFn();
+  }
+
+  function setGoalControlsDisabled(dis){
+    goalChips.querySelectorAll('.goal-chip').forEach(c => { c.disabled = dis; c.style.opacity = dis ? '0.5' : ''; c.style.pointerEvents = dis ? 'none' : ''; });
+  }
+
+  function reset(){
+    clearTimers();
+    running = false; done = false;
+    runBtn.disabled = false;
+    setGoalControlsDisabled(false);
+    hlStatus.textContent = 'Ready';
+    renderFlow();
+  }
+
+  function selectGoal(id){
+    if (running) return;
+    const g = GOALS.find(x => x.id === id);
+    if (!g || g.id === current.id) return;
+    current = g;
+    goalEmoji.textContent = g.emoji;
+    goalText.textContent = g.goal;
+    goalChips.querySelectorAll('.goal-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-id') === id));
+    reset();
+  }
+
+  runBtn.addEventListener('click', run);
+  resetBtn.addEventListener('click', reset);
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderChips();
+    reset();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

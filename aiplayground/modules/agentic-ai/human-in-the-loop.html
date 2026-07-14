@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Human in the Loop, an interactive beginner lesson on why some agentic AI actions need human review or approval before they are completed." />
+  <title>Human in the Loop, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%99%8B</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #c026d3; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #e879f9; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #c026d3; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(192,38,211,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #f0abfc; border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+
+    /* ── Task banner ─────────────────────────── */
+    .goal-banner {
+      display: flex; align-items: center; gap: 0.85rem; padding: 1rem 1.15rem; margin-bottom: 1.25rem;
+      border-radius: 1rem; border: 1.5px solid rgba(192,38,211,0.25); background: rgba(192,38,211,0.06);
+    }
+    html.dark .goal-banner { background: rgba(192,38,211,0.14); border-color: rgba(232,121,249,0.26); }
+    .goal-emoji { font-size: 1.5rem; line-height: 1; }
+    .goal-caption { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #c026d3; }
+    html.dark .goal-caption { color: #f0abfc; }
+    .goal-text { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .goal-text { color: #f1f5f9; }
+
+    /* ── Mode toggle ─────────────────────────── */
+    .mode-toggle { display: inline-flex; padding: 0.3rem; gap: 0.3rem; border-radius: 9999px; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-btn {
+      cursor: pointer; font-size: 0.82rem; font-weight: 800; padding: 0.5rem 1.05rem; border-radius: 9999px;
+      color: #64748b; display: inline-flex; align-items: center; gap: 0.45rem; transition: all 0.22s ease; border: none; background: transparent;
+    }
+    html.dark .mode-btn { color: #94a3b8; }
+    .mode-btn.active { background: #c026d3; color: white; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    html.dark .mode-btn.active { background: #d946ef; color: white; }
+    .mode-caption { font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; }
+    html.dark .mode-caption { color: #94a3b8; }
+    .mode-btn.risky.active { background: #ef4444; box-shadow: 0 6px 16px rgba(239,68,68,0.3); }
+    html.dark .mode-btn.risky.active { background: #ef4444; }
+    .mode-btn.safe.active { background: #16a34a; box-shadow: 0 6px 16px rgba(22,163,74,0.3); }
+    html.dark .mode-btn.safe.active { background: #16a34a; }
+
+    /* ── Controls ────────────────────────────── */
+    .hl-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 1.4rem; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.85rem; font-weight: 800; color: #c026d3; padding: 0.6rem 1.15rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #c026d3; color: white; border-color: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #a21caf; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    html.dark .ctrl-btn.primary { background: #d946ef; border-color: #d946ef; color: white; }
+    .hl-status { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-left: auto; }
+
+    /* ── Approval console ────────────────────── */
+    .mail-console { margin-top: 1.2rem; }
+    .role-hint {
+      display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.9rem; padding: 0.7rem 0.95rem; border-radius: 0.9rem;
+      font-size: 0.84rem; font-weight: 700; color: #334155; background: #f1f5f9; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .role-hint { color: #cbd5e1; background: #0f172a; border-color: #334155; }
+    .role-hint .rh-ic { color: #c026d3; flex-shrink: 0; } html.dark .role-hint .rh-ic { color: #f0abfc; }
+
+    /* pipeline */
+    .pipe { position: relative; padding: 46px 0.25rem 0.4rem; margin-bottom: 1.35rem; }
+    .pipe-rail { position: absolute; left: 16.67%; right: 16.67%; top: 73px; height: 4px; border-radius: 9999px; background: #e2e8f0; z-index: 1; }
+    html.dark .pipe-rail { background: #334155; }
+    .pipe-rail-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0; border-radius: 9999px; background: linear-gradient(90deg,#c026d3,#e879f9); transition: width 0.7s cubic-bezier(.4,0,.2,1); }
+    .pipe-stages { display: grid; grid-template-columns: repeat(3,1fr); position: relative; z-index: 2; }
+    .pipe-stage { display: flex; flex-direction: column; align-items: center; gap: 0.32rem; text-align: center; }
+    .ps-node {
+      width: 54px; height: 54px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+      background: white; border: 2px solid #e2e8f0; color: #94a3b8; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.4s ease;
+    }
+    html.dark .ps-node { background: #0f172a; border-color: #334155; color: #64748b; }
+    .ps-lb { font-size: 0.82rem; font-weight: 900; color: #1e293b; }
+    html.dark .ps-lb { color: #f1f5f9; }
+    .ps-sub { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; }
+
+    /* agent always active */
+    .st-agent .ps-node { background: #c026d3; border-color: #c026d3; color: white; box-shadow: 0 6px 16px rgba(192,38,211,0.28); }
+    html.dark .st-agent .ps-node { background: #d946ef; border-color: #d946ef; }
+
+    /* gate states */
+    .gate-locked .ps-node { border-color: #f59e0b; color: #a16207; background: rgba(245,158,11,0.1); animation: gatePulse 1.8s ease-in-out infinite; }
+    html.dark .gate-locked .ps-node { color: #facc15; background: rgba(161,98,7,0.18); }
+    .gate-locked .ps-sub { color: #a16207; } html.dark .gate-locked .ps-sub { color: #facc15; }
+    @keyframes gatePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.35); } 50% { box-shadow: 0 0 0 8px rgba(245,158,11,0); } }
+    .gate-open .ps-node { border-style: dashed; border-color: #cbd5e1; color: #94a3b8; background: white; }
+    html.dark .gate-open .ps-node { background: #0f172a; border-color: #475569; }
+    .gate-open .ps-sub { color: #94a3b8; }
+    .gate-approved .ps-node { border-color: #16a34a; color: white; background: #16a34a; box-shadow: 0 6px 16px rgba(22,163,74,0.28); }
+    .gate-approved .ps-sub { color: #15803d; } html.dark .gate-approved .ps-sub { color: #4ade80; }
+    .gate-stopped .ps-node { border-color: #ef4444; color: white; background: #ef4444; box-shadow: 0 6px 16px rgba(239,68,68,0.25); }
+    .gate-stopped .ps-sub { color: #b91c1c; } html.dark .gate-stopped .ps-sub { color: #fca5a5; }
+
+    /* inbox delivered */
+    .inbox-filled .ps-node { border-color: #16a34a; color: white; background: #16a34a; box-shadow: 0 6px 16px rgba(22,163,74,0.28); animation: inboxPop 0.5s ease; }
+    .inbox-filled .ps-sub { color: #15803d; } html.dark .inbox-filled .ps-sub { color: #4ade80; }
+    @keyframes inboxPop { 0% { transform: scale(0.7); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+    /* the moving envelope token (floats above the rail) */
+    .pipe-env {
+      position: absolute; top: 14px; left: 16.67%; transform: translate(-50%,0); z-index: 3;
+      width: 34px; height: 34px; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center;
+      background: #c026d3; color: white; box-shadow: 0 8px 18px rgba(192,38,211,0.4);
+      transition: left 0.75s cubic-bezier(.4,0,.2,1), opacity 0.4s ease, background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .pipe-env::after { content: ''; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); width: 2px; height: 10px; background: currentColor; opacity: 0.35; }
+    .pipe-env.parked { animation: envBob 1.6s ease-in-out infinite; }
+    @keyframes envBob { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,-5px); } }
+    .pipe-env.delivered { background: #16a34a; box-shadow: 0 8px 18px rgba(22,163,74,0.4); }
+    .pipe-env.gone { opacity: 0; }
+    @media (max-width: 560px) {
+      .ps-node { width: 46px; height: 46px; }
+      .pipe-rail { top: 69px; }
+      .pipe-env { top: 12px; }
+    }
+
+    /* email card */
+    .mail-card {
+      border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: white; overflow: hidden;
+      transition: transform 0.5s cubic-bezier(.4,0,.2,1), opacity 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    html.dark .mail-card { background: #0f172a; border-color: #334155; }
+    .mail-card.sending { transform: translateY(-14px) scale(0.97); opacity: 0; }
+    .mail-card.awaiting { border-color: rgba(245,158,11,0.5); box-shadow: 0 8px 24px rgba(245,158,11,0.14); }
+    html.dark .mail-card.awaiting { border-color: rgba(245,158,11,0.4); }
+    .mail-card.fixed { border-color: rgba(34,197,94,0.45); }
+    html.dark .mail-card.fixed { border-color: rgba(34,197,94,0.34); }
+    .mail-top { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.1rem; border-bottom: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .mail-top { background: #1e293b; border-color: #334155; }
+    .mail-avatar { width: 38px; height: 38px; flex-shrink: 0; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; background: rgba(192,38,211,0.12); color: #c026d3; }
+    html.dark .mail-avatar { background: rgba(232,121,249,0.18); color: #f0abfc; }
+    .mail-from { font-weight: 900; font-size: 0.9rem; color: #1e293b; }
+    html.dark .mail-from { color: #f1f5f9; }
+    .mail-meta { font-size: 0.76rem; font-weight: 600; color: #94a3b8; }
+    .mail-badge {
+      margin-left: auto; flex-shrink: 0; font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.28rem 0.6rem; border-radius: 9999px; background: #e2e8f0; color: #64748b;
+    }
+    html.dark .mail-badge { background: #334155; color: #94a3b8; }
+    .mail-badge.wait { background: rgba(245,158,11,0.16); color: #a16207; } html.dark .mail-badge.wait { background: rgba(161,98,7,0.24); color: #facc15; }
+    .mail-badge.ok   { background: #dcfce7; color: #15803d; } html.dark .mail-badge.ok { background: rgba(21,128,61,0.24); color: #4ade80; }
+    .mail-body { padding: 1.1rem 1.2rem; font-size: 0.96rem; line-height: 1.65; font-weight: 500; color: #334155; }
+    html.dark .mail-body { color: #cbd5e1; }
+    .mail-body .greet { font-weight: 700; color: #1e293b; } html.dark .mail-body .greet { color: #f1f5f9; }
+    .mail-flag {
+      border-radius: 0.35rem; padding: 0.05rem 0.3rem; font-weight: 800;
+      background: rgba(245,158,11,0.18); color: #a16207; box-shadow: 0 0 0 0 rgba(245,158,11,0.4); animation: flagPulse 1.8s ease-in-out infinite;
+    }
+    html.dark .mail-flag { background: rgba(161,98,7,0.3); color: #facc15; }
+    @keyframes flagPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.35); } 50% { box-shadow: 0 0 0 5px rgba(245,158,11,0); } }
+    .mail-risknote { display: flex; align-items: center; gap: 0.5rem; margin: 0.35rem 1.2rem 1.1rem; padding: 0.6rem 0.85rem; border-radius: 0.8rem; font-size: 0.8rem; font-weight: 700; color: #a16207; background: rgba(245,158,11,0.1); border: 1.5px solid rgba(245,158,11,0.28); }
+    html.dark .mail-risknote { color: #facc15; background: rgba(161,98,7,0.16); border-color: rgba(245,158,11,0.34); }
+
+    /* action buttons */
+    .mail-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 1.1rem; }
+    .act-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 800;
+      padding: 0.6rem 1.1rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: white; color: #334155; transition: all 0.2s ease;
+    }
+    .act-btn:hover:not(:disabled) { transform: translateY(-1px); border-color: #cbd5e1; }
+    html.dark .act-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .act-btn.approve { background: #16a34a; color: white; border-color: #16a34a; box-shadow: 0 6px 16px rgba(22,163,74,0.3); }
+    .act-btn.approve:hover:not(:disabled) { background: #15803d; }
+    .act-btn.fix { background: rgba(245,158,11,0.12); color: #a16207; border-color: rgba(245,158,11,0.4); }
+    html.dark .act-btn.fix { background: rgba(161,98,7,0.2); color: #facc15; }
+    .act-btn.reject { background: rgba(239,68,68,0.08); color: #b91c1c; border-color: rgba(239,68,68,0.3); }
+    html.dark .act-btn.reject { background: rgba(153,27,27,0.2); color: #fca5a5; }
+    .act-btn.send { background: #c026d3; color: white; border-color: #c026d3; box-shadow: 0 6px 16px rgba(192,38,211,0.3); }
+    .act-btn.send:hover:not(:disabled) { background: #a21caf; }
+    .act-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    /* result banner */
+    .mail-result {
+      display: none; align-items: flex-start; gap: 0.65rem; margin-top: 1.1rem; padding: 0.95rem 1.15rem; border-radius: 1rem;
+      font-size: 0.9rem; font-weight: 700; opacity: 0; transform: translateY(8px); transition: all 0.4s ease;
+    }
+    .mail-result.show { display: flex; opacity: 1; transform: translateY(0); }
+    .mail-result .mr-ic { flex-shrink: 0; margin-top: 1px; }
+    .mail-result.risk { color: #b91c1c; background: rgba(239,68,68,0.09); border: 1.5px solid rgba(239,68,68,0.28); }
+    html.dark .mail-result.risk { color: #fca5a5; background: rgba(153,27,27,0.2); border-color: rgba(239,68,68,0.3); }
+    .mail-result.safe { color: #15803d; background: rgba(34,197,94,0.1); border: 1.5px solid rgba(34,197,94,0.28); }
+    html.dark .mail-result.safe { color: #4ade80; background: rgba(21,128,61,0.22); border-color: rgba(34,197,94,0.3); }
+    .mail-result.warn { color: #b45309; background: rgba(245,158,11,0.12); border: 1.5px solid rgba(245,158,11,0.32); }
+    html.dark .mail-result.warn { color: #fbbf24; background: rgba(161,98,7,0.2); border-color: rgba(245,158,11,0.34); }
+    .mail-result.calm { color: #475569; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .mail-result.calm { color: #cbd5e1; background: #0f172a; border-color: #334155; }
+    .mr-title { font-weight: 900; }
+    .mr-sub { font-weight: 600; opacity: 0.9; margin-top: 0.15rem; }
+
+    /* ── Risk cards (section 3) ──────────────── */
+    .risk-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.9rem; }
+    .risk-card {
+      cursor: pointer; text-align: left; width: 100%; border-radius: 1.1rem; padding: 1.1rem 1.25rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .risk-card { background: #0f172a; border-color: #334155; }
+    .risk-card:hover { border-color: rgba(192,38,211,0.4); transform: translateY(-3px); box-shadow: 0 12px 26px rgba(192,38,211,0.12); }
+    .risk-card.selected { border-color: #c026d3; background: rgba(192,38,211,0.06); box-shadow: 0 12px 26px rgba(192,38,211,0.14); }
+    html.dark .risk-card.selected { border-color: #d946ef; background: rgba(192,38,211,0.14); }
+    .risk-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.55rem; }
+    .risk-ic { width: 40px; height: 40px; flex-shrink: 0; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; background: rgba(192,38,211,0.1); color: #c026d3; }
+    html.dark .risk-ic { background: rgba(232,121,249,0.16); color: #f0abfc; }
+    .risk-title { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .risk-title { color: #f1f5f9; }
+    .risk-desc { font-size: 0.86rem; color: #64748b; line-height: 1.5; }
+    html.dark .risk-desc { color: #94a3b8; }
+
+    /* ── Approval mini-flow (detail) ─────────── */
+    .appr-panel { margin-top: 1.2rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; padding: 1.2rem 1.35rem; }
+    html.dark .appr-panel { background: #0f172a; border-color: #334155; }
+    .appr-cap { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #c026d3; margin-bottom: 0.7rem; }
+    html.dark .appr-cap { color: #f0abfc; }
+    .appr-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .appr-step {
+      display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; font-weight: 800;
+      padding: 0.5rem 0.85rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: white; color: #334155;
+      opacity: 0; transform: translateY(6px); transition: all 0.35s ease;
+    }
+    .appr-step.show { opacity: 1; transform: translateY(0); }
+    html.dark .appr-step { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .appr-step.human { border-color: rgba(245,158,11,0.45); background: rgba(245,158,11,0.08); color: #a16207; }
+    html.dark .appr-step.human { color: #facc15; background: rgba(161,98,7,0.16); }
+    .appr-step.done { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.08); color: #15803d; }
+    html.dark .appr-step.done { color: #4ade80; background: rgba(21,128,61,0.18); }
+    .appr-arrow { color: #cbd5e1; opacity: 0; transition: opacity 0.35s ease; }
+    .appr-arrow.show { opacity: 1; }
+    html.dark .appr-arrow { color: #475569; }
+    .appr-hint { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; font-weight: 700; color: #94a3b8; }
+    html.dark .appr-hint { color: #64748b; }
+
+    /* ── Comparison cards (section 4) ────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+    .cmp-card { border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.good { border-color: rgba(192,38,211,0.3); background: rgba(192,38,211,0.05); }
+    html.dark .cmp-card.good { border-color: rgba(232,121,249,0.28); background: rgba(192,38,211,0.1); }
+    .cmp-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.4rem; }
+    .cmp-ic { width: 42px; height: 42px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; flex-shrink: 0; }
+    html.dark .cmp-ic { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-ic { background: #c026d3; color: white; box-shadow: 0 4px 12px rgba(192,38,211,0.3); }
+    .cmp-title { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    html.dark .cmp-title { color: #f1f5f9; }
+    .cmp-sub { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0.6rem 0 0.55rem; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .cmp-item { display: flex; align-items: center; gap: 0.55rem; font-size: 0.9rem; font-weight: 700; color: #334155; }
+    html.dark .cmp-item { color: #cbd5e1; }
+    .cmp-item .tick { width: 20px; height: 20px; flex-shrink: 0; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; }
+    html.dark .cmp-item .tick { background: #334155; color: #94a3b8; }
+    .cmp-card.good .cmp-item .tick { background: rgba(192,38,211,0.14); color: #c026d3; }
+    html.dark .cmp-card.good .cmp-item .tick { background: rgba(232,121,249,0.2); color: #f0abfc; }
+
+    /* ── Try-this pill + modal ───────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(192,38,211,0.3); background: rgba(192,38,211,0.08); color: #c026d3; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(192,38,211,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #f0abfc; border-color: rgba(232,121,249,0.3); background: rgba(192,38,211,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(192,38,211,0.5); color: #c026d3; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(192,38,211,0.08), rgba(217,70,239,0.04));
+      border: 1.5px solid rgba(192,38,211,0.22); border-left: 4px solid #c026d3; border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(192,38,211,0.06), rgba(217,70,239,0.03));
+      border-color: rgba(232,121,249,0.16); border-left-color: #e879f9;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900/30">
+          <span class="w-1.5 h-1.5 bg-fuchsia-500 rounded-full"></span>
+          <span class="text-fuchsia-700 dark:text-fuchsia-400 text-xs font-bold tracking-wide">Agentic AI</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-fuchsia-100 dark:bg-fuchsia-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user-check" class="w-7 h-7 text-fuchsia-600 dark:text-fuchsia-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Human in the Loop</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Human in the Loop means a <strong class="text-slate-800 dark:text-slate-200">person reviews or approves</strong> an AI action <strong class="text-slate-800 dark:text-slate-200">before it is completed</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Approval Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">You are the human in the loop</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The agent wrote this email for you. Choose a mode, then decide what happens next. In <strong class="text-slate-800 dark:text-slate-200">human review</strong>, <strong class="text-slate-800 dark:text-slate-200">you</strong> approve, fix, or reject it before it can be sent.
+        </p>
+
+        <!-- task banner -->
+        <div class="goal-banner">
+          <span class="goal-emoji">✉️</span>
+          <div>
+            <div class="goal-caption">The task</div>
+            <div class="goal-text">Send a project update email to leadership.</div>
+          </div>
+        </div>
+
+        <!-- mode toggle -->
+        <div class="mode-caption">Compare the two ways this email could be sent:</div>
+        <div class="mode-toggle" id="modeToggle" role="tablist">
+          <button class="mode-btn risky active" data-mode="auto" role="tab"><i data-lucide="zap" style="width:14px;height:14px;"></i> Risky · no gate</button>
+          <button class="mode-btn safe" data-mode="human" role="tab"><i data-lucide="shield-check" style="width:14px;height:14px;"></i> Safe · human gate</button>
+        </div>
+
+        <!-- approval console -->
+        <div class="mail-console">
+          <div class="role-hint" id="roleHint"><i data-lucide="zap" style="width:16px;height:16px;" class="rh-ic" id="roleHintIc"></i> <span id="roleHintText"></span></div>
+
+          <!-- pipeline: Agent → Gate → Leadership -->
+          <div class="pipe">
+            <div class="pipe-rail"><div class="pipe-rail-fill" id="pipeFill"></div></div>
+            <div class="pipe-stages">
+              <div class="pipe-stage st-agent" data-st="agent">
+                <div class="ps-node"><i data-lucide="bot" style="width:22px;height:22px;"></i></div>
+                <div class="ps-lb">Agent</div>
+                <div class="ps-sub">writes draft</div>
+              </div>
+              <div class="pipe-stage gate-locked" id="gateStage" data-st="gate">
+                <div class="ps-node" id="gateNode"><i data-lucide="lock" style="width:22px;height:22px;"></i></div>
+                <div class="ps-lb">Your review</div>
+                <div class="ps-sub" id="gateSub">gate locked</div>
+              </div>
+              <div class="pipe-stage" id="inboxStage" data-st="inbox">
+                <div class="ps-node"><i data-lucide="inbox" style="width:22px;height:22px;"></i></div>
+                <div class="ps-lb">Leadership</div>
+                <div class="ps-sub" id="inboxSub">empty</div>
+              </div>
+            </div>
+            <div class="pipe-env" id="pipeEnv"><i data-lucide="mail" style="width:17px;height:17px;"></i></div>
+          </div>
+
+          <div class="mail-card" id="mailCard">
+            <div class="mail-top">
+              <div class="mail-avatar"><i data-lucide="bot" style="width:19px;height:19px;"></i></div>
+              <div>
+                <div class="mail-from">Agent draft</div>
+                <div class="mail-meta">To: Leadership · Subject: Weekly Project Update</div>
+              </div>
+              <span class="mail-badge" id="mailBadge">Draft</span>
+            </div>
+            <div class="mail-body" id="mailBody"></div>
+            <div class="mail-risknote" id="mailRisknote"><i data-lucide="alert-triangle" style="width:15px;height:15px;"></i> Possible issue: this claim may not be accurate yet.</div>
+          </div>
+
+          <!-- action buttons (rebuilt per mode/state) -->
+          <div class="mail-actions" id="mailActions"></div>
+
+          <!-- result banner -->
+          <div class="mail-result" id="mailResult"><i data-lucide="info" style="width:18px;height:18px;" class="mr-ic" id="mailResultIc"></i><div><div class="mr-title" id="mailResultTitle"></div><div class="mr-sub" id="mailResultSub"></div></div></div>
+        </div>
+
+        <!-- controls -->
+        <div class="hl-controls">
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:15px;height:15px;"></i> Reset draft</button>
+          <span class="hl-status" id="hlStatus">Ready</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHEN HUMAN APPROVAL IS NEEDED
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="shield-check" style="width:12px;height:12px;"></i>When human approval is needed</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Some actions should not happen alone</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click an action to see how a human approval step fits in.
+        </p>
+
+        <div class="risk-grid" id="riskGrid"></div>
+
+        <div class="appr-panel">
+          <div class="appr-cap">Approval flow</div>
+          <div class="appr-flow" id="apprFlow">
+            <span class="appr-hint"><i data-lucide="mouse-pointer-click" style="width:15px;height:15px;"></i> Pick an action above to see its approval flow.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. HUMAN REVIEW vs FULL AUTOMATION
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Human review vs full automation</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Which tasks fit which approach?</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Both approaches are useful. The right choice depends on the risk of the task.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="zap" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Full automation</span>
+            </div>
+            <div class="cmp-sub">Best for</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Low-risk tasks</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Repetitive actions</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Simple updates</div>
+            </div>
+          </div>
+          <div class="cmp-card good">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="user-check" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Human in the loop</span>
+            </div>
+            <div class="cmp-sub">Best for</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> High-risk tasks</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> External communication</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Money-related actions</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Sensitive data</div>
+              <div class="cmp-item"><span class="tick"><i data-lucide="check" style="width:12px;height:12px;"></i></span> Final approval</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-fuchsia-700 dark:text-fuchsia-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Human in the Loop adds <strong class="text-slate-900 dark:text-white">review before action</strong>.</li>
+            <li>• It is useful for <strong class="text-slate-900 dark:text-white">important or risky tasks</strong>.</li>
+            <li>• The AI can prepare work, but <strong class="text-slate-900 dark:text-white">humans can approve it</strong>.</li>
+            <li>• It improves <strong class="text-slate-900 dark:text-white">trust and safety</strong>.</li>
+            <li>• <strong class="text-slate-900 dark:text-white">Not every task</strong> needs human review.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Switch between automation and human review.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Click different action cards.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Decide which tasks should need approval.</li>
+            <li class="flex items-start gap-2.5"><span class="text-fuchsia-500 mt-0.5">→</span> Think of one task where you would not want AI to act alone.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(192,38,211,0.3);background:linear-gradient(135deg,rgba(192,38,211,0.05),rgba(217,70,239,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Human in the Loop keeps people involved when AI actions are <strong>important, risky, or need judgment</strong>. The AI can help prepare the work, but the human gives the <strong>final approval</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="reflection.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Reflection
+        </a>
+        <a href="autonomous-workflows.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-fuchsia-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Autonomous Workflows
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Agentic AI');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     HUMAN IN THE LOOP - playground
+  ═══════════════════════════════════════════════ */
+  const MODES = {
+    auto:  { hintIc:'zap',          hint:'Risky mode — no gate: the agent sends with no human check. Fast, but nobody catches a mistake first. Watch what gets delivered.' },
+    human: { hintIc:'shield-check', hint:'Safe mode — human gate: the email waits at your gate. Review the draft, then fix, approve, or reject it before it can be sent.' }
+  };
+
+  // The agent's draft. The risky version over-promises; the fixed version is accurate.
+  const DRAFT_RISKY = '<span class="greet">Hi team,</span> great news &mdash; the project is <span class="mail-flag">100% finished and already shipped to every customer</span> today. Thanks for the hard work!';
+  const DRAFT_FIXED = '<span class="greet">Hi team,</span> quick update &mdash; the main features are complete, final testing is underway, and we plan to ship next week. Thanks for the hard work!';
+
+  const RISKS = [
+    { id:'email',   icon:'mail',        title:'Sending Emails',            desc:'A person should review important messages before sending.', action:'send this email' },
+    { id:'buy',     icon:'credit-card', title:'Making Purchases',          desc:'A person should approve spending money.',                   action:'make this purchase' },
+    { id:'delete',  icon:'trash-2',     title:'Deleting Files',            desc:'A person should confirm destructive actions.',             action:'delete these files' },
+    { id:'prod',    icon:'server',      title:'Updating Production Systems', desc:'A person should review risky technical changes.',        action:'update the production system' },
+    { id:'data',    icon:'lock',        title:'Sharing Sensitive Data',    desc:'A person should check privacy and accuracy.',              action:'share this sensitive data' }
+  ];
+
+  const modeToggle   = document.getElementById('modeToggle');
+  const resetBtn     = document.getElementById('resetBtn');
+  const hlStatus     = document.getElementById('hlStatus');
+  const riskGrid     = document.getElementById('riskGrid');
+  const apprFlow     = document.getElementById('apprFlow');
+
+  const roleHint      = document.getElementById('roleHint');
+  const roleHintIc    = document.getElementById('roleHintIc');
+  const roleHintText  = document.getElementById('roleHintText');
+  const mailCard      = document.getElementById('mailCard');
+  const mailBadge     = document.getElementById('mailBadge');
+  const mailBody      = document.getElementById('mailBody');
+  const mailRisknote  = document.getElementById('mailRisknote');
+  const mailActions   = document.getElementById('mailActions');
+  const mailResult    = document.getElementById('mailResult');
+  const mailResultIc  = document.getElementById('mailResultIc');
+  const mailResultTitle = document.getElementById('mailResultTitle');
+  const mailResultSub = document.getElementById('mailResultSub');
+
+  // pipeline refs
+  const pipeFill    = document.getElementById('pipeFill');
+  const pipeEnv     = document.getElementById('pipeEnv');
+  const gateStage   = document.getElementById('gateStage');
+  const gateSub     = document.getElementById('gateSub');
+  const gateNode    = document.getElementById('gateNode');
+  const inboxStage  = document.getElementById('inboxStage');
+  const inboxSub    = document.getElementById('inboxSub');
+
+  const ENV_POS  = { agent:'16.67%', gate:'50%', inbox:'83.33%' };
+  const FILL_POS = { agent:'0%',     gate:'50%', inbox:'100%'   };
+
+  /* move the envelope; parked=true adds the bob at the gate */
+  function moveEnv(pos, parked){
+    pipeEnv.classList.remove('parked');
+    pipeEnv.style.left = ENV_POS[pos];
+    pipeFill.style.width = FILL_POS[pos];
+    if (parked) pipeEnv.classList.add('parked');
+  }
+  /* set the gate node visual state */
+  function setGate(state, sub){
+    gateStage.className = 'pipe-stage ' + state;
+    const gi = { 'gate-locked':'lock', 'gate-open':'unlock', 'gate-approved':'check', 'gate-stopped':'x' }[state] || 'lock';
+    gateNode.innerHTML = '<i data-lucide="' + gi + '" style="width:22px;height:22px;"></i>';
+    if (sub) gateSub.textContent = sub;
+  }
+  function setInbox(filled){
+    inboxStage.classList.toggle('inbox-filled', !!filled);
+    inboxSub.textContent = filled ? '1 message' : 'empty';
+  }
+
+  let mode = 'auto';
+  let fixed = false;       // has the user fixed the draft
+  let outcome = null;      // null | 'auto-sent' | 'approved' | 'rejected'
+  let timers = [];
+
+  function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
+  function icons(){ if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+  /* ── Draw the email + badge + risk note for current state ── */
+  function renderMail(){
+    mailBody.innerHTML = fixed ? DRAFT_FIXED : DRAFT_RISKY;
+    mailRisknote.style.display = (fixed || outcome) ? 'none' : 'flex';
+    mailCard.classList.toggle('fixed', fixed && !outcome);
+    mailCard.classList.toggle('awaiting', mode === 'human' && !outcome && !fixed);
+    if (outcome) { mailBadge.className = 'mail-badge ok'; mailBadge.textContent = outcome === 'rejected' ? 'Stopped' : 'Sent'; if (outcome === 'rejected') mailBadge.className = 'mail-badge'; }
+    else if (mode === 'human') { mailBadge.className = 'mail-badge wait'; mailBadge.textContent = fixed ? 'Fixed · awaiting you' : 'Awaiting your review'; }
+    else { mailBadge.className = 'mail-badge'; mailBadge.textContent = 'Ready to auto-send'; }
+    icons();
+  }
+
+  /* ── Build the action buttons for current state ── */
+  function renderActions(){
+    if (outcome){ mailActions.innerHTML = ''; return; }
+    if (mode === 'auto'){
+      mailActions.innerHTML = '<button class="act-btn send" data-act="autosend"><i data-lucide="send" style="width:15px;height:15px;"></i> Let the agent send now</button>';
+    } else {
+      mailActions.innerHTML =
+        '<button class="act-btn approve" data-act="approve"><i data-lucide="check" style="width:15px;height:15px;"></i> Approve &amp; send</button>' +
+        (fixed ? '' : '<button class="act-btn fix" data-act="fix"><i data-lucide="wand-2" style="width:15px;height:15px;"></i> Edit &amp; fix</button>') +
+        '<button class="act-btn reject" data-act="reject"><i data-lucide="x" style="width:15px;height:15px;"></i> Reject</button>';
+    }
+    mailActions.querySelectorAll('.act-btn').forEach(b => b.addEventListener('click', () => doAction(b.getAttribute('data-act'))));
+    icons();
+  }
+
+  /* ── Result banner ── */
+  function showResult(tone, ic, title, sub){
+    mailResult.className = 'mail-result ' + tone;
+    mailResultIc.setAttribute('data-lucide', ic);
+    mailResultTitle.textContent = title;
+    mailResultSub.textContent = sub;
+    void mailResult.offsetWidth;
+    mailResult.classList.add('show');
+    icons();
+  }
+
+  /* ── Deliver the envelope to the inbox, then run callback ── */
+  function deliver(cb){
+    moveEnv('inbox');
+    pipeEnv.classList.add('delivered');
+    timers.push(setTimeout(() => { setInbox(true); }, 650));
+    timers.push(setTimeout(() => { pipeEnv.classList.add('gone'); }, 780));
+    timers.push(setTimeout(() => { cb(); }, 950));
+  }
+
+  /* ── Handle a user action ── */
+  function doAction(act){
+    if (act === 'fix'){
+      fixed = true;
+      hlStatus.textContent = 'Draft fixed';
+      renderMail(); renderActions();
+      moveEnv('gate', true);
+      setGate('gate-locked', 'fixed · awaiting you');
+      showResult('safe', 'wand-2', 'You edited the draft.', 'The risky claim is now accurate. Approve it when you are ready.');
+      return;
+    }
+    if (act === 'reject'){
+      outcome = 'rejected';
+      hlStatus.textContent = 'Stopped by you';
+      setGate('gate-stopped', 'you blocked it');
+      moveEnv('agent');
+      timers.push(setTimeout(() => { pipeEnv.classList.add('gone'); }, 700));
+      renderActions(); renderMail();
+      showResult('calm', 'shield', 'You stopped the send.', 'Nothing went out. The agent can revise the draft and try again.');
+      return;
+    }
+    if (act === 'autosend'){
+      outcome = 'auto-sent';
+      mailResult.classList.remove('show');
+      hlStatus.textContent = 'Sent automatically';
+      setGate('gate-open', 'skipped');
+      deliver(() => {
+        renderActions(); renderMail();
+        showResult('risk', 'alert-triangle', 'Sent automatically — no one checked it.', 'The inaccurate claim went straight to leadership. This is the risk of skipping human review.');
+      });
+      return;
+    }
+    if (act === 'approve'){
+      outcome = 'approved';
+      mailResult.classList.remove('show');
+      hlStatus.textContent = 'Approved & sent';
+      const wasFixed = fixed;
+      setGate('gate-approved', 'you approved');
+      deliver(() => {
+        renderActions(); renderMail();
+        if (wasFixed) showResult('safe', 'shield-check', 'Reviewed, fixed, and approved.', 'Because a human checked and corrected it first, the email is safe to send.');
+        else showResult('warn', 'alert-triangle', 'Approved without fixing the issue.', 'Human review only helps when you actually review. The risky claim still went out.');
+      });
+      return;
+    }
+  }
+
+  /* ── Reset the whole console ── */
+  function resetConsole(){
+    clearTimers();
+    fixed = false; outcome = null;
+    mailResult.classList.remove('show');
+    pipeEnv.classList.remove('gone','delivered','parked');
+    setInbox(false);
+    roleHintIc.setAttribute('data-lucide', MODES[mode].hintIc);
+    roleHintText.textContent = MODES[mode].hint;
+    hlStatus.textContent = 'Ready';
+    renderMail(); renderActions();
+
+    if (mode === 'human'){
+      setGate('gate-locked', 'gate locked');
+      moveEnv('agent');                                   // start at the agent…
+      timers.push(setTimeout(() => moveEnv('gate', true), 60)); // …then glide to the gate and park
+    } else {
+      setGate('gate-open', 'no review');
+      moveEnv('agent');
+    }
+    icons();
+  }
+
+  /* ── Switch mode ── */
+  function setMode(m){
+    if (m === mode) return;
+    mode = m;
+    modeToggle.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === m));
+    resetConsole();
+  }
+
+  modeToggle.querySelectorAll('.mode-btn').forEach(b =>
+    b.addEventListener('click', () => setMode(b.getAttribute('data-mode')))
+  );
+  resetBtn.addEventListener('click', resetConsole);
+
+  /* ── Risk cards + approval flow (section 3) ── */
+  let apprTimers = [];
+  function clearApprTimers(){ apprTimers.forEach(t => clearTimeout(t)); apprTimers = []; }
+
+  function renderRisks(){
+    riskGrid.innerHTML = RISKS.map(r =>
+      '<button class="risk-card" data-id="' + r.id + '">' +
+        '<div class="risk-head">' +
+          '<span class="risk-ic"><i data-lucide="' + r.icon + '" style="width:20px;height:20px;"></i></span>' +
+          '<span class="risk-title">' + r.title + '</span>' +
+        '</div>' +
+        '<div class="risk-desc">' + r.desc + '</div>' +
+      '</button>'
+    ).join('');
+    riskGrid.querySelectorAll('.risk-card').forEach(c =>
+      c.addEventListener('click', () => selectRisk(c.getAttribute('data-id')))
+    );
+  }
+
+  function selectRisk(id){
+    clearApprTimers();
+    const r = RISKS.find(x => x.id === id);
+    if (!r) return;
+    riskGrid.querySelectorAll('.risk-card').forEach(c => c.classList.toggle('selected', c.getAttribute('data-id') === id));
+
+    apprFlow.innerHTML =
+      '<span class="appr-step" data-s="0"><i data-lucide="bot" style="width:15px;height:15px;"></i> Agent suggests: ' + r.action + '</span>' +
+      '<span class="appr-arrow" data-r="0"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>' +
+      '<span class="appr-step human" data-s="1"><i data-lucide="user-check" style="width:15px;height:15px;"></i> Human approves</span>' +
+      '<span class="appr-arrow" data-r="1"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>' +
+      '<span class="appr-step done" data-s="2"><i data-lucide="check-circle-2" style="width:15px;height:15px;"></i> Action happens</span>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const parts = apprFlow.querySelectorAll('.appr-step, .appr-arrow');
+    parts.forEach((el, i) => {
+      apprTimers.push(setTimeout(() => el.classList.add('show'), 180 * i + 80));
+    });
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function(){
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons(){
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    resetConsole();
+    renderRisks();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>
