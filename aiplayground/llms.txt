@@ -102,7 +102,26 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [Single-Agent vs Multi-Agent](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/single-vs-multi-agent.html): See how the same task flows through one agent or a team of agents with different roles.
 - [Real-World AI Agents](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/real-world-ai-agents.html): Explore everyday agents like travel, email, coding, research, and support, and the building blocks they share.
 
+## Agentic AI
+
+- [What is Agentic AI?](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/what-is-agentic-ai.html): Understand what makes an AI system truly agentic and autonomous.
+- [Agent Loop](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/agent-loop.html): Follow the think, act, observe loop that drives an agent.
+- [Planning](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/planning.html): See how an agent breaks a big goal into smaller steps.
+- [Reflection](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/reflection.html): Watch an agent check its own work and fix mistakes.
+- [Human in the Loop](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/human-in-the-loop.html): Learn where people step in to guide and approve agent actions.
+- [Autonomous Workflows](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/autonomous-workflows.html): Explore agents that run multi-step workflows on their own.
+- [Multi-Step Reasoning](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/multi-step-reasoning.html): See how agents reason through complex, multi-step problems.
+- [Agent Orchestration](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/agent-orchestration.html): Discover how multiple agents are coordinated to finish a task.
+
+## Training Fundamentals
+
+- [How AI Models Learn](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/how-ai-models-learn.html): Start here, see the big picture of how an AI model learns from data before diving into the details.
+- [Pretraining](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/pretraining.html): See how a model first learns language from huge amounts of text.
+- [Training Loss](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/training-loss.html): Understand how training measures whether the model is getting better.
+- [Epochs](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/epochs.html): Learn how a model improves by passing over the data many times.
+- [Inference](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/inference.html): Understand the difference between training a model and using it.
+
 ## Coming soon
 
-- AI Agent Fundamentals is complete. Agentic AI and later sections are in progress.
-- Agentic AI: 8 modules on agentic AI, the agent loop, planning, reflection, human in the loop, autonomous workflows, multi-step reasoning, and orchestration - in progress.
+- AI Agent Fundamentals, Agentic AI, and Training Fundamentals are complete. Fine-Tuning is in progress.
+- Fine-Tuning: 6 modules on fine-tuning, instruction tuning, RLHF, LoRA, QLoRA, and adapters - in progress.

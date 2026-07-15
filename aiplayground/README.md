@@ -87,16 +87,6 @@ Why models like BERT, GPT, and T5 are built differently.
 - Why do we need Encoder-Decoder Models?
 - Encoder-Decoder Models (T5)
 
-### Vector Index Explorer
-Compare the search strategies vector databases use to trade speed for accuracy.
-- Compare All Indexes
-- FLAT Index
-- IVF_FLAT Index
-- IVF_SQ8 Index
-- IVF_PQ Index
-- HNSW Index
-- DiskANN Index
-
 ### AI Agent Fundamentals
 What an AI agent is, how it uses tools and memory, and how agents work together.
 - What is an AI Agent?
@@ -105,8 +95,6 @@ What an AI agent is, how it uses tools and memory, and how agents work together.
 - Agent Memory
 - Single-Agent vs Multi-Agent
 - Real-World AI Agents
-
-## Coming Soon
 
 ### Agentic AI
 How autonomous agents plan, reason, reflect, and collaborate on complex tasks.
@@ -118,3 +106,32 @@ How autonomous agents plan, reason, reflect, and collaborate on complex tasks.
 - Autonomous Workflows
 - Multi-Step Reasoning
 - Agent Orchestration
+
+### Vector Index Explorer
+Compare the search strategies vector databases use to trade speed for accuracy.
+- Compare All Indexes
+- FLAT Index
+- IVF_FLAT Index
+- IVF_SQ8 Index
+- IVF_PQ Index
+- HNSW Index
+- DiskANN Index
+
+### Training Fundamentals
+How AI models are trained, how they improve during training, and how they finally become ready to answer questions.
+- How AI Models Learn
+- Pretraining
+- Training Loss
+- Epochs
+- Inference
+
+## Coming Soon
+
+### Fine-Tuning
+How existing AI models are adapted for new tasks using techniques like instruction tuning, RLHF, LoRA, and QLoRA.
+- Fine-Tuning
+- Instruction Tuning
+- RLHF
+- LoRA
+- QLoRA
+- Adapters
