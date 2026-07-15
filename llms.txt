@@ -1,0 +1,144 @@
+# Elanthirayan Madhavan — Full Stack & AI Engineer
+
+> Portfolio of Elanthirayan Madhavan, a Full Stack & AI Engineer. This site showcases projects, engineering work, and interactive learning tools — including the AI Concepts Playground, a collection of hands-on, browser-based lessons that teach how modern AI systems work.
+
+<!--
+  ROOT llms.txt for https://imelanthirayan.github.io/
+  Represents the whole domain: the single-page portfolio + the AI Concepts Playground.
+  The playground also keeps its own project-level map at:
+  https://imelanthirayan.github.io/aiplayground/llms.txt
+-->
+
+## Portfolio
+
+- [Elanthirayan Madhavan — Portfolio](https://imelanthirayan.github.io/): Single-page portfolio of Elanthirayan Madhavan, a Full Stack & AI Engineer — covering background, skills, projects, and contact details.
+- [Blog (Medium)](https://elanthirayan.medium.com/): Articles and notes on software engineering, AI, and things learned along the way.
+- [LinkedIn](https://www.linkedin.com/in/elanthirayan/): Professional profile of Elanthirayan Madhavan — experience, background, and contact.
+
+## AI Concepts Playground
+
+> Interactive, browser-based lessons that teach AI concepts by letting you play with them. Every module is a hands-on experiment: no math-heavy theory, no setup, no frameworks.
+
+- [AI Concepts Playground (Home)](https://imelanthirayan.github.io/aiplayground/): Hands-on, no-setup interactive lessons covering how AI works.
+
+### Inside an LLM
+
+- [How an AI Model Works](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/how-ai-model-works.html): Understand the basics of how AI models process input.
+- [Tokens](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/tokens.html): Learn how AI breaks text into smaller pieces.
+- [Context Window](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/context-window.html): Understand how much text AI can read at once.
+- [What is a Transformer?](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/transformer.html): Discover the architecture behind modern AI.
+- [How a Transformer Reads Text](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/transformer-reads-text.html): See how transformers process and understand language.
+- [Attention](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/attention.html): See how words focus on each other inside a model.
+- [Next Word Prediction](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/next-word-prediction.html): Understand how language models generate text.
+- [Temperature](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/temperature.html): Control how creative or focused AI responses are.
+- [Top-P Sampling](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/top-p-sampling.html): Control which words AI picks when generating text.
+- [Hallucinations](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/hallucinations.html): Understand why AI sometimes makes mistakes.
+- [Prompt Engineering](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/prompt-engineering.html): Experiment with better prompts for better results.
+- [Token Cost Estimator](https://imelanthirayan.github.io/aiplayground/modules/inside-llm/token-cost.html): See how token count affects AI API usage.
+
+### Embeddings & Search
+
+- [Embeddings](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/embeddings.html): Learn how meaning can be represented as vectors.
+- [Vectors](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/vectors.html): Learn how text can become numbers.
+- [Embedding Dimensions](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/embedding-dimensions.html): Understand what vector dimensions mean.
+- [Vector Arithmetic](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/vector-arithmetic.html): Learn how vectors capture word relationships.
+- [Vector Normalization](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/vector-normalization.html): See why vectors are normalized before comparison.
+- [Similarity Metrics](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/similarity.html): Learn how computers measure how alike two items are.
+- [Distance vs Similarity](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/distance-vs-similarity.html): Learn the difference between distance and similarity.
+- [Similarity Matrix](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/similarity-matrix.html): Compare every item with every other item at once.
+- [Keyword vs Semantic Search](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/keyword-vs-semantic-search.html): See why AI understands meaning, not just words.
+- [KNN Search](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/knn.html): Learn how nearest neighbors are found.
+- [Top-K Search](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/top-k.html): Learn how the best K results are returned.
+- [Ranking](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/ranking.html): Understand how search results are ordered by relevance.
+- [Clustering](https://imelanthirayan.github.io/aiplayground/modules/embeddings-search/clustering.html): Learn how similar items are grouped together.
+
+### Retrieval-Augmented Generation (RAG)
+
+- [RAG Overview](https://imelanthirayan.github.io/aiplayground/modules/rag/rag-overview.html): See the big picture of how retrieval-augmented generation works.
+- [Document Chunking & Overlap](https://imelanthirayan.github.io/aiplayground/modules/rag/document-chunking.html): Split documents into smaller searchable pieces.
+- [Metadata Filtering](https://imelanthirayan.github.io/aiplayground/modules/rag/metadata-filtering.html): Filter search results using document properties.
+- [Embeddings in RAG](https://imelanthirayan.github.io/aiplayground/modules/rag/embeddings-in-rag.html): Convert document chunks into searchable vectors.
+- [Vector Search](https://imelanthirayan.github.io/aiplayground/modules/rag/vector-search.html): Find relevant chunks using vector similarity.
+- [Retrieval](https://imelanthirayan.github.io/aiplayground/modules/rag/retrieval.html): Bring useful information back to the AI.
+- [Re-ranking](https://imelanthirayan.github.io/aiplayground/modules/rag/re-ranking.html): Reorder retrieved results for better relevance.
+- [RAG Pipeline](https://imelanthirayan.github.io/aiplayground/modules/rag/rag-pipeline.html): See the full retrieval-augmented generation flow end to end.
+
+### Model Context Protocol (MCP)
+
+- [What is MCP?](https://imelanthirayan.github.io/aiplayground/modules/mcp/what-is-mcp.html): Learn what MCP is and why it was introduced using simple real-world analogies.
+- [Why MCP?](https://imelanthirayan.github.io/aiplayground/modules/mcp/why-mcp.html): Understand the problems MCP solves and why a common standard is useful for AI applications.
+- [MCP Architecture](https://imelanthirayan.github.io/aiplayground/modules/mcp/mcp-architecture.html): Explore the complete MCP architecture, including the Host, MCP Clients, MCP Servers, and external domains, and see how they work together.
+- [MCP vs Traditional APIs](https://imelanthirayan.github.io/aiplayground/modules/mcp/mcp-vs-apis.html): Compare MCP with traditional API integrations and understand when MCP provides a better approach.
+- [MCP vs Function Calling](https://imelanthirayan.github.io/aiplayground/modules/mcp/mcp-vs-function-calling.html): Learn the difference between function calling and MCP, and understand how they complement each other.
+- [Where MCP Fits in AI Apps](https://imelanthirayan.github.io/aiplayground/modules/mcp/where-mcp-fits.html): See how MCP fits into modern AI applications alongside LLMs, RAG, vector databases, and external domains.
+
+### Prompt Engineering
+
+- [What is Prompt Engineering?](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/what-is-prompt-engineering.html): Learn what prompt engineering is and why the way you ask shapes the answer you get.
+- [Zero-shot Prompting](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/zero-shot-prompting.html): Ask the model to do a task with no examples and see how far clear instructions alone can go.
+- [One-shot vs Few-shot Prompting](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/one-shot-vs-few-shot.html): See how adding one or a few examples guides the model toward the format and style you want.
+- [Role Prompting](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/role-prompting.html): Give the model a role, like teacher or reviewer, to shape its tone and focus.
+- [Structured Output](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/structured-output.html): Ask for answers in formats like JSON or tables so results are easy to use.
+- [Prompt Chaining](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/prompt-chaining.html): Break a complex task into smaller prompts that build on each other, step by step.
+- [Common Prompt Mistakes](https://imelanthirayan.github.io/aiplayground/modules/prompt-engineering/common-prompt-mistakes.html): Spot the mistakes that make prompts weak, and learn simple fixes that get better answers.
+
+### Transformer Internals
+
+- [How a Transformer Reads Text](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/how-a-transformer-reads-text.html): Play with how a transformer turns text into tokens it can work with.
+- [Word Order & Positional Encoding](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/positional-encoding.html): See why word order matters and how position is added to each token.
+- [Attention & Multi-Head Attention](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/multi-head-attention.html): Watch words look at each other, and see why many attention heads help.
+- [Thinking Step (Feed Forward Network)](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/feed-forward-network.html): Explore the layer where each token is processed and refined on its own.
+- [Residual Connections & Layer Normalization](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/residual-and-layer-norm.html): See how shortcuts and normalization keep information flowing smoothly.
+- [One Transformer Layer](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/one-transformer-layer.html): Put the pieces together and step through a single transformer layer.
+- [Stacking Transformer Layers](https://imelanthirayan.github.io/aiplayground/modules/inside-a-transformer/stacking-transformer-layers.html): Stack layers and watch how understanding deepens layer by layer.
+
+### Transformer Architectures
+
+- [What are Encoder and Decoder?](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-and-decoder.html): Meet the two transformer roles, the encoder reads and understands, the decoder generates output.
+- [Encoder-only Models (BERT)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-only-bert.html): See why encoder-only models like BERT are great at understanding text but not built to generate long responses.
+- [Decoder-only Models (GPT)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/decoder-only-gpt.html): Watch how decoder-only models like GPT generate text one token at a time.
+- [Why do we need Encoder-Decoder Models?](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/why-encoder-decoder.html): Explore why some tasks need both understanding and generation working together.
+- [Encoder-Decoder Models (T5)](https://imelanthirayan.github.io/aiplayground/modules/transformer-architectures/encoder-decoder-t5.html): See how T5 combines an encoder and decoder to read input and generate new output.
+
+### AI Agent Fundamentals
+
+- [What is an AI Agent?](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/what-is-an-ai-agent.html): See how an AI agent differs from a chatbot by working toward a goal and taking actions.
+- [Components of an AI Agent](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/components-of-an-ai-agent.html): Explore the goal, model, tools, memory, action, and result that make up an AI agent.
+- [Tool Calling](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/tool-calling.html): See how an agent chooses the right tool, like a calendar, calculator, files, or search, to complete a task.
+- [Agent Memory](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/agent-memory.html): Compare an agent with and without memory, and see what useful information it can remember.
+- [Single-Agent vs Multi-Agent](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/single-vs-multi-agent.html): See how the same task flows through one agent or a team of agents with different roles.
+- [Real-World AI Agents](https://imelanthirayan.github.io/aiplayground/modules/ai-agent-fundamentals/real-world-ai-agents.html): Explore everyday agents like travel, email, coding, research, and support, and the building blocks they share.
+
+### Agentic AI
+
+- [What is Agentic AI?](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/what-is-agentic-ai.html): Understand what makes an AI system truly agentic and autonomous.
+- [Agent Loop](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/agent-loop.html): Follow the think, act, observe loop that drives an agent.
+- [Planning](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/planning.html): See how an agent breaks a big goal into smaller steps.
+- [Reflection](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/reflection.html): Watch an agent check its own work and fix mistakes.
+- [Human in the Loop](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/human-in-the-loop.html): Learn where people step in to guide and approve agent actions.
+- [Autonomous Workflows](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/autonomous-workflows.html): Explore agents that run multi-step workflows on their own.
+- [Multi-Step Reasoning](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/multi-step-reasoning.html): See how agents reason through complex, multi-step problems.
+- [Agent Orchestration](https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/agent-orchestration.html): Discover how multiple agents are coordinated to finish a task.
+
+### Vector Index Explorer
+
+- [Compare All Indexes](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/compare.html): Run one query against all 6 index strategies side by side. See speed and accuracy differ.
+- [FLAT Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/flat.html): Brute-force exact search. Every stored vector is compared, 100% accurate.
+- [IVF_FLAT Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/ivf-flat.html): Groups vectors into clusters, then searches only the nearest cluster for faster results.
+- [IVF_SQ8 Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/ivf-sq8.html): Converts 32-bit floats to 8-bit integers, 75% less memory, minimal accuracy loss.
+- [IVF_PQ Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/ivf-pq.html): Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.
+- [HNSW Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/hnsw.html): Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.
+- [DiskANN Index](https://imelanthirayan.github.io/aiplayground/modules/vector-indexes/diskann.html): Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.
+
+### Training Fundamentals
+
+- [How AI Models Learn](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/how-ai-models-learn.html): Start here, see the big picture of how an AI model learns from data before diving into the details.
+- [Pretraining](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/pretraining.html): See how a model first learns language from huge amounts of text.
+- [Training Loss](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/training-loss.html): Understand how training measures whether the model is getting better.
+- [Epochs](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/epochs.html): Learn how a model improves by passing over the data many times.
+- [Inference](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/inference.html): Understand the difference between training a model and using it.
+
+## Coming soon
+
+- AI Agent Fundamentals, Agentic AI, and Training Fundamentals are complete. Fine-Tuning is in progress.
+- Fine-Tuning: 6 modules on fine-tuning, instruction tuning, RLHF, LoRA, QLoRA, and adapters - in progress.
