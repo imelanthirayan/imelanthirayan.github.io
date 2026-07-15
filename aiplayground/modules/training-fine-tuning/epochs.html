@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Epochs, a beginner-friendly interactive lesson that explains an epoch as one full pass through the training data, why models train for several epochs, and the risk of too many." />
+  <title>Epochs, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%94%81</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Playground controls ─────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #ea580c; color: white; border-color: #ea580c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #c2410c; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+    html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
+    .ctrl-btn.attn {
+      background: #ea580c; color: white; border-color: #ea580c;
+      box-shadow: 0 0 0 0 rgba(234,88,12,0.5); animation: resetPulse 1.6s ease-in-out infinite;
+    }
+    .ctrl-btn.attn:hover { background: #c2410c; }
+    html.dark .ctrl-btn.attn { background: #f97316; border-color: #f97316; color: white; }
+    @keyframes resetPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(234,88,12,0.45); } 50% { box-shadow: 0 0 0 8px rgba(234,88,12,0); } }
+
+    /* ── Epoch counter + status ──────────────── */
+    .epoch-strip { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1.1rem; margin-top: 0.25rem; }
+    @media (max-width: 520px) { .epoch-strip { grid-template-columns: 1fr; } }
+    .epoch-badge {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 96px; height: 96px; border-radius: 1.1rem; flex-shrink: 0;
+      border: 2px solid rgba(234,88,12,0.28); background: rgba(234,88,12,0.06);
+    }
+    html.dark .epoch-badge { border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.12); }
+    .epoch-num { font-size: 2.5rem; font-weight: 900; line-height: 1; color: #ea580c; transition: transform 0.3s ease; }
+    html.dark .epoch-num { color: #fdba74; }
+    .epoch-num.bump { animation: numBump 0.4s ease; }
+    @keyframes numBump { 0% { transform: scale(0.6); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+    .epoch-cap { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.2rem; }
+    .epoch-status { font-size: 0.95rem; font-weight: 700; color: #334155; line-height: 1.5; }
+    html.dark .epoch-status { color: #e2e8f0; }
+    .epoch-status .es-tag { display: inline-block; font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.55rem; border-radius: 9999px; margin-bottom: 0.45rem; color: #ea580c; background: rgba(234,88,12,0.12); }
+    html.dark .epoch-status .es-tag { color: #fdba74; background: rgba(234,88,12,0.22); }
+
+    /* ── Training data cards ─────────────────── */
+    .data-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 0.6rem; margin-top: 1.4rem; }
+    .tcard {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.85rem; border-radius: 0.85rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease; position: relative; overflow: hidden;
+    }
+    html.dark .tcard { background: #0f172a; border-color: #334155; }
+    .tcard.reading { border-color: #ea580c; background: rgba(234,88,12,0.08); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(234,88,12,0.16); }
+    html.dark .tcard.reading { border-color: #fb923c; background: rgba(234,88,12,0.16); }
+    .tcard.seen { border-color: rgba(22,163,74,0.35); }
+    html.dark .tcard.seen { border-color: rgba(74,222,128,0.3); }
+    .tcard-ic { width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; transition: all 0.3s ease; }
+    html.dark .tcard-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .tcard.reading .tcard-ic { background: #ea580c; color: white; }
+    .tcard.seen .tcard-ic { background: #16a34a; color: white; }
+    .tcard-text { font-weight: 700; font-size: 0.82rem; color: #334155; line-height: 1.35; }
+    html.dark .tcard-text { color: #e2e8f0; }
+
+    /* ── Loss meter ──────────────────────────── */
+    .meter-wrap { margin-top: 1.6rem; }
+    .meter-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.5rem; }
+    .meter-caption { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+    .meter-level { font-size: 1.05rem; font-weight: 900; transition: color 0.4s ease; color: #94a3b8; }
+    .meter-level.high { color: #dc2626; }
+    .meter-level.medium { color: #d97706; }
+    .meter-level.low { color: #16a34a; }
+    html.dark .meter-level.high { color: #f87171; }
+    html.dark .meter-level.medium { color: #fbbf24; }
+    html.dark .meter-level.low { color: #4ade80; }
+    .meter-track { position: relative; height: 22px; border-radius: 9999px; overflow: hidden; background: #e2e8f0; border: 1px solid #e2e8f0; }
+    html.dark .meter-track { background: #334155; border-color: #334155; }
+    .meter-fill { height: 100%; width: 90%; border-radius: 9999px; transition: width 0.9s cubic-bezier(.4,0,.2,1), background 0.6s ease; background: linear-gradient(90deg,#ef4444,#f97316); }
+    .meter-fill.medium { background: linear-gradient(90deg,#f59e0b,#fbbf24); }
+    .meter-fill.low    { background: linear-gradient(90deg,#16a34a,#4ade80); }
+    .meter-scale { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.64rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Note message ────────────────────────── */
+    .note-msg {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.3rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; opacity: 0;
+      color: #ea580c; background: rgba(234,88,12,0.08); border: 1.5px solid rgba(234,88,12,0.22);
+      transition: opacity 0.45s ease;
+    }
+    .note-msg.show { opacity: 1; }
+    html.dark .note-msg { color: #fdba74; background: rgba(234,88,12,0.14); border-color: rgba(251,146,60,0.26); }
+
+    /* ── Multiple-pass steps ─────────────────── */
+    .pass-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .pass-grid { grid-template-columns: 1fr; } }
+    .pass-card { border-radius: 1rem; padding: 1.2rem 1.25rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .pass-card { background: #0f172a; border-color: #334155; }
+    .pass-badge { width: 42px; height: 42px; border-radius: 9999px; margin: 0 auto 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .pass-name { font-weight: 900; font-size: 0.98rem; color: #1e293b; margin-bottom: 0.3rem; }
+    html.dark .pass-name { color: #f1f5f9; }
+    .pass-desc { font-size: 0.83rem; line-height: 1.5; color: #64748b; }
+    html.dark .pass-desc { color: #94a3b8; }
+    .pass-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e1; }
+    html.dark .pass-arrow { color: #475569; }
+
+    /* ── Too few / good / too many cards ─────── */
+    .zone-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.85rem; }
+    .zone-card { border-radius: 1rem; padding: 1.2rem 1.3rem; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease; }
+    html.dark .zone-card { background: #0f172a; border-color: #334155; }
+    .zone-card.few  { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); }
+    .zone-card.good { border-color: rgba(22,163,74,0.3); background: rgba(22,163,74,0.05); }
+    .zone-card.many { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+
+    .zone-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+    .zone-ic { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .zone-card.few .zone-ic  { background: #ef4444; }
+    .zone-card.good .zone-ic { background: #16a34a; }
+    .zone-card.many .zone-ic { background: #f59e0b; }
+    .zone-name { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .zone-name { color: #f1f5f9; }
+    .zone-desc { font-size: 0.84rem; line-height: 1.55; color: #64748b; }
+    html.dark .zone-desc { color: #94a3b8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Training Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="repeat" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Epochs</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          An epoch is <strong class="text-slate-800 dark:text-slate-200">one complete pass through the training data</strong>.
+          If a model trains for <strong class="text-slate-800 dark:text-slate-200">3 epochs</strong>, it has seen the
+          <strong class="text-slate-800 dark:text-slate-200">full dataset 3 times</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Epoch Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Run one full pass at a time</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Press <strong class="text-slate-800 dark:text-slate-200">Run Epoch</strong> to send the model through
+          <strong class="text-slate-800 dark:text-slate-200">all 5 examples once</strong>. Each pass nudges the loss down and
+          the model gets a little more familiar with the patterns.
+        </p>
+
+        <!-- epoch counter + status -->
+        <div class="epoch-strip">
+          <div class="epoch-badge">
+            <span class="epoch-num" id="epochNum">0</span>
+            <span class="epoch-cap">Epochs</span>
+          </div>
+          <div class="epoch-status" id="epochStatus">
+            <span class="es-tag">Epoch 0</span><br>
+            Model has not seen the data yet.
+          </div>
+        </div>
+
+        <!-- training data -->
+        <div class="data-grid" id="dataGrid"></div>
+
+        <!-- loss meter -->
+        <div class="meter-wrap">
+          <div class="meter-top">
+            <span class="meter-caption">Training loss</span>
+            <span class="meter-level" id="meterLevel">High loss</span>
+          </div>
+          <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+          <div class="meter-scale"><span>Low (good)</span><span>High (bad)</span></div>
+        </div>
+
+        <!-- controls -->
+        <div class="pg-controls" style="margin-top:1.4rem;">
+          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="play" style="width:14px;height:14px;"></i> <span id="runBtnLabel">Run Epoch</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Reset</button>
+        </div>
+
+        <!-- note -->
+        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> One epoch = the model has seen every example once.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHY MULTIPLE EPOCHS?
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="layers" style="width:12px;height:12px;"></i>Why Multiple Epochs?</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Seeing the data more than once</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          A model often needs to see the data more than once. Repeated passes can help it learn patterns better.
+        </p>
+        <div class="pass-grid">
+          <div class="pass-card">
+            <div class="pass-badge">1</div>
+            <div class="pass-name">First pass</div>
+            <div class="pass-desc">Learns basic patterns.</div>
+          </div>
+          <div class="pass-card">
+            <div class="pass-badge">2</div>
+            <div class="pass-name">Second pass</div>
+            <div class="pass-desc">Strengthens those patterns.</div>
+          </div>
+          <div class="pass-card">
+            <div class="pass-badge">3</div>
+            <div class="pass-name">Third pass</div>
+            <div class="pass-desc">Improves confidence.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. TOO FEW vs TOO MANY EPOCHS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="scale" style="width:12px;height:12px;"></i>Too Few vs Too Many Epochs</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Finding the sweet spot</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          More epochs help, up to a point. Too few and the model barely learns; too many and it starts memorising.
+          There is <strong class="text-slate-800 dark:text-slate-200">no single magic number</strong>, it depends on the data and model.
+        </p>
+
+        <div class="zone-grid">
+          <div class="zone-card few">
+            <div class="zone-head">
+              <span class="zone-ic"><i data-lucide="battery-low" style="width:20px;height:20px;"></i></span>
+              <span class="zone-name">Too Few Epochs</span>
+            </div>
+            <div class="zone-desc">The model may not learn enough.</div>
+          </div>
+          <div class="zone-card good">
+            <div class="zone-head">
+              <span class="zone-ic"><i data-lucide="check" style="width:20px;height:20px;"></i></span>
+              <span class="zone-name">Good Number of Epochs</span>
+            </div>
+            <div class="zone-desc">The model learns useful patterns.</div>
+          </div>
+          <div class="zone-card many">
+            <div class="zone-head">
+              <span class="zone-ic"><i data-lucide="alert-triangle" style="width:20px;height:20px;"></i></span>
+              <span class="zone-name">Too Many Epochs</span>
+            </div>
+            <div class="zone-desc">The model may memorize the training data instead of learning general patterns.</div>
+          </div>
+        </div>
+
+        <div class="note-msg show" style="opacity:1;position:static;margin-top:1.4rem;"><i data-lucide="info" style="width:16px;height:16px;"></i> The best number of epochs depends on the data and model, teams find it by testing the model on new examples, not a fixed rule.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• One epoch means <strong class="text-slate-900 dark:text-white">one full pass</strong> through the training data.</li>
+            <li>• Multiple epochs help the model <strong class="text-slate-900 dark:text-white">learn patterns better</strong>.</li>
+            <li>• Too few epochs may <strong class="text-slate-900 dark:text-white">undertrain</strong> the model.</li>
+            <li>• Too many epochs may cause <strong class="text-slate-900 dark:text-white">memorization</strong>.</li>
+            <li>• Epochs are part of <strong class="text-slate-900 dark:text-white">training</strong>, not inference.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Click Run Epoch several times.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the epoch counter increase.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the loss meter change.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare too few and too many epochs.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          An epoch tells us <strong>how many times the model has gone through the full training dataset</strong>. More epochs
+          can help learning, but <strong>too many can make the model memorize instead of generalize</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="training-loss.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Training Loss
+        </a>
+        <a href="inference.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Inference
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Training Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     EPOCHS, playground data
+  ═══════════════════════════════════════════════ */
+  const TRAIN_DATA = [
+    { text:'The cat sat on the mat.',    icon:'cat' },
+    { text:'Dogs like to play.',         icon:'dog' },
+    { text:'AI helps people learn.',     icon:'graduation-cap' },
+    { text:'The sun rises in the east.', icon:'sunrise' },
+    { text:'Code can solve problems.',   icon:'code' },
+  ];
+
+  /* per-epoch state: loss %, meter level, and status line */
+  const EPOCH_STATES = [
+    { pct:90, level:'high',   status:'Model has not seen the data yet.' },
+    { pct:70, level:'high',   status:'Model has seen all examples once.' },
+    { pct:52, level:'medium', status:'Model has reviewed all examples again.' },
+    { pct:38, level:'medium', status:'Model is becoming more familiar with the patterns.' },
+    { pct:28, level:'low',    status:'Patterns are getting clearer with each pass.' },
+    { pct:22, level:'low',    status:'Model is training steadily, loss keeps easing down.' },
+  ];
+  const MAX_EPOCH = EPOCH_STATES.length - 1; // 5 passes
+
+  const dataGrid    = document.getElementById('dataGrid');
+  const epochNum    = document.getElementById('epochNum');
+  const epochStatus = document.getElementById('epochStatus');
+  const meterFill   = document.getElementById('meterFill');
+  const meterLevel  = document.getElementById('meterLevel');
+  const noteMsg     = document.getElementById('noteMsg');
+  const runBtn      = document.getElementById('runBtn');
+  const runBtnLabel = document.getElementById('runBtnLabel');
+  const resetBtn    = document.getElementById('resetBtn');
+
+  let epoch = 0;
+  let running = false;
+  let timers = [];
+
+  const LEVEL_TEXT = { high:'High loss', medium:'Medium loss', low:'Low loss' };
+
+  function renderDataCards() {
+    dataGrid.innerHTML = TRAIN_DATA.map((d, i) => `
+      <div class="tcard" data-idx="${i}">
+        <span class="tcard-ic"><i data-lucide="${d.icon}" style="width:16px;height:16px;"></i></span>
+        <span class="tcard-text">${d.text}</span>
+      </div>`).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function applyEpochState() {
+    const s = EPOCH_STATES[epoch];
+    epochNum.textContent = epoch;
+    epochNum.classList.remove('bump'); void epochNum.offsetWidth; epochNum.classList.add('bump');
+    meterFill.className = 'meter-fill ' + s.level;
+    meterFill.style.width = s.pct + '%';
+    meterLevel.className = 'meter-level ' + s.level;
+    meterLevel.textContent = LEVEL_TEXT[s.level];
+    epochStatus.innerHTML = `<span class="es-tag">Epoch ${epoch}</span><br>${s.status}`;
+  }
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function runEpoch() {
+    if (running || epoch >= MAX_EPOCH) return;
+    running = true;
+    runBtn.disabled = true;
+    epoch++;
+
+    // animate the model reading each card in turn
+    const cards = [...dataGrid.querySelectorAll('.tcard')];
+    cards.forEach(c => c.classList.remove('seen'));
+    let t = 0;
+    const gap = 260;
+    cards.forEach((c, i) => {
+      timers.push(setTimeout(() => {
+        c.classList.add('reading');
+      }, t));
+      timers.push(setTimeout(() => {
+        c.classList.remove('reading');
+        c.classList.add('seen');
+      }, t + gap - 40));
+      t += gap;
+    });
+
+    // after the full pass, update counter + loss
+    timers.push(setTimeout(() => {
+      applyEpochState();
+      noteMsg.classList.add('show');
+      running = false;
+      if (epoch >= MAX_EPOCH) {
+        runBtnLabel.textContent = 'Max epochs reached';
+        runBtn.disabled = true;
+        resetBtn.classList.add('attn');
+      } else {
+        runBtn.disabled = false;
+      }
+    }, t + 120));
+  }
+
+  function resetPlayground() {
+    clearTimers();
+    running = false;
+    epoch = 0;
+    // clear highlights instantly
+    meterFill.style.transition = 'none';
+    applyEpochState();
+    void meterFill.offsetWidth;
+    meterFill.style.transition = '';
+    dataGrid.querySelectorAll('.tcard').forEach(c => c.classList.remove('reading','seen'));
+    noteMsg.classList.remove('show');
+    runBtnLabel.textContent = 'Run Epoch';
+    runBtn.disabled = false;
+    resetBtn.classList.remove('attn');
+  }
+
+  runBtn.addEventListener('click', runEpoch);
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderDataCards();
+    applyEpochState();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How AI Models Learn, a beginner-friendly interactive lesson that walks through the full AI learning journey, from raw data to training, a base model, fine-tuning, and finally inference." />
+  <title>How AI Models Learn, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8E%93</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Playground controls ─────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #ea580c; color: white; border-color: #ea580c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #c2410c; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+    html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
+
+    /* ── Progress bar ────────────────────────── */
+    .progress-wrap { margin-top: 1.3rem; }
+    .progress-track { height: 8px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .progress-track { background: #334155; }
+    .progress-fill { height: 100%; width: 0%; border-radius: 9999px; background: linear-gradient(90deg,#ea580c,#fb923c); transition: width 0.5s ease; }
+    .progress-meta { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.45rem; font-size: 0.68rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ── Timeline (clickable) ────────────────── */
+    .timeline {
+      display: flex; align-items: stretch; gap: 0.35rem; margin-top: 1.4rem;
+      overflow-x: auto; padding: 0.35rem 0.15rem 0.65rem;
+    }
+    .tl-step {
+      cursor: pointer; flex: 1 1 0; min-width: 96px; display: flex; flex-direction: column;
+      align-items: center; gap: 0.55rem; text-align: center; padding: 0.6rem 0.35rem;
+      border-radius: 1rem; border: 1.5px solid transparent; background: transparent;
+      transition: all 0.3s ease;
+    }
+    .tl-step:hover { background: rgba(234,88,12,0.05); }
+    html.dark .tl-step:hover { background: rgba(234,88,12,0.12); }
+    .tl-step.active { border-color: rgba(234,88,12,0.35); background: rgba(234,88,12,0.07); box-shadow: 0 10px 26px rgba(234,88,12,0.14); }
+    html.dark .tl-step.active { border-color: rgba(251,146,60,0.4); background: rgba(234,88,12,0.16); }
+    .tl-node {
+      width: 52px; height: 52px; border-radius: 9999px; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; background: #e2e8f0; color: #94a3b8;
+      transition: all 0.35s ease; position: relative;
+    }
+    html.dark .tl-node { background: #334155; color: #64748b; }
+    .tl-step.done .tl-node { background: rgba(234,88,12,0.15); color: #ea580c; }
+    html.dark .tl-step.done .tl-node { background: rgba(234,88,12,0.28); color: #fdba74; }
+    .tl-step.active .tl-node { background: #ea580c; color: white; animation: nodePulse 1.6s ease-in-out infinite; }
+    .tl-num {
+      position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 9999px;
+      background: white; color: #ea580c; font-size: 0.65rem; font-weight: 900;
+      display: flex; align-items: center; justify-content: center; border: 1.5px solid #ea580c;
+    }
+    html.dark .tl-num { background: #1e293b; color: #fdba74; border-color: #fb923c; }
+    @keyframes nodePulse { 0%,100% { box-shadow: 0 0 0 5px rgba(234,88,12,0.16); } 50% { box-shadow: 0 0 0 11px rgba(234,88,12,0.03); } }
+    .tl-name { font-weight: 800; font-size: 0.8rem; color: #1e293b; line-height: 1.2; }
+    html.dark .tl-name { color: #f1f5f9; }
+    .tl-step.active .tl-name { color: #ea580c; }
+    html.dark .tl-step.active .tl-name { color: #fdba74; }
+    .tl-arrow { display: flex; align-items: center; color: #cbd5e1; flex-shrink: 0; align-self: center; }
+    html.dark .tl-arrow { color: #475569; }
+
+    /* ── Stage detail panel ──────────────────── */
+    .stage-detail {
+      margin-top: 1.1rem; border-radius: 1.1rem; padding: 1.4rem 1.5rem;
+      border: 1.5px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.05);
+    }
+    html.dark .stage-detail { border-color: rgba(251,146,60,0.26); background: rgba(234,88,12,0.1); }
+    .stage-detail.swap { animation: fadeSwap 0.4s ease; }
+    .sd-head { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.7rem; }
+    .sd-ic {
+      width: 46px; height: 46px; border-radius: 0.9rem; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; background: #ea580c; color: white;
+      box-shadow: 0 6px 16px rgba(234,88,12,0.3);
+    }
+    .sd-kicker { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #ea580c; }
+    html.dark .sd-kicker { color: #fdba74; }
+    .sd-title { font-weight: 900; font-size: 1.2rem; color: #1e293b; }
+    html.dark .sd-title { color: #f1f5f9; }
+    .sd-body { font-size: 0.95rem; line-height: 1.6; color: #475569; }
+    html.dark .sd-body { color: #cbd5e1; }
+    .sd-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-top: 1rem; }
+    @media (max-width: 640px) { .sd-facts { grid-template-columns: 1fr; } }
+    .sd-fact {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.75rem 0.85rem;
+      border-radius: 0.85rem; border: 1.5px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.65);
+    }
+    html.dark .sd-fact { background: rgba(15,23,42,0.4); border-color: rgba(255,255,255,0.06); }
+    .sd-fact-ic { font-size: 1.15rem; line-height: 1.3; flex-shrink: 0; }
+    .sd-fact-big {
+      font-size: 2.6rem; line-height: 1; flex-shrink: 0;
+      display: grid; place-items: center;
+      width: 3.4rem; height: 3.4rem; border-radius: 0.75rem;
+      background: rgba(234,88,12,0.10);
+      box-shadow: inset 0 0 0 1px rgba(234,88,12,0.15);
+    }
+    html.dark .sd-fact-big { background: rgba(234,88,12,0.16); box-shadow: inset 0 0 0 1px rgba(253,186,116,0.18); }
+    .sd-fact-analogy { align-items: center; }
+    .sd-fact-label { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #ea580c; margin-bottom: 0.15rem; }
+    html.dark .sd-fact-label { color: #fdba74; }
+    .sd-fact-text { font-size: 0.86rem; line-height: 1.5; color: #475569; }
+    html.dark .sd-fact-text { color: #cbd5e1; }
+    @keyframes fadeSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Compare cards (training vs inference) ─ */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+    .cmp-card { border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.train { border-color: rgba(234,88,12,0.3); background: rgba(234,88,12,0.05); }
+    html.dark .cmp-card.train { border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+    .cmp-card.infer { border-color: rgba(37,99,235,0.28); background: rgba(37,99,235,0.05); }
+    html.dark .cmp-card.infer { border-color: rgba(96,165,250,0.28); background: rgba(37,99,235,0.1); }
+    .cmp-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.35rem; }
+    .cmp-ic {
+      width: 42px; height: 42px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center;
+      color: white; flex-shrink: 0;
+    }
+    .cmp-card.train .cmp-ic { background: #ea580c; box-shadow: 0 4px 12px rgba(234,88,12,0.3); }
+    .cmp-card.infer .cmp-ic { background: #2563eb; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .cmp-title { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    html.dark .cmp-title { color: #f1f5f9; }
+    .cmp-sub { font-size: 0.85rem; font-weight: 700; color: #64748b; margin-bottom: 1rem; }
+    html.dark .cmp-sub { color: #94a3b8; }
+    .cmp-mini { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 0.9rem 0 0.5rem; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cmp-item { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.9rem; color: #334155; }
+    html.dark .cmp-item { color: #cbd5e1; }
+    .cmp-dot { flex-shrink: 0; margin-top: 0.12rem; }
+    .cmp-card.train .cmp-dot { color: #ea580c; }
+    .cmp-card.infer .cmp-dot { color: #2563eb; }
+    .cmp-out {
+      margin-top: 1rem; padding: 0.7rem 0.85rem; border-radius: 0.8rem; font-size: 0.85rem; font-weight: 800;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .cmp-card.train .cmp-out { color: #c2410c; background: rgba(234,88,12,0.1); }
+    html.dark .cmp-card.train .cmp-out { color: #fdba74; background: rgba(234,88,12,0.2); }
+    .cmp-card.infer .cmp-out { color: #1d4ed8; background: rgba(37,99,235,0.1); }
+    html.dark .cmp-card.infer .cmp-out { color: #93c5fd; background: rgba(37,99,235,0.2); }
+
+    /* ── Big picture flow ────────────────────── */
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+    .flow-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1rem; border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; font-weight: 800; font-size: 0.9rem; color: #334155;
+      text-decoration: none; transition: all 0.2s ease;
+    }
+    html.dark .flow-chip { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .flow-chip.link {
+      border-color: rgba(234,88,12,0.4); background: rgba(234,88,12,0.06); color: #ea580c;
+      cursor: pointer;
+    }
+    .flow-chip.link:hover { background: rgba(234,88,12,0.14); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.16); }
+    html.dark .flow-chip.link { color: #fdba74; border-color: rgba(251,146,60,0.35); background: rgba(234,88,12,0.12); }
+    .flow-arrow { color: #cbd5e1; flex-shrink: 0; }
+    html.dark .flow-arrow { color: #475569; }
+    .flow-tag { font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.4rem; border-radius: 9999px; background: rgba(234,88,12,0.16); color: #ea580c; }
+    html.dark .flow-tag { background: rgba(234,88,12,0.28); color: #fdba74; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Training Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 6–8 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="graduation-cap" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">How AI Models Learn</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          AI models are <strong class="text-slate-800 dark:text-slate-200">not born with knowledge</strong>. They learn from
+          <strong class="text-slate-800 dark:text-slate-200">large amounts of data</strong>, improve through
+          <strong class="text-slate-800 dark:text-slate-200">training</strong>, and can later be
+          <strong class="text-slate-800 dark:text-slate-200">adapted for new tasks</strong>. This lesson gives you the
+          big-picture journey before we dive into each step.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Learning Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Click each step to follow the journey</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+          Every AI model moves through the same five stages. Tap any stage on the timeline, or press
+          <strong class="text-slate-800 dark:text-slate-200">Next step</strong> to walk through them one by one.
+          Each stage opens with a simple explanation, a real-life comparison, and an everyday example.
+        </p>
+
+        <!-- clickable timeline -->
+        <div class="timeline" id="timeline"></div>
+
+        <!-- controls -->
+        <div class="pg-controls" style="margin-top:0.4rem;">
+          <button class="ctrl-btn primary" id="stepBtn"><i data-lucide="chevron-right" style="width:14px;height:14px;"></i> <span>Next step</span></button>
+        </div>
+
+        <!-- progress -->
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-meta"><span id="progressStep">Click a step or press Next</span><span id="progressPct">0%</span></div>
+        </div>
+
+        <!-- expanded stage detail -->
+        <div id="stageDetail"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. TRAINING vs USING A MODEL
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Training vs Using a Model</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two very different moments</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          <strong class="text-slate-800 dark:text-slate-200">Training</strong> happens once, before anyone uses the model.
+          <strong class="text-slate-800 dark:text-slate-200">Inference</strong> happens every time someone sends a prompt.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card train">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="dumbbell" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Training</span>
+            </div>
+            <div class="cmp-sub">The model is learning.</div>
+            <div class="cmp-mini">Needs</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="database" style="width:14px;height:14px;"></i></span> Large datasets</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="cpu" style="width:14px;height:14px;"></i></span> Powerful GPUs</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="clock" style="width:14px;height:14px;"></i></span> A lot of time</div>
+            </div>
+            <div class="cmp-out"><i data-lucide="package-check" style="width:16px;height:16px;"></i> Output: a trained model</div>
+          </div>
+          <div class="cmp-card infer">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="message-square" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Inference</span>
+            </div>
+            <div class="cmp-sub">The model answers questions.</div>
+            <div class="cmp-mini">Needs</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="pen-line" style="width:14px;height:14px;"></i></span> A prompt</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="box" style="width:14px;height:14px;"></i></span> The trained model</div>
+            </div>
+            <div class="cmp-out"><i data-lucide="reply" style="width:16px;height:16px;"></i> Output: a response</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. BIG PICTURE
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="map" style="width:12px;height:12px;"></i>The Big Picture</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The complete flow, end to end</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Here is the full path a model travels. The <strong class="text-slate-800 dark:text-slate-200">highlighted steps</strong>
+          are lessons of their own, this section will explain each step one by one.
+        </p>
+        <div class="flow">
+          <span class="flow-chip"><i data-lucide="database" style="width:15px;height:15px;"></i> Data</span>
+          <span class="flow-arrow"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+          <a href="pretraining.html" class="flow-chip link"><i data-lucide="book-open" style="width:15px;height:15px;"></i> Pretraining <span class="flow-tag">Lesson</span></a>
+          <span class="flow-arrow"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+          <span class="flow-chip"><i data-lucide="box" style="width:15px;height:15px;"></i> Base Model</span>
+          <span class="flow-arrow"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+          <a href="fine-tuning.html" class="flow-chip link"><i data-lucide="sliders" style="width:15px;height:15px;"></i> Fine-Tuning <span class="flow-tag">Lesson</span></a>
+          <span class="flow-arrow"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+          <span class="flow-chip"><i data-lucide="sparkles" style="width:15px;height:15px;"></i> Specialized Model</span>
+          <span class="flow-arrow"><i data-lucide="arrow-right" style="width:16px;height:16px;"></i></span>
+          <a href="inference.html" class="flow-chip link"><i data-lucide="play" style="width:15px;height:15px;"></i> Inference <span class="flow-tag">Lesson</span></a>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• AI models <strong class="text-slate-900 dark:text-white">learn from data</strong>.</li>
+            <li>• Training happens <strong class="text-slate-900 dark:text-white">before users interact</strong> with the model.</li>
+            <li>• Pretraining creates a <strong class="text-slate-900 dark:text-white">general model</strong>.</li>
+            <li>• Fine-tuning teaches <strong class="text-slate-900 dark:text-white">specific skills</strong>.</li>
+            <li>• Inference is <strong class="text-slate-900 dark:text-white">when people use</strong> the trained model.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Click every stage in the learning journey.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare Training and Inference.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Step through the complete lifecycle with Next.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Think about where ChatGPT fits today.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ 7. SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Every AI model follows a <strong>learning journey</strong>. It first <strong>learns from data</strong>,
+          can later be <strong>specialized</strong>, and is finally <strong>used to answer real user questions</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="../../index.html#learn" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Back to all modules
+        </a>
+        <a href="pretraining.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Pretraining
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Training Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     HOW AI MODELS LEARN, timeline data
+  ═══════════════════════════════════════════════ */
+  const STAGES = [
+    { id:'data',   name:'Raw Data',   icon:'database', big:'📚',
+      kicker:'Where it all starts',
+      body:'First, we gather a huge pile of text: books, websites, articles, and code. The model has not learned anything yet, this is just the material it will study.',
+      analogy:'All the books and notes a student could ever read, stacked up before class begins.',
+      example:'Wikipedia pages, news stories, recipes, and code collected from the internet.' },
+    { id:'train',  name:'Training',   icon:'cpu', big:'🧒',
+      kicker:'This is the learning part',
+      body:'The model reads that text again and again and tries to guess what comes next. Each time it guesses, it gets a little better at spotting patterns in language.',
+      analogy:'A student studying and practicing over and over until the ideas finally stick.',
+      example:'Reading billions of sentences and quietly predicting the next word each time.' },
+    { id:'base',   name:'Base Model', icon:'box', big:'🎓',
+      kicker:'A general model is ready',
+      body:'After all that practice, we have a general-purpose model. It knows a little about almost everything, but it has no special job or style yet.',
+      analogy:'A fresh graduate who knows a bit of everything but has not picked a career.',
+      example:'It can chat about space, cooking, or history, but is not tuned for any one task.' },
+    { id:'finetune', name:'Fine-Tuning', icon:'sliders', big:'👩‍⚕️',
+      kicker:'Learning a specific skill',
+      body:'We train the model a little more on smaller, focused examples. This teaches it one particular skill, tone, or job really well.',
+      analogy:'That graduate taking a short course to become, say, a nurse or a lawyer.',
+      example:'Teaching it to reply politely and helpfully as a customer-support assistant.' },
+    { id:'infer',  name:'Inference',  icon:'play', big:'💼',
+      kicker:'You finally use it',
+      body:'Training is done. Now you type a question and the model gives you an answer. This is the only part most people ever see.',
+      analogy:'The trained person now at work, answering real questions from real people.',
+      example:'You ask "Explain gravity simply" and it writes a clear, short answer back.' },
+  ];
+
+  const timeline    = document.getElementById('timeline');
+  const stageDetail = document.getElementById('stageDetail');
+  const stepBtn     = document.getElementById('stepBtn');
+  const progressFill = document.getElementById('progressFill');
+  const progressStep = document.getElementById('progressStep');
+  const progressPct  = document.getElementById('progressPct');
+
+  let idx = -1;          // -1 = nothing selected yet
+
+  /* ── Build the clickable timeline ── */
+  function renderTimeline() {
+    let html = '';
+    STAGES.forEach((s, i) => {
+      html += `
+        <div class="tl-step" data-i="${i}" role="button" tabindex="0" aria-label="${s.name}">
+          <div class="tl-node">
+            <i data-lucide="${s.icon}" style="width:22px;height:22px;"></i>
+            <span class="tl-num">${i + 1}</span>
+          </div>
+          <div class="tl-name">${s.name}</div>
+        </div>`;
+      if (i < STAGES.length - 1) {
+        html += `<div class="tl-arrow"><i data-lucide="chevron-right" style="width:18px;height:18px;"></i></div>`;
+      }
+    });
+    timeline.innerHTML = html;
+
+    timeline.querySelectorAll('.tl-step').forEach(el => {
+      const i = +el.dataset.i;
+      el.addEventListener('click', () => selectStage(i));
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectStage(i); }
+      });
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Render the expanded detail for the active stage ── */
+  function renderDetail() {
+    if (idx < 0) {
+      stageDetail.innerHTML = '';
+      return;
+    }
+    const s = STAGES[idx];
+    stageDetail.innerHTML = `
+      <div class="stage-detail swap">
+        <div class="sd-head">
+          <span class="sd-ic"><i data-lucide="${s.icon}" style="width:24px;height:24px;"></i></span>
+          <div>
+            <div class="sd-kicker">Step ${idx + 1} of ${STAGES.length} · ${s.kicker}</div>
+            <div class="sd-title">${s.name}</div>
+          </div>
+        </div>
+        <p class="sd-body">${s.body}</p>
+        <div class="sd-facts">
+          <div class="sd-fact sd-fact-analogy">
+            <span class="sd-fact-big">${s.big}</span>
+            <div>
+              <div class="sd-fact-label">Think of it like</div>
+              <div class="sd-fact-text">${s.analogy}</div>
+            </div>
+          </div>
+          <div class="sd-fact">
+            <span class="sd-fact-ic">💡</span>
+            <div>
+              <div class="sd-fact-label">Everyday example</div>
+              <div class="sd-fact-text">${s.example}</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Reflect state on timeline + progress + detail ── */
+  function applyState() {
+    timeline.querySelectorAll('.tl-step').forEach(el => {
+      const i = +el.dataset.i;
+      el.classList.toggle('active', i === idx);
+      el.classList.toggle('done', i < idx);
+    });
+    const n = STAGES.length;
+    const pct = idx < 0 ? 0 : Math.round(((idx + 1) / n) * 100);
+    progressFill.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    progressStep.textContent = idx < 0
+      ? 'Click a step or press Next'
+      : ('Step ' + (idx + 1) + ' of ' + n + ' · ' + STAGES[idx].name);
+    const atEnd = idx >= n - 1;
+    stepBtn.innerHTML = atEnd
+      ? '<i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> <span>Start over</span>'
+      : '<i data-lucide="chevron-right" style="width:14px;height:14px;"></i> <span>Next step</span>';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    renderDetail();
+  }
+
+  function selectStage(i) {
+    idx = i;
+    applyState();
+  }
+
+  /* ── Manual navigation: Next advances, or restarts at the end ── */
+  function nextStep() {
+    idx = (idx >= STAGES.length - 1) ? 0 : idx + 1;
+    applyState();
+  }
+
+  stepBtn.addEventListener('click', nextStep);
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderTimeline();
+    idx = 0;            // open the first stage so the explanation is visible right away
+    applyState();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

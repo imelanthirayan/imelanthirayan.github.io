@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pretraining, a beginner-friendly interactive lesson that shows how an AI model learns general language and knowledge patterns from large amounts of text to become a base model." />
+  <title>Pretraining, AI Concepts Playground</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%93%9A</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Playground controls ─────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #ea580c; color: white; border-color: #ea580c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #c2410c; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+    html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
+
+    /* ── Progress bar ────────────────────────── */
+    .progress-wrap { margin-top: 1.3rem; }
+    .progress-track { height: 8px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .progress-track { background: #334155; }
+    .progress-fill { height: 100%; width: 0%; border-radius: 9999px; background: linear-gradient(90deg,#ea580c,#fb923c); transition: width 0.5s ease; }
+    .progress-meta { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.45rem; font-size: 0.68rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .prog-left { display: inline-flex; align-items: center; gap: 0.4rem; }
+    .prog-spinner {
+      width: 11px; height: 11px; border-radius: 9999px; flex-shrink: 0;
+      border: 2px solid rgba(234,88,12,0.25); border-top-color: #ea580c;
+      display: none;
+    }
+    html.dark .prog-spinner { border-color: rgba(251,146,60,0.3); border-top-color: #fb923c; }
+    .prog-spinner.on { display: inline-block; animation: spin 0.7s linear infinite; }
+    /* Start button loading state */
+    .ctrl-btn .btn-spinner {
+      width: 14px; height: 14px; border-radius: 9999px; flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+      display: inline-block; animation: spin 0.7s linear infinite;
+    }
+
+    /* ── Pretraining flow ────────────────────── */
+    .flow-grid {
+      display: grid; grid-template-columns: 1.15fr auto 1fr auto 1fr; align-items: center; gap: 0.6rem;
+      margin-top: 1.4rem;
+    }
+    @media (max-width: 760px) { .flow-grid { grid-template-columns: 1fr; } .flow-grid .flow-arrow { transform: rotate(90deg); justify-self: center; } }
+    .flow-col-label { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; text-align: center; margin-bottom: 0.5rem; }
+    .flow-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e1; }
+    html.dark .flow-arrow { color: #475569; }
+
+    /* data cards */
+    .data-stack { display: flex; flex-direction: column; gap: 0.5rem; }
+    .data-card {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem;
+      border-radius: 0.85rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: transform 0.55s cubic-bezier(.5,-0.3,.3,1.4), opacity 0.55s ease, border-color 0.3s ease, background 0.3s ease;
+      position: relative;
+    }
+    html.dark .data-card { background: #0f172a; border-color: #334155; }
+    .data-card.feeding { border-color: #ea580c; background: rgba(234,88,12,0.07); }
+    html.dark .data-card.feeding { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .data-card.absorbed { opacity: 0; transform: translateX(90px) scale(0.7); }
+    .dc-ic {
+      width: 30px; height: 30px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      background: rgba(234,88,12,0.12); color: #ea580c;
+    }
+    html.dark .dc-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .dc-name { font-weight: 800; font-size: 0.85rem; color: #1e293b; }
+    html.dark .dc-name { color: #f1f5f9; }
+
+    /* model node */
+    .model-node {
+      display: flex; flex-direction: column; align-items: center; gap: 0.6rem; text-align: center;
+      padding: 1.3rem 1rem; border-radius: 1.1rem; border: 2px solid #e2e8f0; background: #f8fafc;
+      transition: all 0.35s ease;
+    }
+    html.dark .model-node { background: #0f172a; border-color: #334155; }
+    .model-node.learning { border-color: #ea580c; background: rgba(234,88,12,0.06); box-shadow: 0 12px 30px rgba(234,88,12,0.18); }
+    html.dark .model-node.learning { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .model-orb {
+      position: relative;
+      width: 60px; height: 60px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+      background: #e2e8f0; color: #94a3b8; transition: all 0.35s ease;
+    }
+    html.dark .model-orb { background: #334155; color: #64748b; }
+    .model-node.learning .model-orb { background: #ea580c; color: white; animation: nodePulse 1.4s ease-in-out infinite; }
+    /* spinning loader ring around the orb while training */
+    .model-orb::after {
+      content: ''; position: absolute; inset: -7px; border-radius: 9999px;
+      border: 3px solid transparent; opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .model-node.learning .model-orb::after {
+      opacity: 1;
+      border-color: rgba(234,88,12,0.22);
+      border-top-color: #ea580c;
+      animation: spin 0.85s linear infinite;
+    }
+    html.dark .model-node.learning .model-orb::after { border-color: rgba(251,146,60,0.28); border-top-color: #fb923c; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .model-node.pulse { transform: scale(1.04); }
+    @keyframes nodePulse { 0%,100% { box-shadow: 0 0 0 5px rgba(234,88,12,0.16); } 50% { box-shadow: 0 0 0 13px rgba(234,88,12,0.02); } }
+    .model-name { font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .model-name { color: #f1f5f9; }
+    .model-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+
+    /* base model node */
+    .base-node {
+      display: flex; flex-direction: column; align-items: center; gap: 0.55rem; text-align: center;
+      padding: 1.2rem 1rem; border-radius: 1.1rem; border: 2px dashed #cbd5e1; background: transparent;
+      opacity: 0.55; transition: all 0.45s ease;
+    }
+    html.dark .base-node { border-color: #475569; }
+    .base-node.active {
+      opacity: 1; border-style: solid; border-color: #16a34a; background: rgba(22,163,74,0.06);
+      box-shadow: 0 12px 30px rgba(22,163,74,0.16);
+    }
+    html.dark .base-node.active { border-color: #4ade80; background: rgba(22,163,74,0.12); }
+    .base-orb { width: 52px; height: 52px; border-radius: 0.9rem; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #94a3b8; transition: all 0.45s ease; }
+    html.dark .base-orb { background: #334155; color: #64748b; }
+    .base-node.active .base-orb { background: #16a34a; color: white; }
+    .base-name { font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .base-name { color: #f1f5f9; }
+    .base-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+
+    /* learned patterns list */
+    .learned-wrap { margin-top: 1.3rem; }
+    .learned-title { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #ea580c; margin-bottom: 0.7rem; display: flex; align-items: center; gap: 0.4rem; }
+    html.dark .learned-title { color: #fdba74; }
+    .learned-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 0.6rem; }
+    .lp-item {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.85rem; border-radius: 0.85rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+      opacity: 0; transform: translateY(8px); transition: all 0.4s ease;
+    }
+    html.dark .lp-item { background: #0f172a; border-color: #334155; }
+    .lp-item.show { opacity: 1; transform: translateY(0); border-color: rgba(234,88,12,0.3); background: rgba(234,88,12,0.05); }
+    html.dark .lp-item.show { border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+    .lp-ic { width: 28px; height: 28px; border-radius: 0.55rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.14); color: #ea580c; }
+    html.dark .lp-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .lp-text { font-weight: 700; font-size: 0.82rem; color: #334155; }
+    html.dark .lp-text { color: #e2e8f0; }
+
+    /* note message */
+    .note-msg {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.3rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; opacity: 0;
+      color: #ea580c; background: rgba(234,88,12,0.08); border: 1.5px solid rgba(234,88,12,0.22);
+      transition: opacity 0.45s ease;
+    }
+    .note-msg.show { opacity: 1; }
+    html.dark .note-msg { color: #fdba74; background: rgba(234,88,12,0.14); border-color: rgba(251,146,60,0.26); }
+
+    /* ── What the model learns (clickable cards) ── */
+    .learn-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 0.8rem; }
+    .learn-card {
+      cursor: pointer; text-align: left; padding: 1.1rem 1.2rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    .learn-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); }
+    html.dark .learn-card { background: #0f172a; border-color: #334155; }
+    .learn-card.active { border-color: #ea580c; background: rgba(234,88,12,0.07); box-shadow: 0 8px 22px rgba(234,88,12,0.14); }
+    html.dark .learn-card.active { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .learn-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.45rem; }
+    .learn-ic { width: 38px; height: 38px; border-radius: 0.75rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; transition: all 0.22s ease; }
+    html.dark .learn-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .learn-card.active .learn-ic { background: #ea580c; color: white; }
+    .learn-name { font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .learn-name { color: #f1f5f9; }
+    .learn-desc { font-size: 0.82rem; line-height: 1.5; color: #64748b; }
+    html.dark .learn-desc { color: #94a3b8; }
+    .learn-example {
+      margin-top: 1rem; border-radius: 0.95rem; padding: 1.1rem 1.25rem;
+      border: 1.5px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.05);
+    }
+    html.dark .learn-example { border-color: rgba(251,146,60,0.26); background: rgba(234,88,12,0.1); }
+    .learn-example.swap { animation: fadeSwap 0.4s ease; }
+    .le-label { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #ea580c; margin-bottom: 0.35rem; }
+    html.dark .le-label { color: #fdba74; }
+    .le-text { font-size: 0.92rem; line-height: 1.6; color: #334155; }
+    html.dark .le-text { color: #e2e8f0; }
+    @keyframes fadeSwap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Compare cards (base vs specialized) ─── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+    .cmp-card { border-radius: 1.1rem; padding: 1.4rem 1.5rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.base { border-color: rgba(234,88,12,0.3); background: rgba(234,88,12,0.05); }
+    html.dark .cmp-card.base { border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+    .cmp-card.spec { border-color: rgba(22,163,74,0.3); background: rgba(22,163,74,0.05); }
+    html.dark .cmp-card.spec { border-color: rgba(74,222,128,0.28); background: rgba(22,163,74,0.1); }
+    .cmp-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.35rem; }
+    .cmp-ic { width: 42px; height: 42px; border-radius: 0.85rem; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+    .cmp-card.base .cmp-ic { background: #ea580c; box-shadow: 0 4px 12px rgba(234,88,12,0.3); }
+    .cmp-card.spec .cmp-ic { background: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+    .cmp-title { font-weight: 900; font-size: 1.1rem; color: #1e293b; }
+    html.dark .cmp-title { color: #f1f5f9; }
+    .cmp-sub { font-size: 0.85rem; font-weight: 700; color: #64748b; margin-bottom: 1rem; }
+    html.dark .cmp-sub { color: #94a3b8; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cmp-item { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.9rem; color: #334155; }
+    html.dark .cmp-item { color: #cbd5e1; }
+    .cmp-dot { flex-shrink: 0; margin-top: 0.12rem; }
+    .cmp-card.base .cmp-dot { color: #ea580c; }
+    .cmp-card.spec .cmp-dot { color: #16a34a; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Training Fundamentals</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 7–9 min</span>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="book-open" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Pretraining</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Pretraining is the <strong class="text-slate-800 dark:text-slate-200">first major learning stage</strong>.
+          The model studies a <strong class="text-slate-800 dark:text-slate-200">large amount of text</strong> and learns
+          <strong class="text-slate-800 dark:text-slate-200">general patterns in language</strong>, long before it is given any specific job.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Pretraining Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Feed the data, build a base model</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+          A model starts out knowing nothing. Press <strong class="text-slate-800 dark:text-slate-200">Start Pretraining</strong>
+          and watch large text data flow into the model. As it reads, it slowly picks up patterns and becomes a
+          <strong class="text-slate-800 dark:text-slate-200">base model</strong>.
+        </p>
+
+        <!-- flow -->
+        <div class="flow-grid">
+          <div>
+            <div class="flow-col-label">Large Text Data</div>
+            <div class="data-stack" id="dataStack"></div>
+          </div>
+          <div class="flow-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
+          <div>
+            <div class="flow-col-label">Pretraining</div>
+            <div class="model-node" id="modelNode">
+              <div class="model-orb"><i data-lucide="brain" style="width:28px;height:28px;"></i></div>
+              <div>
+                <div class="model-name">The Model</div>
+                <div class="model-sub" id="modelSub">Empty, knows nothing yet</div>
+              </div>
+            </div>
+          </div>
+          <div class="flow-arrow"><i data-lucide="arrow-right" style="width:20px;height:20px;"></i></div>
+          <div>
+            <div class="flow-col-label">Result</div>
+            <div class="base-node" id="baseNode">
+              <div class="base-orb"><i data-lucide="box" style="width:24px;height:24px;"></i></div>
+              <div>
+                <div class="base-name">Base Model</div>
+                <div class="base-sub" id="baseSub">Not ready yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="pg-controls" style="margin-top:1.3rem;">
+          <button class="ctrl-btn primary" id="startBtn"><i data-lucide="play" style="width:14px;height:14px;"></i> <span>Start Pretraining</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Reset</button>
+        </div>
+
+        <!-- progress -->
+        <div class="progress-wrap">
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          <div class="progress-meta"><span class="prog-left"><span class="prog-spinner" id="progSpinner" aria-hidden="true"></span><span id="progressStep">Ready, press Start Pretraining</span></span><span id="progressPct">0%</span></div>
+        </div>
+
+        <!-- learned patterns -->
+        <div class="learned-wrap">
+          <div class="learned-title"><i data-lucide="sparkles" style="width:13px;height:13px;"></i> Patterns the model picks up</div>
+          <div class="learned-grid" id="learnedGrid"></div>
+        </div>
+
+        <!-- note -->
+        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> The model learns patterns, not exact understanding like a human.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHAT THE MODEL LEARNS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="brain-circuit" style="width:12px;height:12px;"></i>What the Model Learns</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Click a pattern to see an example</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pretraining is not about memorising facts. The model soaks up broad, general patterns. Tap each card below to see
+          what that looks like in practice.
+        </p>
+        <div class="learn-grid" id="learnGrid"></div>
+        <div id="learnExample"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. BASE MODEL vs SPECIALIZED MODEL
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Base Model vs Specialized Model</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two stages, two kinds of model</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pretraining creates the <strong class="text-slate-800 dark:text-slate-200">base model</strong>.
+          Fine-tuning later makes it more useful for <strong class="text-slate-800 dark:text-slate-200">specific tasks</strong>.
+        </p>
+        <div class="cmp-grid">
+          <div class="cmp-card base">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="box" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Base Model</span>
+            </div>
+            <div class="cmp-sub">Created after pretraining.</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></span> Knows many general patterns</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></span> Understands broad language and facts</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="circle" style="width:10px;height:10px;"></i></span> Not yet tuned for assistant behavior</div>
+            </div>
+          </div>
+          <div class="cmp-card spec">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="sparkles" style="width:22px;height:22px;"></i></span>
+              <span class="cmp-title">Specialized Model</span>
+            </div>
+            <div class="cmp-sub">Created after fine-tuning.</div>
+            <div class="cmp-list">
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></span> Built on top of the base model</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></span> Better at following specific tasks</div>
+              <div class="cmp-item"><span class="cmp-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></span> Tuned to follow instructions well</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Pretraining is the <strong class="text-slate-900 dark:text-white">first major training stage</strong>.</li>
+            <li>• The model learns from <strong class="text-slate-900 dark:text-white">large amounts of data</strong>.</li>
+            <li>• It learns general <strong class="text-slate-900 dark:text-white">language and knowledge patterns</strong>.</li>
+            <li>• Pretraining creates a <strong class="text-slate-900 dark:text-white">base model</strong>.</li>
+            <li>• Fine-tuning can later <strong class="text-slate-900 dark:text-white">specialize</strong> the base model.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Click different data cards.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Start the pretraining animation.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Explore what patterns the model learns.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare base model and specialized model.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-8" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          Pretraining gives an AI model its <strong>general foundation</strong>. It learns <strong>broad patterns</strong>
+          from large data before being <strong>adapted for more specific tasks</strong>.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="how-ai-models-learn.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: How AI Models Learn
+        </a>
+        <a href="training-loss.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next:</strong> Training Loss
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Training Fundamentals');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     PRETRAINING, playground data
+  ═══════════════════════════════════════════════ */
+  const DATA_CARDS = [
+    { id:'books',  name:'Books',        icon:'book' },
+    { id:'articles', name:'Articles',   icon:'newspaper' },
+    { id:'websites', name:'Websites',   icon:'globe' },
+    { id:'code',   name:'Code',          icon:'code' },
+    { id:'convos', name:'Conversations', icon:'messages-square' },
+  ];
+
+  const PATTERNS = [
+    { text:'Words that appear together', icon:'link' },
+    { text:'Sentence structure',         icon:'align-left' },
+    { text:'Facts and concepts',         icon:'lightbulb' },
+    { text:'Writing styles',             icon:'pen-tool' },
+    { text:'Basic reasoning patterns',   icon:'git-branch' },
+  ];
+
+  const LEARN_CARDS = [
+    { id:'lang',  name:'Language Patterns', icon:'spell-check',
+      desc:'How words and sentences commonly appear.',
+      example:'After the words "Once upon a", the word "time" very often comes next.' },
+    { id:'know',  name:'General Knowledge', icon:'lightbulb',
+      desc:'Common facts and concepts from training data.',
+      example:'It picks up that "Paris" is very often mentioned as the capital of France.' },
+    { id:'style', name:'Style Patterns',    icon:'pen-tool',
+      desc:'Different ways people write.',
+      example:'A formal email reads very differently from a quick, casual text message.' },
+    { id:'code',  name:'Code Patterns',     icon:'code',
+      desc:'Common programming structures.',
+      example:'After a line like "def add(a, b):", the next line is often "return a + b".' },
+  ];
+
+  const dataStack   = document.getElementById('dataStack');
+  const learnedGrid = document.getElementById('learnedGrid');
+  const learnGrid   = document.getElementById('learnGrid');
+  const learnExample = document.getElementById('learnExample');
+  const modelNode   = document.getElementById('modelNode');
+  const modelSub    = document.getElementById('modelSub');
+  const baseNode    = document.getElementById('baseNode');
+  const baseSub     = document.getElementById('baseSub');
+  const noteMsg     = document.getElementById('noteMsg');
+  const startBtn    = document.getElementById('startBtn');
+  const resetBtn    = document.getElementById('resetBtn');
+  const progressFill = document.getElementById('progressFill');
+  const progressStep = document.getElementById('progressStep');
+  const progressPct  = document.getElementById('progressPct');
+  const progSpinner  = document.getElementById('progSpinner');
+
+  const startBtnHTML = startBtn.innerHTML;
+  function setStartLoading(on) {
+    progSpinner.classList.toggle('on', on);
+    startBtn.classList.toggle('is-loading', on);
+    startBtn.innerHTML = on
+      ? '<span class="btn-spinner"></span> <span>Training…</span>'
+      : startBtnHTML;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  let timers = [];
+  let running = false;
+  let activeLearn = null;
+
+  /* ── Render data cards (display only, they flow into training) ── */
+  function renderDataCards() {
+    dataStack.innerHTML = DATA_CARDS.map(d => `
+      <div class="data-card" data-id="${d.id}" aria-label="${d.name}">
+        <span class="dc-ic"><i data-lucide="${d.icon}" style="width:16px;height:16px;"></i></span>
+        <span class="dc-name">${d.name}</span>
+      </div>`).join('');
+  }
+
+  /* ── Render learned-pattern chips (hidden until pretraining) ── */
+  function renderPatterns() {
+    learnedGrid.innerHTML = PATTERNS.map(p => `
+      <div class="lp-item">
+        <span class="lp-ic"><i data-lucide="${p.icon}" style="width:15px;height:15px;"></i></span>
+        <span class="lp-text">${p.text}</span>
+      </div>`).join('');
+  }
+
+  /* ── Render "what the model learns" clickable cards ── */
+  function renderLearnCards() {
+    learnGrid.innerHTML = LEARN_CARDS.map(c => `
+      <div class="learn-card" data-id="${c.id}" role="button" tabindex="0" aria-label="${c.name}">
+        <div class="learn-head">
+          <span class="learn-ic"><i data-lucide="${c.icon}" style="width:19px;height:19px;"></i></span>
+          <span class="learn-name">${c.name}</span>
+        </div>
+        <div class="learn-desc">${c.desc}</div>
+      </div>`).join('');
+    learnGrid.querySelectorAll('.learn-card').forEach(el => {
+      const id = el.dataset.id;
+      el.addEventListener('click', () => selectLearn(id));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectLearn(id); } });
+    });
+  }
+
+  function selectLearn(id) {
+    activeLearn = id;
+    const c = LEARN_CARDS.find(x => x.id === id);
+    learnGrid.querySelectorAll('.learn-card').forEach(el => el.classList.toggle('active', el.dataset.id === id));
+    learnExample.innerHTML = `
+      <div class="learn-example swap">
+        <div class="le-label">Example · ${c.name}</div>
+        <div class="le-text">${c.example}</div>
+      </div>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Progress helper ── */
+  function setProgress(pct, label) {
+    progressFill.style.width = pct + '%';
+    progressPct.textContent = Math.round(pct) + '%';
+    progressStep.textContent = label;
+  }
+
+  /* ── Playground engine ── */
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function resetPlayground() {
+    clearTimers();
+    running = false;
+    dataStack.querySelectorAll('.data-card').forEach(c => c.classList.remove('absorbed','feeding'));
+    learnedGrid.querySelectorAll('.lp-item').forEach(i => i.classList.remove('show'));
+    modelNode.classList.remove('learning');
+    baseNode.classList.remove('active');
+    noteMsg.classList.remove('show');
+    modelSub.textContent = 'Empty, knows nothing yet';
+    baseSub.textContent = 'Not ready yet';
+    setProgress(0, 'Ready, press Start Pretraining');
+    setStartLoading(false);
+    startBtn.disabled = false;
+  }
+
+  function startPretraining() {
+    if (running) return;
+    resetPlayground();
+    running = true;
+    startBtn.disabled = true;
+    setStartLoading(true);
+    modelNode.classList.add('learning');
+    modelSub.textContent = 'Reading data…';
+
+    const cards = [...dataStack.querySelectorAll('.data-card')];
+    const items = [...learnedGrid.querySelectorAll('.lp-item')];
+    const totalSteps = cards.length + items.length;
+    let step = 0;
+    let t = 400;
+    const gap = 560;
+
+    cards.forEach((c, i) => {
+      timers.push(setTimeout(() => {
+        c.classList.add('feeding');
+        setProgress((step / totalSteps) * 100, 'Feeding in: ' + DATA_CARDS[i].name);
+      }, t));
+      timers.push(setTimeout(() => {
+        c.classList.remove('feeding');
+        c.classList.add('absorbed');
+        modelNode.classList.add('pulse');
+        step++;
+        setProgress((step / totalSteps) * 100, 'Feeding in: ' + DATA_CARDS[i].name);
+      }, t + 260));
+      timers.push(setTimeout(() => modelNode.classList.remove('pulse'), t + 520));
+      t += gap;
+    });
+
+    items.forEach((it, i) => {
+      timers.push(setTimeout(() => {
+        it.classList.add('show');
+        step++;
+        setProgress((step / totalSteps) * 100, 'Learning: ' + PATTERNS[i].text);
+      }, t));
+      t += gap;
+    });
+
+    timers.push(setTimeout(() => {
+      modelNode.classList.remove('learning');
+      modelSub.textContent = 'Full of general patterns';
+      baseNode.classList.add('active');
+      baseSub.textContent = 'Ready to use or fine-tune';
+      noteMsg.classList.add('show');
+      setProgress(100, 'Done, a base model is ready');
+      setStartLoading(false);
+      startBtn.disabled = false;
+      running = false;
+    }, t + 200));
+  }
+
+  startBtn.addEventListener('click', startPretraining);
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderDataCards();
+    renderPatterns();
+    renderLearnCards();
+    selectLearn('lang');   // open the first pattern example by default
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>
