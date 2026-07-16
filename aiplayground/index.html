@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Learn AI visually through interactive experiments. Your guided roadmap from tokens to clustering. No prerequisites." />
   <title>AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="AI Concepts Playground" />
+  <meta property="og:description" content="Learn AI visually through interactive experiments. Your guided roadmap from tokens to clustering. No prerequisites." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground — Learn AI by playing with it" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI Concepts Playground" />
+  <meta name="twitter:description" content="Learn AI visually through interactive experiments. Your guided roadmap from tokens to clustering. No prerequisites." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
   <meta name="google-site-verification" content="WDnNujm4niUnvCvo9ddyyl7AEyCShO5eSWlVDLqW1nY" />
 
@@ -732,9 +749,10 @@
           <button class="filter-chip" data-filter="Transformer Architectures" data-group="section">Transformer Architectures</button>
           <button class="filter-chip" data-filter="AI Agent Fundamentals" data-group="section">AI Agent Fundamentals</button>
           <button class="filter-chip" data-filter="Agentic AI" data-group="section">Agentic AI</button>
-          <button class="filter-chip" data-filter="Vector Index Explorer" data-group="section">Vector Index Explorer</button>
           <button class="filter-chip" data-filter="Training Fundamentals" data-group="section">Training Fundamentals</button>
           <button class="filter-chip" data-filter="Fine-Tuning" data-group="section">Fine-Tuning</button>
+          <button class="filter-chip" data-filter="Vector Index Explorer" data-group="section">Vector Index Explorer</button>
+          <button class="filter-chip" data-filter="Model Optimization" data-group="section">Model Optimization</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner" data-group="diff">Beginner</button>
           <button class="filter-chip" data-filter="Intermediate" data-group="diff">Intermediate</button>
@@ -906,15 +924,6 @@
       { num:7,  id:'ag-reasoning',  title:'Multi-Step Reasoning',                      desc:'See how agents reason through complex, multi-step problems.',                        status:'available',   diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/multi-step-reasoning.html',      icon:'brain',        color:'#c026d3' },
       { num:8,  id:'ag-orchestration', title:'Agent Orchestration',                    desc:'Discover how multiple agents are coordinated to finish a task.',                    status:'available', diff:'Advanced',     dur:'8–10 min', mod:'Agentic AI', page:'modules/agentic-ai/agent-orchestration.html',       icon:'network',      color:'#c026d3' },
 
-      // ── Module 8: Vector Index Explorer ──────────────────────────────────────────────
-      { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
-      { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
-      { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
-      { num:4,  id:'vi-ivf-sq8',  title:'IVF_SQ8 Index',                desc:'Converts 32-bit floats to 8-bit integers, 75% less memory, minimal accuracy loss.',       status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-sq8.html',  icon:'hash',          color:'#d97706' },
-      { num:5,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
-      { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
-      { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
-
       // ── Training Fundamentals ────────────────────────────────────────
       { num:1,  id:'tft-how-models-learn', title:'How AI Models Learn',  desc:'Start here: see the big picture of how an AI model learns from data before diving into the details.', status:'available',   diff:'Beginner',     dur:'6–8 min',  mod:'Training Fundamentals', page:'modules/training-fine-tuning/how-ai-models-learn.html', icon:'lightbulb',     color:'#ea580c' },
       { num:2,  id:'tft-pretraining',      title:'Pretraining',          desc:'See how a model first learns language from huge amounts of text.',                 status:'available',   diff:'Beginner',     dur:'7–9 min',  mod:'Training Fundamentals', page:'modules/training-fine-tuning/pretraining.html',       icon:'book-open',    color:'#ea580c' },
@@ -923,12 +932,30 @@
       { num:5,  id:'tft-inference',        title:'Inference',            desc:'Understand the difference between training a model and using it.',                 status:'available', diff:'Beginner',     dur:'6–8 min',  mod:'Training Fundamentals', page:'modules/training-fine-tuning/inference.html',         icon:'play',         color:'#ea580c' },
 
       // ── Fine-Tuning ──────────────────────────────────────────────────
-      { num:1,  id:'tft-finetuning',   title:'Fine-Tuning',          desc:'See how a pretrained model is adapted for a specific task.',                       status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/fine-tuning.html',       icon:'sliders',      color:'#f59e0b' },
-      { num:2,  id:'tft-instruction',  title:'Instruction Tuning',   desc:'Learn how models are taught to follow instructions well.',                         status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/instruction-tuning.html',icon:'list-checks',  color:'#f59e0b' },
-      { num:3,  id:'tft-rlhf',         title:'RLHF',                 desc:'See how human feedback helps align a model\u2019s answers.',                       status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/rlhf.html',              icon:'thumbs-up',    color:'#f59e0b' },
-      { num:4,  id:'tft-lora',         title:'LoRA',                 desc:'Fine-tune efficiently by updating only a small set of weights.',                   status:'coming-soon', diff:'Intermediate', dur:'7–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/lora.html',              icon:'git-branch',   color:'#f59e0b' },
-      { num:5,  id:'tft-qlora',        title:'QLoRA',                desc:'Combine LoRA with compression to train using far less memory.',                    status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/qlora.html',             icon:'minimize-2',   color:'#f59e0b' },
-      { num:6,  id:'tft-adapters',     title:'Adapters',             desc:'Add small trainable parts instead of retraining the whole model.',                 status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/adapters.html',          icon:'puzzle',       color:'#f59e0b' },
+      { num:1,  id:'tft-finetuning',   title:'Fine-Tuning',          desc:'See how a pretrained model is adapted for a specific task.',                       status:'available',   diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/fine-tuning.html',       icon:'sliders',      color:'#f59e0b' },
+      { num:2,  id:'tft-instruction',  title:'Instruction Tuning',   desc:'Learn how models are taught to follow instructions well.',                         status:'available',   diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/instruction-tuning.html',icon:'list-checks',  color:'#f59e0b' },
+      { num:3,  id:'tft-rlhf',         title:'RLHF',                 desc:'See how human feedback helps align a model\u2019s answers.',                       status:'available',   diff:'Advanced',     dur:'8–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/rlhf.html',              icon:'thumbs-up',    color:'#f59e0b' },
+      { num:4,  id:'tft-lora',         title:'LoRA',                 desc:'Fine-tune efficiently by updating only a small set of weights.',                   status:'available',   diff:'Intermediate', dur:'7–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/lora.html',              icon:'git-branch',   color:'#f59e0b' },
+      { num:5,  id:'tft-qlora',        title:'QLoRA',                desc:'Combine LoRA with compression to train using far less memory.',                    status:'available',   diff:'Advanced',     dur:'8–10 min', mod:'Fine-Tuning', page:'modules/training-fine-tuning/qlora.html',             icon:'minimize-2',   color:'#f59e0b' },
+      { num:6,  id:'tft-adapters',     title:'Adapters',             desc:'Add small trainable parts instead of retraining the whole model.',                 status:'available', diff:'Intermediate', dur:'7–9 min',  mod:'Fine-Tuning', page:'modules/training-fine-tuning/adapters.html',          icon:'puzzle',       color:'#f59e0b' },
+
+      // ── Model Optimization ───────────────────────────────────────────
+      { num:1,  id:'mo-what-is',       title:'What is Model Optimization?', desc:'See the big picture of how models are made faster, smaller, and cheaper to run.',   status:'coming-soon', diff:'Intermediate', dur:'6–8 min',  mod:'Model Optimization', page:'modules/model-optimization/what-is-model-optimization.html', icon:'zap',          color:'#eab308' },
+      { num:2,  id:'mo-quantization',  title:'Quantization',         desc:'Learn how using smaller number formats shrinks a model with little accuracy loss.', status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Model Optimization', page:'modules/model-optimization/quantization.html',              icon:'minimize-2',   color:'#eab308' },
+      { num:3,  id:'mo-precision',     title:'FP32 vs FP16 vs INT8 vs INT4', desc:'Compare number precisions and their trade-offs in size, speed, and accuracy.',  status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Model Optimization', page:'modules/model-optimization/precision-formats.html',         icon:'binary',       color:'#eab308' },
+      { num:4,  id:'mo-kv-cache',      title:'KV Cache',             desc:'See how caching past tokens makes text generation much faster.',                    status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'Model Optimization', page:'modules/model-optimization/kv-cache.html',                  icon:'database',     color:'#eab308' },
+      { num:5,  id:'mo-batching',      title:'Batching',             desc:'Learn how processing many requests together improves efficiency.',                  status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Model Optimization', page:'modules/model-optimization/batching.html',                  icon:'layers',       color:'#eab308' },
+      { num:6,  id:'mo-latency-throughput', title:'Latency vs Throughput', desc:'Understand the difference between speed per request and total work done.',       status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'Model Optimization', page:'modules/model-optimization/latency-vs-throughput.html',      icon:'gauge',        color:'#eab308' },
+      { num:7,  id:'mo-speculative',   title:'Speculative Decoding', desc:'See how a small model drafts tokens that a big model quickly checks to speed up output.', status:'coming-soon', diff:'Advanced',   dur:'8–10 min', mod:'Model Optimization', page:'modules/model-optimization/speculative-decoding.html',      icon:'rabbit',       color:'#eab308' },
+
+      // ── Vector Index Explorer ────────────────────────────────────────
+      { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
+      { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
+      { num:3,  id:'vi-ivf-flat', title:'IVF_FLAT Index',               desc:'Groups vectors into clusters, then searches only the nearest cluster for faster results.',  status:'available',   diff:'Intermediate', dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-flat.html', icon:'package',       color:'#d97706' },
+      { num:4,  id:'vi-ivf-sq8',  title:'IVF_SQ8 Index',                desc:'Converts 32-bit floats to 8-bit integers, 75% less memory, minimal accuracy loss.',       status:'available',   diff:'Advanced',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-sq8.html',  icon:'hash',          color:'#d97706' },
+      { num:5,  id:'vi-ivf-pq',   title:'IVF_PQ Index',                 desc:'Compresses vectors into short codes. Huge memory savings with a slight accuracy trade-off.',status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/ivf-pq.html',   icon:'archive',       color:'#d97706' },
+      { num:6,  id:'vi-hnsw',     title:'HNSW Index',                   desc:'Builds a navigable graph. Jumps node-to-node to find the nearest neighbor fast.',           status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/hnsw.html',     icon:'share-2',       color:'#d97706' },
+      { num:7,  id:'vi-diskann',  title:'DiskANN Index',                 desc:'Keeps hot vectors in RAM, rest on disk. Handles billion-scale datasets with small memory.', status:'available',   diff:'Advanced',     dur:'10 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/diskann.html',  icon:'hard-drive',    color:'#d97706' },
     ];
 
     const MODULE_CONFIGS = {
@@ -944,6 +971,7 @@
       'Vector Index Explorer':                   { icon:'layers',   color:'#d97706', bg:'rgba(217,119,6,0.07)',  border:'rgba(217,119,6,0.2)',   iconBg:'rgba(217,119,6,0.1)'   },
       'Training Fundamentals':                   { icon:'graduation-cap', color:'#ea580c', bg:'rgba(234,88,12,0.07)', border:'rgba(234,88,12,0.2)', iconBg:'rgba(234,88,12,0.1)' },
       'Fine-Tuning':                             { icon:'wrench',   color:'#f59e0b', bg:'rgba(245,158,11,0.07)', border:'rgba(245,158,11,0.2)',  iconBg:'rgba(245,158,11,0.1)'  },
+      'Model Optimization':                      { icon:'zap',      color:'#eab308', bg:'rgba(234,179,8,0.07)',  border:'rgba(234,179,8,0.2)',   iconBg:'rgba(234,179,8,0.1)'   },
     };
 
     const DIFF_CONFIG = {

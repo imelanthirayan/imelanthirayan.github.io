@@ -121,7 +121,16 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [Epochs](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/epochs.html): Learn how a model improves by passing over the data many times.
 - [Inference](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/inference.html): Understand the difference between training a model and using it.
 
+## Fine-Tuning
+
+- [Fine-Tuning](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/fine-tuning.html): See how a pretrained model is adapted for a specific task.
+- [Instruction Tuning](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/instruction-tuning.html): Learn how models are taught to follow instructions well.
+- [RLHF](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/rlhf.html): See how human feedback helps align a model's answers.
+- [LoRA](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/lora.html): Fine-tune efficiently by updating only a small set of weights.
+- [QLoRA](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/qlora.html): Combine LoRA with compression to train using far less memory.
+- [Adapters](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/adapters.html): Add small trainable parts instead of retraining the whole model.
+
 ## Coming soon
 
-- AI Agent Fundamentals, Agentic AI, and Training Fundamentals are complete. Fine-Tuning is in progress.
-- Fine-Tuning: 6 modules on fine-tuning, instruction tuning, RLHF, LoRA, QLoRA, and adapters - in progress.
+- Inside an LLM, Embeddings & Search, RAG, MCP, Prompt Engineering, Transformer Internals, Transformer Architectures, AI Agent Fundamentals, Agentic AI, Vector Index Explorer, Training Fundamentals, and Fine-Tuning are complete.
+- Model Optimization: 7 modules on what model optimization is, quantization, precision formats (FP32/FP16/INT8/INT4), KV cache, batching, latency vs throughput, and speculative decoding - in progress.

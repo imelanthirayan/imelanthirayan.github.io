@@ -1,15 +1,53 @@
-# AI Concepts Playground
+<h1 align="center">🧠 AI Concepts Playground</h1>
 
-Interactive, browser-based lessons that teach AI concepts by letting you play with them. Every module is a hands-on experiment, with no math-heavy theory and no setup. Each lesson is a self-contained, visual page you can click through at your own pace.
+<p align="center">
+  <b>Learn AI visually, by playing with it — not by reading theory.</b><br/>
+  Interactive, browser-based lessons that turn abstract AI concepts into hands-on experiments.
+</p>
 
-## Purpose
+<p align="center">
+  <a href="https://imelanthirayan.github.io/aiplayground/">🚀 Live Demo</a> &nbsp;•&nbsp;
+  <a href="#-sections--modules">📚 Modules</a> &nbsp;•&nbsp;
+  <a href="#-whats-inside">✨ Features</a> &nbsp;•&nbsp;
+  <a href="#-getting-started">⚡ Get Started</a>
+</p>
 
-Most AI explanations are either too shallow or too academic. This playground sits in between: it uses simple English, live interactions, and step-by-step animations so beginners can *feel* how each concept works. Topics range from how large language models work, to embeddings and search, RAG, MCP, prompt engineering, and the inner workings of transformers.
+<p align="center">
+  <img alt="No setup required" src="https://img.shields.io/badge/setup-none-brightgreen?style=flat-square" />
+  <img alt="Made with HTML/CSS/JS" src="https://img.shields.io/badge/built%20with-HTML%20%7C%20CSS%20%7C%20JS-blue?style=flat-square" />
+  <img alt="Beginner friendly" src="https://img.shields.io/badge/level-beginner%20friendly-orange?style=flat-square" />
+  <img alt="Interactive" src="https://img.shields.io/badge/style-interactive-purple?style=flat-square" />
+</p>
 
-## Sections & Modules
+---
 
-### Inside an LLM
-The fundamentals of how a language model reads, thinks, and generates text.
+## 💡 Why this exists
+
+Most AI explanations are either **too shallow** or **too academic**. This playground sits in between.
+
+It uses plain English, live interactions, and step-by-step animations so beginners can actually *feel* how each concept works — from how large language models read text, to embeddings, search, RAG, MCP, prompt engineering, and the inner workings of transformers.
+
+> Every module is a self-contained, visual page you can click through at your own pace. No math-heavy theory. No setup.
+
+---
+
+## ✨ What's inside
+
+| | |
+|---|---|
+| 🎮 **Hands-on** | Every lesson is a live experiment you can click, drag, and tweak |
+| 🧭 **Guided roadmap** | A clear path from tokens all the way to AI agents |
+| 🎨 **Visual & animated** | Concepts explained through step-by-step animations |
+| 🚫 **Zero setup** | Runs entirely in the browser — no installs, no accounts |
+| 🌱 **Beginner first** | Plain English, no prerequisites, no equations |
+
+---
+
+## 📚 Sections & Modules
+
+<details open>
+<summary><b>🔍 Inside an LLM</b> — how a language model reads, thinks, and generates text</summary>
+
 - How an AI Model Works
 - Tokens
 - Context Window
@@ -22,9 +60,11 @@ The fundamentals of how a language model reads, thinks, and generates text.
 - Hallucinations
 - Prompt Engineering
 - Token Cost Estimator
+</details>
 
-### Embeddings & Search
-How meaning becomes numbers, and how machines find similar things.
+<details>
+<summary><b>🧲 Embeddings & Search</b> — how meaning becomes numbers, and how machines find similar things</summary>
+
 - Embeddings
 - Vectors
 - Embedding Dimensions
@@ -38,9 +78,11 @@ How meaning becomes numbers, and how machines find similar things.
 - Top-K Search
 - Ranking
 - Clustering
+</details>
 
-### Retrieval-Augmented Generation (RAG)
-How AI answers questions using your own documents.
+<details>
+<summary><b>📖 Retrieval-Augmented Generation (RAG)</b> — how AI answers questions using your own documents</summary>
+
 - RAG Overview
 - Document Chunking & Overlap
 - Metadata Filtering
@@ -49,18 +91,22 @@ How AI answers questions using your own documents.
 - Retrieval
 - Re-ranking
 - RAG Pipeline
+</details>
 
-### Model Context Protocol (MCP)
-The standard that connects AI models to external tools and data.
+<details>
+<summary><b>🔌 Model Context Protocol (MCP)</b> — the standard that connects AI models to external tools and data</summary>
+
 - What is MCP?
 - Why MCP?
 - MCP Architecture
 - MCP vs Traditional APIs
 - MCP vs Function Calling
 - Where MCP Fits in AI Apps
+</details>
 
-### Prompt Engineering
-How the way you ask shapes the answer you get.
+<details>
+<summary><b>✍️ Prompt Engineering</b> — how the way you ask shapes the answer you get</summary>
+
 - What is Prompt Engineering?
 - Zero-shot Prompting
 - One-shot vs Few-shot Prompting
@@ -68,9 +114,11 @@ How the way you ask shapes the answer you get.
 - Structured Output
 - Prompt Chaining
 - Common Prompt Mistakes
+</details>
 
-### Transformer Internals
-A layer-by-layer look at how a transformer processes text.
+<details>
+<summary><b>⚙️ Transformer Internals</b> — a layer-by-layer look at how a transformer processes text</summary>
+
 - How a Transformer Reads Text
 - Word Order & Positional Encoding
 - Attention & Multi-Head Attention
@@ -78,26 +126,32 @@ A layer-by-layer look at how a transformer processes text.
 - Residual Connections & Layer Normalization
 - One Transformer Layer
 - Stacking Transformer Layers
+</details>
 
-### Transformer Architectures
-Why models like BERT, GPT, and T5 are built differently.
+<details>
+<summary><b>🏗️ Transformer Architectures</b> — why models like BERT, GPT, and T5 are built differently</summary>
+
 - What are Encoder and Decoder?
 - Encoder-only Models (BERT)
 - Decoder-only Models (GPT)
 - Why do we need Encoder-Decoder Models?
 - Encoder-Decoder Models (T5)
+</details>
 
-### AI Agent Fundamentals
-What an AI agent is, how it uses tools and memory, and how agents work together.
+<details>
+<summary><b>🤖 AI Agent Fundamentals</b> — what an AI agent is, and how it uses tools and memory</summary>
+
 - What is an AI Agent?
 - Components of an AI Agent
 - Tool Calling
 - Agent Memory
 - Single-Agent vs Multi-Agent
 - Real-World AI Agents
+</details>
 
-### Agentic AI
-How autonomous agents plan, reason, reflect, and collaborate on complex tasks.
+<details>
+<summary><b>🧠 Agentic AI</b> — how autonomous agents plan, reason, reflect, and collaborate</summary>
+
 - What is Agentic AI?
 - Agent Loop
 - Planning
@@ -106,9 +160,32 @@ How autonomous agents plan, reason, reflect, and collaborate on complex tasks.
 - Autonomous Workflows
 - Multi-Step Reasoning
 - Agent Orchestration
+</details>
 
-### Vector Index Explorer
-Compare the search strategies vector databases use to trade speed for accuracy.
+<details>
+<summary><b>🎓 Training Fundamentals</b> — how AI models learn and become ready to answer</summary>
+
+- How AI Models Learn
+- Pretraining
+- Training Loss
+- Epochs
+- Inference
+</details>
+
+<details>
+<summary><b>🔧 Fine-Tuning</b> — how existing AI models are adapted for new tasks and styles</summary>
+
+- Fine-Tuning
+- Instruction Tuning
+- RLHF
+- LoRA
+- QLoRA
+- Adapters
+</details>
+
+<details>
+<summary><b>🗂️ Vector Index Explorer</b> — compare how vector databases trade speed for accuracy</summary>
+
 - Compare All Indexes
 - FLAT Index
 - IVF_FLAT Index
@@ -116,22 +193,32 @@ Compare the search strategies vector databases use to trade speed for accuracy.
 - IVF_PQ Index
 - HNSW Index
 - DiskANN Index
+</details>
 
-### Training Fundamentals
-How AI models are trained, how they improve during training, and how they finally become ready to answer questions.
-- How AI Models Learn
-- Pretraining
-- Training Loss
-- Epochs
-- Inference
+---
 
-## Coming Soon
+## 🛠️ Coming Soon
 
-### Fine-Tuning
-How existing AI models are adapted for new tasks using techniques like instruction tuning, RLHF, LoRA, and QLoRA.
-- Fine-Tuning
-- Instruction Tuning
-- RLHF
-- LoRA
-- QLoRA
-- Adapters
+> **⚡ Model Optimization** — how AI models are made faster, smaller, and more efficient.
+
+`What is Model Optimization?` · `Quantization` · `FP32 vs FP16 vs INT8 vs INT4` · `KV Cache` · `Batching` · `Latency vs Throughput` · `Speculative Decoding`
+
+---
+
+## ⚡ Getting Started
+
+Nothing to install. Nothing to clone. Just open the site and start exploring:
+
+### 👉 **[imelanthirayan.github.io/aiplayground](https://imelanthirayan.github.io/aiplayground/)** 🎉
+
+---
+
+## 👥 Who is this for
+
+Anyone curious about how modern AI actually works — students, developers, product folks, and the endlessly curious. If you can open a web page, you can use this. No prerequisites required.
+
+---
+
+<p align="center">
+  Built with ❤️ to make AI click. &nbsp;•&nbsp; <a href="https://imelanthirayan.github.io/aiplayground/">Start exploring →</a>
+</p>
