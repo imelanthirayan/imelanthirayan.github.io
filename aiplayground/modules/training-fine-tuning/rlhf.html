@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RLHF, a beginner-friendly interactive lesson that explains Reinforcement Learning from Human Feedback, and how human preferences guide a model toward more helpful answers." />
+  <title>RLHF, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/rlhf.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="RLHF, AI Concepts Playground" />
+  <meta property="og:description" content="RLHF, a beginner-friendly interactive lesson that explains Reinforcement Learning from Human Feedback, and how human preferences guide a model toward more helpful answers." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/rlhf.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RLHF, AI Concepts Playground" />
+  <meta name="twitter:description" content="RLHF, a beginner-friendly interactive lesson that explains Reinforcement Learning from Human Feedback, and how human preferences guide a model toward more helpful answers." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Playground controls ─────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #ea580c; color: white; border-color: #ea580c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #c2410c; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+    html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
+
+    /* ── Prompt banner ───────────────────────── */
+    .prompt-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
+    .prompt-banner {
+      display: flex; align-items: center; gap: 0.7rem; padding: 1rem 1.2rem; border-radius: 1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; margin-bottom: 1.4rem;
+    }
+    html.dark .prompt-banner { background: #0f172a; border-color: #334155; }
+    .prompt-banner .pb-ic { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .prompt-banner .pb-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .prompt-banner .pb-text { font-size: 0.95rem; font-weight: 800; color: #334155; }
+    html.dark .prompt-banner .pb-text { color: #e2e8f0; }
+    .prompt-banner .pb-role { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; display: block; margin-bottom: 0.1rem; }
+
+    /* ── Response comparison cards ───────────── */
+    .resp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .resp-grid { grid-template-columns: 1fr; } }
+    .resp-card {
+      cursor: pointer; border-radius: 1rem; padding: 1.2rem 1.3rem; text-align: left;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease; position: relative;
+    }
+    html.dark .resp-card { background: #0f172a; border-color: #334155; }
+    .resp-card:hover:not(.locked) { border-color: rgba(234,88,12,0.45); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.12); }
+    .resp-card.locked { cursor: default; }
+    .resp-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; }
+    .resp-badge { width: 30px; height: 30px; border-radius: 9999px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.85rem; color: white; background: #94a3b8; transition: all 0.25s ease; }
+    .resp-name { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+    .resp-text { font-size: 0.9rem; font-weight: 700; color: #334155; line-height: 1.5; }
+    html.dark .resp-text { color: #e2e8f0; }
+    .resp-pick { margin-top: 0.9rem; }
+    .pick-btn {
+      cursor: pointer; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      font-size: 0.78rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .pick-btn:hover { background: rgba(234,88,12,0.16); }
+    html.dark .pick-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    /* chosen (preferred) */
+    .resp-card.chosen { border-color: rgba(22,163,74,0.5); background: rgba(22,163,74,0.06); box-shadow: 0 8px 20px rgba(22,163,74,0.14); }
+    html.dark .resp-card.chosen { border-color: rgba(74,222,128,0.4); background: rgba(22,163,74,0.12); }
+    .resp-card.chosen .resp-badge { background: #16a34a; }
+    .resp-card.chosen .resp-name { color: #16a34a; }
+    html.dark .resp-card.chosen .resp-name { color: #4ade80; }
+    /* not chosen */
+    .resp-card.rejected { opacity: 0.55; }
+    .resp-card.rejected .resp-badge { background: #cbd5e1; }
+    html.dark .resp-card.rejected .resp-badge { background: #475569; }
+    .resp-flag { position: absolute; top: 0.9rem; right: 1rem; display: none; align-items: center; gap: 0.3rem; font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.6rem; border-radius: 9999px; }
+    .resp-card.chosen .resp-flag { display: inline-flex; color: #16a34a; background: rgba(22,163,74,0.12); }
+    html.dark .resp-card.chosen .resp-flag { color: #4ade80; background: rgba(22,163,74,0.2); }
+    .resp-card.rejected .resp-flag { display: inline-flex; color: #94a3b8; background: rgba(148,163,184,0.15); }
+
+    /* ── Feedback flow (revealed) ────────────── */
+    .flow-col { display: flex; flex-direction: column; align-items: stretch; gap: 0.2rem; margin-top: 1.6rem; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.5s ease, opacity 0.5s ease, margin-top 0.5s ease; }
+    .flow-col.show { max-height: 560px; opacity: 1; }
+    .flow-node {
+      border-radius: 1.1rem; padding: 1.05rem 1.3rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center;
+      transform: translateY(10px); opacity: 0; transition: all 0.4s ease;
+    }
+    html.dark .flow-node { background: #0f172a; border-color: #334155; }
+    .flow-col.show .flow-node { transform: translateY(0); opacity: 1; }
+    .flow-col.show .flow-node:nth-child(3) { transition-delay: 0.15s; }
+    .flow-col.show .flow-node:nth-child(5) { transition-delay: 0.3s; }
+    .flow-head { display: flex; align-items: center; justify-content: center; gap: 0.6rem; margin-bottom: 0.45rem; }
+    .flow-ic { width: 34px; height: 34px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .flow-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .flow-node.good .flow-ic { background: #16a34a; color: white; }
+    .flow-name { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; }
+    .flow-body { font-size: 0.9rem; font-weight: 700; color: #334155; line-height: 1.45; }
+    html.dark .flow-body { color: #e2e8f0; }
+    .flow-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e1; padding: 0.15rem 0; opacity: 0; transition: opacity 0.4s ease 0.2s; }
+    .flow-col.show .flow-arrow { opacity: 1; }
+    html.dark .flow-arrow { color: #475569; }
+
+    /* ── Note message ────────────────────────── */
+    .note-msg {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.4rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; opacity: 0;
+      color: #16a34a; background: rgba(22,163,74,0.08); border: 1.5px solid rgba(22,163,74,0.25);
+      transition: opacity 0.45s ease;
+    }
+    .note-msg.show { opacity: 1; }
+    html.dark .note-msg { color: #4ade80; background: rgba(22,163,74,0.14); border-color: rgba(74,222,128,0.28); }
+
+    /* ── Reason cards (Why feedback helps) ───── */
+    .reason-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .reason-grid { grid-template-columns: 1fr; } }
+    .reason-card { border-radius: 1rem; padding: 1.25rem 1.35rem; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease; }
+    html.dark .reason-card { background: #0f172a; border-color: #334155; }
+    .reason-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.12); }
+    .reason-head { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.55rem; }
+    .reason-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .reason-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .reason-title { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .reason-title { color: #f1f5f9; }
+    .reason-text { font-size: 0.88rem; font-weight: 600; color: #64748b; line-height: 1.5; }
+    html.dark .reason-text { color: #94a3b8; }
+
+    /* ── Comparison cards (Before vs After) ──── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-card { border-radius: 1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.train { border-color: rgba(100,116,139,0.35); background: rgba(100,116,139,0.05); }
+    .cmp-card.infer { border-color: rgba(22,163,74,0.3); background: rgba(22,163,74,0.05); }
+    .cmp-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; }
+    .cmp-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .cmp-card.train .cmp-ic { background: #64748b; }
+    .cmp-card.infer .cmp-ic { background: #16a34a; }
+    .cmp-name { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .cmp-name { color: #f1f5f9; }
+    .cmp-lead { font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 0.9rem; }
+    html.dark .cmp-lead { color: #94a3b8; }
+    .cmp-quote { font-size: 0.88rem; font-weight: 700; color: #334155; line-height: 1.5; padding: 0.7rem 0.9rem; border-radius: 0.7rem; background: rgba(148,163,184,0.1); border-left: 3px solid #cbd5e1; }
+    html.dark .cmp-quote { color: #e2e8f0; background: rgba(148,163,184,0.08); }
+    .cmp-card.infer .cmp-quote { border-left-color: #16a34a; background: rgba(22,163,74,0.08); }
+
+    /* ── Step flow ───────────────────────────── */
+    .step-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    @media (max-width: 640px) { .step-flow { grid-template-columns: 1fr; } }
+    .step-card { border-radius: 1rem; padding: 1.15rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .step-card { background: #0f172a; border-color: #334155; }
+    .step-num { width: 40px; height: 40px; border-radius: 9999px; margin: 0 auto 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .step-text { font-size: 0.85rem; font-weight: 700; color: #334155; line-height: 1.45; }
+    html.dark .step-text { color: #e2e8f0; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Fine-Tuning</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+          <span class="text-red-700 dark:text-red-400 text-xs font-bold tracking-wide">🔴 Advanced · 8–10 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="thumbs-up" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">RLHF</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          RLHF means <strong class="text-slate-800 dark:text-slate-200">Reinforcement Learning from Human Feedback</strong>.
+          It helps improve a model by using <strong class="text-slate-800 dark:text-slate-200">human preferences</strong>
+          about which responses are better.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Human Feedback Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Pick the more helpful response</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The model gives <strong class="text-slate-800 dark:text-slate-200">two responses</strong> to the same prompt.
+          You are the human giving feedback, <strong class="text-slate-800 dark:text-slate-200">choose the one you find more helpful</strong>
+          and watch how that preference guides the model.
+        </p>
+
+        <!-- user prompt -->
+        <div class="prompt-cap">The prompt</div>
+        <div class="prompt-banner">
+          <span class="pb-ic"><i data-lucide="message-square" style="width:17px;height:17px;"></i></span>
+          <div>
+            <span class="pb-role">User</span>
+            <span class="pb-text">Explain RAG to a beginner.</span>
+          </div>
+        </div>
+
+        <!-- two responses -->
+        <div class="prompt-cap">Which response is more helpful?</div>
+        <div class="resp-grid">
+          <div class="resp-card" id="cardA">
+            <span class="resp-flag"><i data-lucide="check" style="width:11px;height:11px;"></i><span class="flag-label">Preferred</span></span>
+            <div class="resp-head">
+              <span class="resp-badge">A</span>
+              <span class="resp-name">Response A</span>
+            </div>
+            <div class="resp-text">RAG is a system that combines retrieval and generation.</div>
+            <div class="resp-pick">
+              <button class="pick-btn" data-pick="A"><i data-lucide="thumbs-up" style="width:13px;height:13px;"></i> Choose A</button>
+            </div>
+          </div>
+
+          <div class="resp-card" id="cardB">
+            <span class="resp-flag"><i data-lucide="check" style="width:11px;height:11px;"></i><span class="flag-label">Preferred</span></span>
+            <div class="resp-head">
+              <span class="resp-badge">B</span>
+              <span class="resp-name">Response B</span>
+            </div>
+            <div class="resp-text">RAG means the AI first searches useful documents, then uses those documents to answer your question.</div>
+            <div class="resp-pick">
+              <button class="pick-btn" data-pick="B"><i data-lucide="thumbs-up" style="width:13px;height:13px;"></i> Choose B</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- feedback flow (revealed after choice) -->
+        <div class="flow-col" id="flowCol">
+          <div class="flow-node good">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="thumbs-up" style="width:17px;height:17px;"></i></span>
+              <span class="flow-name">Human Feedback</span>
+            </div>
+            <div class="flow-body">A person picks the response they find more helpful.</div>
+          </div>
+
+          <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
+
+          <div class="flow-node good">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="award" style="width:17px;height:17px;"></i></span>
+              <span class="flow-name">Preferred Response</span>
+            </div>
+            <div class="flow-body" id="preferredBody">The chosen response is marked as the better one.</div>
+          </div>
+
+          <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
+
+          <div class="flow-node good">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="sparkles" style="width:17px;height:17px;"></i></span>
+              <span class="flow-name">Model Learns</span>
+            </div>
+            <div class="flow-body">The model learns to give this better response style more often.</div>
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="pg-controls" style="margin-top:1.4rem;">
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Reset</button>
+        </div>
+
+        <!-- note -->
+        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> Human feedback helps the model learn what people find more useful.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHY HUMAN FEEDBACK HELPS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="heart-handshake" style="width:12px;height:12px;"></i>Why Human Feedback Helps</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">People know what "better" feels like</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          A model can be correct yet still unhelpful. Human feedback adds the human sense of what makes a good answer.
+        </p>
+
+        <div class="reason-grid">
+          <div class="reason-card">
+            <div class="reason-head">
+              <span class="reason-ic"><i data-lucide="hand-heart" style="width:20px;height:20px;"></i></span>
+              <span class="reason-title">More Helpful</span>
+            </div>
+            <div class="reason-text">Humans can prefer answers that are clearer and more useful.</div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-head">
+              <span class="reason-ic"><i data-lucide="shield-check" style="width:20px;height:20px;"></i></span>
+              <span class="reason-title">Safer</span>
+            </div>
+            <div class="reason-text">Humans can reject risky or harmful responses.</div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-head">
+              <span class="reason-ic"><i data-lucide="smile" style="width:20px;height:20px;"></i></span>
+              <span class="reason-title">Better Tone</span>
+            </div>
+            <div class="reason-text">Humans can prefer polite and appropriate responses.</div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-head">
+              <span class="reason-ic"><i data-lucide="target" style="width:20px;height:20px;"></i></span>
+              <span class="reason-title">Better Alignment</span>
+            </div>
+            <div class="reason-text">The model becomes closer to what users expect.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. BEFORE vs AFTER FEEDBACK
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Before vs After Feedback</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">From correct to genuinely helpful</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Before feedback, an answer can be right but flat. After feedback, the model leans toward answers people actually like.
+        </p>
+
+        <div class="cmp-grid">
+          <div class="cmp-card train">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="file-text" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">Before RLHF</span>
+            </div>
+            <div class="cmp-lead">The model may answer correctly but not helpfully.</div>
+            <div class="cmp-quote">"RAG combines retrieval and generation."</div>
+          </div>
+
+          <div class="cmp-card infer">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="thumbs-up" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">After RLHF</span>
+            </div>
+            <div class="cmp-lead">The model gives a clearer, more useful response.</div>
+            <div class="cmp-quote">"RAG helps AI answer using documents instead of guessing."</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW IT WORKS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>How It Works</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Feedback becomes better behavior</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Three simple steps turn human choices into a more helpful model.
+        </p>
+        <div class="step-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-text">The model gives a few possible responses.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-text">Humans compare them and pick the better one.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-text">The model learns to prefer that kind of answer.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• RLHF uses <strong class="text-slate-900 dark:text-white">human feedback</strong>.</li>
+            <li>• Humans <strong class="text-slate-900 dark:text-white">compare or rate</strong> model responses.</li>
+            <li>• Feedback helps the model <strong class="text-slate-900 dark:text-white">prefer better answers</strong>.</li>
+            <li>• RLHF can improve <strong class="text-slate-900 dark:text-white">helpfulness, tone, and safety</strong>.</li>
+            <li>• RLHF does <strong class="text-slate-900 dark:text-white">not make the model perfect</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare the two responses.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Choose the more helpful one.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice what makes one response better.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Think about how human feedback can improve an assistant.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>RLHF helps a model improve by learning from human preferences. It guides the model toward responses that are more helpful, clear, and aligned with user expectations.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="instruction-tuning.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Instruction Tuning
+        </a>
+        <a href="lora.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: LoRA</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Fine-Tuning');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     RLHF, human-feedback playground
+  ═══════════════════════════════════════════════ */
+  const cardA    = document.getElementById('cardA');
+  const cardB    = document.getElementById('cardB');
+  const flowCol  = document.getElementById('flowCol');
+  const preferredBody = document.getElementById('preferredBody');
+  const noteMsg  = document.getElementById('noteMsg');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let chosen = false;
+
+  function choose(pick) {
+    if (chosen) return;
+    chosen = true;
+
+    const winner = pick === 'A' ? cardA : cardB;
+    const loser  = pick === 'A' ? cardB : cardA;
+
+    winner.classList.add('chosen', 'locked');
+    loser.classList.add('rejected', 'locked');
+    winner.querySelector('.flag-label').textContent = 'Preferred';
+    loser.querySelector('.flag-label').textContent = 'Not chosen';
+
+    preferredBody.textContent = 'Response ' + pick + ' is marked as the better answer.';
+
+    if (pick === 'A') {
+      noteMsg.innerHTML = '<i data-lucide="info" style="width:16px;height:16px;"></i> Any choice teaches the model. Many people would find B clearer, try Reset and compare!';
+    } else {
+      noteMsg.innerHTML = '<i data-lucide="info" style="width:16px;height:16px;"></i> Human feedback helps the model learn what people find more useful.';
+    }
+
+    flowCol.classList.add('show');
+    noteMsg.classList.add('show');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function resetPlayground() {
+    chosen = false;
+    [cardA, cardB].forEach(c => c.classList.remove('chosen', 'rejected', 'locked'));
+    cardA.querySelector('.flag-label').textContent = 'Preferred';
+    cardB.querySelector('.flag-label').textContent = 'Preferred';
+    flowCol.classList.remove('show');
+    noteMsg.classList.remove('show');
+    noteMsg.innerHTML = '<i data-lucide="info" style="width:16px;height:16px;"></i> Human feedback helps the model learn what people find more useful.';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  document.querySelectorAll('[data-pick]').forEach(btn =>
+    btn.addEventListener('click', e => { e.stopPropagation(); choose(btn.dataset.pick); })
+  );
+  cardA.addEventListener('click', () => choose('A'));
+  cardB.addEventListener('click', () => choose('B'));
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

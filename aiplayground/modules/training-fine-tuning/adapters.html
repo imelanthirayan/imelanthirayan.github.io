@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Adapters, a beginner-friendly interactive lesson that explains adapters as small add-on modules that specialize a base model for a task without changing the full model." />
+  <title>Adapters, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/adapters.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Adapters, AI Concepts Playground" />
+  <meta property="og:description" content="Adapters, a beginner-friendly interactive lesson that explains adapters as small add-on modules that specialize a base model for a task without changing the full model." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/adapters.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Adapters, AI Concepts Playground" />
+  <meta name="twitter:description" content="Adapters, a beginner-friendly interactive lesson that explains adapters as small add-on modules that specialize a base model for a task without changing the full model." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Controls ────────────────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    /* ── Model diagram ───────────────────────── */
+    .diagram { display: flex; align-items: center; justify-content: center; gap: 1.1rem; flex-wrap: wrap; margin: 1.6rem 0 0.4rem; min-height: 210px; }
+    @media (max-width: 520px) { .diagram { flex-direction: column; } }
+
+    .base-block {
+      position: relative; width: 210px; max-width: 100%; border-radius: 1.1rem; padding: 1.4rem 1.2rem;
+      border: 2px solid #38bdf8; background: rgba(56,189,248,0.06); text-align: center;
+      transition: all 0.45s ease; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(56,189,248,0.15);
+    }
+    html.dark .base-block { background: rgba(56,189,248,0.1); }
+    .base-ic { width: 46px; height: 46px; border-radius: 0.8rem; margin: 0 auto 0.6rem; display: flex; align-items: center; justify-content: center; background: #0ea5e9; color: white; box-shadow: 0 0 0 6px rgba(56,189,248,0.15); }
+    .base-title { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .base-title { color: #f1f5f9; }
+    .base-sub { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #0ea5e9; margin-top: 0.2rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+    html.dark .base-sub { color: #38bdf8; }
+    /* weight dots grid */
+    .weights { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 0.9rem; position: relative; z-index: 1; }
+    .wdot { aspect-ratio: 1; border-radius: 4px; background: #7dd3fc; transform: scale(0.92); transition: all 0.35s ease; }
+    html.dark .wdot { background: #0ea5e9; opacity: 0.65; }
+    /* frost shimmer + lock badge — base stays unchanged */
+    .frost { position: absolute; inset: 0; border-radius: 1.1rem; pointer-events: none; opacity: 1; z-index: 2;
+      background: linear-gradient(135deg, rgba(255,255,255,0.32) 0%, rgba(56,189,248,0.05) 40%, transparent 70%);
+      animation: frostShimmer 3.5s ease-in-out infinite; }
+    @keyframes frostShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.22); } }
+    .froze-badge { position: absolute; top: 0.6rem; right: 0.6rem; width: 26px; height: 26px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center; background: #0ea5e9; color: white; z-index: 3;
+      box-shadow: 0 4px 10px rgba(14,165,233,0.4); }
+
+    /* connector between base and adapter */
+    .connector { position: relative; width: 56px; height: 4px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; opacity: 0.4; transition: opacity 0.4s ease; }
+    @media (max-width: 520px) { .connector { width: 4px; height: 40px; } }
+    html.dark .connector { background: #334155; }
+    .connector.live { opacity: 1; }
+    .connector .spark { position: absolute; top: 0; left: 0; width: 40%; height: 100%; border-radius: 9999px;
+      background: linear-gradient(90deg, transparent, #16a34a, transparent); opacity: 0; }
+    @media (max-width: 520px) { .connector .spark { width: 100%; height: 40%; background: linear-gradient(180deg, transparent, #16a34a, transparent); } }
+    .connector.live .spark { opacity: 1; animation: flow 1.3s linear infinite; }
+    @keyframes flow { 0% { left: -40%; } 100% { left: 100%; } }
+    @media (max-width: 520px) { @keyframes flow { 0% { top: -40%; left: 0; } 100% { top: 100%; left: 0; } } }
+    .connector .lbl { position: absolute; top: -1.35rem; left: 50%; transform: translateX(-50%); white-space: nowrap;
+      font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: #16a34a; opacity: 0; transition: opacity 0.4s ease; }
+    @media (max-width: 520px) { .connector .lbl { display: none; } }
+    .connector.live .lbl { opacity: 1; }
+
+    /* adapter block */
+    .adapter-block {
+      position: relative; width: 160px; max-width: 100%; border-radius: 1.1rem; padding: 1.2rem 1rem;
+      border: 2px dashed #cbd5e1; background: #f8fafc; text-align: center; transition: all 0.45s ease;
+      opacity: 0.4; transform: scale(0.94);
+    }
+    html.dark .adapter-block { background: #0f172a; border-color: #475569; }
+    .adapter-block.on { opacity: 1; transform: scale(1); border-color: #16a34a; border-style: solid; background: rgba(22,163,74,0.06); box-shadow: 0 8px 22px rgba(22,163,74,0.18); }
+    html.dark .adapter-block.on { border-color: #4ade80; background: rgba(22,163,74,0.12); }
+    .adapter-block.swap { animation: adapterSwap 0.5s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes adapterSwap { 0% { transform: scale(0.6) rotate(-8deg); opacity: 0; } 60% { transform: scale(1.08) rotate(3deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+    .adapter-ic { width: 44px; height: 44px; border-radius: 0.7rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; background: rgba(148,163,184,0.18); color: #94a3b8; transition: all 0.45s ease; }
+    .adapter-block.on .adapter-ic { background: #16a34a; color: white; animation: ringPulse 1.6s ease-in-out infinite; }
+    @keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); } 50% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } }
+    .adapter-title { font-weight: 900; font-size: 0.85rem; color: #1e293b; line-height: 1.2; }
+    html.dark .adapter-title { color: #f1f5f9; }
+    .adapter-sub { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin-top: 0.25rem; }
+    .adapter-block.on .adapter-sub { color: #16a34a; }
+    html.dark .adapter-block.on .adapter-sub { color: #4ade80; }
+
+    /* ── Adapter selector pills ──────────────── */
+    .prompt-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
+    .prompt-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .prompt-pill {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 700; color: #475569; padding: 0.5rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.2s ease;
+    }
+    .prompt-pill:hover { border-color: rgba(234,88,12,0.4); color: #ea580c; transform: translateY(-1px); }
+    .prompt-pill.selected { border-color: #ea580c; background: rgba(234,88,12,0.1); color: #ea580c; box-shadow: 0 4px 12px rgba(234,88,12,0.14); }
+    html.dark .prompt-pill { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    html.dark .prompt-pill:hover { border-color: rgba(251,146,60,0.45); color: #fdba74; }
+    html.dark .prompt-pill.selected { border-color: #fb923c; background: rgba(234,88,12,0.2); color: #fdba74; }
+    .prompt-pill .pp-dot { width: 7px; height: 7px; border-radius: 9999px; background: #cbd5e1; transition: all 0.2s ease; }
+    .prompt-pill.selected .pp-dot { background: #ea580c; }
+    html.dark .prompt-pill.selected .pp-dot { background: #fb923c; }
+
+    /* combine row: Base + Adapter → Behavior */
+    .combine-row { display: flex; align-items: stretch; justify-content: center; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.5rem; }
+    @media (max-width: 640px) { .combine-row { flex-direction: column; align-items: stretch; } }
+    .combine-box { flex: 1; min-width: 150px; border-radius: 1rem; padding: 1.1rem 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .combine-box { background: #0f172a; border-color: #334155; }
+    .combine-box.base { border-color: rgba(56,189,248,0.4); }
+    .combine-box.adapter { border-color: #ea580c; background: rgba(234,88,12,0.06); }
+    html.dark .combine-box.adapter { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .combine-box.result { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.05); }
+    html.dark .combine-box.result { border-color: rgba(74,222,128,0.35); background: rgba(22,163,74,0.1); }
+    .combine-cap { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.4rem; }
+    .combine-main { font-size: 0.92rem; font-weight: 900; color: #1e293b; }
+    html.dark .combine-main { color: #f1f5f9; }
+    .combine-op { display: flex; align-items: center; font-size: 1.4rem; font-weight: 900; color: #cbd5e1; }
+    @media (max-width: 640px) { .combine-op { justify-content: center; } }
+    html.dark .combine-op { color: #475569; }
+    #behaviorResult { transition: color 0.3s ease; min-height: 1.2em; }
+    .caret { display: inline-block; width: 2px; background: #16a34a; margin-left: 1px; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Comparison cards ────────────────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-card { border-radius: 1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.full { border-color: rgba(234,88,12,0.3); background: rgba(234,88,12,0.05); }
+    .cmp-card.adpt { border-color: rgba(22,163,74,0.35); background: rgba(22,163,74,0.05); }
+    .cmp-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
+    .cmp-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .cmp-card.full .cmp-ic { background: #ea580c; }
+    .cmp-card.adpt .cmp-ic { background: #16a34a; }
+    .cmp-name { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .cmp-name { color: #f1f5f9; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cmp-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.87rem; font-weight: 700; color: #334155; line-height: 1.4; }
+    html.dark .cmp-item { color: #e2e8f0; }
+    .cmp-item i { flex-shrink: 0; margin-top: 2px; }
+    .cmp-card.full .cmp-item i { color: #ea580c; }
+    .cmp-card.adpt .cmp-item i { color: #16a34a; }
+
+    /* ── Adapter hub (switching tree) ────────── */
+    .hub { margin-top: 0.6rem; }
+    .hub-base {
+      position: relative; margin: 0 auto 0.2rem; width: 230px; max-width: 100%; text-align: center;
+      border-radius: 1rem; padding: 1rem 1.1rem; border: 2px solid #38bdf8;
+      background: rgba(56,189,248,0.07); box-shadow: 0 8px 22px rgba(56,189,248,0.15);
+    }
+    html.dark .hub-base { background: rgba(56,189,248,0.12); }
+    .hub-base-ic { width: 38px; height: 38px; border-radius: 0.7rem; margin: 0 auto 0.4rem; display: flex; align-items: center; justify-content: center; background: #0ea5e9; color: white; }
+    .hub-base-title { font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .hub-base-title { color: #f1f5f9; }
+    .hub-base-sub { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #0ea5e9; margin-top: 0.15rem; }
+    .hub-stem { width: 3px; height: 26px; margin: 0 auto; background: #cbd5e1; border-radius: 9999px; }
+    html.dark .hub-stem { background: #475569; }
+    .hub-branches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 0.3rem; }
+    @media (max-width: 720px) { .hub-branches { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .hub-branches { grid-template-columns: 1fr; } }
+    .hub-node {
+      cursor: pointer; position: relative; border-radius: 0.9rem; padding: 0.95rem 0.7rem; text-align: center;
+      border: 1.5px dashed #cbd5e1; background: #f8fafc; transition: all 0.3s ease;
+    }
+    html.dark .hub-node { background: #0f172a; border-color: #475569; }
+    .hub-node::before {
+      content: ''; position: absolute; top: -0.3rem; left: 50%; transform: translateX(-50%);
+      width: 3px; height: 0.3rem; background: #cbd5e1;
+    }
+    html.dark .hub-node::before { background: #475569; }
+    .hub-node:hover { border-color: rgba(22,163,74,0.5); transform: translateY(-2px); }
+    .hub-node.active { border-style: solid; border-color: #16a34a; background: rgba(22,163,74,0.08); box-shadow: 0 8px 20px rgba(22,163,74,0.18); }
+    html.dark .hub-node.active { background: rgba(22,163,74,0.14); }
+    .hub-node.active::before { background: #16a34a; }
+    .hub-node-ic { width: 34px; height: 34px; border-radius: 0.6rem; margin: 0 auto 0.4rem; display: flex; align-items: center; justify-content: center; background: rgba(148,163,184,0.18); color: #94a3b8; transition: all 0.3s ease; }
+    .hub-node.active .hub-node-ic { background: #16a34a; color: white; }
+    .hub-node-name { font-size: 0.72rem; font-weight: 800; color: #475569; line-height: 1.2; }
+    html.dark .hub-node-name { color: #cbd5e1; }
+    .hub-node.active .hub-node-name { color: #15803d; }
+    html.dark .hub-node.active .hub-node-name { color: #4ade80; }
+    .hub-note {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.3rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700;
+      color: #15803d; background: rgba(22,163,74,0.06); border: 1.5px solid rgba(22,163,74,0.25);
+    }
+    html.dark .hub-note { color: #4ade80; background: rgba(22,163,74,0.12); border-color: rgba(74,222,128,0.28); }
+
+    /* ── Step flow ───────────────────────────── */
+    .step-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    @media (max-width: 640px) { .step-flow { grid-template-columns: 1fr; } }
+    .step-card { border-radius: 1rem; padding: 1.15rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .step-card { background: #0f172a; border-color: #334155; }
+    .step-num { width: 40px; height: 40px; border-radius: 9999px; margin: 0 auto 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .step-text { font-size: 0.85rem; font-weight: 700; color: #334155; line-height: 1.45; }
+    html.dark .step-text { color: #e2e8f0; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.2); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Fine-Tuning</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="puzzle" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Adapters</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Adapters are <strong class="text-slate-800 dark:text-slate-200">small trainable modules</strong> added to a model.
+          They help specialize the model for a task <strong class="text-slate-800 dark:text-slate-200">without changing the full base model</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="puzzle" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Attach an adapter to the base model</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-2">
+          Pick an adapter and watch it snap onto the <strong class="text-slate-800 dark:text-slate-200">same base model</strong>.
+          The base stays unchanged — only the small adapter gives it a new behavior.
+        </p>
+
+        <!-- diagram: base + connector + adapter -->
+        <div class="diagram">
+          <div class="base-block" id="baseBlock">
+            <div class="frost"></div>
+            <div class="froze-badge"><i data-lucide="lock" style="width:13px;height:13px;"></i></div>
+            <div class="base-ic"><i data-lucide="box" style="width:24px;height:24px;"></i></div>
+            <div class="base-title">Base Model</div>
+            <div class="base-sub"><i data-lucide="snowflake" style="width:11px;height:11px;"></i> Unchanged</div>
+            <div class="weights" id="weights"></div>
+          </div>
+
+          <div class="connector" id="connector">
+            <span class="lbl">attach</span>
+            <span class="spark"></span>
+          </div>
+
+          <div class="adapter-block" id="adapterBlock">
+            <div class="adapter-ic" id="adapterIc"><i data-lucide="puzzle" style="width:22px;height:22px;"></i></div>
+            <div class="adapter-title" id="adapterTitle">No adapter</div>
+            <div class="adapter-sub" id="adapterSub">Pick one below</div>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <div class="prompt-cap">Choose an adapter</div>
+          <div class="prompt-list" id="adapterList"></div>
+        </div>
+
+        <!-- combine row -->
+        <div class="combine-row">
+          <div class="combine-box base">
+            <div class="combine-cap">Base Model</div>
+            <div class="combine-main">Stays the same</div>
+          </div>
+          <div class="combine-op">+</div>
+          <div class="combine-box adapter">
+            <div class="combine-cap">Adapter</div>
+            <div class="combine-main" id="combineAdapter">—</div>
+          </div>
+          <div class="combine-op">→</div>
+          <div class="combine-box result">
+            <div class="combine-cap">Behavior</div>
+            <div class="combine-main" id="behaviorResult">Select an adapter</div>
+          </div>
+        </div>
+
+        <p class="text-center text-sm font-bold text-slate-500 dark:text-slate-400 mt-5">
+          Same base model. Different adapter. Different behavior.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHY ADAPTERS HELP
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="scale" style="width:12px;height:12px;"></i>Why Adapters Help</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Full fine-tuning vs adapters</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Both can specialize a model. Adapters just do it in a lighter, easier-to-manage way.
+        </p>
+
+        <div class="cmp-grid">
+          <div class="cmp-card full">
+            <div class="cmp-head">
+              <div class="cmp-ic"><i data-lucide="layers" style="width:20px;height:20px;"></i></div>
+              <div class="cmp-name">Full Fine-Tuning</div>
+            </div>
+            <div class="cmp-list">
+              <div class="cmp-item"><i data-lucide="git-commit" style="width:15px;height:15px;"></i> Changes many parts of the model</div>
+              <div class="cmp-item"><i data-lucide="hard-drive" style="width:15px;height:15px;"></i> Needs more storage for each specialized model</div>
+              <div class="cmp-item"><i data-lucide="copy" style="width:15px;height:15px;"></i> One full copy per task</div>
+            </div>
+          </div>
+
+          <div class="cmp-card adpt">
+            <div class="cmp-head">
+              <div class="cmp-ic"><i data-lucide="puzzle" style="width:20px;height:20px;"></i></div>
+              <div class="cmp-name">Adapters</div>
+            </div>
+            <div class="cmp-list">
+              <div class="cmp-item"><i data-lucide="snowflake" style="width:15px;height:15px;"></i> Keep the base model mostly unchanged</div>
+              <div class="cmp-item"><i data-lucide="package" style="width:15px;height:15px;"></i> Store small task-specific modules</div>
+              <div class="cmp-item"><i data-lucide="repeat" style="width:15px;height:15px;"></i> Easier to switch between tasks</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. ADAPTER SWITCHING
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-branch" style="width:12px;height:12px;"></i>Adapter Switching</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">One base model, many adapters</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+          Instead of keeping many full models, we can keep <strong class="text-slate-800 dark:text-slate-200">one base model</strong>
+          and attach <strong class="text-slate-800 dark:text-slate-200">different adapters</strong> for different needs.
+          Click a branch to switch.
+        </p>
+
+        <div class="hub">
+          <div class="hub-base">
+            <div class="hub-base-ic"><i data-lucide="box" style="width:20px;height:20px;"></i></div>
+            <div class="hub-base-title">Base Model</div>
+            <div class="hub-base-sub">Shared by all adapters</div>
+          </div>
+          <div class="hub-stem"></div>
+          <div class="hub-branches" id="hubBranches"></div>
+
+          <div class="hub-note">
+            <i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0;"></i>
+            <span id="hubNote">Attach an adapter to give the base model new behavior.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW IT FITS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>How It Fits Together</div>
+        <h2 class="text-2xl font-black mb-5 text-slate-900 dark:text-white">Three simple steps</h2>
+        <div class="step-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-text">Start with one <strong class="text-slate-900 dark:text-white">base model</strong> that stays the same.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-text">Train a <strong class="text-slate-900 dark:text-white">small adapter</strong> for each task.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong class="text-slate-900 dark:text-white">Attach or swap</strong> adapters to change behavior.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-orange-500 dark:bg-orange-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• Adapters are <strong class="text-slate-900 dark:text-white">small add-on modules</strong>.</li>
+              <li>• They <strong class="text-slate-900 dark:text-white">specialize a base model</strong> for a task.</li>
+              <li>• The base model can stay <strong class="text-slate-900 dark:text-white">mostly unchanged</strong>.</li>
+              <li>• Different adapters can be <strong class="text-slate-900 dark:text-white">swapped</strong> for different use cases.</li>
+              <li>• Adapters make customization <strong class="text-slate-900 dark:text-white">easier to manage</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Select different adapters.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the model behavior change.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare adapter switching with full fine-tuning.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Think of one adapter your own project might need.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Adapters let one base model support many specialized behaviors by attaching small task-specific modules instead of changing the whole model.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ SECTION COMPLETE ═════ -->
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="text-center mb-5">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">
+          <i data-lucide="party-popper" style="width:14px;height:14px;"></i>
+          🎉 Fine-Tuning section complete
+        </span>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="qlora.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: QLoRA
+        </a>
+        <a href="../../index.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <i data-lucide="home" style="width:15px;height:15px;margin-right:4px;"></i>
+          <strong>All Modules</strong>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Fine-Tuning');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Adapters, playground
+  ═══════════════════════════════════════════════ */
+  const ADAPTERS = [
+    { label: 'Customer Support Adapter', short: 'Support',       icon: 'headset',    behavior: 'Responds in a helpful support style.' },
+    { label: 'Legal Summary Adapter',    short: 'Legal',         icon: 'scale',      behavior: 'Summarizes legal documents more clearly.' },
+    { label: 'Code Assistant Adapter',   short: 'Code',          icon: 'code-2',     behavior: 'Helps with programming tasks.' },
+    { label: 'Company Tone Adapter',     short: 'Tone',          icon: 'pen-line',   behavior: 'Uses a specific writing style.' },
+  ];
+
+  const weights       = document.getElementById('weights');
+  const connector     = document.getElementById('connector');
+  const adapterBlock  = document.getElementById('adapterBlock');
+  const adapterIc     = document.getElementById('adapterIc');
+  const adapterTitle  = document.getElementById('adapterTitle');
+  const adapterSub    = document.getElementById('adapterSub');
+  const adapterList   = document.getElementById('adapterList');
+  const combineAdapter= document.getElementById('combineAdapter');
+  const behaviorResult= document.getElementById('behaviorResult');
+  const hubBranches   = document.getElementById('hubBranches');
+  const hubNote       = document.getElementById('hubNote');
+
+  let selected = -1;
+  let typeTimer = null;
+
+  // base weight dots
+  weights.innerHTML = Array.from({ length: 18 }, () => '<span class="wdot"></span>').join('');
+
+  function typeOut(el, text) {
+    if (typeTimer) clearTimeout(typeTimer);
+    el.innerHTML = '';
+    let i = 0;
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    caret.style.height = '1em';
+    el.appendChild(caret);
+    (function step() {
+      if (i < text.length) {
+        caret.insertAdjacentText('beforebegin', text.charAt(i));
+        i++;
+        typeTimer = setTimeout(step, 22);
+      } else {
+        setTimeout(() => { if (caret.parentNode) caret.remove(); }, 500);
+      }
+    })();
+  }
+
+  function renderPills() {
+    adapterList.innerHTML = ADAPTERS.map((a, i) => `
+      <button class="prompt-pill${i === selected ? ' selected' : ''}" data-idx="${i}">
+        <span class="pp-dot"></span>${a.label}
+      </button>`).join('');
+    adapterList.querySelectorAll('.prompt-pill').forEach(btn =>
+      btn.addEventListener('click', () => selectAdapter(+btn.dataset.idx))
+    );
+  }
+
+  function renderHub() {
+    hubBranches.innerHTML = ADAPTERS.map((a, i) => `
+      <button class="hub-node${i === selected ? ' active' : ''}" data-idx="${i}">
+        <div class="hub-node-ic"><i data-lucide="${a.icon}" style="width:18px;height:18px;"></i></div>
+        <div class="hub-node-name">${a.label}</div>
+      </button>`).join('');
+    hubBranches.querySelectorAll('.hub-node').forEach(btn =>
+      btn.addEventListener('click', () => selectAdapter(+btn.dataset.idx))
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function selectAdapter(i) {
+    const changed = i !== selected;
+    selected = i;
+    const a = ADAPTERS[i];
+
+    // pills
+    adapterList.querySelectorAll('.prompt-pill').forEach(b =>
+      b.classList.toggle('selected', +b.dataset.idx === i)
+    );
+
+    // hub highlight
+    hubBranches.querySelectorAll('.hub-node').forEach(b =>
+      b.classList.toggle('active', +b.dataset.idx === i)
+    );
+
+    // connector live
+    connector.classList.add('live');
+
+    // adapter block
+    adapterBlock.classList.add('on');
+    if (changed) {
+      adapterBlock.classList.remove('swap');
+      void adapterBlock.offsetWidth;
+      adapterBlock.classList.add('swap');
+    }
+    adapterIc.innerHTML = `<i data-lucide="${a.icon}" style="width:22px;height:22px;"></i>`;
+    adapterTitle.textContent = a.label;
+    adapterSub.textContent = 'Attached';
+
+    // combine row
+    combineAdapter.textContent = a.short + ' Adapter';
+    typeOut(behaviorResult, a.behavior);
+
+    // hub note
+    hubNote.textContent = `Base Model + ${a.short} Adapter → ${a.behavior}`;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderPills();
+    renderHub();
+    selectAdapter(0);
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>

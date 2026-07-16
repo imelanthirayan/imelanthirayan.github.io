@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="QLoRA, a beginner-friendly interactive lesson that explains QLoRA as a memory-efficient version of LoRA that stores the base model in a smaller quantized format while training small adapters." />
+  <title>QLoRA, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/qlora.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="QLoRA, AI Concepts Playground" />
+  <meta property="og:description" content="QLoRA, a beginner-friendly interactive lesson that explains QLoRA as a memory-efficient version of LoRA that stores the base model in a smaller quantized format while training small adapters." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/qlora.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="QLoRA, AI Concepts Playground" />
+  <meta name="twitter:description" content="QLoRA, a beginner-friendly interactive lesson that explains QLoRA as a memory-efficient version of LoRA that stores the base model in a smaller quantized format while training small adapters." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Controls ────────────────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    /* ── Mode toggle ─────────────────────────── */
+    .mode-toggle { display: inline-flex; padding: 0.3rem; gap: 0.3rem; border-radius: 9999px; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #64748b; padding: 0.5rem 1.1rem; border-radius: 9999px;
+      border: none; background: transparent; transition: all 0.2s ease;
+    }
+    .mode-btn:hover { color: #ea580c; }
+    .mode-btn.active { background: #ea580c; color: white; box-shadow: 0 4px 12px rgba(234,88,12,0.3); }
+    html.dark .mode-btn { color: #cbd5e1; }
+    html.dark .mode-btn.active { background: #f97316; color: white; }
+
+    /* ── Model diagram ───────────────────────── */
+    .diagram { display: flex; align-items: center; justify-content: center; gap: 1.1rem; flex-wrap: wrap; margin: 1.8rem 0 0.4rem; min-height: 230px; }
+    @media (max-width: 520px) { .diagram { flex-direction: column; } }
+
+    .base-block {
+      position: relative; width: 210px; max-width: 100%; border-radius: 1.1rem; padding: 1.4rem 1.2rem;
+      border: 2px solid #38bdf8; background: rgba(56,189,248,0.06); text-align: center;
+      transition: width 0.6s cubic-bezier(.4,0,.2,1), padding 0.6s ease, border-color 0.45s ease, background 0.45s ease, box-shadow 0.45s ease;
+      box-shadow: 0 10px 30px rgba(56,189,248,0.15); overflow: hidden;
+    }
+    html.dark .base-block { background: rgba(56,189,248,0.1); }
+    .base-ic { width: 46px; height: 46px; border-radius: 0.8rem; margin: 0 auto 0.6rem; display: flex; align-items: center; justify-content: center; background: #0ea5e9; color: white; box-shadow: 0 0 0 6px rgba(56,189,248,0.15); transition: all 0.5s ease; }
+    .base-title { font-weight: 900; font-size: 1rem; color: #1e293b; transition: font-size 0.5s ease; }
+    html.dark .base-title { color: #f1f5f9; }
+    .base-sub { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #0ea5e9; margin-top: 0.2rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+    html.dark .base-sub { color: #38bdf8; }
+    /* weight dots grid */
+    .weights { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; margin-top: 0.9rem; position: relative; z-index: 1; transition: gap 0.6s ease; }
+    .wdot { aspect-ratio: 1; border-radius: 4px; background: #7dd3fc; transform: scale(0.92); transition: background 0.45s ease, transform 0.5s ease; }
+    html.dark .wdot { background: #0ea5e9; opacity: 0.7; }
+
+    /* frost overlay + lock badge (base always frozen here) */
+    .frost { position: absolute; inset: 0; border-radius: 1.1rem; pointer-events: none; z-index: 2;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(56,189,248,0.05) 40%, transparent 70%);
+      animation: frostShimmer 3.5s ease-in-out infinite; }
+    @keyframes frostShimmer { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.22); } }
+    .froze-badge { position: absolute; top: 0.6rem; right: 0.6rem; width: 26px; height: 26px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center; background: #0ea5e9; color: white; z-index: 3;
+      box-shadow: 0 4px 10px rgba(14,165,233,0.4); }
+
+    /* QLoRA (quantized / shrunk) state */
+    .base-block.quantized { width: 150px; padding: 1.15rem 0.9rem; border-color: #a855f7; background: rgba(168,85,247,0.07); box-shadow: 0 10px 30px rgba(168,85,247,0.2); }
+    html.dark .base-block.quantized { background: rgba(168,85,247,0.14); }
+    .base-block.quantized .base-ic { background: #9333ea; box-shadow: 0 0 0 6px rgba(168,85,247,0.16); }
+    .base-block.quantized .base-title { font-size: 0.9rem; }
+    .base-block.quantized .base-sub { color: #9333ea; }
+    html.dark .base-block.quantized .base-sub { color: #c084fc; }
+    .base-block.quantized .froze-badge { background: #9333ea; box-shadow: 0 4px 10px rgba(147,51,234,0.4); }
+    .base-block.quantized .weights { gap: 3px; }
+    .base-block.quantized .wdot { background: #c084fc; transform: scale(0.78); }
+    html.dark .base-block.quantized .wdot { background: #9333ea; }
+    /* compress flash when shrinking */
+    .compress-flash { position: absolute; inset: 0; border-radius: 1.1rem; background: rgba(168,85,247,0.35); opacity: 0; pointer-events: none; z-index: 4; }
+    .compress-flash.go { animation: compFlash 0.6s ease; }
+    @keyframes compFlash { 0% { opacity: 0; } 30% { opacity: 0.8; } 100% { opacity: 0; } }
+    .quant-badge { position: absolute; top: 0.6rem; left: 0.6rem; display: none; align-items: center; gap: 0.25rem;
+      font-size: 0.56rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: white;
+      background: #9333ea; padding: 0.2rem 0.5rem; border-radius: 9999px; z-index: 3; }
+    .base-block.quantized .quant-badge { display: inline-flex; animation: badgePop 0.45s ease; }
+    @keyframes badgePop { 0% { transform: scale(0); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+    /* connector between base and adapter */
+    .connector { position: relative; width: 56px; height: 4px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    @media (max-width: 520px) { .connector { width: 4px; height: 40px; } }
+    html.dark .connector { background: #334155; }
+    .connector .spark { position: absolute; top: 0; left: 0; width: 40%; height: 100%; border-radius: 9999px;
+      background: linear-gradient(90deg, transparent, #16a34a, transparent); animation: flow 1.3s linear infinite; }
+    @media (max-width: 520px) { .connector .spark { width: 100%; height: 40%; background: linear-gradient(180deg, transparent, #16a34a, transparent); } }
+    @keyframes flow { 0% { left: -40%; } 100% { left: 100%; } }
+    @media (max-width: 520px) { @keyframes flow { 0% { top: -40%; left: 0; } 100% { top: 100%; left: 0; } } }
+    .connector .lbl { position: absolute; top: -1.35rem; left: 50%; transform: translateX(-50%); white-space: nowrap;
+      font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: #16a34a; }
+    @media (max-width: 520px) { .connector .lbl { display: none; } }
+
+    /* adapter block (always on here) */
+    .adapter-block {
+      width: 150px; max-width: 100%; border-radius: 1.1rem; padding: 1.2rem 1rem;
+      border: 2px solid #16a34a; background: rgba(22,163,74,0.06); text-align: center;
+      box-shadow: 0 8px 22px rgba(22,163,74,0.18);
+    }
+    html.dark .adapter-block { background: rgba(22,163,74,0.12); border-color: #4ade80; }
+    .adapter-ic { width: 40px; height: 40px; border-radius: 0.7rem; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; background: #16a34a; color: white; animation: ringPulse 1.4s ease-in-out infinite; }
+    @keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(22,163,74,0.5); } 50% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } }
+    .adapter-title { font-weight: 900; font-size: 0.85rem; color: #1e293b; }
+    html.dark .adapter-title { color: #f1f5f9; }
+    .adapter-sub { font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #16a34a; margin-top: 0.15rem; }
+    html.dark .adapter-sub { color: #4ade80; }
+    .adapter-wsmall { display: flex; gap: 4px; justify-content: center; margin-top: 0.6rem; }
+    .adapter-wsmall .wdot { width: 12px; height: 12px; border-radius: 3px; aspect-ratio: auto; background: #16a34a; transform: none; }
+    html.dark .adapter-block .adapter-wsmall .wdot { background: #4ade80; opacity: 1; }
+
+    /* mode caption */
+    .mode-caption {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.3rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 700;
+      color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3); transition: all 0.35s ease;
+    }
+    html.dark .mode-caption { color: #7dd3fc; background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.3); }
+    .mode-caption.q { color: #7e22ce; background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.32); }
+    html.dark .mode-caption.q { color: #d8b4fe; background: rgba(168,85,247,0.16); border-color: rgba(168,85,247,0.32); }
+
+    /* single memory meter under playground */
+    .mem-wrap { margin-top: 1.3rem; }
+    .mem-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; }
+    .mem-title { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.82rem; font-weight: 900; color: #334155; }
+    html.dark .mem-title { color: #e2e8f0; }
+    .mem-badge { font-size: 0.72rem; font-weight: 900; padding: 0.2rem 0.7rem; border-radius: 9999px; }
+    .mem-bar { height: 14px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .mem-bar { background: #334155; }
+    .mem-fill { height: 100%; border-radius: 9999px; width: 55%; transition: width 0.7s cubic-bezier(.4,0,.2,1), background 0.4s ease; }
+    .mem-fill.med { background: linear-gradient(90deg,#38bdf8,#0ea5e9); }
+    .mem-fill.low { background: linear-gradient(90deg,#c084fc,#9333ea); }
+    .mem-badge.med { color: #0369a1; background: rgba(56,189,248,0.15); }
+    .mem-badge.low { color: #7e22ce; background: rgba(168,85,247,0.15); }
+    html.dark .mem-badge.med { color: #7dd3fc; background: rgba(56,189,248,0.2); }
+    html.dark .mem-badge.low { color: #d8b4fe; background: rgba(168,85,247,0.22); }
+
+    /* ── Comparison cards ────────────────────── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-card { border-radius: 1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.train { border-color: rgba(56,189,248,0.35); background: rgba(56,189,248,0.06); }
+    .cmp-card.infer { border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.06); }
+    .cmp-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.8rem; }
+    .cmp-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .cmp-card.train .cmp-ic { background: #0ea5e9; }
+    .cmp-card.infer .cmp-ic { background: #9333ea; }
+    .cmp-name { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .cmp-name { color: #f1f5f9; }
+    .cmp-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cmp-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.87rem; font-weight: 700; color: #334155; line-height: 1.4; }
+    html.dark .cmp-item { color: #e2e8f0; }
+    .cmp-item i { flex-shrink: 0; margin-top: 2px; }
+    .cmp-card.train .cmp-item i { color: #0ea5e9; }
+    .cmp-card.infer .cmp-item i { color: #9333ea; }
+
+    /* ── Analogy box ─────────────────────────── */
+    .analogy {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.4rem 1.6rem; border-radius: 1.15rem;
+      background: linear-gradient(135deg, rgba(168,85,247,0.09), rgba(147,51,234,0.04));
+      border: 1.5px solid rgba(168,85,247,0.28);
+    }
+    .analogy-ic { width: 44px; height: 44px; border-radius: 0.8rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #9333ea; color: white; }
+
+    /* ── Memory comparison selector ──────────── */
+    .prompt-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
+    .prompt-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .prompt-pill {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 700; color: #475569; padding: 0.5rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.2s ease;
+    }
+    .prompt-pill:hover { border-color: rgba(234,88,12,0.4); color: #ea580c; transform: translateY(-1px); }
+    .prompt-pill.selected { border-color: #ea580c; background: rgba(234,88,12,0.1); color: #ea580c; box-shadow: 0 4px 12px rgba(234,88,12,0.14); }
+    html.dark .prompt-pill { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    html.dark .prompt-pill:hover { border-color: rgba(251,146,60,0.45); color: #fdba74; }
+    html.dark .prompt-pill.selected { border-color: #fb923c; background: rgba(234,88,12,0.2); color: #fdba74; }
+    .prompt-pill .pp-dot { width: 7px; height: 7px; border-radius: 9999px; background: #cbd5e1; transition: all 0.2s ease; }
+    .prompt-pill.selected .pp-dot { background: #ea580c; }
+    html.dark .prompt-pill.selected .pp-dot { background: #fb923c; }
+
+    .cmeters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; margin-top: 1.4rem; }
+    @media (max-width: 720px) { .cmeters { grid-template-columns: 1fr; } }
+    .cmeter-card { border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmeter-card { background: #0f172a; border-color: #334155; }
+    .cmeter-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.9rem; }
+    .cmeter-ic { width: 32px; height: 32px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .cmeter-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .cmeter-name { font-size: 0.82rem; font-weight: 900; color: #334155; }
+    html.dark .cmeter-name { color: #e2e8f0; }
+    /* one row per method inside each metric card */
+    .cmrow { margin-bottom: 0.8rem; }
+    .cmrow:last-child { margin-bottom: 0; }
+    .cmrow-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.28rem; }
+    .cmrow-label { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-weight: 800; color: #64748b; }
+    html.dark .cmrow-label { color: #94a3b8; }
+    .cmrow-dot { width: 8px; height: 8px; border-radius: 9999px; flex-shrink: 0; }
+    .cmrow-dot.m-full { background: #e11d48; }
+    .cmrow-dot.m-lora { background: #0ea5e9; }
+    .cmrow-dot.m-qlora { background: #9333ea; }
+    .cmrow-val { font-size: 0.68rem; font-weight: 900; color: #94a3b8; }
+    .cmeter-bar { height: 11px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .cmeter-bar { background: #334155; }
+    .cmeter-fill { height: 100%; width: 0; border-radius: 9999px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+    .cmeter-fill.lvl-high { background: linear-gradient(90deg,#fb7185,#e11d48); }
+    .cmeter-fill.lvl-med  { background: linear-gradient(90deg,#fbbf24,#f59e0b); }
+    .cmeter-fill.lvl-low  { background: linear-gradient(90deg,#4ade80,#16a34a); }
+    /* legend */
+    .cm-legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1.1rem; }
+    .cm-leg { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.74rem; font-weight: 800; color: #64748b; }
+    html.dark .cm-leg { color: #94a3b8; }
+    .cm-leg .cmrow-dot { width: 10px; height: 10px; }
+
+    /* ── Step flow ───────────────────────────── */
+    .step-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    @media (max-width: 640px) { .step-flow { grid-template-columns: 1fr; } }
+    .step-card { border-radius: 1rem; padding: 1.15rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .step-card { background: #0f172a; border-color: #334155; }
+    .step-num { width: 40px; height: 40px; border-radius: 9999px; margin: 0 auto 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .step-text { font-size: 0.85rem; font-weight: 700; color: #334155; line-height: 1.45; }
+    html.dark .step-text { color: #e2e8f0; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Fine-Tuning</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30">
+          <span class="text-red-700 dark:text-red-400 text-xs font-bold tracking-wide">🔴 Advanced · 8–10 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="minimize-2" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">QLoRA</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          QLoRA is like LoRA, but with an <strong class="text-slate-800 dark:text-slate-200">extra memory-saving step</strong>.
+          It uses a <strong class="text-slate-800 dark:text-slate-200">smaller version of the base model</strong> in memory
+          while training small LoRA adapters.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Memory Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">LoRA vs QLoRA</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Both keep the base model frozen and train a small adapter. Switch to <strong class="text-slate-800 dark:text-slate-200">QLoRA</strong>
+          and watch the base model <strong class="text-slate-800 dark:text-slate-200">shrink in memory</strong> as it is quantized.
+        </p>
+
+        <!-- mode toggle -->
+        <div class="mode-toggle" role="tablist">
+          <button class="mode-btn active" data-mode="lora"><i data-lucide="git-branch" style="width:14px;height:14px;"></i> LoRA</button>
+          <button class="mode-btn" data-mode="qlora"><i data-lucide="minimize-2" style="width:14px;height:14px;"></i> QLoRA</button>
+        </div>
+
+        <!-- diagram -->
+        <div class="diagram">
+          <div class="base-block" id="baseBlock">
+            <div class="frost"></div>
+            <div class="froze-badge"><i data-lucide="lock" style="width:13px;height:13px;"></i></div>
+            <div class="quant-badge"><i data-lucide="minimize-2" style="width:9px;height:9px;"></i> 4-bit</div>
+            <div class="compress-flash" id="compressFlash"></div>
+            <div class="base-ic"><i data-lucide="box" style="width:24px;height:24px;"></i></div>
+            <div class="base-title" id="baseTitle">Base Model</div>
+            <div class="base-sub" id="baseSub"><i data-lucide="lock" style="width:11px;height:11px;"></i> Frozen</div>
+            <div class="weights" id="weights"></div>
+          </div>
+
+          <div class="connector">
+            <span class="lbl">training</span>
+            <span class="spark"></span>
+          </div>
+
+          <div class="adapter-block">
+            <div class="adapter-ic"><i data-lucide="puzzle" style="width:20px;height:20px;"></i></div>
+            <div class="adapter-title">LoRA Adapter</div>
+            <div class="adapter-sub">Trained</div>
+            <div class="adapter-wsmall">
+              <span class="wdot"></span><span class="wdot"></span><span class="wdot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- mode caption -->
+        <div class="mode-caption" id="modeCaption">
+          <i data-lucide="info" style="width:16px;height:16px;flex-shrink:0;"></i>
+          <span id="modeCaptionText">The base model is kept mostly fixed. A small adapter is trained.</span>
+        </div>
+
+        <!-- memory meter -->
+        <div class="mem-wrap">
+          <div class="mem-head">
+            <span class="mem-title"><i data-lucide="memory-stick" style="width:15px;height:15px;"></i> Memory usage</span>
+            <span class="mem-badge med" id="memBadge">Medium</span>
+          </div>
+          <div class="mem-bar"><div class="mem-fill med" id="memFill"></div></div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. LoRA vs QLoRA
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>LoRA vs QLoRA</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Same idea, smaller footprint</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          QLoRA keeps everything LoRA does and adds one thing: it <strong class="text-slate-800 dark:text-slate-200">stores the base model in a smaller format</strong>.
+        </p>
+
+        <div class="cmp-grid">
+          <div class="cmp-card train">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="git-branch" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">LoRA</span>
+            </div>
+            <div class="cmp-list">
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Keeps the base model mostly frozen</div>
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Trains small adapters</div>
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Saves resources vs full fine-tuning</div>
+            </div>
+          </div>
+
+          <div class="cmp-card infer">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="minimize-2" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">QLoRA</span>
+            </div>
+            <div class="cmp-list">
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Uses LoRA adapters</div>
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Stores the base model in a smaller format</div>
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Saves even more memory</div>
+              <div class="cmp-item"><i data-lucide="check" style="width:15px;height:15px;"></i> Useful for large models</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. WHY QUANTIZATION HELPS (analogy)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="image" style="width:12px;height:12px;"></i>Why Quantization Helps</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A simple way to think about it</h2>
+        <div class="analogy mb-4">
+          <span class="analogy-ic"><i data-lucide="image-down" style="width:22px;height:22px;"></i></span>
+          <p class="text-slate-700 dark:text-slate-200 text-base leading-relaxed font-semibold">
+            Imagine carrying a <strong>full-size photo</strong> versus a <strong>compressed photo</strong>. The compressed one uses less space, but still keeps enough useful detail.
+          </p>
+        </div>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Quantization reduces <strong class="text-slate-800 dark:text-slate-200">how much memory the model needs</strong> while still keeping it useful for fine-tuning.
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. INTERACTIVE MEMORY COMPARISON
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="bar-chart-3" style="width:12px;height:12px;"></i>Compare the Three Methods</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Memory, cost, and flexibility</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          All three methods side by side. The bars are a visual feel, not exact numbers.
+        </p>
+
+        <div class="cmeters" id="cmeters"></div>
+
+        <div class="cm-legend">
+          <span class="cm-leg"><span class="cmrow-dot m-qlora"></span> QLoRA</span>
+          <span class="cm-leg"><span class="cmrow-dot m-lora"></span> LoRA</span>
+          <span class="cm-leg"><span class="cmrow-dot m-full"></span> Full Fine-Tuning</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW IT WORKS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>How It Works</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Fine-tune with even less memory</h2>
+        <div class="step-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-text">Store the frozen base model in a smaller format.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-text">Train only a small LoRA adapter, like before.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-text">Fit large models into smaller hardware.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• QLoRA <strong class="text-slate-900 dark:text-white">builds on LoRA</strong>.</li>
+            <li>• LoRA trains <strong class="text-slate-900 dark:text-white">small adapters</strong>.</li>
+            <li>• QLoRA also reduces <strong class="text-slate-900 dark:text-white">base model memory usage</strong>.</li>
+            <li>• Quantization helps large models fit into <strong class="text-slate-900 dark:text-white">smaller hardware</strong>.</li>
+            <li>• QLoRA is useful when <strong class="text-slate-900 dark:text-white">memory is limited</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Switch between LoRA and QLoRA.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the base model shrink in memory.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare Full Fine-Tuning, LoRA, and QLoRA.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice how QLoRA keeps the adapter idea but reduces memory.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>QLoRA combines quantization with LoRA. It keeps fine-tuning efficient by training small adapters while using less memory for the base model.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="lora.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: LoRA
+        </a>
+        <a href="adapters.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Adapters</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Fine-Tuning');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     QLoRA, playground
+  ═══════════════════════════════════════════════ */
+  const baseBlock = document.getElementById('baseBlock');
+  const baseTitle = document.getElementById('baseTitle');
+  const baseSub   = document.getElementById('baseSub');
+  const weights   = document.getElementById('weights');
+  const compressFlash = document.getElementById('compressFlash');
+  const modeCaption   = document.getElementById('modeCaption');
+  const modeCaptionText = document.getElementById('modeCaptionText');
+  const memFill  = document.getElementById('memFill');
+  const memBadge = document.getElementById('memBadge');
+
+  // build 30 weight dots
+  weights.innerHTML = Array.from({ length: 30 }, () => '<span class="wdot"></span>').join('');
+
+  const MODES = {
+    lora: {
+      title: 'Base Model',
+      sub: 'Frozen',
+      caption: 'The base model is kept mostly fixed. A small adapter is trained.',
+      captionClass: 'mode-caption',
+      mem: [58, 'Medium', 'med'],
+    },
+    qlora: {
+      title: 'Quantized Base Model',
+      sub: 'Frozen · Quantized',
+      caption: 'The base model is stored in a smaller memory format. The adapter is still trained.',
+      captionClass: 'mode-caption q',
+      mem: [30, 'Lower', 'low'],
+    },
+  };
+
+  function setMode(mode) {
+    const m = MODES[mode];
+
+    document.querySelectorAll('.mode-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.mode === mode)
+    );
+
+    const q = mode === 'qlora';
+    if (q) {
+      compressFlash.classList.remove('go');
+      void compressFlash.offsetWidth;   // restart animation
+      compressFlash.classList.add('go');
+    }
+    baseBlock.classList.toggle('quantized', q);
+    baseTitle.textContent = m.title;
+    baseSub.innerHTML = `<i data-lucide="${q ? 'minimize-2' : 'lock'}" style="width:11px;height:11px;"></i> ${m.sub}`;
+
+    modeCaption.className = m.captionClass;
+    modeCaptionText.textContent = m.caption;
+
+    const [pct, label, cls] = m.mem;
+    memFill.style.width = pct + '%';
+    memFill.className = 'mem-fill ' + cls;
+    memBadge.textContent = label;
+    memBadge.className = 'mem-badge ' + cls;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  document.querySelectorAll('.mode-btn').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.mode))
+  );
+
+  /* ── Memory comparison: all three methods in one view ── */
+  const METRICS = [
+    {
+      name: 'Memory Usage', icon: 'memory-stick',
+      rows: [
+        { method: 'QLoRA',            cls: 'm-qlora', pct: 28, label: 'Lower',  lvl: 'lvl-low' },
+        { method: 'LoRA',             cls: 'm-lora',  pct: 55, label: 'Medium', lvl: 'lvl-med' },
+        { method: 'Full Fine-Tuning', cls: 'm-full',  pct: 95, label: 'High',   lvl: 'lvl-high' },
+      ],
+    },
+    {
+      name: 'Training Cost', icon: 'wallet',
+      rows: [
+        { method: 'QLoRA',            cls: 'm-qlora', pct: 35, label: 'Lower',  lvl: 'lvl-low' },
+        { method: 'LoRA',             cls: 'm-lora',  pct: 42, label: 'Lower',  lvl: 'lvl-low' },
+        { method: 'Full Fine-Tuning', cls: 'm-full',  pct: 92, label: 'High',   lvl: 'lvl-high' },
+      ],
+    },
+    {
+      name: 'Model Flexibility', icon: 'sliders-horizontal',
+      rows: [
+        { method: 'QLoRA',            cls: 'm-qlora', pct: 68,  label: 'High',    lvl: 'lvl-low' },
+        { method: 'LoRA',             cls: 'm-lora',  pct: 72,  label: 'High',    lvl: 'lvl-low' },
+        { method: 'Full Fine-Tuning', cls: 'm-full',  pct: 100, label: 'Highest', lvl: 'lvl-low' },
+      ],
+    },
+  ];
+
+  const cmeters = document.getElementById('cmeters');
+
+  function renderComparison() {
+    cmeters.innerHTML = METRICS.map(metric => `
+      <div class="cmeter-card">
+        <div class="cmeter-head">
+          <span class="cmeter-ic"><i data-lucide="${metric.icon}" style="width:16px;height:16px;"></i></span>
+          <span class="cmeter-name">${metric.name}</span>
+        </div>
+        ${metric.rows.map(r => `
+          <div class="cmrow">
+            <div class="cmrow-top">
+              <span class="cmrow-label"><span class="cmrow-dot ${r.cls}"></span>${r.method}</span>
+              <span class="cmrow-val">${r.label}</span>
+            </div>
+            <div class="cmeter-bar"><div class="cmeter-fill ${r.lvl}" data-pct="${r.pct}"></div></div>
+          </div>`).join('')}
+      </div>`).join('');
+
+    // animate bars from 0 to target
+    requestAnimationFrame(() => {
+      cmeters.querySelectorAll('.cmeter-fill').forEach(f => { f.style.width = f.dataset.pct + '%'; });
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderComparison();
+    setMode('lora');
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>

@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Inference, a beginner-friendly interactive lesson that explains inference as the stage where a trained AI model is used to turn a prompt into an output, and how it differs from training." />
-  <title>Inference, AI Concepts Playground</title>
-  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/inference.html" />
+  <meta name="description" content="Fine-Tuning, a beginner-friendly interactive lesson that explains how a pre-trained model is adapted a little more for a specific task, style, or domain." />
+  <title>Fine-Tuning, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/fine-tuning.html" />
 
   <!-- Open Graph / social preview -->
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="AI Concepts Playground" />
-  <meta property="og:title" content="Inference, AI Concepts Playground" />
-  <meta property="og:description" content="Inference, a beginner-friendly interactive lesson that explains inference as the stage where a trained AI model is used to turn a prompt into an output, and how it differs from training." />
-  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/inference.html" />
+  <meta property="og:title" content="Fine-Tuning, AI Concepts Playground" />
+  <meta property="og:description" content="Fine-Tuning, a beginner-friendly interactive lesson that explains how a pre-trained model is adapted a little more for a specific task, style, or domain." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/fine-tuning.html" />
   <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="AI Concepts Playground" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Inference, AI Concepts Playground" />
-  <meta name="twitter:description" content="Inference, a beginner-friendly interactive lesson that explains inference as the stage where a trained AI model is used to turn a prompt into an output, and how it differs from training." />
+  <meta name="twitter:title" content="Fine-Tuning, AI Concepts Playground" />
+  <meta name="twitter:description" content="Fine-Tuning, a beginner-friendly interactive lesson that explains how a pre-trained model is adapted a little more for a specific task, style, or domain." />
   <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
 
@@ -77,7 +77,7 @@
     html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
     html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
 
-    /* ── Prompt picker ───────────────────────── */
+    /* ── Goal picker ─────────────────────────── */
     .prompt-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
     .prompt-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .prompt-pill {
@@ -94,7 +94,7 @@
     .prompt-pill.selected .pp-dot { background: #ea580c; }
     html.dark .prompt-pill.selected .pp-dot { background: #fb923c; }
 
-    /* ── Inference flow ──────────────────────── */
+    /* ── Fine-tuning flow ────────────────────── */
     .flow-col { display: flex; flex-direction: column; align-items: stretch; gap: 0.2rem; margin-top: 1.5rem; }
     .flow-node {
       border-radius: 1.1rem; padding: 1.15rem 1.3rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
@@ -112,26 +112,31 @@
     .flow-body { font-size: 0.95rem; font-weight: 700; color: #334155; line-height: 1.5; min-height: 1.4em; }
     html.dark .flow-body { color: #e2e8f0; }
 
-    /* prompt node active */
-    .flow-node.prompt.active { border-color: #ea580c; background: rgba(234,88,12,0.07); box-shadow: 0 8px 20px rgba(234,88,12,0.14); }
-    html.dark .flow-node.prompt.active { border-color: #fb923c; background: rgba(234,88,12,0.15); }
-    .flow-node.prompt.active .flow-ic { background: #ea580c; color: white; }
+    /* base node active */
+    .flow-node.base { text-align: center; }
+    .flow-node.base .flow-head { justify-content: center; }
+    .flow-node.base.active { border-color: #ea580c; background: rgba(234,88,12,0.07); box-shadow: 0 8px 20px rgba(234,88,12,0.14); }
+    html.dark .flow-node.base.active { border-color: #fb923c; background: rgba(234,88,12,0.15); }
+    .flow-node.base.active .flow-ic { background: #ea580c; color: white; }
+    .base-state { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    .flow-node.base.active .base-state { color: #ea580c; }
+    html.dark .flow-node.base.active .base-state { color: #fdba74; }
 
-    /* model node processing */
-    .flow-node.model { text-align: center; }
-    .flow-node.model .flow-head { justify-content: center; }
-    .flow-node.model.processing { border-color: #ea580c; background: rgba(234,88,12,0.07); }
-    html.dark .flow-node.model.processing { border-color: #fb923c; background: rgba(234,88,12,0.15); }
-    .flow-node.model.processing .flow-ic { background: #ea580c; color: white; animation: modelSpin 1s linear infinite; }
-    @keyframes modelSpin { to { transform: rotate(360deg); } }
-    .model-state { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
-    .flow-node.model.processing .model-state { color: #ea580c; }
-    html.dark .flow-node.model.processing .model-state { color: #fdba74; }
-    .flow-node.model.done .flow-ic { background: #16a34a; color: white; }
-    .flow-node.model.done .model-state { color: #16a34a; }
-    html.dark .flow-node.model.done .model-state { color: #4ade80; }
+    /* tuning node processing */
+    .flow-node.tune { text-align: center; }
+    .flow-node.tune .flow-head { justify-content: center; }
+    .flow-node.tune.processing { border-color: #ea580c; background: rgba(234,88,12,0.07); }
+    html.dark .flow-node.tune.processing { border-color: #fb923c; background: rgba(234,88,12,0.15); }
+    .flow-node.tune.processing .flow-ic { background: #ea580c; color: white; animation: tuneSpin 1s linear infinite; }
+    @keyframes tuneSpin { to { transform: rotate(360deg); } }
+    .tune-state { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    .flow-node.tune.processing .tune-state { color: #ea580c; }
+    html.dark .flow-node.tune.processing .tune-state { color: #fdba74; }
+    .flow-node.tune.done .flow-ic { background: #16a34a; color: white; }
+    .flow-node.tune.done .tune-state { color: #16a34a; }
+    html.dark .flow-node.tune.done .tune-state { color: #4ade80; }
 
-    /* output node */
+    /* specialized output node */
     .flow-node.output.filled { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.05); }
     html.dark .flow-node.output.filled { border-color: rgba(74,222,128,0.32); background: rgba(22,163,74,0.1); }
     .flow-node.output.filled .flow-ic { background: #16a34a; color: white; }
@@ -141,6 +146,21 @@
 
     .flow-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e1; padding: 0.15rem 0; }
     html.dark .flow-arrow { color: #475569; }
+
+    /* ── Before / After output ───────────────── */
+    .ba-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; margin-top: 1.4rem; }
+    @media (max-width: 640px) { .ba-grid { grid-template-columns: 1fr; } }
+    .ba-card { border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease; }
+    html.dark .ba-card { background: #0f172a; border-color: #334155; }
+    .ba-card.before { border-color: rgba(100,116,139,0.3); }
+    .ba-card.after.filled { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.05); }
+    html.dark .ba-card.after.filled { border-color: rgba(74,222,128,0.32); background: rgba(22,163,74,0.1); }
+    .ba-tag { font-size: 0.64rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+    .ba-card.after .ba-tag { color: #16a34a; }
+    html.dark .ba-card.after .ba-tag { color: #4ade80; }
+    .ba-text { font-size: 0.9rem; font-weight: 700; color: #334155; line-height: 1.5; min-height: 2.6em; }
+    html.dark .ba-text { color: #e2e8f0; }
+    .ba-text.placeholder { color: #94a3b8; font-weight: 600; font-style: italic; }
 
     /* ── Note message ────────────────────────── */
     .note-msg {
@@ -152,7 +172,7 @@
     .note-msg.show { opacity: 1; }
     html.dark .note-msg { color: #fdba74; background: rgba(234,88,12,0.14); border-color: rgba(251,146,60,0.26); }
 
-    /* ── Comparison cards (Training vs Inference) ─ */
+    /* ── Comparison cards (Pretraining vs Fine-Tuning) ─ */
     .cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
     @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
     .cmp-card { border-radius: 1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
@@ -173,10 +193,35 @@
     .cmp-val { font-weight: 700; color: #334155; }
     html.dark .cmp-val { color: #e2e8f0; }
 
-    /* ── Step flow (What happens during inference) ─ */
-    .step-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; }
-    @media (max-width: 760px) { .step-flow { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 420px) { .step-flow { grid-template-columns: 1fr; } }
+    /* ── When fine-tuning helps (clickable cards) ─ */
+    .help-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .help-grid { grid-template-columns: 1fr; } }
+    .help-card {
+      cursor: pointer; border-radius: 1rem; padding: 1.2rem 1.3rem; text-align: left;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .help-card { background: #0f172a; border-color: #334155; }
+    .help-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.12); }
+    .help-card.open { border-color: #ea580c; background: rgba(234,88,12,0.06); }
+    html.dark .help-card.open { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .help-head { display: flex; align-items: center; gap: 0.6rem; }
+    .help-ic { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; transition: all 0.25s ease; }
+    html.dark .help-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .help-card.open .help-ic { background: #ea580c; color: white; }
+    .help-title { font-weight: 900; font-size: 0.98rem; color: #1e293b; flex: 1; }
+    html.dark .help-title { color: #f1f5f9; }
+    .help-chev { color: #cbd5e1; transition: transform 0.25s ease; }
+    .help-card.open .help-chev { transform: rotate(180deg); color: #ea580c; }
+    .help-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, margin-top 0.3s ease; }
+    .help-card.open .help-body { max-height: 220px; margin-top: 0.8rem; }
+    .help-ex { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.25rem; }
+    .help-ex + .help-text { margin-bottom: 0.7rem; }
+    .help-text { font-size: 0.88rem; font-weight: 700; color: #334155; line-height: 1.5; }
+    html.dark .help-text { color: #e2e8f0; }
+
+    /* ── Step flow ───────────────────────────── */
+    .step-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    @media (max-width: 640px) { .step-flow { grid-template-columns: 1fr; } }
     .step-card { border-radius: 1rem; padding: 1.15rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
     html.dark .step-card { background: #0f172a; border-color: #334155; }
     .step-num { width: 40px; height: 40px; border-radius: 9999px; margin: 0 auto 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
@@ -247,12 +292,13 @@
         </a>
         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
           <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
-          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Training Fundamentals</span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Fine-Tuning</span>
         </div>
-        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-          <span class="text-emerald-700 dark:text-emerald-400 text-xs font-bold tracking-wide">🟢 Beginner · 6–8 min</span>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
         </div>
       </div>
+
 
       <!-- ══════════════════════════════════════
            1. OVERVIEW
@@ -260,14 +306,14 @@
       <header class="mb-10">
         <div class="flex items-center gap-4 mb-4">
           <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="play" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+            <i data-lucide="sliders" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
           </div>
-          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Inference</h1>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Fine-Tuning</h1>
         </div>
         <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-          Inference is when we <strong class="text-slate-800 dark:text-slate-200">use a trained model to produce an answer</strong>,
-          a prediction, or any other output. The learning is already done, now the model simply
-          <strong class="text-slate-800 dark:text-slate-200">puts what it learned to work</strong>.
+          Fine-tuning means taking a model that <strong class="text-slate-800 dark:text-slate-200">already learned general patterns</strong>
+          and training it a little more for a <strong class="text-slate-800 dark:text-slate-200">specific task or style</strong>.
+          You don't start from scratch, you build on what the model already knows.
         </p>
       </header>
 
@@ -277,125 +323,204 @@
       ══════════════════════════════════════ -->
       <section class="module-card mb-5">
         <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
-          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Inference Playground</div>
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Fine-Tuning Playground</div>
           <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
         </div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Turn a prompt into an output</h2>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Turn a base model into a specialist</h2>
         <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Pick a prompt, then press <strong class="text-slate-800 dark:text-slate-200">Run inference</strong>.
-          The same trained model reads your prompt and produces a response. Notice it gives
-          <strong class="text-slate-800 dark:text-slate-200">different outputs</strong> for different prompts.
+          Pick a fine-tuning goal, then press <strong class="text-slate-800 dark:text-slate-200">Fine-tune</strong>.
+          The base model learns from task-specific examples and becomes a
+          <strong class="text-slate-800 dark:text-slate-200">specialized model</strong>. Compare the answer before and after.
         </p>
 
-        <!-- prompt picker -->
-        <div class="prompt-cap">Choose a prompt</div>
-        <div class="prompt-list" id="promptList"></div>
+        <!-- goal picker -->
+        <div class="prompt-cap">Choose a fine-tuning goal</div>
+        <div class="prompt-list" id="goalList"></div>
 
-        <!-- inference flow -->
+        <!-- fine-tuning flow -->
         <div class="flow-col">
-          <!-- prompt -->
-          <div class="flow-node prompt active" id="promptNode">
+          <!-- base model -->
+          <div class="flow-node base active" id="baseNode">
             <div class="flow-head">
-              <span class="flow-ic"><i data-lucide="message-square" style="width:18px;height:18px;"></i></span>
-              <span class="flow-name">User Prompt</span>
+              <span class="flow-ic"><i data-lucide="box" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Base Model</span>
             </div>
-            <div class="flow-body" id="promptBody"></div>
+            <div class="base-state" id="baseState">A general model that already knows language.</div>
           </div>
 
           <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
 
-          <!-- model -->
-          <div class="flow-node model" id="modelNode">
+          <!-- fine-tuning data / process -->
+          <div class="flow-node tune" id="tuneNode">
             <div class="flow-head">
-              <span class="flow-ic"><i data-lucide="brain-circuit" style="width:18px;height:18px;"></i></span>
-              <span class="flow-name">Trained Model</span>
+              <span class="flow-ic"><i data-lucide="graduation-cap" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Fine-Tuning Data</span>
             </div>
-            <div class="model-state" id="modelState">Ready, waiting for a prompt.</div>
+            <div class="tune-state" id="tuneState">Ready, waiting for a goal.</div>
           </div>
 
           <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
 
-          <!-- output -->
-          <div class="flow-node output" id="outputNode">
+          <!-- specialized model -->
+          <div class="flow-node output base" id="specNode">
             <div class="flow-head">
-              <span class="flow-ic"><i data-lucide="sparkles" style="width:18px;height:18px;"></i></span>
-              <span class="flow-name">Output</span>
+              <span class="flow-ic"><i data-lucide="badge-check" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Specialized Model</span>
             </div>
-            <div class="flow-body placeholder" id="outputBody">Press Run inference to see the response.</div>
+            <div class="flow-body placeholder" id="specBody">Press Fine-tune to create a specialized model.</div>
+          </div>
+        </div>
+
+        <!-- before / after output -->
+        <div class="ba-grid">
+          <div class="ba-card before" id="beforeCard">
+            <div class="ba-tag"><i data-lucide="minus-circle" style="width:12px;height:12px;"></i> Before fine-tuning</div>
+            <div class="ba-text" id="beforeText">General answer</div>
+          </div>
+          <div class="ba-card after" id="afterCard">
+            <div class="ba-tag"><i data-lucide="check-circle" style="width:12px;height:12px;"></i> After fine-tuning</div>
+            <div class="ba-text placeholder" id="afterText">Run fine-tuning to see the focused answer.</div>
           </div>
         </div>
 
         <!-- controls -->
         <div class="pg-controls" style="margin-top:1.4rem;">
-          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="play" style="width:14px;height:14px;"></i> <span id="runBtnLabel">Run inference</span></button>
+          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="sliders" style="width:14px;height:14px;"></i> <span id="runBtnLabel">Fine-tune</span></button>
           <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Reset</button>
         </div>
 
         <!-- note -->
-        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> The model is not learning here. It is using what it already learned.</div>
+        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> Fine-tuning does not start over. It adjusts a model that already learned a lot.</div>
       </section>
 
 
       <!-- ══════════════════════════════════════
-           3. TRAINING vs INFERENCE
+           3. PRETRAINING vs FINE-TUNING
       ══════════════════════════════════════ -->
       <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Training vs Inference</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two very different jobs</h2>
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Pretraining vs Fine-Tuning</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Broad learning, then focused learning</h2>
         <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Training is how a model <strong class="text-slate-800 dark:text-slate-200">learns</strong>.
-          Inference is how we <strong class="text-slate-800 dark:text-slate-200">use</strong> the model it became.
+          Pretraining builds a <strong class="text-slate-800 dark:text-slate-200">general base model</strong>.
+          Fine-tuning shapes that base model into a <strong class="text-slate-800 dark:text-slate-200">specialist</strong>.
         </p>
 
         <div class="cmp-grid">
           <div class="cmp-card train">
             <div class="cmp-head">
-              <span class="cmp-ic"><i data-lucide="dumbbell" style="width:20px;height:20px;"></i></span>
-              <span class="cmp-name">Training</span>
+              <span class="cmp-ic"><i data-lucide="book-open" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">Pretraining</span>
             </div>
-            <div class="cmp-lead">The model learns from data.</div>
-            <div class="cmp-row"><span class="cmp-key">Input</span><span class="cmp-val">Training examples</span></div>
-            <div class="cmp-row"><span class="cmp-key">Output</span><span class="cmp-val">An improved model</span></div>
+            <div class="cmp-lead">Learns broad patterns from large data.</div>
+            <div class="cmp-row"><span class="cmp-key">Data</span><span class="cmp-val">Huge and general</span></div>
+            <div class="cmp-row"><span class="cmp-key">Result</span><span class="cmp-val">A base model</span></div>
           </div>
 
           <div class="cmp-card infer">
             <div class="cmp-head">
-              <span class="cmp-ic"><i data-lucide="zap" style="width:20px;height:20px;"></i></span>
-              <span class="cmp-name">Inference</span>
+              <span class="cmp-ic"><i data-lucide="target" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">Fine-Tuning</span>
             </div>
-            <div class="cmp-lead">The trained model is used.</div>
-            <div class="cmp-row"><span class="cmp-key">Input</span><span class="cmp-val">A user prompt</span></div>
-            <div class="cmp-row"><span class="cmp-key">Output</span><span class="cmp-val">An answer or prediction</span></div>
+            <div class="cmp-lead">Learns a specific task from focused data.</div>
+            <div class="cmp-row"><span class="cmp-key">Data</span><span class="cmp-val">Small and focused</span></div>
+            <div class="cmp-row"><span class="cmp-key">Result</span><span class="cmp-val">A specialized model</span></div>
           </div>
         </div>
       </section>
 
 
       <!-- ══════════════════════════════════════
-           4. WHAT HAPPENS DURING INFERENCE?
+           4. WHEN FINE-TUNING HELPS
       ══════════════════════════════════════ -->
       <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>What Happens During Inference?</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">From prompt to response, step by step</h2>
+        <div class="mod-label"><i data-lucide="check-square" style="width:12px;height:12px;"></i>When Fine-Tuning Helps</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Good moments to fine-tune</h2>
         <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Every time you ask a chatbot something, these four steps quietly happen behind the scenes.
+          Click a card to expand it. Fine-tuning shines when you need the same behavior again and again,
+          in cases where a plain prompt is not enough.
+        </p>
+
+        <div class="help-grid">
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="pen-tool" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Specific Writing Style</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">When it helps</div>
+              <div class="help-text">You want every reply to sound the same, in your brand's voice.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">A support bot that always stays warm, calm, and on-brand.</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="repeat" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Repeated Task</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">When it helps</div>
+              <div class="help-text">You run the same kind of task thousands of times a day.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">Sorting support tickets into "billing", "bug", or "refund".</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="scale" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Domain-Specific Language</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">When it helps</div>
+              <div class="help-text">Your field uses special words a general model rarely sees.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">Reading legal, medical, engineering, or finance documents.</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="layout-grid" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Consistent Output</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">When it helps</div>
+              <div class="help-text">You need the exact same format every single time.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">Always returning clean JSON or a fixed report layout.</div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW FINE-TUNING WORKS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>How It Works</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">From base model to specialist</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Three simple steps turn a general model into a focused one.
         </p>
         <div class="step-flow">
           <div class="step-card">
             <div class="step-num">1</div>
-            <div class="step-text">User gives input.</div>
+            <div class="step-text">Start with a pre-trained base model.</div>
           </div>
           <div class="step-card">
             <div class="step-num">2</div>
-            <div class="step-text">The trained model processes it.</div>
+            <div class="step-text">Train a little more on focused examples.</div>
           </div>
           <div class="step-card">
             <div class="step-num">3</div>
-            <div class="step-text">The model predicts the output.</div>
-          </div>
-          <div class="step-card">
-            <div class="step-num">4</div>
-            <div class="step-text">The user receives the response.</div>
+            <div class="step-text">Get a specialized model for the task.</div>
           </div>
         </div>
       </section>
@@ -409,11 +534,11 @@
         <div>
           <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
           <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-            <li>• Inference means <strong class="text-slate-900 dark:text-white">using a trained model</strong>.</li>
-            <li>• Training <strong class="text-slate-900 dark:text-white">changes</strong> the model.</li>
-            <li>• Inference uses the model to <strong class="text-slate-900 dark:text-white">produce outputs</strong>.</li>
-            <li>• Chatbots use inference when <strong class="text-slate-900 dark:text-white">answering users</strong>.</li>
-            <li>• Inference happens <strong class="text-slate-900 dark:text-white">after training</strong>.</li>
+            <li>• Fine-tuning starts from a <strong class="text-slate-900 dark:text-white">pre-trained model</strong>.</li>
+            <li>• It adapts the model for a <strong class="text-slate-900 dark:text-white">specific task or style</strong>.</li>
+            <li>• It usually uses <strong class="text-slate-900 dark:text-white">focused examples</strong>.</li>
+            <li>• It is different from training a model <strong class="text-slate-900 dark:text-white">from scratch</strong>.</li>
+            <li>• Fine-tuning is useful when <strong class="text-slate-900 dark:text-white">consistent behavior</strong> is needed.</li>
           </ul>
         </div>
       </div>
@@ -430,10 +555,10 @@
             <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
           <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Select different prompt types.</li>
-            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the same trained model produce different outputs.</li>
-            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare training and inference.</li>
-            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice that inference uses learned patterns instead of learning new ones.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Select different fine-tuning goals.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare the base model and specialized model.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice how the output becomes more focused.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Think of a task where fine-tuning would help.</li>
           </ul>
         </div>
       </div>
@@ -443,29 +568,20 @@
       <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
         <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
         <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
-          <strong>Training is how a model learns.</strong> <strong>Inference is how we use the trained model to get answers.</strong>
+          <strong>Fine-tuning helps turn a general model into a more specialized model for a specific task, domain, or style.</strong>
         </p>
       </section>
 
 
-      <!-- ══════════════════════════════════════ SECTION COMPLETE ═════ -->
-      <div class="text-center mb-5">
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">
-          <i data-lucide="party-popper" style="width:14px;height:14px;"></i>
-          🎉 Training Fundamentals section complete
-        </span>
-      </div>
-
-
       <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
       <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
-        <a href="epochs.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+        <a href="inference.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
           <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
-          Previous: Epochs
+          Previous: Inference
         </a>
-        <a href="../../index.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
-          <i data-lucide="home" style="width:15px;height:15px;margin-right:4px;"></i>
-          <strong>All Modules</strong>
+        <a href="instruction-tuning.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Instruction Tuning</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
         </a>
       </div>
 
@@ -474,54 +590,60 @@
 
 
   <!-- ── FOOTER ────────────────────────────────── -->
-  <script>writeSiteFooter('Training Fundamentals');</script>
+  <script>writeSiteFooter('Fine-Tuning');</script>
 
   <script src="../../js/utils.js"></script>
   <script src="../../js/animations.js"></script>
 
   <script>
   /* ═══════════════════════════════════════════════
-     INFERENCE, playground data
+     FINE-TUNING, playground data
   ═══════════════════════════════════════════════ */
-  const PROMPTS = [
+  const GOALS = [
     {
-      label: 'Explain AI in one sentence',
-      prompt: 'Explain AI in one sentence.',
-      output: 'AI is technology that helps machines perform tasks that usually need human intelligence.'
+      label: 'Customer support style',
+      data: 'Learning from support chat examples...',
+      spec: 'Support Assistant model',
+      before: 'You can try turning the device off and on again. If it still fails, it may need repair or replacement.',
+      after: 'Hi! I\'m sorry for the trouble, let\'s sort this out together. Could you restart the device and tell me what you see? I\'ll guide you through the next step from there.'
     },
     {
-      label: 'Summarize this text',
-      prompt: 'Summarize this text: "The library was quiet, and students read for hours."',
-      output: 'A short summary: students spent a long, quiet time reading in the library.'
+      label: 'Medical document classification',
+      data: 'Learning from labeled medical notes...',
+      spec: 'Medical Classifier model',
+      before: 'The note discusses a patient with chest discomfort and mentions some tests and a treatment plan.',
+      after: 'Category: Cardiology · Priority: Follow-up. The note reports chest pain, an ECG order, and a scheduled cardiology review.'
     },
     {
-      label: 'Classify this review',
-      prompt: 'Classify this review: "I loved every minute of this movie!"',
-      output: 'Sentiment: Positive. The review sounds happy and satisfied.'
+      label: 'Legal document summarization',
+      data: 'Learning from legal contracts and summaries...',
+      spec: 'Legal Summarizer model',
+      before: 'This document is an agreement between two parties that describes services, payment, and how it can end.',
+      after: 'Summary: 12-month service contract. Monthly fee due on the 1st. Either party may terminate with 30 days\' written notice. Auto-renews unless cancelled.'
     },
     {
-      label: 'Continue this sentence',
-      prompt: 'Continue this sentence: "The best thing about learning is..."',
-      output: '...that every new question opens the door to another idea.'
-    },
-    {
-      label: 'Answer this question',
-      prompt: 'Answer this question: "Why is the sky blue?"',
-      output: 'Sunlight scatters in the air, and blue light scatters the most, so the sky looks blue.'
+      label: 'Company writing tone',
+      data: 'Learning from approved company messages...',
+      spec: 'Brand Voice model',
+      before: 'We have released a product update. It includes several new features and some bug fixes.',
+      after: 'We\'re excited to share a fresh update, thoughtfully designed to make your day a little easier. Here\'s what\'s new, and what\'s now running more smoothly.'
     },
   ];
 
-  const promptList = document.getElementById('promptList');
-  const promptNode = document.getElementById('promptNode');
-  const promptBody = document.getElementById('promptBody');
-  const modelNode  = document.getElementById('modelNode');
-  const modelState = document.getElementById('modelState');
-  const outputNode = document.getElementById('outputNode');
-  const outputBody = document.getElementById('outputBody');
-  const noteMsg    = document.getElementById('noteMsg');
-  const runBtn     = document.getElementById('runBtn');
-  const runBtnLabel= document.getElementById('runBtnLabel');
-  const resetBtn   = document.getElementById('resetBtn');
+  const goalList  = document.getElementById('goalList');
+  const baseNode  = document.getElementById('baseNode');
+  const tuneNode  = document.getElementById('tuneNode');
+  const tuneState = document.getElementById('tuneState');
+  const specNode  = document.getElementById('specNode');
+  const specBody  = document.getElementById('specBody');
+  const beforeCard= document.getElementById('beforeCard');
+  const beforeText= document.getElementById('beforeText');
+  const afterCard = document.getElementById('afterCard');
+  const afterText = document.getElementById('afterText');
+  const noteMsg   = document.getElementById('noteMsg');
+  const runBtn    = document.getElementById('runBtn');
+  const runBtnLabel = document.getElementById('runBtnLabel');
+  const resetBtn  = document.getElementById('resetBtn');
 
   let selectedIdx = 0;
   let running = false;
@@ -529,47 +651,50 @@
 
   function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
-  function renderPrompts() {
-    promptList.innerHTML = PROMPTS.map((p, i) => `
+  function renderGoals() {
+    goalList.innerHTML = GOALS.map((g, i) => `
       <button class="prompt-pill${i === selectedIdx ? ' selected' : ''}" data-idx="${i}">
-        <span class="pp-dot"></span>${p.label}
+        <span class="pp-dot"></span>${g.label}
       </button>`).join('');
-    promptList.querySelectorAll('.prompt-pill').forEach(btn =>
-      btn.addEventListener('click', () => selectPrompt(+btn.dataset.idx))
+    goalList.querySelectorAll('.prompt-pill').forEach(btn =>
+      btn.addEventListener('click', () => selectGoal(+btn.dataset.idx))
     );
   }
 
-  function showPrompt() {
-    promptBody.textContent = PROMPTS[selectedIdx].prompt;
+  function showBefore() {
+    beforeText.textContent = GOALS[selectedIdx].before;
   }
 
   function clearOutput() {
-    outputNode.classList.remove('filled');
-    modelNode.classList.remove('processing', 'done');
-    outputBody.classList.add('placeholder');
-    outputBody.textContent = 'Press Run inference to see the response.';
-    modelState.textContent = 'Ready, waiting for a prompt.';
+    specNode.classList.remove('filled');
+    tuneNode.classList.remove('processing', 'done');
+    specBody.classList.add('placeholder');
+    specBody.textContent = 'Press Fine-tune to create a specialized model.';
+    tuneState.textContent = 'Ready, waiting for a goal.';
+    afterCard.classList.remove('filled');
+    afterText.classList.add('placeholder');
+    afterText.textContent = 'Run fine-tuning to see the focused answer.';
     noteMsg.classList.remove('show');
   }
 
-  function selectPrompt(i) {
+  function selectGoal(i) {
     if (running) return;
     selectedIdx = i;
-    promptList.querySelectorAll('.prompt-pill').forEach(b =>
+    goalList.querySelectorAll('.prompt-pill').forEach(b =>
       b.classList.toggle('selected', +b.dataset.idx === i)
     );
-    showPrompt();
+    showBefore();
     clearOutput();
   }
 
-  function typeOut(text, done) {
-    outputBody.classList.remove('placeholder');
-    outputBody.textContent = '';
+  function typeOut(el, text, done) {
+    el.classList.remove('placeholder');
+    el.textContent = '';
     const caret = document.createElement('span');
     caret.className = 'type-caret';
-    outputBody.appendChild(caret);
+    el.appendChild(caret);
     let idx = 0;
-    const speed = 18;
+    const speed = 16;
     function tick() {
       if (idx <= text.length) {
         caret.insertAdjacentText('beforebegin', text.charAt(idx - 1) || '');
@@ -583,53 +708,65 @@
     tick();
   }
 
-  function runInference() {
+  function runFineTune() {
     if (running) return;
     running = true;
     runBtn.disabled = true;
+    const goal = GOALS[selectedIdx];
 
-    // 1. prompt enters model
-    promptNode.classList.add('active');
-    outputNode.classList.remove('filled');
-    outputBody.classList.add('placeholder');
-    outputBody.textContent = '...';
+    // 1. base model active
+    baseNode.classList.add('active');
+    specNode.classList.remove('filled');
+    specBody.classList.add('placeholder');
+    specBody.textContent = '...';
+    afterCard.classList.remove('filled');
+    afterText.classList.add('placeholder');
+    afterText.textContent = '...';
 
-    // 2. model processes
+    // 2. fine-tuning process
     timers.push(setTimeout(() => {
-      modelNode.classList.remove('done');
-      modelNode.classList.add('processing');
-      modelState.textContent = 'Processing the prompt...';
+      tuneNode.classList.remove('done');
+      tuneNode.classList.add('processing');
+      tuneState.textContent = goal.data;
     }, 250));
 
-    // 3. output appears (typed out)
+    // 3. specialized model ready + typed after-output
     timers.push(setTimeout(() => {
-      modelNode.classList.remove('processing');
-      modelNode.classList.add('done');
-      modelState.textContent = 'Done, output ready.';
-      outputNode.classList.add('filled');
-      typeOut(PROMPTS[selectedIdx].output, () => {
+      tuneNode.classList.remove('processing');
+      tuneNode.classList.add('done');
+      tuneState.textContent = 'Done, examples learned.';
+      specNode.classList.add('filled');
+      specBody.classList.remove('placeholder');
+      specBody.textContent = goal.spec + ' is ready.';
+      afterCard.classList.add('filled');
+      typeOut(afterText, goal.after, () => {
         noteMsg.classList.add('show');
         running = false;
         runBtn.disabled = false;
-        runBtnLabel.textContent = 'Run again';
+        runBtnLabel.textContent = 'Fine-tune again';
       });
-    }, 1500));
+    }, 1600));
   }
 
   function resetPlayground() {
     clearTimers();
     running = false;
     selectedIdx = 0;
-    renderPrompts();
-    showPrompt();
+    renderGoals();
+    showBefore();
     clearOutput();
     runBtn.disabled = false;
-    runBtnLabel.textContent = 'Run inference';
+    runBtnLabel.textContent = 'Fine-tune';
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  runBtn.addEventListener('click', runInference);
+  runBtn.addEventListener('click', runFineTune);
   resetBtn.addEventListener('click', resetPlayground);
+
+  /* ── When-fine-tuning-helps clickable cards ── */
+  document.querySelectorAll('[data-help]').forEach(card =>
+    card.addEventListener('click', () => card.classList.toggle('open'))
+  );
 
   /* ── Try-this modal wiring ── */
   (function () {
@@ -665,8 +802,8 @@
       mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
     }
 
-    renderPrompts();
-    showPrompt();
+    renderGoals();
+    showBefore();
     clearOutput();
 
     if (typeof lucide !== 'undefined') lucide.createIcons();

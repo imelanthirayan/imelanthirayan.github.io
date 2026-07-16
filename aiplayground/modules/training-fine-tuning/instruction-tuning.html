@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Instruction Tuning, a beginner-friendly interactive lesson that explains how a model is taught to follow human instructions better, turning a general language model into a more useful assistant." />
+  <title>Instruction Tuning, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/instruction-tuning.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Instruction Tuning, AI Concepts Playground" />
+  <meta property="og:description" content="Instruction Tuning, a beginner-friendly interactive lesson that explains how a model is taught to follow human instructions better, turning a general language model into a more useful assistant." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/instruction-tuning.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Instruction Tuning, AI Concepts Playground" />
+  <meta name="twitter:description" content="Instruction Tuning, a beginner-friendly interactive lesson that explains how a model is taught to follow human instructions better, turning a general language model into a more useful assistant." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Playground controls ─────────────────── */
+    .pg-controls { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .ctrl-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 800; color: #ea580c; padding: 0.5rem 0.95rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); transition: all 0.2s ease;
+    }
+    .ctrl-btn:hover:not(:disabled) { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    .ctrl-btn.primary { background: #ea580c; color: white; border-color: #ea580c; box-shadow: 0 6px 16px rgba(234,88,12,0.3); }
+    .ctrl-btn.primary:hover:not(:disabled) { background: #c2410c; }
+    .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    html.dark .ctrl-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+    html.dark .ctrl-btn.primary { background: #f97316; border-color: #f97316; color: white; }
+
+    /* ── Task picker ─────────────────────────── */
+    .prompt-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
+    .prompt-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .prompt-pill {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 700; color: #475569; padding: 0.5rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.2s ease;
+    }
+    .prompt-pill:hover { border-color: rgba(234,88,12,0.4); color: #ea580c; transform: translateY(-1px); }
+    .prompt-pill.selected { border-color: #ea580c; background: rgba(234,88,12,0.1); color: #ea580c; box-shadow: 0 4px 12px rgba(234,88,12,0.14); }
+    html.dark .prompt-pill { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    html.dark .prompt-pill:hover { border-color: rgba(251,146,60,0.45); color: #fdba74; }
+    html.dark .prompt-pill.selected { border-color: #fb923c; background: rgba(234,88,12,0.2); color: #fdba74; }
+    .prompt-pill .pp-dot { width: 7px; height: 7px; border-radius: 9999px; background: #cbd5e1; transition: all 0.2s ease; }
+    .prompt-pill.selected .pp-dot { background: #ea580c; }
+    html.dark .prompt-pill.selected .pp-dot { background: #fb923c; }
+
+    /* ── Instruction-tuning flow ─────────────── */
+    .flow-col { display: flex; flex-direction: column; align-items: stretch; gap: 0.2rem; margin-top: 1.5rem; }
+    .flow-node {
+      border-radius: 1.1rem; padding: 1.15rem 1.3rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+      transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    html.dark .flow-node { background: #0f172a; border-color: #334155; }
+    .flow-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.55rem; }
+    .flow-ic {
+      width: 36px; height: 36px; border-radius: 0.7rem; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(234,88,12,0.12); color: #ea580c; transition: all 0.3s ease;
+    }
+    html.dark .flow-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .flow-name { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; }
+    .flow-body { font-size: 0.95rem; font-weight: 700; color: #334155; line-height: 1.5; min-height: 1.4em; }
+    html.dark .flow-body { color: #e2e8f0; }
+
+    /* base node active */
+    .flow-node.base { text-align: center; }
+    .flow-node.base .flow-head { justify-content: center; }
+    .flow-node.base.active { border-color: #ea580c; background: rgba(234,88,12,0.07); box-shadow: 0 8px 20px rgba(234,88,12,0.14); }
+    html.dark .flow-node.base.active { border-color: #fb923c; background: rgba(234,88,12,0.15); }
+    .flow-node.base.active .flow-ic { background: #ea580c; color: white; }
+    .base-state { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    .flow-node.base.active .base-state { color: #ea580c; }
+    html.dark .flow-node.base.active .base-state { color: #fdba74; }
+
+    /* tuning node processing */
+    .flow-node.tune { text-align: center; }
+    .flow-node.tune .flow-head { justify-content: center; }
+    .flow-node.tune.processing { border-color: #ea580c; background: rgba(234,88,12,0.07); }
+    html.dark .flow-node.tune.processing { border-color: #fb923c; background: rgba(234,88,12,0.15); }
+    .flow-node.tune.processing .flow-ic { background: #ea580c; color: white; animation: tuneSpin 1s linear infinite; }
+    @keyframes tuneSpin { to { transform: rotate(360deg); } }
+    .tune-state { font-size: 0.82rem; font-weight: 800; color: #94a3b8; }
+    .flow-node.tune.processing .tune-state { color: #ea580c; }
+    html.dark .flow-node.tune.processing .tune-state { color: #fdba74; }
+    .flow-node.tune.done .flow-ic { background: #16a34a; color: white; }
+    .flow-node.tune.done .tune-state { color: #16a34a; }
+    html.dark .flow-node.tune.done .tune-state { color: #4ade80; }
+
+    /* tuned model output node */
+    .flow-node.output.filled { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.05); }
+    html.dark .flow-node.output.filled { border-color: rgba(74,222,128,0.32); background: rgba(22,163,74,0.1); }
+    .flow-node.output.filled .flow-ic { background: #16a34a; color: white; }
+    .flow-body.placeholder { color: #94a3b8; font-weight: 600; font-style: italic; }
+    .type-caret { display: inline-block; width: 2px; height: 1em; background: #16a34a; margin-left: 2px; vertical-align: text-bottom; animation: caretBlink 0.8s step-end infinite; }
+    @keyframes caretBlink { 50% { opacity: 0; } }
+
+    .flow-arrow { display: flex; align-items: center; justify-content: center; color: #cbd5e1; padding: 0.15rem 0; }
+    html.dark .flow-arrow { color: #475569; }
+
+    /* ── Before / After response cards ───────── */
+    .ba-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; margin-top: 1.4rem; }
+    @media (max-width: 640px) { .ba-grid { grid-template-columns: 1fr; } }
+    .ba-card { border-radius: 1rem; padding: 1.1rem 1.2rem; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease; }
+    html.dark .ba-card { background: #0f172a; border-color: #334155; }
+    .ba-card.before { border-color: rgba(100,116,139,0.3); }
+    .ba-card.after.filled { border-color: rgba(22,163,74,0.4); background: rgba(22,163,74,0.05); }
+    html.dark .ba-card.after.filled { border-color: rgba(74,222,128,0.32); background: rgba(22,163,74,0.1); }
+    .ba-tag { font-size: 0.64rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+    .ba-card.after .ba-tag { color: #16a34a; }
+    html.dark .ba-card.after .ba-tag { color: #4ade80; }
+    .ba-role { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-top: 0.5rem; }
+    .ba-text { font-size: 0.9rem; font-weight: 700; color: #334155; line-height: 1.5; min-height: 2.6em; }
+    html.dark .ba-text { color: #e2e8f0; }
+    .ba-text.placeholder { color: #94a3b8; font-weight: 600; font-style: italic; }
+    .ba-user { font-size: 0.85rem; font-weight: 700; color: #64748b; line-height: 1.45; padding-bottom: 0.6rem; margin-bottom: 0.2rem; border-bottom: 1px dashed rgba(100,116,139,0.25); }
+    html.dark .ba-user { color: #94a3b8; }
+
+    /* ── Note message ────────────────────────── */
+    .note-msg {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.4rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; opacity: 0;
+      color: #ea580c; background: rgba(234,88,12,0.08); border: 1.5px solid rgba(234,88,12,0.22);
+      transition: opacity 0.45s ease;
+    }
+    .note-msg.show { opacity: 1; }
+    html.dark .note-msg { color: #fdba74; background: rgba(234,88,12,0.14); border-color: rgba(251,146,60,0.26); }
+
+    /* ── Comparison cards (Before vs After) ──── */
+    .cmp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .cmp-grid { grid-template-columns: 1fr; } }
+    .cmp-card { border-radius: 1rem; padding: 1.3rem 1.4rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-card { background: #0f172a; border-color: #334155; }
+    .cmp-card.train { border-color: rgba(100,116,139,0.35); background: rgba(100,116,139,0.05); }
+    .cmp-card.infer { border-color: rgba(22,163,74,0.3); background: rgba(22,163,74,0.05); }
+    .cmp-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; }
+    .cmp-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .cmp-card.train .cmp-ic { background: #64748b; }
+    .cmp-card.infer .cmp-ic { background: #16a34a; }
+    .cmp-name { font-weight: 900; font-size: 1.05rem; color: #1e293b; }
+    html.dark .cmp-name { color: #f1f5f9; }
+    .cmp-lead { font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 0.9rem; }
+    html.dark .cmp-lead { color: #94a3b8; }
+    .cmp-row { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.86rem; line-height: 1.45; padding: 0.4rem 0; border-top: 1px dashed rgba(100,116,139,0.25); }
+    .cmp-row:first-of-type { border-top: none; }
+    .cmp-key { font-weight: 900; color: #94a3b8; text-transform: uppercase; font-size: 0.64rem; letter-spacing: 0.05em; flex-shrink: 0; width: 58px; padding-top: 0.15rem; }
+    .cmp-val { font-weight: 700; color: #334155; }
+    html.dark .cmp-val { color: #e2e8f0; }
+
+    /* ── What the model learns (clickable cards) ─ */
+    .help-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .help-grid { grid-template-columns: 1fr; } }
+    .help-card {
+      cursor: pointer; border-radius: 1rem; padding: 1.2rem 1.3rem; text-align: left;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .help-card { background: #0f172a; border-color: #334155; }
+    .help-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.12); }
+    .help-card.open { border-color: #ea580c; background: rgba(234,88,12,0.06); }
+    html.dark .help-card.open { border-color: #fb923c; background: rgba(234,88,12,0.14); }
+    .help-head { display: flex; align-items: center; gap: 0.6rem; }
+    .help-ic { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; transition: all 0.25s ease; }
+    html.dark .help-ic { background: rgba(234,88,12,0.24); color: #fdba74; }
+    .help-card.open .help-ic { background: #ea580c; color: white; }
+    .help-title { font-weight: 900; font-size: 0.98rem; color: #1e293b; flex: 1; }
+    html.dark .help-title { color: #f1f5f9; }
+    .help-chev { color: #cbd5e1; transition: transform 0.25s ease; }
+    .help-card.open .help-chev { transform: rotate(180deg); color: #ea580c; }
+    .help-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, margin-top 0.3s ease; }
+    .help-card.open .help-body { max-height: 220px; margin-top: 0.8rem; }
+    .help-ex { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.25rem; }
+    .help-ex + .help-text { margin-bottom: 0.7rem; }
+    .help-text { font-size: 0.88rem; font-weight: 700; color: #334155; line-height: 1.5; }
+    html.dark .help-text { color: #e2e8f0; }
+
+    /* ── Step flow ───────────────────────────── */
+    .step-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
+    @media (max-width: 640px) { .step-flow { grid-template-columns: 1fr; } }
+    .step-card { border-radius: 1rem; padding: 1.15rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .step-card { background: #0f172a; border-color: #334155; }
+    .step-num { width: 40px; height: 40px; border-radius: 9999px; margin: 0 auto 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .step-text { font-size: 0.85rem; font-weight: 700; color: #334155; line-height: 1.45; }
+    html.dark .step-text { color: #e2e8f0; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.16); border-left-color: #fb923c;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30">
+          <span class="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+          <span class="text-orange-700 dark:text-orange-400 text-xs font-bold tracking-wide">Fine-Tuning</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="list-checks" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Instruction Tuning</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Instruction tuning teaches a model to <strong class="text-slate-800 dark:text-slate-200">respond better to human instructions</strong>.
+          Instead of only learning text patterns, the model learns how to <strong class="text-slate-800 dark:text-slate-200">follow tasks</strong>
+          like summarize, explain, classify, rewrite, or answer.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Instruction Tuning Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Teach the model to follow tasks</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a task, then press <strong class="text-slate-800 dark:text-slate-200">Instruction-tune</strong>.
+          The base model learns from instruction and good-response examples, then follows the instruction
+          <strong class="text-slate-800 dark:text-slate-200">clearly and helpfully</strong>. Compare before and after.
+        </p>
+
+        <!-- task picker -->
+        <div class="prompt-cap">Choose an instruction task</div>
+        <div class="prompt-list" id="taskList"></div>
+
+        <!-- flow -->
+        <div class="flow-col">
+          <!-- base model -->
+          <div class="flow-node base active" id="baseNode">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="box" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Base Model</span>
+            </div>
+            <div class="base-state" id="baseState">Knows language, but not how to follow tasks well.</div>
+          </div>
+
+          <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
+
+          <!-- instruction + response examples -->
+          <div class="flow-node tune" id="tuneNode">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="messages-square" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Instruction + Good Response Examples</span>
+            </div>
+            <div class="tune-state" id="tuneState">Ready, waiting for a task.</div>
+          </div>
+
+          <div class="flow-arrow"><i data-lucide="chevron-down" style="width:22px;height:22px;"></i></div>
+
+          <!-- instruction-tuned model -->
+          <div class="flow-node output base" id="tunedNode">
+            <div class="flow-head">
+              <span class="flow-ic"><i data-lucide="bot" style="width:18px;height:18px;"></i></span>
+              <span class="flow-name">Instruction-Tuned Model</span>
+            </div>
+            <div class="flow-body placeholder" id="tunedBody">Press Instruction-tune to create an assistant-like model.</div>
+          </div>
+        </div>
+
+        <!-- before / after response -->
+        <div class="ba-grid">
+          <div class="ba-card before" id="beforeCard">
+            <div class="ba-tag"><i data-lucide="minus-circle" style="width:12px;height:12px;"></i> Before instruction tuning</div>
+            <div class="ba-user" id="beforeUser">User: ...</div>
+            <div class="ba-role">Model</div>
+            <div class="ba-text" id="beforeText">A vague response</div>
+          </div>
+          <div class="ba-card after" id="afterCard">
+            <div class="ba-tag"><i data-lucide="check-circle" style="width:12px;height:12px;"></i> After instruction tuning</div>
+            <div class="ba-user" id="afterUser">User: ...</div>
+            <div class="ba-role">Model</div>
+            <div class="ba-text placeholder" id="afterText">Run tuning to see the helpful response.</div>
+          </div>
+        </div>
+
+        <!-- controls -->
+        <div class="pg-controls" style="margin-top:1.4rem;">
+          <button class="ctrl-btn primary" id="runBtn"><i data-lucide="list-checks" style="width:14px;height:14px;"></i> <span id="runBtnLabel">Instruction-tune</span></button>
+          <button class="ctrl-btn" id="resetBtn"><i data-lucide="rotate-cw" style="width:14px;height:14px;"></i> Reset</button>
+        </div>
+
+        <!-- note -->
+        <div class="note-msg" id="noteMsg"><i data-lucide="info" style="width:16px;height:16px;"></i> The model already knew language. Instruction tuning taught it to actually follow the task.</div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. BEFORE vs AFTER INSTRUCTION TUNING
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-compare" style="width:12px;height:12px;"></i>Before vs After Instruction Tuning</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">From text predictor to task follower</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          A base model is great at <strong class="text-slate-800 dark:text-slate-200">continuing text</strong>.
+          Instruction tuning teaches it to <strong class="text-slate-800 dark:text-slate-200">do what the user asks</strong>.
+        </p>
+
+        <div class="cmp-grid">
+          <div class="cmp-card train">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="file-text" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">Before</span>
+            </div>
+            <div class="cmp-lead">The model knows language patterns.</div>
+            <div class="cmp-row"><span class="cmp-key">Good at</span><span class="cmp-val">Predicting the next words</span></div>
+            <div class="cmp-row"><span class="cmp-key">Weak at</span><span class="cmp-val">Knowing what you actually want</span></div>
+          </div>
+
+          <div class="cmp-card infer">
+            <div class="cmp-head">
+              <span class="cmp-ic"><i data-lucide="bot" style="width:20px;height:20px;"></i></span>
+              <span class="cmp-name">After</span>
+            </div>
+            <div class="cmp-lead">The model learns task-following behavior.</div>
+            <div class="cmp-row"><span class="cmp-key">Good at</span><span class="cmp-val">Following clear instructions</span></div>
+            <div class="cmp-row"><span class="cmp-key">Feels like</span><span class="cmp-val">A helpful assistant</span></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. WHAT THE MODEL LEARNS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="check-square" style="width:12px;height:12px;"></i>What the Model Learns</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Skills instruction tuning adds</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click a card to expand it. These are the assistant-like habits the model picks up from good examples.
+        </p>
+
+        <div class="help-grid">
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="list-todo" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Follow Tasks</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">What it means</div>
+              <div class="help-text">The model actually does the action you ask for.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">Summarize, classify, translate, explain, or rewrite.</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="layout-list" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Match Output Style</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">What it means</div>
+              <div class="help-text">The model shapes the answer the way you want it.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">A short answer, bullet points, a table, or a friendly tone.</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="search" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Understand Intent</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">What it means</div>
+              <div class="help-text">The model figures out what you are really asking for.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">Knowing "make this shorter" means summarize, not delete.</div>
+            </div>
+          </button>
+
+          <button class="help-card" data-help>
+            <div class="help-head">
+              <span class="help-ic"><i data-lucide="heart-handshake" style="width:19px;height:19px;"></i></span>
+              <span class="help-title">Be More Helpful</span>
+              <i data-lucide="chevron-down" class="help-chev" style="width:18px;height:18px;"></i>
+            </div>
+            <div class="help-body">
+              <div class="help-ex">What it means</div>
+              <div class="help-text">The model gives responses that better match what people need.</div>
+              <div class="help-ex">Example</div>
+              <div class="help-text">A clear, direct answer instead of a vague continuation.</div>
+            </div>
+          </button>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW IT WORKS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>How It Works</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">From base model to assistant</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Three simple steps turn a text predictor into a task follower.
+        </p>
+        <div class="step-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-text">Start with a pre-trained base model.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-text">Show it many instruction and good-response examples.</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-text">Get a model that follows instructions helpfully.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <div class="takeaway mb-5">
+        <span class="text-2xl flex-shrink-0">🔑</span>
+        <div>
+          <div class="text-xs font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-2">Key takeaways</div>
+          <ul class="flex flex-col gap-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li>• Instruction tuning helps models <strong class="text-slate-900 dark:text-white">follow instructions</strong>.</li>
+            <li>• It uses <strong class="text-slate-900 dark:text-white">instruction-response examples</strong>.</li>
+            <li>• It makes models more useful as <strong class="text-slate-900 dark:text-white">assistants</strong>.</li>
+            <li>• It is different from general <strong class="text-slate-900 dark:text-white">pretraining</strong>.</li>
+            <li>• It improves <strong class="text-slate-900 dark:text-white">task-following behavior</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Select different instruction tasks.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare before and after responses.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice how the tuned model follows the task better.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Think of instructions you give to AI every day.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Instruction tuning helps a model become better at following human instructions. It turns a general language model into a more useful assistant.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="fine-tuning.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Fine-Tuning
+        </a>
+        <a href="rlhf.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: RLHF</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Fine-Tuning');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     INSTRUCTION TUNING, playground data
+  ═══════════════════════════════════════════════ */
+  const TASKS = [
+    {
+      label: 'Summarize this paragraph',
+      user: 'Summarize this paragraph.',
+      data: 'Learning from summary examples...',
+      spec: 'Assistant model',
+      before: 'This paragraph contains information about several topics and ideas.',
+      after: 'Here is a short summary: the text explains the main idea in one or two clear sentences.'
+    },
+    {
+      label: 'Rewrite this email politely',
+      user: 'Rewrite this email politely: "Send the report now."',
+      data: 'Learning from polite rewrite examples...',
+      spec: 'Assistant model',
+      before: 'Send the report now. Send the report now, please. The report is needed.',
+      after: 'Hi, I hope you\'re well. Could you please send over the report when you have a moment? Thank you so much!'
+    },
+    {
+      label: 'Classify this review',
+      user: 'Classify this review: "The food was cold and slow to arrive."',
+      data: 'Learning from labeled classification examples...',
+      spec: 'Assistant model',
+      before: 'The review talks about food and service and how it arrived.',
+      after: 'Sentiment: Negative. The customer was unhappy with cold food and a slow delivery.'
+    },
+    {
+      label: 'Explain this concept simply',
+      user: 'Explain gravity simply.',
+      data: 'Learning from clear explanation examples...',
+      spec: 'Assistant model',
+      before: 'Gravity is a topic in physics and is related to mass and motion and objects.',
+      after: 'Gravity is the pull that brings things toward each other. It\'s why a dropped ball falls down instead of floating away.'
+    },
+  ];
+
+  const taskList  = document.getElementById('taskList');
+  const baseNode  = document.getElementById('baseNode');
+  const tuneNode  = document.getElementById('tuneNode');
+  const tuneState = document.getElementById('tuneState');
+  const tunedNode = document.getElementById('tunedNode');
+  const tunedBody = document.getElementById('tunedBody');
+  const beforeUser= document.getElementById('beforeUser');
+  const beforeText= document.getElementById('beforeText');
+  const afterCard = document.getElementById('afterCard');
+  const afterUser = document.getElementById('afterUser');
+  const afterText = document.getElementById('afterText');
+  const noteMsg   = document.getElementById('noteMsg');
+  const runBtn    = document.getElementById('runBtn');
+  const runBtnLabel = document.getElementById('runBtnLabel');
+  const resetBtn  = document.getElementById('resetBtn');
+
+  let selectedIdx = 0;
+  let running = false;
+  let timers = [];
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function renderTasks() {
+    taskList.innerHTML = TASKS.map((t, i) => `
+      <button class="prompt-pill${i === selectedIdx ? ' selected' : ''}" data-idx="${i}">
+        <span class="pp-dot"></span>${t.label}
+      </button>`).join('');
+    taskList.querySelectorAll('.prompt-pill').forEach(btn =>
+      btn.addEventListener('click', () => selectTask(+btn.dataset.idx))
+    );
+  }
+
+  function showBefore() {
+    const t = TASKS[selectedIdx];
+    beforeUser.textContent = 'User: ' + t.user;
+    beforeText.textContent = t.before;
+    afterUser.textContent = 'User: ' + t.user;
+  }
+
+  function clearOutput() {
+    tunedNode.classList.remove('filled');
+    tuneNode.classList.remove('processing', 'done');
+    tunedBody.classList.add('placeholder');
+    tunedBody.textContent = 'Press Instruction-tune to create an assistant-like model.';
+    tuneState.textContent = 'Ready, waiting for a task.';
+    afterCard.classList.remove('filled');
+    afterText.classList.add('placeholder');
+    afterText.textContent = 'Run tuning to see the helpful response.';
+    noteMsg.classList.remove('show');
+  }
+
+  function selectTask(i) {
+    if (running) return;
+    selectedIdx = i;
+    taskList.querySelectorAll('.prompt-pill').forEach(b =>
+      b.classList.toggle('selected', +b.dataset.idx === i)
+    );
+    showBefore();
+    clearOutput();
+  }
+
+  function typeOut(el, text, done) {
+    el.classList.remove('placeholder');
+    el.textContent = '';
+    const caret = document.createElement('span');
+    caret.className = 'type-caret';
+    el.appendChild(caret);
+    let idx = 0;
+    const speed = 16;
+    function tick() {
+      if (idx <= text.length) {
+        caret.insertAdjacentText('beforebegin', text.charAt(idx - 1) || '');
+        idx++;
+        timers.push(setTimeout(tick, speed));
+      } else {
+        caret.remove();
+        if (done) done();
+      }
+    }
+    tick();
+  }
+
+  function runTuning() {
+    if (running) return;
+    running = true;
+    runBtn.disabled = true;
+    const t = TASKS[selectedIdx];
+
+    // 1. base model active
+    baseNode.classList.add('active');
+    tunedNode.classList.remove('filled');
+    tunedBody.classList.add('placeholder');
+    tunedBody.textContent = '...';
+    afterCard.classList.remove('filled');
+    afterText.classList.add('placeholder');
+    afterText.textContent = '...';
+
+    // 2. instruction tuning process
+    timers.push(setTimeout(() => {
+      tuneNode.classList.remove('done');
+      tuneNode.classList.add('processing');
+      tuneState.textContent = t.data;
+    }, 250));
+
+    // 3. tuned model ready + typed after-response
+    timers.push(setTimeout(() => {
+      tuneNode.classList.remove('processing');
+      tuneNode.classList.add('done');
+      tuneState.textContent = 'Done, examples learned.';
+      tunedNode.classList.add('filled');
+      tunedBody.classList.remove('placeholder');
+      tunedBody.textContent = t.spec + ' now follows the instruction.';
+      afterCard.classList.add('filled');
+      typeOut(afterText, t.after, () => {
+        noteMsg.classList.add('show');
+        running = false;
+        runBtn.disabled = false;
+        runBtnLabel.textContent = 'Tune again';
+      });
+    }, 1600));
+  }
+
+  function resetPlayground() {
+    clearTimers();
+    running = false;
+    selectedIdx = 0;
+    renderTasks();
+    showBefore();
+    clearOutput();
+    runBtn.disabled = false;
+    runBtnLabel.textContent = 'Instruction-tune';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  runBtn.addEventListener('click', runTuning);
+  resetBtn.addEventListener('click', resetPlayground);
+
+  /* ── What-the-model-learns clickable cards ── */
+  document.querySelectorAll('[data-help]').forEach(card =>
+    card.addEventListener('click', () => card.classList.toggle('open'))
+  );
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open  = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ═══════════════════════════════════════════════
+     INIT (shared chrome: dark mode, nav, icons)
+  ═══════════════════════════════════════════════ */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderTasks();
+    showBefore();
+    clearOutput();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+
+</body>
+</html>
