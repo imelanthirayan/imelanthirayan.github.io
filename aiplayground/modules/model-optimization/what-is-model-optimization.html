@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="What is Model Optimization? A beginner-friendly interactive lesson on how trained AI models are made faster, smaller, and more efficient, and the trade-offs between speed, memory, and accuracy." />
+  <title>What is Model Optimization?, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/model-optimization/what-is-model-optimization.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="What is Model Optimization?, AI Concepts Playground" />
+  <meta property="og:description" content="What is Model Optimization? A beginner-friendly interactive lesson on how trained AI models are made faster, smaller, and more efficient, and the trade-offs between speed, memory, and accuracy." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/model-optimization/what-is-model-optimization.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What is Model Optimization?, AI Concepts Playground" />
+  <meta name="twitter:description" content="What is Model Optimization? A beginner-friendly interactive lesson on how trained AI models are made faster, smaller, and more efficient." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Optimization goal buttons ───────────── */
+    .opt-controls { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-top: 0.4rem; }
+    .opt-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.45rem;
+      font-size: 0.85rem; font-weight: 800; color: #64748b; padding: 0.6rem 1.15rem; border-radius: 9999px;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.2s ease;
+    }
+    .opt-btn:hover { border-color: rgba(234,88,12,0.4); color: #ea580c; transform: translateY(-1px); }
+    .opt-btn.active { border-color: #ea580c; background: #ea580c; color: white; box-shadow: 0 6px 16px rgba(234,88,12,0.28); }
+    html.dark .opt-btn { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    html.dark .opt-btn:hover { border-color: rgba(251,146,60,0.45); color: #fdba74; }
+    html.dark .opt-btn.active { background: #f97316; border-color: #f97316; color: white; }
+    .opt-btn .obi { width: 18px; height: 18px; }
+
+    /* ── Optimization Lab ───────────────────────── */
+    .opt-lab { margin-top: 1.6rem; }
+    .lab-top { display: grid; grid-template-columns: minmax(180px, 0.85fr) 1.15fr; gap: 1rem; align-items: stretch; }
+    @media (max-width: 640px) { .lab-top { grid-template-columns: 1fr; } }
+
+    /* the model chip that shrinks */
+    .model-viz {
+      display: flex; align-items: center; justify-content: center; min-height: 190px; height: 100%;
+      padding: 1rem; border-radius: 1.15rem; background: #f8fafc; border: 1.5px solid #e2e8f0; overflow: hidden;
+    }
+    html.dark .model-viz { background: #0f172a; border-color: #334155; }
+    .chip {
+      position: relative; width: 170px; height: 170px; border-radius: 1.4rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;
+      color: white; background: linear-gradient(140deg, #fb923c, #ea580c);
+      box-shadow: 0 18px 40px rgba(234,88,12,0.32);
+      transition: transform 0.45s cubic-bezier(.34,1.4,.64,1), filter 0.45s ease, box-shadow 0.45s ease;
+      transform-origin: center center;
+    }
+    .chip.warn { background: linear-gradient(140deg, #f87171, #dc2626); box-shadow: 0 18px 40px rgba(220,38,38,0.32); }
+    .chip-ic { width: 40px; height: 40px; }
+    .chip-name { font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.9; }
+    .chip-size { font-size: 1.05rem; font-weight: 900; letter-spacing: 0.01em; }
+    .chip-glow {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.45), transparent 55%);
+    }
+
+    /* slider */
+    .slider-wrap { margin-top: 1.4rem; }
+    .slider-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; }
+    .slider-label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 800; color: #475569; }
+    html.dark .slider-label { color: #cbd5e1; }
+    .slider-pct { font-size: 1rem; font-weight: 900; color: #ea580c; }
+    html.dark .slider-pct { color: #fb923c; }
+    .opt-range {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 10px; border-radius: 9999px; outline: none; cursor: pointer;
+      background: linear-gradient(90deg, #ea580c var(--pct,0%), #e2e8f0 var(--pct,0%));
+    }
+    html.dark .opt-range { background: linear-gradient(90deg, #f97316 var(--pct,0%), #334155 var(--pct,0%)); }
+    .opt-range::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 26px; height: 26px; border-radius: 9999px;
+      background: white; border: 4px solid #ea580c; box-shadow: 0 3px 10px rgba(0,0,0,0.2); cursor: grab; transition: transform 0.15s ease;
+    }
+    .opt-range::-webkit-slider-thumb:active { transform: scale(1.15); cursor: grabbing; }
+    .opt-range::-moz-range-thumb {
+      width: 26px; height: 26px; border-radius: 9999px; background: white; border: 4px solid #ea580c; box-shadow: 0 3px 10px rgba(0,0,0,0.2); cursor: grab;
+    }
+    .slider-scale { display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.68rem; font-weight: 800; color: #94a3b8; }
+    html.dark .slider-scale { color: #64748b; }
+    .preset-row { display: flex; gap: 0.5rem; margin-top: 0.9rem; flex-wrap: wrap; }
+    .preset-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; font-weight: 800;
+      color: #64748b; padding: 0.45rem 0.9rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.18s ease;
+    }
+    .preset-btn:hover { border-color: rgba(234,88,12,0.4); color: #ea580c; transform: translateY(-1px); }
+    html.dark .preset-btn { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    html.dark .preset-btn:hover { border-color: rgba(251,146,60,0.45); color: #fdba74; }
+
+    /* live stat pills */
+    .lab-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 1.5rem; }
+    @media (max-width: 560px) { .lab-stats { grid-template-columns: 1fr; } }
+    .lab-stat {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem; border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .lab-stat { background: #0f172a; border-color: #334155; }
+    .ls-ic { font-size: 1.25rem; }
+    .ls-name { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #94a3b8; }
+    html.dark .ls-name { color: #64748b; }
+    .ls-val { font-size: 1.05rem; font-weight: 900; color: #0f172a; transition: color 0.3s ease; }
+    html.dark .ls-val { color: #f1f5f9; }
+    .ls-val.good { color: #16a34a; } html.dark .ls-val.good { color: #4ade80; }
+    .ls-val.bad  { color: #dc2626; } html.dark .ls-val.bad  { color: #f87171; }
+
+    /* device shelf */
+    .device-col { display: flex; flex-direction: column; }
+    .shelf-label { margin-bottom: 0.6rem; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+    html.dark .shelf-label { color: #64748b; }
+    .device-shelf { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; gap: 0.6rem; flex: 1; }
+    @media (max-width: 380px) { .device-shelf { grid-template-columns: 1fr; } }
+    .dev-card {
+      position: relative; text-align: center; padding: 0.85rem 0.6rem; border-radius: 1rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; opacity: 0.5; filter: grayscale(0.7);
+      transition: all 0.4s cubic-bezier(.34,1.4,.64,1);
+    }
+    html.dark .dev-card { background: #0f172a; border-color: #334155; }
+    .dev-card.on { opacity: 1; filter: none; border-color: #16a34a; background: rgba(22,163,74,0.06); box-shadow: 0 8px 22px rgba(22,163,74,0.14); }
+    html.dark .dev-card.on { background: rgba(22,163,74,0.12); }
+    .dev-card.just-on { animation: devPop 0.5s ease; }
+    @keyframes devPop { 0% { transform: scale(1); } 40% { transform: scale(1.09); } 100% { transform: scale(1); } }
+    .dev-ic { width: 40px; height: 40px; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; color: #64748b; }
+    .dev-card.on .dev-ic { color: #16a34a; } html.dark .dev-card.on .dev-ic { color: #4ade80; }
+    .dev-name { font-size: 0.82rem; font-weight: 900; color: #334155; }
+    html.dark .dev-name { color: #e2e8f0; }
+    .dev-cap { font-size: 0.66rem; font-weight: 700; color: #94a3b8; margin-top: 0.15rem; }
+    .dev-status {
+      display: inline-flex; align-items: center; gap: 0.25rem; margin-top: 0.55rem; font-size: 0.64rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 0.03em; padding: 0.16rem 0.55rem; border-radius: 9999px;
+      color: #94a3b8; background: #e2e8f0;
+    }
+    html.dark .dev-status { color: #64748b; background: #334155; }
+    .dev-card.on .dev-status { color: #15803d; background: rgba(22,163,74,0.15); }
+    html.dark .dev-card.on .dev-status { color: #4ade80; background: rgba(22,163,74,0.25); }
+    .dev-status i { width: 10px; height: 10px; }
+
+
+    /* trade-off message */
+    .tradeoff {
+      display: flex; align-items: center; gap: 0.7rem; margin-top: 1.4rem; padding: 0.95rem 1.15rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 700;
+      color: #334155; background: #f8fafc; border: 1.5px solid #e2e8f0; transition: all 0.35s ease;
+    }
+    html.dark .tradeoff { color: #e2e8f0; background: #0f172a; border-color: #334155; }
+    .tradeoff .ti { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .tradeoff .ti { background: rgba(234,88,12,0.22); color: #fdba74; }
+
+    /* ── Scenario cards ──────────────────────── */
+    .scn-intro { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1.5px dashed #e2e8f0; margin-bottom: 0.9rem; }
+    html.dark .scn-intro { border-top-color: #334155; }
+    .scn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    @media (max-width: 760px) { .scn-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .scn-grid { grid-template-columns: 1fr; } }
+    .scn-card {
+      cursor: pointer; text-align: left; border-radius: 1rem; padding: 1.1rem 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .scn-card { background: #0f172a; border-color: #334155; }
+    .scn-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.1); }
+    .scn-card.active { border-color: #ea580c; background: rgba(234,88,12,0.06); box-shadow: 0 8px 22px rgba(234,88,12,0.16); }
+    html.dark .scn-card.active { background: rgba(234,88,12,0.14); border-color: #fb923c; }
+    .scn-ic { width: 40px; height: 40px; border-radius: 0.7rem; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; margin-bottom: 0.7rem; transition: all 0.25s ease; }
+    html.dark .scn-ic { background: rgba(234,88,12,0.22); color: #fdba74; }
+    .scn-card.active .scn-ic { background: #ea580c; color: white; }
+    .scn-title { font-weight: 900; font-size: 0.92rem; color: #1e293b; }
+    html.dark .scn-title { color: #f1f5f9; }
+    .scn-body { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 0.25rem; line-height: 1.4; }
+    html.dark .scn-body { color: #94a3b8; }
+    .scn-goal {
+      display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.7rem;
+      font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em;
+      color: #0369a1; background: rgba(56,189,248,0.14); padding: 0.2rem 0.6rem; border-radius: 9999px;
+    }
+    html.dark .scn-goal { color: #7dd3fc; background: rgba(56,189,248,0.2); }
+
+    /* ── Technique cards ─────────────────────── */
+    .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+    @media (max-width: 640px) { .tech-grid { grid-template-columns: 1fr; } }
+    .tech-card { border-radius: 1rem; padding: 1.25rem 1.3rem; border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease; }
+    html.dark .tech-card { background: #0f172a; border-color: #334155; }
+    .tech-card:hover { border-color: rgba(234,88,12,0.35); transform: translateY(-2px); }
+    .tech-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; }
+    .tech-ic { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; background: linear-gradient(135deg,#fb923c,#ea580c); }
+    .tech-name { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .tech-name { color: #f1f5f9; }
+    .tech-flow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.82rem; font-weight: 700; color: #475569; }
+    html.dark .tech-flow { color: #cbd5e1; }
+    .tech-flow .tf-arrow { color: #ea580c; }
+    .tech-flow .tf-out { color: #15803d; font-weight: 900; }
+    html.dark .tech-flow .tf-out { color: #4ade80; }
+    .tech-note {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; padding: 0.9rem 1.1rem; border-radius: 0.9rem;
+      font-size: 0.88rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.08); border: 1.5px solid rgba(56,189,248,0.28);
+    }
+    html.dark .tech-note { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.2); border-left-color: #fb923c;
+    }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+          <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+          <span class="text-yellow-700 dark:text-yellow-400 text-xs font-bold tracking-wide">⚡ Model Optimization</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 6–8 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="zap" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">What is Model Optimization?</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          After a model has been trained, it can be <strong class="text-slate-800 dark:text-slate-200">optimized</strong> to make it
+          <strong class="text-slate-800 dark:text-slate-200">faster</strong>, use <strong class="text-slate-800 dark:text-slate-200">less memory</strong>,
+          or run on <strong class="text-slate-800 dark:text-slate-200">smaller devices</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Shrink the model — see where it can run</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-1">
+          Drag the slider to optimize the model. It gets <strong class="text-slate-800 dark:text-slate-200">smaller and faster</strong>,
+          which lets it run on more devices — but push too far and <strong class="text-slate-800 dark:text-slate-200">accuracy</strong> starts to drop.
+          That is the trade-off at the heart of optimization.
+        </p>
+
+        <!-- optimization lab -->
+        <div class="opt-lab">
+          <!-- model + devices side by side so both react as you drag -->
+          <div class="lab-top">
+            <div class="model-viz">
+              <div class="chip" id="chip">
+                <div class="chip-glow"></div>
+                <i data-lucide="box" class="chip-ic"></i>
+                <div class="chip-name">AI Model</div>
+                <div class="chip-size" id="chipSize">13.0 GB</div>
+              </div>
+            </div>
+            <div class="device-col">
+              <div class="shelf-label">Devices this model can run on</div>
+              <div class="device-shelf" id="deviceShelf"></div>
+            </div>
+          </div>
+
+          <!-- slider -->
+          <div class="slider-wrap">
+            <div class="slider-head">
+              <span class="slider-label"><i data-lucide="sliders-horizontal" style="width:13px;height:13px;"></i> Optimization strength</span>
+              <span class="slider-pct" id="optPct">0%</span>
+            </div>
+            <input type="range" id="optRange" min="0" max="100" value="0" step="1" class="opt-range" aria-label="Optimization strength">
+            <div class="slider-scale"><span>None</span><span>Balanced</span><span>Max</span></div>
+            <div class="preset-row">
+              <button class="preset-btn" data-preset="0"><i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i> Reset</button>
+              <button class="preset-btn" data-preset="45"><i data-lucide="scale" style="width:13px;height:13px;"></i> Balanced</button>
+              <button class="preset-btn" data-preset="100"><i data-lucide="zap" style="width:13px;height:13px;"></i> Max</button>
+            </div>
+          </div>
+
+          <!-- live stats -->
+          <div class="lab-stats">
+            <div class="lab-stat">
+              <span class="ls-ic">⚡</span>
+              <div><div class="ls-name">Speed</div><div class="ls-val" id="lsSpeed">1.0×</div></div>
+            </div>
+            <div class="lab-stat">
+              <span class="ls-ic">💾</span>
+              <div><div class="ls-name">Model Size</div><div class="ls-val" id="lsSize">13.0 GB</div></div>
+            </div>
+            <div class="lab-stat">
+              <span class="ls-ic">🎯</span>
+              <div><div class="ls-name">Accuracy</div><div class="ls-val" id="lsAcc">99%</div></div>
+            </div>
+          </div>
+
+          <!-- message -->
+          <div class="tradeoff" id="tradeoff">
+            <span class="ti"><i data-lucide="info" style="width:18px;height:18px;"></i></span>
+            <span id="tradeoffText">A full-size model. Powerful and accurate, but so big only large servers can run it. Start dragging.</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. COMMON OPTIMIZATION TECHNIQUES
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="wrench" style="width:12px;height:12px;"></i>Common Techniques</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Four ways to optimize</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Here is a quick preview. You will explore each of these in the next lessons.
+        </p>
+
+        <div class="tech-grid">
+          <div class="tech-card">
+            <div class="tech-head">
+              <div class="tech-ic"><i data-lucide="minimize-2" style="width:19px;height:19px;"></i></div>
+              <div class="tech-name">Quantization</div>
+            </div>
+            <div class="tech-flow"><span>Reduce memory</span> <span class="tf-arrow">↓</span> <span class="tf-out">Smaller model</span></div>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-head">
+              <div class="tech-ic"><i data-lucide="database" style="width:19px;height:19px;"></i></div>
+              <div class="tech-name">KV Cache</div>
+            </div>
+            <div class="tech-flow"><span>Reuse previous work</span> <span class="tf-arrow">↓</span> <span class="tf-out">Faster responses</span></div>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-head">
+              <div class="tech-ic"><i data-lucide="layers" style="width:19px;height:19px;"></i></div>
+              <div class="tech-name">Batching</div>
+            </div>
+            <div class="tech-flow"><span>Process requests together</span> <span class="tf-arrow">↓</span> <span class="tf-out">Higher efficiency</span></div>
+          </div>
+
+          <div class="tech-card">
+            <div class="tech-head">
+              <div class="tech-ic"><i data-lucide="rabbit" style="width:19px;height:19px;"></i></div>
+              <div class="tech-name">Speculative Decoding</div>
+            </div>
+            <div class="tech-flow"><span>Generate faster</span> <span class="tf-arrow">↓</span> <span class="tf-out">Lower waiting time</span></div>
+          </div>
+        </div>
+
+        <div class="tech-note">
+          <i data-lucide="book-open" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span>Each technique is explained in the following lessons.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           HOW IT FITS (step flow)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>Where It Happens</div>
+        <h2 class="text-2xl font-black mb-5 text-slate-900 dark:text-white">Optimization comes after training</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="rounded-2xl p-4 text-center border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
+            <div class="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center font-black text-white" style="background:linear-gradient(135deg,#fb923c,#ea580c);">1</div>
+            <div class="text-sm font-bold text-slate-700 dark:text-slate-200 leading-snug">Train the model so it learns the task.</div>
+          </div>
+          <div class="rounded-2xl p-4 text-center border-[1.5px] border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20">
+            <div class="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center font-black text-white" style="background:linear-gradient(135deg,#fb923c,#ea580c);">2</div>
+            <div class="text-sm font-bold text-slate-700 dark:text-slate-200 leading-snug"><strong class="text-orange-600 dark:text-orange-400">Optimize</strong> it for speed, memory, or size.</div>
+          </div>
+          <div class="rounded-2xl p-4 text-center border-[1.5px] border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
+            <div class="w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center font-black text-white" style="background:linear-gradient(135deg,#fb923c,#ea580c);">3</div>
+            <div class="text-sm font-bold text-slate-700 dark:text-slate-200 leading-snug">Deploy it where it needs to run.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-orange-500 dark:bg-orange-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• Optimization happens <strong class="text-slate-900 dark:text-white">after training</strong>.</li>
+              <li>• Different optimizations have <strong class="text-slate-900 dark:text-white">different goals</strong>.</li>
+              <li>• Some <strong class="text-slate-900 dark:text-white">reduce memory</strong>.</li>
+              <li>• Some <strong class="text-slate-900 dark:text-white">improve speed</strong>.</li>
+              <li>• Some involve <strong class="text-slate-900 dark:text-white">small trade-offs</strong> in accuracy.</li>
+              <li>• The right choice depends on <strong class="text-slate-900 dark:text-white">where the model will run</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Drag the slider slowly from None to Max.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Watch the model shrink and new devices light up.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Push past Balanced and notice accuracy start to drop.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Find the smallest setting that still runs on a phone.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Model optimization helps AI models become faster, smaller, and more efficient. Different techniques are used depending on the needs of the application.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="../training-fine-tuning/adapters.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Fine-Tuning Complete
+        </a>
+        <a href="model-precision.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: FP32 vs FP16 vs INT8 vs INT4</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Model Optimization');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     What is Model Optimization?, playground
+  ═══════════════════════════════════════════════ */
+
+  // meter value = 0..100. For speed/accuracy higher is better.
+  // For memory this is "usage", so lower is better (color inverted).
+  const FULL_SIZE = 13.0; // GB at 0% optimization
+  const MIN_SIZE  = 0.5;  // GB at 100% optimization
+
+  // devices, largest capacity first; a device "lights up" when the model fits
+  const DEVICES = [
+    { id:'server', icon:'server',     name:'Cloud Server', cap:99,  note:'Fits ≤ any size' },
+    { id:'laptop', icon:'laptop',     name:'Laptop',       cap:8,   note:'Fits ≤ 8 GB' },
+    { id:'phone',  icon:'smartphone', name:'Smartphone',   cap:3,   note:'Fits ≤ 3 GB' },
+    { id:'watch',  icon:'watch',      name:'Smartwatch',   cap:0.8, note:'Fits ≤ 0.8 GB' },
+  ];
+
+  const chip        = document.getElementById('chip');
+  const chipSize    = document.getElementById('chipSize');
+  const optRange    = document.getElementById('optRange');
+  const optPct      = document.getElementById('optPct');
+  const lsSpeed     = document.getElementById('lsSpeed');
+  const lsSize      = document.getElementById('lsSize');
+  const lsAcc       = document.getElementById('lsAcc');
+  const deviceShelf = document.getElementById('deviceShelf');
+  const tradeoffText = document.getElementById('tradeoffText');
+  const presetBtns  = document.querySelectorAll('.preset-btn');
+
+  // derive all values from a single 0..100 optimization level
+  function derive(opt) {
+    const t = opt / 100;
+    const size  = +(FULL_SIZE - (FULL_SIZE - MIN_SIZE) * Math.pow(t, 0.8)).toFixed(1);
+    const speed = +(1 + 5 * t).toFixed(1);         // 1.0× → 6.0×
+    // accuracy holds high, then falls off as you over-optimize
+    const acc   = Math.round(99 - 6 * t - (opt > 55 ? (opt - 55) * 0.32 : 0));
+    return { size, speed, acc };
+  }
+
+  let unlocked = new Set();
+
+  function renderDevices(size, animate) {
+    deviceShelf.innerHTML = DEVICES.map(d => {
+      const on = size <= d.cap;
+      return `<div class="dev-card ${on ? 'on' : ''}" data-id="${d.id}">
+        <div class="dev-ic"><i data-lucide="${d.icon}" style="width:26px;height:26px;"></i></div>
+        <div class="dev-name">${d.name}</div>
+        <div class="dev-cap">${d.note}</div>
+        <div class="dev-status">${on
+          ? '<i data-lucide="check"></i> Runs here'
+          : '<i data-lucide="lock"></i> Too big'}</div>
+      </div>`;
+    }).join('');
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    // pop devices that just turned on
+    if (animate) {
+      DEVICES.forEach(d => {
+        const on = size <= d.cap;
+        if (on && !unlocked.has(d.id)) {
+          const el = deviceShelf.querySelector(`[data-id="${d.id}"]`);
+          if (el) { el.classList.add('just-on'); setTimeout(() => el.classList.remove('just-on'), 500); }
+        }
+      });
+    }
+    unlocked = new Set(DEVICES.filter(d => size <= d.cap).map(d => d.id));
+  }
+
+  function message(opt, size, acc) {
+    if (opt === 0)   return 'A full-size model. Powerful and accurate, but so big only large servers can run it.';
+    if (opt < 40)    return `Lighter and faster. Now around ${size} GB — it fits on a laptop with almost no accuracy loss.`;
+    if (opt < 70)    return `Small enough for phones now (${size} GB). Speed is much higher and accuracy is still solid.`;
+    if (acc >= 80)   return `Tiny and very fast (${size} GB) — it even fits on a smartwatch. Accuracy is starting to slip.`;
+    return `Squeezed to the limit (${size} GB). It runs almost anywhere, but accuracy has clearly dropped — a real trade-off.`;
+  }
+
+  function apply(opt, animate) {
+    const { size, speed, acc } = derive(opt);
+
+    optRange.value = opt;
+    optRange.style.setProperty('--pct', opt + '%');
+    optPct.textContent = opt + '%';
+
+    // chip shrinks and turns red when accuracy gets low
+    const scale = 1 - 0.55 * (opt / 100);
+    chip.style.transform = `scale(${scale})`;
+    chip.classList.toggle('warn', acc < 80);
+    chipSize.textContent = size + ' GB';
+
+    lsSpeed.textContent = speed + '×';
+    lsSize.textContent  = size + ' GB';
+    lsAcc.textContent   = acc + '%';
+    lsSpeed.className = 'ls-val good';
+    lsSize.className  = 'ls-val ' + (opt > 0 ? 'good' : '');
+    lsAcc.className   = 'ls-val ' + (acc < 80 ? 'bad' : '');
+
+    renderDevices(size, animate);
+    tradeoffText.textContent = message(opt, size, acc);
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    // slider drag
+    optRange.addEventListener('input', () => apply(+optRange.value, true));
+    // preset buttons animate the slider to a target value
+    presetBtns.forEach(btn => btn.addEventListener('click', () => {
+      const target = +btn.dataset.preset;
+      let cur = +optRange.value;
+      const step = target > cur ? 2 : -2;
+      const timer = setInterval(() => {
+        cur += step;
+        if ((step > 0 && cur >= target) || (step < 0 && cur <= target)) { cur = target; clearInterval(timer); }
+        apply(cur, true);
+      }, 12);
+    }));
+
+    apply(0, false);
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>

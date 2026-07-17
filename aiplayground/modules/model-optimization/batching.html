@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Batching: a beginner-friendly interactive lesson on how processing many requests together — instead of one by one — makes AI model serving more efficient." />
+  <title>Batching, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/model-optimization/batching.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Batching, AI Concepts Playground" />
+  <meta property="og:description" content="An interactive lesson on how processing many requests together makes AI model serving more efficient and improves throughput." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/model-optimization/batching.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Batching, AI Concepts Playground" />
+  <meta name="twitter:description" content="How processing many requests together makes AI model serving more efficient." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #ea580c; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #fb923c; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #ea580c; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(234,88,12,0.25); background: rgba(234,88,12,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(234,88,12,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #fdba74; border-color: rgba(251,146,60,0.28); background: rgba(234,88,12,0.1); }
+
+    /* ── Mode toggle ─────────────────────────── */
+    .mode-toggle { display: inline-flex; padding: 0.3rem; border-radius: 9999px; border: 1.5px solid #e2e8f0; background: #f1f5f9; gap: 0.25rem; }
+    html.dark .mode-toggle { background: #0f172a; border-color: #334155; }
+    .mode-btn {
+      cursor: pointer; font-weight: 900; font-size: 0.85rem; color: #64748b;
+      padding: 0.5rem 1.15rem; border-radius: 9999px; transition: all 0.2s ease; white-space: nowrap;
+    }
+    .mode-btn:hover { color: #ea580c; }
+    .mode-btn.active { background: #ea580c; color: white; box-shadow: 0 6px 16px rgba(234,88,12,0.28); }
+    html.dark .mode-btn.active { background: #f97316; }
+
+    /* ── Serving stage ───────────────────────── */
+    .serve-stage { margin-top: 1.4rem; padding: 1.4rem 1.25rem; border-radius: 1.25rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .serve-stage { background: #0f172a; border-color: #334155; }
+    .serve-grid { display: grid; grid-template-columns: 1fr auto 150px; align-items: center; gap: 1rem; }
+    @media (max-width: 640px) { .serve-grid { grid-template-columns: 1fr; } }
+    .col-cap { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.6rem; }
+
+    .req-list { display: flex; flex-direction: column; gap: 0.55rem; position: relative; }
+    .req {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 0.8rem;
+      border: 1.5px solid #cbd5e1; background: white; font-weight: 700; font-size: 0.85rem; color: #334155;
+      transition: all 0.4s ease;
+    }
+    html.dark .req { background: #1e293b; border-color: #475569; color: #e2e8f0; }
+    .req .req-emoji { font-size: 1.05rem; }
+    .req.queued { border-style: dashed; opacity: 0.9; }
+    .req.batched { border-color: #ea580c; background: rgba(234,88,12,0.08); transform: translateX(6px); }
+    html.dark .req.batched { background: rgba(234,88,12,0.15); border-color: #fb923c; }
+    .req.processing { border-color: #ea580c; background: #ea580c; color: white; box-shadow: 0 8px 20px rgba(234,88,12,0.3); transform: scale(1.02); }
+    .req.done { border-color: #16a34a; background: rgba(22,163,74,0.08); color: #15803d; }
+    html.dark .req.done { background: rgba(22,163,74,0.16); color: #86efac; border-color: #22c55e; }
+    .req .req-tick { margin-left: auto; font-size: 0.75rem; font-weight: 900; opacity: 0; transition: opacity 0.3s ease; }
+    .req.done .req-tick { opacity: 1; }
+
+    .batch-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; color: #94a3b8; }
+    .batch-chip {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem;
+      min-width: 92px; padding: 0.7rem 0.9rem; border-radius: 1rem; border: 2px dashed #cbd5e1; color: #64748b;
+      font-weight: 900; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.4s ease;
+    }
+    html.dark .batch-chip { border-color: #475569; color: #cbd5e1; }
+    .batch-chip.on { border-color: #ea580c; border-style: solid; background: rgba(234,88,12,0.1); color: #ea580c; }
+    html.dark .batch-chip.on { background: rgba(234,88,12,0.2); color: #fdba74; }
+    .batch-arrow { color: #94a3b8; }
+
+    .model-box {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem;
+      padding: 1.3rem 1rem; border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: white;
+      font-weight: 900; color: #1e293b; transition: all 0.3s ease; text-align: center;
+    }
+    html.dark .model-box { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+    .model-box.busy { border-color: #ea580c; background: rgba(234,88,12,0.06); box-shadow: 0 10px 26px rgba(234,88,12,0.18); }
+    html.dark .model-box.busy { background: rgba(234,88,12,0.14); border-color: #fb923c; }
+    .model-box .mb-ic { width: 40px; height: 40px; border-radius: 0.7rem; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; margin-bottom: 0.3rem; }
+    html.dark .model-box .mb-ic { background: rgba(234,88,12,0.22); color: #fdba74; }
+    .model-box.busy .mb-ic { animation: mbpulse 0.6s ease infinite; }
+    @keyframes mbpulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+    .mb-sub { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; }
+
+    .work-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1.2rem; }
+    @media (max-width: 480px) { .work-row { grid-template-columns: 1fr; } }
+    .work-box { padding: 0.9rem 1.1rem; border-radius: 0.9rem; border: 1.5px solid #e2e8f0; background: #f8fafc; text-align: center; }
+    html.dark .work-box { background: #0f172a; border-color: #334155; }
+    .work-num { font-size: 1.7rem; font-weight: 900; color: #ea580c; line-height: 1; }
+    html.dark .work-num { color: #fdba74; }
+    .work-lbl { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; margin-top: 0.35rem; }
+
+    .kv-msg {
+      display: flex; align-items: center; gap: 0.7rem; margin-top: 1.2rem; padding: 0.95rem 1.15rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 800; transition: all 0.3s ease;
+      color: #334155; background: #f8fafc; border: 1.5px solid #e2e8f0;
+    }
+    html.dark .kv-msg { color: #e2e8f0; background: #0f172a; border-color: #334155; }
+    .kv-msg.good { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.3); }
+    html.dark .kv-msg.good { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(22,163,74,0.35); }
+
+    /* ── Buttons ─────────────────────────────── */
+    .kv-controls { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.3rem; }
+    .kv-btn {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.85rem;
+      padding: 0.6rem 1.15rem; border-radius: 0.8rem; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #475569;
+      transition: all 0.2s ease;
+    }
+    .kv-btn:hover { border-color: rgba(234,88,12,0.45); color: #ea580c; transform: translateY(-1px); }
+    .kv-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    html.dark .kv-btn { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    .kv-btn.primary { background: #ea580c; border-color: #ea580c; color: white; box-shadow: 0 8px 20px rgba(234,88,12,0.28); }
+    .kv-btn.primary:hover { background: #f97316; color: white; }
+
+    /* ── Efficiency bars ─────────────────────── */
+    .eff-row { display: grid; grid-template-columns: 150px 1fr; align-items: center; gap: 0.9rem; margin-bottom: 0.9rem; }
+    @media (max-width: 520px) { .eff-row { grid-template-columns: 1fr; gap: 0.35rem; } }
+    .eff-name { font-weight: 900; font-size: 0.85rem; color: #1e293b; display: flex; align-items: center; gap: 0.4rem; }
+    html.dark .eff-name { color: #f1f5f9; }
+    .eff-track { height: 24px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+    html.dark .eff-track { background: #334155; }
+    .eff-fill { height: 100%; width: 0; border-radius: 9999px; display: flex; align-items: center; padding-left: 0.7rem; color: white; font-size: 0.72rem; font-weight: 900; white-space: nowrap; transition: width 0.9s cubic-bezier(.4,0,.2,1); }
+    .eff-fill.slow { background: linear-gradient(90deg,#fb7185,#e11d48); }
+    .eff-fill.fast { background: linear-gradient(90deg,#4ade80,#16a34a); }
+
+    /* ── Analogy cards ───────────────────────── */
+    .ana-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 560px) { .ana-grid { grid-template-columns: 1fr; } }
+    .ana-card { border-radius: 1.25rem; border: 1.5px solid #e2e8f0; background: #f8fafc; padding: 1.4rem 1.3rem; }
+    html.dark .ana-card { background: #0f172a; border-color: #334155; }
+    .ana-card.good { border-color: #16a34a; background: rgba(22,163,74,0.06); }
+    html.dark .ana-card.good { border-color: #22c55e; background: rgba(22,163,74,0.12); }
+    .ana-ic { width: 44px; height: 44px; border-radius: 0.8rem; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; background: rgba(148,163,184,0.18); color: #64748b; }
+    html.dark .ana-ic { background: rgba(148,163,184,0.2); color: #cbd5e1; }
+    .ana-card.good .ana-ic { background: rgba(22,163,74,0.14); color: #16a34a; }
+    html.dark .ana-card.good .ana-ic { background: rgba(22,163,74,0.22); color: #86efac; }
+    .ana-title { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .ana-title { color: #f1f5f9; }
+    .ana-body { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-top: 0.35rem; line-height: 1.5; }
+    html.dark .ana-body { color: #94a3b8; }
+    .ana-map { display: inline-block; margin-top: 0.85rem; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.3rem 0.7rem; border-radius: 9999px; background: rgba(148,163,184,0.18); color: #475569; }
+    html.dark .ana-map { background: rgba(148,163,184,0.2); color: #cbd5e1; }
+
+    /* ── Scenario cards ──────────────────────── */
+    .scn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    @media (max-width: 760px) { .scn-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .scn-grid { grid-template-columns: 1fr; } }
+    .scn-card {
+      cursor: pointer; text-align: left; border-radius: 1rem; padding: 1.1rem 1.1rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.25s ease;
+    }
+    html.dark .scn-card { background: #0f172a; border-color: #334155; }
+    .scn-card:hover { border-color: rgba(234,88,12,0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.1); }
+    .scn-card.active { border-color: #ea580c; background: rgba(234,88,12,0.06); box-shadow: 0 8px 22px rgba(234,88,12,0.16); }
+    html.dark .scn-card.active { background: rgba(234,88,12,0.14); border-color: #fb923c; }
+    .scn-ic { width: 40px; height: 40px; border-radius: 0.7rem; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; margin-bottom: 0.7rem; transition: all 0.25s ease; }
+    html.dark .scn-ic { background: rgba(234,88,12,0.22); color: #fdba74; }
+    .scn-card.active .scn-ic { background: #ea580c; color: white; }
+    .scn-title { font-weight: 900; font-size: 0.92rem; color: #1e293b; }
+    html.dark .scn-title { color: #f1f5f9; }
+    .scn-body { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 0.25rem; line-height: 1.4; }
+    html.dark .scn-body { color: #94a3b8; }
+    .scn-note {
+      display: flex; align-items: center; gap: 0.7rem; margin-top: 1.3rem; padding: 0.95rem 1.15rem;
+      border-radius: 0.9rem; font-size: 0.92rem; font-weight: 700;
+      color: #334155; background: #f8fafc; border: 1.5px solid #e2e8f0; transition: all 0.3s ease;
+    }
+    html.dark .scn-note { color: #e2e8f0; background: #0f172a; border-color: #334155; }
+    .scn-note .ni { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(234,88,12,0.12); color: #ea580c; }
+    html.dark .scn-note .ni { background: rgba(234,88,12,0.22); color: #fdba74; }
+
+    /* ── Trade-off preview ───────────────────── */
+    .tradeoff {
+      display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.2rem;
+    }
+    .to-pill {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1.05rem; border-radius: 0.9rem;
+      font-weight: 800; font-size: 0.86rem; border: 1.5px solid #e2e8f0;
+    }
+    .to-pill.up { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.3); }
+    html.dark .to-pill.up { color: #86efac; background: rgba(22,163,74,0.14); border-color: rgba(22,163,74,0.35); }
+    .to-pill.warn { color: #b45309; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.32); }
+    html.dark .to-pill.warn { color: #fcd34d; background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.35); }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(234,88,12,0.08), rgba(251,146,60,0.04));
+      border: 1.5px solid rgba(234,88,12,0.22); border-left: 4px solid #ea580c;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(234,88,12,0.06), rgba(251,146,60,0.03));
+      border-color: rgba(251,146,60,0.2); border-left-color: #fb923c;
+    }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(234,88,12,0.3); background: rgba(234,88,12,0.08); color: #ea580c;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(234,88,12,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #fdba74; border-color: rgba(251,146,60,0.3); background: rgba(234,88,12,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(234,88,12,0.5); color: #ea580c; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
+          <span class="w-1.5 h-1.5 bg-yellow-500 rounded-full"></span>
+          <span class="text-yellow-700 dark:text-yellow-400 text-xs font-bold tracking-wide">⚡ Model Optimization</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="layers" class="w-7 h-7 text-orange-600 dark:text-orange-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Batching</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Batching means processing <strong class="text-slate-800 dark:text-slate-200">multiple user requests together</strong> as one group,
+          instead of one at a time. This can make model serving <strong class="text-slate-800 dark:text-slate-200">more efficient</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Serve four requests, two ways</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Four users send requests at once. Flip the toggle and press run to see how many times the model has to work.
+        </p>
+
+        <!-- toggle -->
+        <div class="mode-toggle" id="modeToggle" role="tablist">
+          <div class="mode-btn active" data-mode="single" role="tab">One-by-One</div>
+          <div class="mode-btn" data-mode="batch" role="tab">Batch</div>
+        </div>
+
+        <!-- stage -->
+        <div class="serve-stage">
+          <div class="serve-grid">
+            <div>
+              <div class="col-cap">Incoming requests</div>
+              <div class="req-list" id="reqList"></div>
+            </div>
+
+            <div class="batch-wrap">
+              <div class="batch-chip" id="batchChip"><span id="batchChipText">no batch</span></div>
+              <i data-lucide="arrow-right" class="batch-arrow" style="width:22px;height:22px;"></i>
+            </div>
+
+            <div>
+              <div class="col-cap">Model</div>
+              <div class="model-box" id="modelBox">
+                <span class="mb-ic"><i data-lucide="cpu" style="width:22px;height:22px;"></i></span>
+                <span id="modelState">Idle</span>
+                <span class="mb-sub">AI model</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="work-row">
+            <div class="work-box">
+              <div class="work-num" id="passNum">0</div>
+              <div class="work-lbl">Model passes used</div>
+            </div>
+            <div class="work-box">
+              <div class="work-num" id="doneNum">0<span style="font-size:1rem;color:#94a3b8;">/4</span></div>
+              <div class="work-lbl">Requests finished</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kv-msg" id="kvMsg">
+          <i data-lucide="info" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span id="kvMsgText">One-by-One mode: each request is processed separately. Press “Run”.</span>
+        </div>
+
+        <div class="kv-controls">
+          <button class="kv-btn primary" id="runBtn"><i data-lucide="play" style="width:15px;height:15px;"></i> Run</button>
+          <button class="kv-btn" id="resetBtn"><i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i> Reset</button>
+        </div>
+
+        <!-- efficiency bars -->
+        <div style="margin-top:1.6rem;">
+          <div class="col-cap" style="margin-bottom:0.8rem;">Model passes for the same 4 requests</div>
+          <div class="eff-row">
+            <div class="eff-name"><span>🐢</span> One-by-One</div>
+            <div class="eff-track"><div class="eff-fill slow" id="effSingle">4 passes</div></div>
+          </div>
+          <div class="eff-row">
+            <div class="eff-name"><span>🐇</span> Batch</div>
+            <div class="eff-track"><div class="eff-fill fast" id="effBatch">1 pass</div></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. ONE-BY-ONE vs BATCH (analogy)
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="bus" style="width:12px;height:12px;"></i>Simple Analogy</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Cars vs a bus</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Moving many people is much more efficient when they share one ride instead of each taking a separate car.
+        </p>
+
+        <div class="ana-grid">
+          <div class="ana-card">
+            <div class="ana-ic"><i data-lucide="car" style="width:22px;height:22px;"></i></div>
+            <div class="ana-title">One car per person</div>
+            <div class="ana-body">Every person gets their own car. Lots of separate trips, lots of repeated effort.</div>
+            <span class="ana-map">= One request at a time</span>
+          </div>
+          <div class="ana-card good">
+            <div class="ana-ic"><i data-lucide="bus" style="width:22px;height:22px;"></i></div>
+            <div class="ana-title">One bus for many</div>
+            <div class="ana-body">Many people share a single bus. One trip carries everyone — far more efficient.</div>
+            <span class="ana-map">= Batch processing</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. WHEN BATCHING HELPS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="target" style="width:12px;height:12px;"></i>When Batching Helps</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Where grouping pays off</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Tap a situation to see why batching is a good fit there.
+        </p>
+
+        <div class="scn-grid" id="scnGrid">
+          <button class="scn-card" data-idx="0">
+            <div class="scn-ic"><i data-lucide="users" style="width:20px;height:20px;"></i></div>
+            <div class="scn-title">Many Users</div>
+            <div class="scn-body">Lots of requests arrive at the same time.</div>
+          </button>
+          <button class="scn-card" data-idx="1">
+            <div class="scn-ic"><i data-lucide="copy" style="width:20px;height:20px;"></i></div>
+            <div class="scn-title">Similar Workloads</div>
+            <div class="scn-body">Requests are alike and easy to group.</div>
+          </button>
+          <button class="scn-card" data-idx="2">
+            <div class="scn-ic"><i data-lucide="cloud" style="width:20px;height:20px;"></i></div>
+            <div class="scn-title">Cloud Serving</div>
+            <div class="scn-body">A system serves many people at once.</div>
+          </button>
+          <button class="scn-card" data-idx="3">
+            <div class="scn-ic"><i data-lucide="trending-up" style="width:20px;height:20px;"></i></div>
+            <div class="scn-title">High Throughput Need</div>
+            <div class="scn-body">The goal is to process more requests overall.</div>
+          </button>
+        </div>
+
+        <div class="scn-note" id="scnNote">
+          <span class="ni"><i data-lucide="mouse-pointer-click" style="width:18px;height:18px;"></i></span>
+          <span id="scnNoteText">Pick a situation above to see why batching helps there.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. IMPORTANT TRADE-OFF
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="scale" style="width:12px;height:12px;"></i>Important Trade-Off</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Efficiency has a catch</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+          Batching can improve efficiency, but <strong class="text-slate-800 dark:text-slate-200">waiting to form a batch</strong> can
+          sometimes add a little delay for an individual request.
+        </p>
+
+        <div class="tradeoff">
+          <div class="to-pill up"><i data-lucide="trending-up" style="width:16px;height:16px;"></i> Batching improves throughput</div>
+          <div class="to-pill warn"><i data-lucide="clock" style="width:16px;height:16px;"></i> but may affect latency</div>
+        </div>
+
+        <div class="kv-msg" style="margin-top:1.2rem;">
+          <i data-lucide="arrow-right" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span>We explore this balance in the next lesson: <strong>Latency vs Throughput</strong>.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-orange-500 dark:bg-orange-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• Batching <strong class="text-slate-900 dark:text-white">groups multiple requests together</strong>.</li>
+              <li>• It can make model serving <strong class="text-slate-900 dark:text-white">more efficient</strong>.</li>
+              <li>• It is useful when <strong class="text-slate-900 dark:text-white">many requests arrive</strong>.</li>
+              <li>• It can improve <strong class="text-slate-900 dark:text-white">throughput</strong>.</li>
+              <li>• It may add <strong class="text-slate-900 dark:text-white">waiting time</strong> for some requests.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Switch between One-by-One and Batch mode.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Run each mode and watch how requests enter the model.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Compare the “model passes used” between the two modes.</li>
+            <li class="flex items-start gap-2.5"><span class="text-orange-500 mt-0.5">→</span> Notice why batching helps when many users are active.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(234,88,12,0.3);background:linear-gradient(135deg,rgba(234,88,12,0.05),rgba(251,146,60,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Batching helps AI systems process multiple requests together. This can improve efficiency and throughput, especially when many users are using the model.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="kv-cache.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: KV Cache
+        </a>
+        <a href="latency-vs-throughput.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-orange-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Latency vs Throughput</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('Model Optimization');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Batching, playground
+  ═══════════════════════════════════════════════ */
+
+  const REQS = [
+    { emoji:'📝', text:'Summarize this paragraph.' },
+    { emoji:'🏷️', text:'Classify this review.' },
+    { emoji:'✏️', text:'Rewrite this sentence.' },
+    { emoji:'❓', text:'Answer this question.' },
+  ];
+
+  let mode = 'single';   // 'single' = one-by-one, 'batch'
+  let running = false;
+
+  const reqList   = document.getElementById('reqList');
+  const batchChip = document.getElementById('batchChip');
+  const batchChipText = document.getElementById('batchChipText');
+  const modelBox  = document.getElementById('modelBox');
+  const modelState = document.getElementById('modelState');
+  const passNum   = document.getElementById('passNum');
+  const doneNum   = document.getElementById('doneNum');
+  const kvMsg     = document.getElementById('kvMsg');
+  const kvMsgText = document.getElementById('kvMsgText');
+  const runBtn    = document.getElementById('runBtn');
+  const resetBtn  = document.getElementById('resetBtn');
+  const modeToggle = document.getElementById('modeToggle');
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  function renderReqs() {
+    reqList.innerHTML = REQS.map((r, i) => `
+      <div class="req queued" data-i="${i}">
+        <span class="req-emoji">${r.emoji}</span>
+        <span>${r.text}</span>
+        <span class="req-tick">done ✓</span>
+      </div>`).join('');
+  }
+  function reqEls() { return reqList.querySelectorAll('.req'); }
+
+  function setMsg(kind, text) {
+    kvMsg.className = 'kv-msg' + (kind ? ' ' + kind : '');
+    kvMsgText.textContent = text;
+  }
+
+  function reset() {
+    running = false;
+    renderReqs();
+    passNum.textContent = '0';
+    doneNum.innerHTML = '0<span style="font-size:1rem;color:#94a3b8;">/4</span>';
+    modelBox.classList.remove('busy');
+    modelState.textContent = 'Idle';
+    batchChip.classList.toggle('on', false);
+    batchChipText.textContent = mode === 'batch' ? 'batch ready' : 'no batch';
+    runBtn.disabled = false;
+    setMsg('', mode === 'single'
+      ? 'One-by-One mode: each request is processed separately. Press “Run”.'
+      : 'Batch mode: all requests are grouped and processed together. Press “Run”.');
+  }
+
+  async function run() {
+    if (running) return;
+    running = true; runBtn.disabled = true;
+    renderReqs();
+    passNum.textContent = '0';
+    doneNum.innerHTML = '0<span style="font-size:1rem;color:#94a3b8;">/4</span>';
+    const els = reqEls();
+
+    if (mode === 'single') {
+      batchChip.classList.remove('on');
+      batchChipText.textContent = 'no batch';
+      for (let i = 0; i < els.length; i++) {
+        els[i].classList.remove('queued');
+        els[i].classList.add('processing');
+        modelBox.classList.add('busy');
+        modelState.textContent = 'Working…';
+        setMsg('', `Processing request ${i + 1} of 4 on its own — a separate model pass.`);
+        await wait(750);
+        els[i].classList.remove('processing');
+        els[i].classList.add('done');
+        passNum.textContent = i + 1;
+        doneNum.innerHTML = (i + 1) + '<span style="font-size:1rem;color:#94a3b8;">/4</span>';
+        modelBox.classList.remove('busy');
+        await wait(180);
+      }
+      modelState.textContent = 'Idle';
+      setMsg('', 'Each request was processed separately — 4 model passes for 4 requests.');
+    } else {
+      // batch: group all, one pass
+      batchChipText.textContent = 'grouping…';
+      els.forEach(e => e.classList.remove('queued'));
+      for (let i = 0; i < els.length; i++) { els[i].classList.add('batched'); await wait(160); }
+      batchChip.classList.add('on');
+      batchChipText.textContent = 'batch ×4';
+      setMsg('', 'All four requests are grouped into one batch…');
+      await wait(500);
+      modelBox.classList.add('busy');
+      modelState.textContent = 'Working…';
+      els.forEach(e => { e.classList.remove('batched'); e.classList.add('processing'); });
+      setMsg('', 'The batch runs through the model together — a single pass.');
+      await wait(950);
+      els.forEach(e => { e.classList.remove('processing'); e.classList.add('done'); });
+      passNum.textContent = '1';
+      doneNum.innerHTML = '4<span style="font-size:1rem;color:#94a3b8;">/4</span>';
+      modelBox.classList.remove('busy');
+      modelState.textContent = 'Idle';
+      setMsg('good', 'Multiple requests were processed together — only 1 model pass for all 4 requests.');
+    }
+    running = false;
+    runBtn.disabled = false;
+  }
+
+  /* ── Scenarios ── */
+  const SCN = [
+    'When many requests arrive at the same moment, grouping them lets the model handle the crowd in fewer passes.',
+    'When requests are similar, they group cleanly into one batch and share the same model pass efficiently.',
+    'A cloud service serves many people at once — batching keeps the hardware busy and serves more of them per second.',
+    'When the goal is to process more requests overall, batching raises throughput by doing more work per pass.',
+  ];
+  const scnGrid = document.getElementById('scnGrid');
+  const scnNoteText = document.getElementById('scnNoteText');
+  function selectScn(i) {
+    scnGrid.querySelectorAll('.scn-card').forEach((c, idx) => c.classList.toggle('active', idx === i));
+    scnNoteText.textContent = SCN[i];
+  }
+
+  /* ── Efficiency bars ── */
+  function animateEff() {
+    // width reflects model passes: 4 passes = 100%, 1 pass = 25%
+    document.getElementById('effSingle').style.width = '100%';
+    document.getElementById('effBatch').style.width = '25%';
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    // mode toggle
+    modeToggle.querySelectorAll('.mode-btn').forEach(btn =>
+      btn.addEventListener('click', () => {
+        if (running || btn.dataset.mode === mode) return;
+        mode = btn.dataset.mode;
+        modeToggle.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+        reset();
+      })
+    );
+
+    runBtn.addEventListener('click', run);
+    resetBtn.addEventListener('click', () => { if (!running) reset(); });
+
+    // scenarios
+    scnGrid.querySelectorAll('.scn-card').forEach(c =>
+      c.addEventListener('click', () => selectScn(+c.dataset.idx))
+    );
+
+    reset();
+    animateEff();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>
