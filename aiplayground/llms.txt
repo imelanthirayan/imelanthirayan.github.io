@@ -130,7 +130,17 @@ The site is a static collection of self-contained HTML modules grouped into sect
 - [QLoRA](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/qlora.html): Combine LoRA with compression to train using far less memory.
 - [Adapters](https://imelanthirayan.github.io/aiplayground/modules/training-fine-tuning/adapters.html): Add small trainable parts instead of retraining the whole model.
 
+## Model Optimization
+
+- [What is Model Optimization?](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/what-is-model-optimization.html): See the big picture of how models are made faster, smaller, and cheaper to run.
+- [FP32 vs FP16 vs INT8 vs INT4](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/model-precision.html): Compare number precisions and their trade-offs in size, speed, and accuracy.
+- [Quantization](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/quantization.html): See how converting a trained model to lower precision makes it smaller and faster.
+- [KV Cache](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/kv-cache.html): See how reusing previous token work makes text generation faster.
+- [Batching](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/batching.html): See how processing many requests together makes model serving more efficient.
+- [Latency vs Throughput](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/latency-vs-throughput.html): Compare how long one user waits (latency) with how many requests the system handles over time (throughput).
+- [Speculative Decoding](https://imelanthirayan.github.io/aiplayground/modules/model-optimization/speculative-decoding.html): See how a small model drafts tokens while a large model verifies them to speed up text generation.
+
 ## Coming soon
 
 - Inside an LLM, Embeddings & Search, RAG, MCP, Prompt Engineering, Transformer Internals, Transformer Architectures, AI Agent Fundamentals, Agentic AI, Vector Index Explorer, Training Fundamentals, and Fine-Tuning are complete.
-- Model Optimization: 7 modules on what model optimization is, quantization, precision formats (FP32/FP16/INT8/INT4), KV cache, batching, latency vs throughput, and speculative decoding - in progress.
+- Model Optimization: complete. Covers model optimization basics, precision, quantization, KV cache, batching, latency vs throughput, and speculative decoding.

@@ -197,11 +197,17 @@ It uses plain English, live interactions, and step-by-step animations so beginne
 
 ---
 
-## 🛠️ Coming Soon
+<details open>
+<summary><b>⚡ Model Optimization</b> — how AI models are made faster, smaller, and more efficient</summary>
 
-> **⚡ Model Optimization** — how AI models are made faster, smaller, and more efficient.
-
-`What is Model Optimization?` · `Quantization` · `FP32 vs FP16 vs INT8 vs INT4` · `KV Cache` · `Batching` · `Latency vs Throughput` · `Speculative Decoding`
+- What is Model Optimization?
+- FP32 vs FP16 vs INT8 vs INT4
+- Quantization
+- KV Cache
+- Batching
+- Latency vs Throughput
+- Speculative Decoding
+</details>
 
 ---
 
