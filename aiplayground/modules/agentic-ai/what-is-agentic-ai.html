@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="What is Agentic AI, an interactive beginner-friendly lesson that shows how Agentic AI plans, acts, observes, and adjusts toward a goal, and how it differs from a simple AI agent." />
   <title>What is Agentic AI?, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/what-is-agentic-ai.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="What is Agentic AI?, AI Concepts Playground" />
+  <meta property="og:description" content="What is Agentic AI, an interactive beginner-friendly lesson that shows how Agentic AI plans, acts, observes, and adjusts toward a goal, and how it differs from a simple AI agent." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/agentic-ai/what-is-agentic-ai.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="What is Agentic AI?, AI Concepts Playground" />
+  <meta name="twitter:description" content="What is Agentic AI, an interactive beginner-friendly lesson that shows how Agentic AI plans, acts, observes, and adjusts toward a goal, and how it differs from a simple AI agent." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -134,25 +150,22 @@
     .jn-hint { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; }
     html.dark .jn-hint { color: #94a3b8; }
 
-    /* loop-back arc (agentic only) */
-    .jn-loop {
-      position: absolute; left: -2px; width: 16px;
-      border: 2px dashed #c026d3; border-right: none; border-radius: 14px 0 0 14px;
-      opacity: 0; transition: opacity 0.45s ease; pointer-events: none;
+    /* loop-back divider (agentic retry) */
+    .jn-divider {
+      display: flex; align-items: center; gap: 0.4rem; align-self: center;
+      color: #c026d3; font-size: 0.6rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.05em; margin: 0.05rem 0;
+      opacity: 0; transform: translateY(-4px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
-    html.dark .jn-loop { border-color: #e879f9; }
-    .jn-loop.show { opacity: 1; }
-    .jn-loop-arrow { position: absolute; left: -10px; color: #c026d3; opacity: 0; transition: opacity 0.45s ease; pointer-events: none; }
-    html.dark .jn-loop-arrow { color: #e879f9; }
-    .jn-loop-arrow.show { opacity: 1; }
-    .jn-loop-label {
-      position: absolute; left: -6px; transform: translateX(-100%);
-      background: #c026d3; color: white; font-size: 0.6rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.04em; padding: 0.2rem 0.5rem; border-radius: 9999px;
-      white-space: nowrap; opacity: 0; transition: opacity 0.45s ease; pointer-events: none;
+    html.dark .jn-divider { color: #e879f9; }
+    .jn-divider.show { opacity: 1; transform: translateY(0); }
+    .jn-divider-ic {
+      display: inline-flex; width: 22px; height: 22px; border-radius: 9999px;
+      align-items: center; justify-content: center;
+      background: rgba(192,38,211,0.12); color: #c026d3;
     }
-    html.dark .jn-loop-label { background: #d946ef; }
-    .jn-loop-label.show { opacity: 1; }
+    html.dark .jn-divider-ic { background: rgba(232,121,211,0.16); color: #e879f9; }
 
     /* ── Live report card ────────────────────── */
     .report-card { border-radius: 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; padding: 1.1rem 1.2rem; }
@@ -504,92 +517,111 @@
   ═══════════════════════════════════════════════ */
   const EXAMPLES = [
     { id:'report',   name:'Project status report', icon:'clipboard-list',
-      goal:'Prepare a project status report.',
-      simple:'a quick summary from the updates I already have',
-      plan:'Decide what the report must cover.',
-      action:'Collect updates from the team.',
-      observation:'One update is still missing.',
-      adjustment:'Chase the missing update.',
-      result:'A complete status report.' },
+      goal:'Write this week\u2019s status report for the website project.',
+      simple:'a short summary from the updates I already have',
+      plan:'Decide the report needs progress, risks, and next steps.',
+      action:'Collect this week\u2019s updates from design, dev, and QA.',
+      observation:'The QA testing update has not arrived yet.',
+      adjustment:'Message QA and wait for the testing results.',
+      result:'A weekly report: 3 tasks done, 1 delayed, and next week\u2019s plan.' },
     { id:'research', name:'Research report', icon:'file-search',
-      goal:'Write a clear report on a topic.',
+      goal:'Write a short report on the benefits of electric cars.',
       simple:'a quick draft from what I already know',
-      plan:'List the questions to answer.',
-      action:'Gather notes from many sources.',
-      observation:'Some points are still unclear.',
-      adjustment:'Look up the missing details.',
-      result:'A complete, well-organized report.' },
+      plan:'List key questions: cost, driving range, and charging.',
+      action:'Read articles and note facts for each question.',
+      observation:'The charging section has no recent data.',
+      adjustment:'Find up-to-date charging numbers to fill the gap.',
+      result:'A 3-part report on cost, range, and charging, with sources.' },
     { id:'travel',   name:'Travel planning', icon:'plane',
-      goal:'Plan a trip that fits the budget.',
+      goal:'Plan a 5-day Tokyo trip that stays under $2,000.',
       simple:'one quick suggested plan',
-      plan:'Decide dates, places, and stops.',
-      action:'Find options for travel and stay.',
-      observation:'One choice is over budget.',
-      adjustment:'Swap it for a cheaper option.',
-      result:'A trip plan that fits the budget.' },
+      plan:'Set dates, then pick flights, a hotel, and daily activities.',
+      action:'Compare flights, hotels, and a city rail pass.',
+      observation:'The chosen hotel pushes the total to $2,300.',
+      adjustment:'Swap to a cheaper hotel near the same station.',
+      result:'A 5-day plan with flights, hotel, and rail pass for $1,940.' },
     { id:'debug',    name:'Code debugging', icon:'bug',
-      goal:'Fix a problem in the software.',
+      goal:'Fix the login button that does nothing when clicked.',
       simple:'one quick guess at the fix',
-      plan:'Decide where to look first.',
-      action:'Test the parts that may be broken.',
-      observation:'A test shows the real cause.',
-      adjustment:'Change the plan to fix that cause.',
-      result:'Working software with the bug gone.' },
+      plan:'Check the button code first, then the login request.',
+      action:'Test the click handler and the server\u2019s response.',
+      observation:'The server returns a 401 from an expired API key.',
+      adjustment:'Replace the expired key and test the login again.',
+      result:'Login works again and users can sign in normally.' },
     { id:'support',  name:'Customer issue resolution', icon:'headset',
-      goal:'Solve a customer\u2019s problem fully.',
+      goal:'Resolve a refund request for a damaged order.',
       simple:'one quick reply',
-      plan:'Understand what the customer needs.',
-      action:'Check the account and order details.',
-      observation:'The issue needs an extra step.',
-      adjustment:'Take that step or ask a person.',
-      result:'A resolved and happy customer.' },
-    { id:'workflow', name:'Workflow automation', icon:'workflow',
-      goal:'Finish a multi-step process on time.',
-      simple:'one quick pass through the steps',
-      plan:'Map each step in the right order.',
-      action:'Run the steps one after another.',
-      observation:'One step returns an error.',
-      adjustment:'Retry or reroute that step.',
-      result:'The whole workflow completed.' }
+      plan:'Check the order, the payment, and the refund policy.',
+      action:'Look up order #4821 and confirm the damage photo.',
+      observation:'A refund over $100 needs manager approval.',
+      adjustment:'Send it for approval, then process the refund.',
+      result:'A $120 refund approved and confirmed by email.' }
   ];
 
   const MODES = {
     simple: {
       kind: 'bubble',
       message: 'The agent completes one direct task.',
-      steps: (ex) => [
-        { name:'User asks',                hint:'You ask: \u201C' + ex.goal + '\u201D', icon:'user' },
-        { name:'Agent creates a response', hint:'It answers in one direct step.',        icon:'message-square' },
-        { name:'Done',                     hint:'The task is finished.',                 icon:'check-circle-2' }
-      ],
-      report: (ex) => [
-        { bubble:null, stamp:null },
-        { bubble:'\u201CHere is ' + ex.simple + '.\u201D', stamp:null },
-        { bubble:'\u201CHere is ' + ex.simple + '.\u201D', stamp:{ type:'partial', text:'One response' } }
-      ]
+      build: (ex) => {
+        const cards = [
+          { name:'User asks',                hint:'You ask: \u201C' + ex.goal + '\u201D', icon:'user' },
+          { name:'Agent creates a response', hint:'It answers in one direct step.',        icon:'message-square' },
+          { name:'Done',                     hint:'The task is finished.',                 icon:'check-circle-2' }
+        ];
+        const bubble = '\u201CHere is ' + ex.simple + '.\u201D';
+        const frames = [
+          { activeCard:0, done:[],     shown:[0],     progress:'User asks',                report:{ bubble:null,   stamp:null } },
+          { activeCard:1, done:[0],    shown:[0,1],   progress:'Agent creates a response', report:{ bubble:bubble, stamp:null } },
+          { activeCard:2, done:[0,1],  shown:[0,1,2], progress:'Done',                     report:{ bubble:bubble, stamp:{ type:'partial', text:'One response' } } }
+        ];
+        return { cards, frames };
+      }
     },
     agentic: {
       kind: 'log',
-      message: 'Agentic AI works through a goal step by step and adjusts as needed.',
-      loopFrom: 4, loopTo: 1,
-      steps: (ex) => [
-        { name:'Goal',        hint:ex.goal,        icon:'target' },
-        { name:'Plan',        hint:ex.plan,        icon:'list-checks' },
-        { name:'Action',      hint:ex.action,      icon:'zap' },
-        { name:'Observation', hint:ex.observation, icon:'eye' },
-        { name:'Adjustment',  hint:ex.adjustment,  icon:'rotate-cw' },
-        { name:'Result',      hint:ex.result,      icon:'check-circle-2' }
-      ],
-      report: (ex) => {
-        const L = (label, text, state) => ({ label, text, state });
-        return [
-          [ L('Goal', ex.goal, 'active') ],
-          [ L('Goal', ex.goal, 'done'), L('Plan', ex.plan, 'done') ],
-          [ L('Goal', ex.goal, 'done'), L('Plan', ex.plan, 'done'), L('Action', ex.action, 'done') ],
-          [ L('Goal', ex.goal, 'done'), L('Plan', ex.plan, 'done'), L('Action', ex.action, 'done'), L('Observation', ex.observation, 'missing') ],
-          [ L('Goal', ex.goal, 'done'), L('Plan', ex.plan, 'done'), L('Action', ex.action, 'done'), L('Observation', ex.observation, 'missing'), L('Adjustment', ex.adjustment, 'filling') ],
-          [ L('Goal', ex.goal, 'done'), L('Plan', ex.plan, 'done'), L('Action', ex.action, 'done'), L('Observation', ex.observation, 'done'), L('Adjustment', ex.adjustment, 'done'), L('Result', ex.result, 'done') ]
+      message: 'Agentic AI works toward a goal and repeats action \u2192 check \u2192 adjust until the result is good.',
+      build: (ex) => {
+        const cards = [
+          { name:'Goal',        hint:ex.goal,        icon:'target' },
+          { name:'Plan',        hint:ex.plan,        icon:'list-checks' },
+          { name:'Action',      hint:ex.action,      icon:'zap' },
+          { name:'Observation', hint:ex.observation, icon:'eye' },
+          { name:'Adjustment',  hint:ex.adjustment,  icon:'rotate-cw' },
+          { name:'Result',      hint:ex.result,      icon:'check-circle-2', divider:'Repeats until the result is good' }
         ];
+        const L = (label, text, state) => ({ label, text, state });
+        const N = 2 + Math.floor(Math.random() * 2); // loops 2 or 3 times — varies each run
+        const frames = [];
+        const notes = [];           // settled notes so far
+        let shown = [];
+        const push = (activeCard, progress, curNote, extra) => {
+          if (shown.indexOf(activeCard) === -1) shown = shown.concat([activeCard]);
+          const done = shown.filter(c => c !== activeCard);
+          const report = curNote ? notes.concat([curNote]) : notes.slice();
+          frames.push(Object.assign({ activeCard, done: done.slice(), shown: shown.slice(), progress, report }, extra || {}));
+        };
+        push(0, 'Goal', L('Goal', ex.goal, 'active'));
+        notes.push(L('Goal', ex.goal, 'done'));
+        push(1, 'Plan', L('Plan', ex.plan, 'active'));
+        notes.push(L('Plan', ex.plan, 'done'));
+        for (let k = 1; k <= N; k++) {
+          const isFinal = (k === N);
+          const rl = (name) => name + (k > 1 ? ' (try ' + k + ')' : '');
+          const actText = (k === 1) ? ex.action : 'Try again with the latest fix.';
+          push(2, 'Attempt ' + k + ' \u00B7 Action', L(rl('Action'), actText, 'active'), { loop:true, attempt:k });
+          notes.push(L(rl('Action'), actText, 'done'));
+          const obsText = isFinal ? 'Checked \u2014 the result is good now.'
+                                  : (k === 1 ? ex.observation : 'Still not right yet.');
+          push(3, 'Attempt ' + k + ' \u00B7 Observation', L('Observation', obsText, isFinal ? 'active' : 'missing'), { loop:true, attempt:k });
+          notes.push(L('Observation', obsText, isFinal ? 'done' : 'missing'));
+          if (!isFinal) {
+            const adjText = (k === 1) ? ex.adjustment : 'Adjust and try once more.';
+            push(4, 'Attempt ' + k + ' \u00B7 Adjustment', L('Adjustment', adjText, 'filling'), { loop:true, attempt:k });
+            notes.push(L('Adjustment', adjText, 'done'));
+          }
+        }
+        push(5, 'Result', L('Result', ex.result, 'done'));
+        return { cards, frames };
       }
     }
   };
@@ -613,17 +645,18 @@
   let playing = false;
   let timers = [];
   let curSteps = [];
-  let curReport = [];
+  let curFrames = [];
 
   function clearTimers(){ timers.forEach(t => clearTimeout(t)); timers = []; }
-  function total(){ return curSteps.length; }
+  function total(){ return curFrames.length; }
   function currentExample(){ return EXAMPLES.find(e => e.id === activeEx); }
 
-  /* ── Build steps + report for the current goal + mode ── */
+  /* ── Build journey cards + playback frames for the current goal + mode ── */
   function buildStage(){
     const ex = currentExample();
-    curSteps  = MODES[activeMode].steps(ex);
-    curReport = MODES[activeMode].report(ex);
+    const b = MODES[activeMode].build(ex);
+    curSteps  = b.cards;
+    curFrames = b.frames;
   }
 
   /* ── Goal picker ── */
@@ -639,10 +672,12 @@
     );
   }
 
-  /* ── Build the step journey ── */
+  /* ── Build the step journey (cards render once) ── */
   function renderJourney(){
-    const mode = MODES[activeMode];
     let html = curSteps.map((s, i) =>
+      (s.divider
+        ? '<div class="jn-divider"><span class="jn-divider-ic"><i data-lucide="rotate-ccw" style="width:13px;height:13px;"></i></span> ' + s.divider + '<span class="jn-attempt"></span></div>'
+        : '') +
       '<div class="jn-step" data-i="' + i + '">' +
         '<span class="jn-node"><i data-lucide="' + s.icon + '" style="width:18px;height:18px;"></i></span>' +
         '<div>' +
@@ -651,30 +686,7 @@
         '</div>' +
       '</div>'
     ).join('');
-    if (mode.loopFrom != null) {
-      html += '<div class="jn-loop"></div>' +
-              '<div class="jn-loop-arrow"><i data-lucide="arrow-up" style="width:16px;height:16px;"></i></div>' +
-              '<div class="jn-loop-label">Loops back to adjust</div>';
-    }
     journey.innerHTML = html;
-  }
-
-  /* ── Position the loop-back arc over the journey ── */
-  function positionLoop(){
-    const mode = MODES[activeMode];
-    if (mode.loopFrom == null) return;
-    const loop  = journey.querySelector('.jn-loop');
-    const arrow = journey.querySelector('.jn-loop-arrow');
-    const label = journey.querySelector('.jn-loop-label');
-    const nodes = journey.querySelectorAll('.jn-step');
-    const from = nodes[mode.loopTo], to = nodes[mode.loopFrom];
-    if (!loop || !from || !to) return;
-    const top = from.offsetTop + 18;
-    const bottom = to.offsetTop + 18;
-    loop.style.top = top + 'px';
-    loop.style.height = (bottom - top) + 'px';
-    if (arrow) arrow.style.top = (top - 9) + 'px';
-    if (label) label.style.top = (top + (bottom - top) / 2 - 9) + 'px';
   }
 
   /* ── Live report rendering ── */
@@ -695,13 +707,13 @@
   }
   function renderReport(){
     const mode = MODES[activeMode];
+    const snap = idx >= 0 ? curFrames[idx].report : null;
     if (mode.kind === 'bubble') {
-      const snap = idx >= 0 ? curReport[idx] : null;
       let inner = '<div class="rc-head"><div class="rc-title"><span class="rc-doc-ic"><i data-lucide="message-square" style="width:17px;height:17px;"></i></span> Response</div>' + stampHtml(snap && snap.stamp) + '</div>';
       inner += (snap && snap.bubble) ? '<div class="rc-bubble">' + snap.bubble + '</div>' : emptyHtml('Waiting for the request\u2026', 'message-square');
       reportCard.innerHTML = inner;
     } else {
-      const lines = idx >= 0 ? curReport[idx] : [];
+      const lines = Array.isArray(snap) ? snap : [];
       const stamp = (idx >= 0 && idx === total() - 1) ? { type:'complete', text:'Goal complete' } : null;
       let inner = '<div class="rc-head"><div class="rc-title"><span class="rc-doc-ic"><i data-lucide="notebook-pen" style="width:17px;height:17px;"></i></span> Working notes</div>' + stampHtml(stamp) + '</div>';
       inner += lines.length ? '<div class="rc-items">' + lines.map(logHtml).join('') + '</div>' : emptyHtml('No steps yet \u2014 press Play.', 'notebook-pen');
@@ -709,27 +721,27 @@
     }
   }
 
-  /* ── Apply the current step to every view ── */
+  /* ── Apply the current frame to every view ── */
   function applyState(){
     const mode = MODES[activeMode];
     const n = total();
+    const frame = idx >= 0 ? curFrames[idx] : null;
     journey.querySelectorAll('.jn-step').forEach((el, i) => {
-      el.classList.toggle('show', i <= idx);
-      el.classList.toggle('active', i === idx);
-      el.classList.toggle('done', i < idx);
+      el.classList.toggle('show',   frame ? frame.shown.indexOf(i) !== -1 : false);
+      el.classList.toggle('active', frame ? frame.activeCard === i : false);
+      el.classList.toggle('done',   frame ? frame.done.indexOf(i) !== -1 : false);
     });
     const pct = idx < 0 ? 0 : Math.round(((idx + 1) / n) * 100);
     progressFill.style.width = pct + '%';
     progressPct.textContent = pct + '%';
-    progressStep.textContent = idx < 0 ? 'Ready \u2014 press Play' : ('Step ' + (idx + 1) + ' of ' + n + ' \u00B7 ' + curSteps[idx].name);
+    progressStep.textContent = idx < 0 ? 'Ready \u2014 press Play' : ('Step ' + (idx + 1) + ' of ' + n + ' \u00B7 ' + frame.progress);
 
-    if (mode.loopFrom != null) {
-      const on = idx >= mode.loopFrom;
-      ['.jn-loop', '.jn-loop-arrow', '.jn-loop-label'].forEach(sel => {
-        const el = journey.querySelector(sel);
-        if (el) el.classList.toggle('show', on);
-      });
-      requestAnimationFrame(positionLoop);
+    const divider = journey.querySelector('.jn-divider');
+    if (divider) {
+      const inLoop = !!(frame && frame.loop);
+      divider.classList.toggle('show', inLoop);
+      const at = divider.querySelector('.jn-attempt');
+      if (at) at.textContent = inLoop ? ' \u00B7 attempt ' + frame.attempt : '';
     }
 
     renderReport();
@@ -763,6 +775,7 @@
   }
   function stepOnce(){ stopPlay(); if (idx < total() - 1) { idx++; applyState(); } }
   function resetPlayground(){ stopPlay(); idx = -1; applyState(); }
+  function showFinal(){ stopPlay(); idx = total() - 1; applyState(); }
 
   /* ── Rebuild the whole playground (goal or mode change) ── */
   function rebuild(){
@@ -777,20 +790,26 @@
     stopPlay();
     activeMode = m;
     modeToggle.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-    rebuild();
+    buildStage();
+    goalText.textContent = currentExample().goal;
+    renderJourney();
+    idx = -1;
+    applyState();
   }
   function selectExample(id){
     stopPlay();
     activeEx = id;
     goalPicker.querySelectorAll('.ex-btn').forEach(b => b.classList.toggle('active', b.dataset.ex === id));
-    rebuild();
+    buildStage();
+    goalText.textContent = currentExample().goal;
+    renderJourney();
+    showFinal();
   }
 
   modeToggle.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => selectMode(b.dataset.mode)));
   playBtn.addEventListener('click', togglePlay);
   stepBtn.addEventListener('click', stepOnce);
   resetBtn.addEventListener('click', resetPlayground);
-  window.addEventListener('resize', positionLoop);
 
   /* ── Try-this modal wiring ── */
   (function(){
