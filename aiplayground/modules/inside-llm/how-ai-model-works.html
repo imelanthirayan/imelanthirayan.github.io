@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="See how an AI model processes your question step by step   an interactive pipeline demo." />
-  <title>How an AI Model Works   AI Concepts Playground</title>
+  <title>How an AI Model Works — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/how-ai-model-works.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="How an AI Model Works — AI Concepts Playground" />
+  <meta property="og:description" content="See how an AI model processes your question step by step   an interactive pipeline demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/how-ai-model-works.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="How an AI Model Works — AI Concepts Playground" />
+  <meta name="twitter:description" content="See how an AI model processes your question step by step   an interactive pipeline demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -57,45 +73,90 @@
       box-shadow: 0 0 0 3px rgba(165,180,252,0.1);
     }
 
-    /* ── Stat boxes ──────────────────────────── */
-    .stat-box {
-      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
-      text-align: center; border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    /* ── Try this button + modal ─────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
     }
-    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
-    .stat-val {
-      font-size: 1.1rem; font-weight: 900; line-height: 1.2;
-      font-variant-numeric: tabular-nums; word-break: break-all;
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
     }
-    .stat-lbl {
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
     }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
 
-    /* ── Flow diagram ────────────────────────── */
-    .flow-wrap { display: flex; flex-direction: column; gap: 0.625rem; }
-    .flow-step { display: flex; align-items: center; gap: 0.5rem; }
-    .flow-node {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 0.25rem; padding: 0.55rem 0.75rem; border-radius: 0.75rem; text-align: center;
-      background: rgba(99,102,241,0.07); border: 1.5px solid rgba(99,102,241,0.18);
+    /* ── Flow diagram (expandable steps) ─────── */
+    /* horizontal pipeline of step boxes */
+    .flow-row {
+      display: flex; align-items: stretch; gap: 0.4rem;
+      overflow-x: auto; padding: 0.25rem 0.1rem 0.6rem;
+      scrollbar-width: thin;
     }
-    .flow-node.active {
-      background: rgba(99,102,241,0.13); border-color: rgba(99,102,241,0.38);
-      box-shadow: 0 3px 12px rgba(99,102,241,0.16);
+    .flow-box {
+      position: relative; flex: 1 1 0; min-width: 116px;
+      display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+      padding: 0.9rem 0.6rem 0.8rem; border-radius: 0.9rem; cursor: pointer;
+      background: #ffffff; border: 1.5px solid #e8ebf6; text-align: center;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s;
     }
-    html.dark .flow-node { background: rgba(99,102,241,0.09); border-color: rgba(99,102,241,0.22); }
-    html.dark .flow-node.active { background: rgba(99,102,241,0.18); border-color: rgba(165,180,252,0.4); }
-    .flow-emoji { font-size: 1.1rem; line-height: 1; }
-    .flow-lbl {
-      font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.07em; color: #6366f1;
+    html.dark .flow-box { background: rgba(30,41,59,0.55); border-color: rgba(99,102,241,0.2); }
+    .flow-box:hover { border-color: rgba(99,102,241,0.45); box-shadow: 0 5px 14px rgba(99,102,241,0.12); transform: translateY(-2px); }
+    .flow-box.active {
+      background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.6);
+      box-shadow: 0 6px 18px rgba(99,102,241,0.2);
     }
-    html.dark .flow-lbl { color: #a5b4fc; }
-    .flow-arrow { font-size: 0.7rem; color: #cbd5e1; flex-shrink: 0; }
+    html.dark .flow-box.active { background: rgba(99,102,241,0.18); border-color: rgba(165,180,252,0.55); }
+    .flow-num {
+      width: 22px; height: 22px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 800; color: #6366f1; background: #eef0fe;
+      transition: all 0.25s;
+    }
+    html.dark .flow-num { background: #312e81; color: #c7d2fe; }
+    .flow-box.active .flow-num { background: #6366f1; color: #fff; box-shadow: 0 0 0 4px rgba(99,102,241,0.16); }
+    .flow-emoji { font-size: 1.5rem; line-height: 1; }
+    .flow-lbl { font-size: 0.72rem; font-weight: 700; line-height: 1.3; color: #334155; }
+    html.dark .flow-lbl { color: #cbd5e1; }
+    .flow-conn { align-self: center; flex-shrink: 0; color: #cbd5e1; font-size: 0.9rem; }
+    html.dark .flow-conn { color: #475569; }
+    /* detail panel below the row */
+    .flow-detail {
+      margin-top: 0.9rem; border-radius: 0.95rem; padding: 1.1rem 1.25rem;
+      background: rgba(99,102,241,0.06); border: 1.5px solid rgba(99,102,241,0.18);
+      display: flex; gap: 0.85rem; align-items: flex-start;
+    }
+    html.dark .flow-detail { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.25); }
+    .flow-detail-emoji { font-size: 1.6rem; line-height: 1; flex-shrink: 0; }
+    .flow-detail-title { font-size: 0.95rem; font-weight: 800; color: #4338ca; margin-bottom: 0.2rem; }
+    html.dark .flow-detail-title { color: #a5b4fc; }
+    .flow-detail-body { font-size: 0.86rem; line-height: 1.6; color: #475569; }
+    html.dark .flow-detail-body { color: #cbd5e1; }
 
     /* ── Takeaway ────────────────────────────── */
+    .flow-layout {
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+    .flow-layout > section { margin-bottom: 0 !important; }
     .takeaway {
       display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
       background: linear-gradient(135deg, rgba(251,191,36,0.07), rgba(245,158,11,0.03));
@@ -238,66 +299,6 @@
       background: #10b981; margin-left: 1px; vertical-align: text-bottom;
       animation: blinkCursor 0.7s infinite;
     }
-
-    /* ── Flip Cards ──────────────────────────── */
-    .flip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-    @media (max-width: 640px) { .flip-grid { grid-template-columns: repeat(2, 1fr); } }
-    .flip-card { perspective: 700px; cursor: pointer; height: 110px; }
-    .flip-card-inner {
-      position: relative; width: 100%; height: 100%;
-      transform-style: preserve-3d; transition: transform 0.45s ease;
-    }
-    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-    .flip-card-front, .flip-card-back {
-      position: absolute; inset: 0; border-radius: 0.875rem;
-      backface-visibility: hidden; -webkit-backface-visibility: hidden;
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; text-align: center;
-      padding: 0.625rem; border: 1.5px solid;
-    }
-    .flip-card-front {
-      background: #f8fafc; border-color: #e2e8f0;
-    }
-    html.dark .flip-card-front { background: #1e293b; border-color: #334155; }
-    .flip-card-back {
-      transform: rotateY(180deg);
-      background: white; border-color: #e2e8f0;
-    }
-    html.dark .flip-card-back { background: #0f172a; border-color: #334155; }
-    .flip-card-front .fc-emoji { font-size: 1.5rem; margin-bottom: 0.35rem; }
-    .flip-card-front .fc-term { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; }
-    .flip-card-front .fc-hint { font-size: 0.58rem; color: #94a3b8; margin-top: 0.2rem; }
-    .flip-card-back .fc-def { font-size: 0.7rem; color: #475569; line-height: 1.55; }
-    html.dark .flip-card-back .fc-def { color: #94a3b8; }
-    .flip-card-back .fc-tag { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
-
-    /* ── Myth Quiz ───────────────────────────── */
-    .myth-card {
-      border-radius: 1rem; border: 1.5px solid #e2e8f0; padding: 1rem;
-      background: white; transition: all 0.25s;
-    }
-    html.dark .myth-card { background: #1e293b; border-color: #334155; }
-    .myth-card.answered-myth  { border-color: #f43f5e; background: #fff1f2; }
-    .myth-card.answered-fact  { border-color: #10b981; background: #f0fdf4; }
-    html.dark .myth-card.answered-myth { background: rgba(244,63,94,0.06); }
-    html.dark .myth-card.answered-fact { background: rgba(16,185,129,0.06); }
-    .myth-btn {
-      display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.75rem;
-      font-weight: 700; border: 1.5px solid; cursor: pointer;
-      transition: all 0.18s;
-    }
-    .myth-btn-myth  { color: #f43f5e; border-color: #fda4af; background: #fff1f2; }
-    .myth-btn-myth:hover  { background: #ffe4e6; }
-    .myth-btn-fact  { color: #059669; border-color: #6ee7b7; background: #f0fdf4; }
-    .myth-btn-fact:hover  { background: #dcfce7; }
-    html.dark .myth-btn-myth  { color: #fb7185; border-color: #be123c; background: rgba(244,63,94,0.08); }
-    html.dark .myth-btn-fact  { color: #34d399; border-color: #065f46; background: rgba(16,185,129,0.08); }
-    .myth-reveal {
-      max-height: 0; overflow: hidden; opacity: 0;
-      transition: max-height 0.35s ease, opacity 0.25s;
-    }
-    .myth-reveal.open { max-height: 120px; opacity: 1; }
   </style>
 </head>
 
@@ -306,7 +307,6 @@
   <!-- NAV -->
   <script src="../../js/partials.js"></script>
   <script>writeSiteNav();</script>
-
 
   <main class="pt-20 pb-28">
     <div class="max-w-6xl mx-auto px-5 md:px-8">
@@ -343,7 +343,6 @@
         </div>
       </header>
 
-
       <!-- ══════════════════════════════════════
            MAIN GRID
       ══════════════════════════════════════ -->
@@ -353,12 +352,14 @@
         <div class="flex flex-col gap-5">
 
           <section class="module-card">
-            <div class="mod-label">
-              <i data-lucide="play-circle" style="width:12px;height:12px;"></i>
-              Interactive Playground
+            <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="play-circle" style="width:12px;height:12px;"></i>
+                Interactive Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
             </div>
-
-            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block">Your Prompt</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block" for="promptInput">Your Prompt</label>
             <textarea id="promptInput" class="pg-textarea" rows="4"
               placeholder="Ask AI anything…">Explain Artificial Intelligence in simple words.</textarea>
 
@@ -414,7 +415,6 @@
 
         </div><!-- /left -->
 
-
         <!-- ── RIGHT: Pipeline ───────────────── -->
         <div class="pg-grid-right">
 
@@ -432,302 +432,102 @@
 
       </div><!-- /pg-grid -->
 
+      <!-- ══════════════════════════════════════
+           TRY THIS MODAL
+      ══════════════════════════════════════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Type your own prompt, then press <strong>Start Pipeline</strong> and step through all 7 stages.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Watch each step light up — notice how every stage builds on the one before it.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Tap any step box below the playground to read what that stage actually does.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Hit <strong>Random</strong> to see how different prompts get broken into tokens.</span></li>
+          </ul>
+        </div>
+      </div>
 
       <!-- ══════════════════════════════════════
-           STATS + FLOW (full-width)
+           PIPELINE FLOW + TAKEAWAY
       ══════════════════════════════════════ -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-5">
+      <div class="flow-layout mb-8 mt-5">
 
-        <!-- Statistics -->
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i>
-            Statistics
-          </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statPromptLen"> </div>
-              <div class="stat-lbl">Prompt Characters</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statTokens"> </div>
-              <div class="stat-lbl">Estimated Tokens</div>
-            </div>
-          </div>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400">6</div>
-              <div class="stat-lbl">Total Steps</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statCurrent"> </div>
-              <div class="stat-lbl">Current Stage</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statDone">0</div>
-              <div class="stat-lbl">Completed</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- How It Works -->
+        <!-- How It Works + Key Concepts (merged) -->
         <section class="module-card">
           <div class="mod-label">
             <i data-lucide="git-branch" style="width:12px;height:12px;"></i>
-            How It Works
+            How It Works — tap a step to learn the concept
           </div>
-          <div class="flow-wrap">
-            <div class="flow-step">
-              <div class="flow-node" id="flow-0">
-                <span class="flow-emoji">🧠</span>
-                <span class="flow-lbl">1. What is Artificial Intelligence?</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-1">
-                <span class="flow-emoji">🔤</span>
-                <span class="flow-lbl">2. Text becomes Tokens</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-2">
-                <span class="flow-emoji">🔢</span>
-                <span class="flow-lbl">3. Tokens become Token IDs</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-3">
-                <span class="flow-emoji">📐</span>
-                <span class="flow-lbl">4. Token IDs become Embeddings</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-4">
-                <span class="flow-emoji">⚙️</span>
-                <span class="flow-lbl">5. Transformer processes them</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-5">
-                <span class="flow-emoji">⚡</span>
-                <span class="flow-lbl">6. Model predicts next token</span>
-              </div>
-            </div>
-            <div class="flow-step"><div class="flow-arrow w-full text-center">↓</div></div>
-            <div class="flow-step">
-              <div class="flow-node" id="flow-6">
-                <span class="flow-emoji">✅</span>
-                <span class="flow-lbl">7. Response appears</span>
-              </div>
-            </div>
+          <div class="flow-row" id="flowRow">
+            <button type="button" class="flow-box" id="flow-0" onclick="showStep(0)" aria-label="Step 1: What is AI?">
+              <span class="flow-num">1</span>
+              <span class="flow-emoji">🧠</span>
+              <span class="flow-lbl">What is AI?</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-1" onclick="showStep(1)" aria-label="Step 2: Text → Tokens">
+              <span class="flow-num">2</span>
+              <span class="flow-emoji">🔤</span>
+              <span class="flow-lbl">Text → Tokens</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-2" onclick="showStep(2)" aria-label="Step 3: Tokens → IDs">
+              <span class="flow-num">3</span>
+              <span class="flow-emoji">🔢</span>
+              <span class="flow-lbl">Tokens → IDs</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-3" onclick="showStep(3)" aria-label="Step 4: IDs → Embeddings">
+              <span class="flow-num">4</span>
+              <span class="flow-emoji">📐</span>
+              <span class="flow-lbl">IDs → Embeddings</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-4" onclick="showStep(4)" aria-label="Step 5: Transformer">
+              <span class="flow-num">5</span>
+              <span class="flow-emoji">⚙️</span>
+              <span class="flow-lbl">Transformer</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-5" onclick="showStep(5)" aria-label="Step 6: Predict token">
+              <span class="flow-num">6</span>
+              <span class="flow-emoji">⚡</span>
+              <span class="flow-lbl">Predict token</span>
+            </button>
+            <span class="flow-conn">→</span>
+            <button type="button" class="flow-box" id="flow-6" onclick="showStep(6)" aria-label="Step 7: Response">
+              <span class="flow-num">7</span>
+              <span class="flow-emoji">✅</span>
+              <span class="flow-lbl">Response</span>
+            </button>
           </div>
+          <div class="flow-detail" id="flowDetail"></div>
         </section>
 
-      </div>
-
-
-      
-      <!-- ══════════════════════════════════════
-           BEGINNER TIPS
-      ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsHowAI">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
-          </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Each pipeline step builds on the last, an error in tokenisation compounds through embedding and attention.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>The model doesn't look things up in real-time. <strong>Everything it knows was baked in during training</strong> before you sent your message.</span>
+        <!-- ══════════════════════════════════════
+             KEY TAKEAWAY
+        ══════════════════════════════════════ -->
+        <div class="takeaway">
+          <span class="text-2xl flex-shrink-0">💡</span>
+          <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Key Takeaway</div>
+            <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-2">
+              Modern AI answers questions by <strong class="text-slate-900 dark:text-white">processing text step by step</strong>,
+              not by instantly knowing the answer. Each stage builds on the previous one to produce a meaningful response.
+            </p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              The magic isn't that AI "thinks"   it's that billions of math operations on patterns from human text produce results that <em>look</em> just like thinking. And the more you understand these steps, the better you'll be at using AI effectively!
+            </p>
           </div>
         </div>
-      </div>
 
-<!-- ══════════════════════════════════════
-           KEY TAKEAWAY
-      ══════════════════════════════════════ -->
-      <div class="takeaway mb-8">
-        <span class="text-2xl flex-shrink-0">💡</span>
-        <div>
-          <div class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1">Key Takeaway</div>
-          <p class="text-slate-700 dark:text-slate-300 font-medium leading-relaxed mb-2">
-            Modern AI answers questions by <strong class="text-slate-900 dark:text-white">processing text step by step</strong>,
-            not by instantly knowing the answer. Each stage builds on the previous one to produce a meaningful response.
-          </p>
-          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            The magic isn't that AI "thinks"   it's that billions of math operations on patterns from human text produce results that <em>look</em> just like thinking. And the more you understand these steps, the better you'll be at using AI effectively!
-          </p>
-        </div>
-      </div>
-
-
-      <!-- ══════════════════════════════════════
-           KEY CONCEPTS   FLIP CARDS
-      ══════════════════════════════════════ -->
-      <div class="module-card mb-5">
-        <div class="mod-label">
-          <i data-lucide="layers" style="width:12px;height:12px;"></i>
-          Key Concepts   Tap a card to flip
-        </div>
-        <div class="flip-grid">
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">🔤</div>
-                <div class="fc-term" style="color:#6366f1;">Token</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#6366f1;">Token</div>
-                <div class="fc-def">"playing" → "play" + "ing". AI works with these chunks, not letters.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">🪟</div>
-                <div class="fc-term" style="color:#8b5cf6;">Context Window</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#8b5cf6;">Context Window</div>
-                <div class="fc-def">AI's working memory. Think of it as a whiteboard   when it's full, old text is erased.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">⚙️</div>
-                <div class="fc-term" style="color:#2563eb;">Transformer</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#2563eb;">Transformer</div>
-                <div class="fc-def">Reads ALL tokens at once and maps how each word connects to every other.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">🔢</div>
-                <div class="fc-term" style="color:#7c3aed;">Embeddings</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#7c3aed;">Embeddings</div>
-                <div class="fc-def">Tokens become lists of numbers. Similar words get similar numbers.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">⚡</div>
-                <div class="fc-term" style="color:#f59e0b;">Prediction</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#f59e0b;">Prediction</div>
-                <div class="fc-def">AI picks the most likely next word   one at a time   until the answer is done.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="flip-card" onclick="this.classList.toggle('flipped')">
-            <div class="flip-card-inner">
-              <div class="flip-card-front">
-                <div class="fc-emoji">🎓</div>
-                <div class="fc-term" style="color:#10b981;">Training</div>
-                <div class="fc-hint">tap to reveal</div>
-              </div>
-              <div class="flip-card-back">
-                <div class="fc-tag" style="color:#10b981;">Training</div>
-                <div class="fc-def">AI studied billions of text examples before you ever used it   adjusting billions of numbers.</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ══════════════════════════════════════
-           MYTH VS FACT QUIZ
-      ══════════════════════════════════════ -->
-      <div class="module-card mb-8">
-        <div class="mod-label" style="color:#f43f5e;">
-          <i data-lucide="help-circle" style="width:12px;height:12px;"></i>
-          Myth or Fact?   Tap to guess
-        </div>
-        <div class="flex flex-col gap-3" id="mythQuiz">
-
-          <div class="myth-card" id="myth-0">
-            <div class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">"AI looks up answers from the internet when you ask it something."</div>
-            <div class="flex gap-2 mb-0">
-              <button class="myth-btn myth-btn-myth" onclick="answerMyth(0,'myth')">❌ Myth</button>
-              <button class="myth-btn myth-btn-fact" onclick="answerMyth(0,'fact')">✅ Fact</button>
-            </div>
-            <div class="myth-reveal" id="myth-reveal-0">
-              <div class="mt-3 pt-3 border-t border-rose-100 dark:border-rose-900/30">
-                <span class="text-xs font-bold text-rose-600 dark:text-rose-400">❌ Myth!</span>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Most AI models predict answers from patterns learned during training   they don't browse the web live. It's like a well-read person recalling knowledge, not a live Google search.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="myth-card" id="myth-1">
-            <div class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">"AI generates its reply one word at a time, not all at once."</div>
-            <div class="flex gap-2">
-              <button class="myth-btn myth-btn-myth" onclick="answerMyth(1,'myth')">❌ Myth</button>
-              <button class="myth-btn myth-btn-fact" onclick="answerMyth(1,'fact')">✅ Fact</button>
-            </div>
-            <div class="myth-reveal" id="myth-reveal-1">
-              <div class="mt-3 pt-3 border-t border-emerald-100 dark:border-emerald-900/30">
-                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✅ Fact!</span>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Correct! The model predicts one token at a time   each new word is influenced by everything that came before it. That's why the typing animation looks the way it does!</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="myth-card" id="myth-2">
-            <div class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-2">"AI always gives correct answers because it was trained on so much data."</div>
-            <div class="flex gap-2">
-              <button class="myth-btn myth-btn-myth" onclick="answerMyth(2,'myth')">❌ Myth</button>
-              <button class="myth-btn myth-btn-fact" onclick="answerMyth(2,'fact')">✅ Fact</button>
-            </div>
-            <div class="myth-reveal" id="myth-reveal-2">
-              <div class="mt-3 pt-3 border-t border-rose-100 dark:border-rose-900/30">
-                <span class="text-xs font-bold text-rose-600 dark:text-rose-400">❌ Myth!</span>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">AI predicts the most likely words   not necessarily the true ones. It can confidently produce wrong info ("hallucinations"). Always verify important facts!</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <div id="mythScore" class="hidden mt-4 text-center text-sm font-bold text-indigo-600 dark:text-indigo-400"></div>
-      </div>
+      </div><!-- /flow-layout -->
 
       <!-- ══════════════════════════════════════
            NAVIGATION
@@ -742,10 +542,8 @@
     </div>
   </main>
 
-
   <!-- FOOTER -->
   <script>writeSiteFooter('Inside an LLM');</script>
-
 
   <script src="../../js/utils.js"></script>
   <script src="../../js/animations.js"></script>
@@ -981,24 +779,53 @@
   }
 
   /* ═══════════════════════════════════════════════
-     STATS + FLOW
+     FLOW
   ═══════════════════════════════════════════════ */
-  function updateStats() {
-    const prompt = getPrompt();
-    const tokens = getTokens(prompt);
-    document.getElementById('statPromptLen').textContent = prompt.length || ' ';
-    document.getElementById('statTokens').textContent    = tokens.length || ' ';
-    document.getElementById('statCurrent').textContent   =
-      currentStageIdx >= 0 && currentStageIdx < PIPELINE_STAGES.length
-        ? currentStageIdx + 1 : (currentStageIdx >= PIPELINE_STAGES.length ? PIPELINE_STAGES.length : ' ');
-    document.getElementById('statDone').textContent      =
-      currentStageIdx >= PIPELINE_STAGES.length ? PIPELINE_STAGES.length : Math.max(0, currentStageIdx);
+  /* ═══════════════════════════════════════════════
+     HOW IT WORKS — horizontal step boxes
+  ═══════════════════════════════════════════════ */
+  const STEP_DEFS = [
+    { emoji: '🧠', title: 'What is Artificial Intelligence?',
+      body: 'Software that learns patterns from huge amounts of human text, then uses them to understand questions and generate language.' },
+    { emoji: '🔤', title: 'Text becomes Tokens',
+      body: '<strong>Token:</strong> the chunks AI reads — "playing" becomes "play" + "ing". It works with these pieces, not individual letters.' },
+    { emoji: '🔢', title: 'Tokens become Token IDs',
+      body: "<strong>Token ID:</strong> each token maps to a number from the model's fixed vocabulary — its internal dictionary of every token it knows." },
+    { emoji: '📐', title: 'Token IDs become Embeddings',
+      body: '<strong>Embeddings:</strong> each ID becomes a list of numbers. Words with similar meaning get similar numbers.' },
+    { emoji: '⚙️', title: 'Transformer processes them',
+      body: '<strong>Transformer:</strong> reads all tokens at once and works out how every word relates to every other word.' },
+    { emoji: '⚡', title: 'Model predicts next token',
+      body: '<strong>Prediction:</strong> the model picks the most likely next token, one at a time, using everything it learned during training.' },
+    { emoji: '✅', title: 'Response appears',
+      body: 'The predicted tokens are turned back into text and streamed to you as the final answer.' },
+  ];
+
+  function renderStepDetail(idx) {
+    const s = STEP_DEFS[idx];
+    const el = document.getElementById('flowDetail');
+    if (!s || !el) return;
+    el.innerHTML = `
+      <span class="flow-detail-emoji">${s.emoji}</span>
+      <div>
+        <div class="flow-detail-title">Step ${idx + 1} · ${s.title}</div>
+        <div class="flow-detail-body">${s.body}</div>
+      </div>`;
+  }
+
+  function showStep(idx) {
+    for (let i = 0; i < STEP_DEFS.length; i++) {
+      document.getElementById(`flow-${i}`)?.classList.toggle('active', i === idx);
+    }
+    renderStepDetail(idx);
+    document.getElementById(`flow-${idx}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
   }
 
   function updateFlow(activeIdx) {
     for (let i = 0; i < PIPELINE_STAGES.length; i++) {
       document.getElementById(`flow-${i}`)?.classList.toggle('active', i === activeIdx);
     }
+    if (activeIdx >= 0 && activeIdx < STEP_DEFS.length) renderStepDetail(activeIdx);
   }
 
   /* ═══════════════════════════════════════════════
@@ -1008,7 +835,6 @@
     currentStageIdx = idx;
     renderPipeline();
     updateExplainCard(idx);
-    updateStats();
     updateFlow(idx);
     document.getElementById(`ps-${idx}`)?.scrollIntoView({ behavior:'smooth', block:'nearest' });
     if (idx === 4) startTransformerAnimation();
@@ -1036,7 +862,6 @@
       currentStageIdx = PIPELINE_STAGES.length;
       markAllStagesDone();
       updateExplainCard(PIPELINE_STAGES.length);
-      updateStats();
       updateFlow(-1);
       updateNextBtn();
       updateProgress();
@@ -1103,7 +928,6 @@
       currentStageIdx = PIPELINE_STAGES.length;
       markAllStagesDone();
       updateExplainCard(PIPELINE_STAGES.length);
-      updateStats();
       updateFlow(-1);
       updateNextBtn();
       updateProgress();
@@ -1121,7 +945,6 @@
     currentStageIdx = -1;
     renderPipeline();
     updateFlow(-1);
-    updateStats();
     updateNextBtn();
     updateProgress();
     if (full) updateExplainCard(null);
@@ -1181,50 +1004,6 @@
   }
 
   /* ═══════════════════════════════════════════════
-     MYTH QUIZ
-  ═══════════════════════════════════════════════ */
-  const MYTH_ANSWERS = ['myth', 'fact', 'myth']; // correct answers
-  let mythAnswered = [false, false, false];
-
-  function answerMyth(idx, guess) {
-    if (mythAnswered[idx]) return;
-    mythAnswered[idx] = true;
-
-    const card    = document.getElementById(`myth-${idx}`);
-    const reveal  = document.getElementById(`myth-reveal-${idx}`);
-    const correct = MYTH_ANSWERS[idx];
-    const isRight = guess === correct;
-
-    card.classList.add(correct === 'myth' ? 'answered-myth' : 'answered-fact');
-    reveal.classList.add('open');
-
-    // Disable buttons
-    card.querySelectorAll('.myth-btn').forEach(btn => {
-      btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'default';
-    });
-
-    // Score update
-    const done = mythAnswered.filter(Boolean).length;
-    if (done === 3) {
-      const score = mythAnswered.filter((_, i) => {
-        const card = document.getElementById(`myth-${i}`);
-        return card.classList.contains(`answered-${MYTH_ANSWERS[i]}`);
-      }).length;
-      // Actually just count correct guesses
-      const correct_count = [0,1,2].filter(i => {
-        return document.getElementById(`myth-${i}`).dataset.guess === MYTH_ANSWERS[i];
-      }).length;
-      const el = document.getElementById('mythScore');
-      if (el) {
-        el.textContent = '🎉 All answered! Nice work   now you know how AI really works.';
-        el.classList.remove('hidden');
-      }
-    }
-    // store guess
-    card.dataset.guess = guess;
-  }
-
-  /* ═══════════════════════════════════════════════
      RANDOM PROMPT
   ═══════════════════════════════════════════════ */
   function randomPrompt() {
@@ -1232,15 +1011,28 @@
     const pool = RANDOM_PROMPTS.filter(p => p !== cur);
     document.getElementById('promptInput').value = pool[Math.floor(Math.random() * pool.length)];
     resetPipeline(true);
-    updateStats();
   }
 
   /* ═══════════════════════════════════════════════
      EVENTS
   ═══════════════════════════════════════════════ */
   document.getElementById('promptInput').addEventListener('input', function() {
-    resetPipeline(true); updateStats();
+    resetPipeline(true);
   });
+
+  /* ═══════════════════════════════════════════════
+     TRY-THIS MODAL
+  ═══════════════════════════════════════════════ */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
 
   /* ═══════════════════════════════════════════════
      INIT
@@ -1268,9 +1060,9 @@
     }
 
     renderPipeline();
-    updateStats();
     updateNextBtn();
     updateProgress();
+    showStep(0);
     if (typeof lucide !== 'undefined') lucide.createIcons();
   });
   </script>

@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Learn how the AI context window limits how much text an AI can read at one time   an interactive AI fundamentals demo." />
-  <title>Context Window   AI Concepts Playground</title>
+  <title>Context Window — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/context-window.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Context Window — AI Concepts Playground" />
+  <meta property="og:description" content="Learn how the AI context window limits how much text an AI can read at one time   an interactive AI fundamentals demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/context-window.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Context Window — AI Concepts Playground" />
+  <meta name="twitter:description" content="Learn how the AI context window limits how much text an AI can read at one time   an interactive AI fundamentals demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +35,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
   <style>
     /* ── Module card ─────────────────────────── */
@@ -196,25 +211,6 @@
       color: #94a3b8; margin-top: 0.3rem;
     }
 
-    /* ── Flow diagram ────────────────────────── */
-    .flow-wrap { display:flex; align-items:center; gap:0.5rem; overflow-x:auto; padding:0.25rem 0.125rem; }
-    .flow-node {
-      display:flex; flex-direction:column; align-items:center; gap:0.35rem;
-      padding:0.75rem 1rem; border-radius:1rem; min-width:82px; text-align:center;
-      background:rgba(37,99,235,0.06); border:1.5px solid rgba(37,99,235,0.14); flex-shrink:0;
-    }
-    .flow-node.active {
-      background:rgba(37,99,235,0.12); border-color:rgba(37,99,235,0.38);
-      box-shadow:0 4px 14px rgba(37,99,235,0.18);
-    }
-    html.dark .flow-node { background:rgba(37,99,235,0.09); border-color:rgba(37,99,235,0.18); }
-    html.dark .flow-node.active { background:rgba(37,99,235,0.16); border-color:rgba(96,165,250,0.35); }
-    .flow-emoji { font-size:1.25rem; line-height:1; }
-    .flow-lbl { font-size:0.58rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:#2563eb; }
-    html.dark .flow-lbl { color:#60a5fa; }
-    .flow-node.active .flow-emoji { animation: float 2.5s ease-in-out infinite; }
-    .flow-arrow { font-size:1rem; color:#cbd5e1; flex-shrink:0; }
-
     /* ── Takeaway ────────────────────────────── */
     .takeaway {
       display:flex; align-items:flex-start; gap:1rem;
@@ -250,6 +246,37 @@
       100% { transform: scale(1);   opacity:1; }
     }
     .badge-enter { animation: badge-pop 0.28s ease forwards; }
+    /* ── Tips button + modal ─────────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
   </style>
 </head>
 
@@ -302,14 +329,17 @@
            1. INTERACTIVE PLAYGROUND
       ══════════════════════════════════════ -->
       <section class="module-card">
-        <div class="mod-label">
-          <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
-          Interactive Playground
-        </div>
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+                Interactive Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Tips</button>
+            </div>
 
         <!-- Text input -->
         <div class="mb-4">
-          <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
+          <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block" for="textInput">
             Your Text
           </label>
           <textarea id="textInput" class="pg-textarea"
@@ -321,7 +351,7 @@
 
           <!-- Token mode -->
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block">
+            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2 block" for="modeSelect">
               Token Mode
             </label>
             <select id="modeSelect" class="pg-select">
@@ -334,7 +364,7 @@
           <!-- Context size slider -->
           <div class="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30">
             <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+              <label class="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400" for="ctxSlider">
                 Context Window Size
               </label>
               <span id="ctxValue" class="ctx-value">80</span>
@@ -409,8 +439,8 @@
       <!-- ══════════════════════════════════════
            STATISTICS + HOW IT WORKS (full-width row)
       ══════════════════════════════════════ -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        <section>
+      <!-- Statistics -->
+      <section class="module-card mb-5">
           <div class="mod-label">
             <i data-lucide="activity" style="width:12px;height:12px;"></i>
             Statistics
@@ -441,58 +471,23 @@
           </div>
         </section>
 
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="git-merge" style="width:12px;height:12px;"></i>
-            How It Works
-          </div>
-          <div class="flow-wrap">
-            <div class="flow-node" style="flex:1;">
-              <span class="flow-emoji">📝</span>
-              <span class="flow-lbl">Text</span>
-            </div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-node" style="flex:1;">
-              <span class="flow-emoji">🔤</span>
-              <span class="flow-lbl">Tokens</span>
-            </div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-node active" style="flex:1;">
-              <span class="flow-emoji">🪟</span>
-              <span class="flow-lbl">Context Window</span>
-            </div>
-            <span class="flow-arrow">→</span>
-            <div class="flow-node" style="flex:1;">
-              <span class="flow-emoji">🤖</span>
-              <span class="flow-lbl">AI Reads</span>
-            </div>
-          </div>
-        </section>
-      </div>
-      
+
       <!-- ══════════════════════════════════════
-           BEGINNER TIPS
+           TIPS MODAL
       ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsContextWindow">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+      <div class="modal-overlay" id="tipsModal" role="dialog" aria-modal="true" aria-label="Tips">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Tips</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Tokens outside the window are <strong>completely invisible</strong> to the model, it can't summarise or refer to what was cut off.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Context windows are in tokens, not words. 128K tokens ≈ 90,000 words, roughly one full novel.</span>
-          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Tokens outside the window are <strong>completely invisible</strong> to the model, it can't summarise or refer to what was cut off.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Context windows are in tokens, not words. 128K tokens ≈ 90,000 words, roughly one full novel.</span></li>
+          </ul>
         </div>
       </div>
 
@@ -621,10 +616,22 @@
        Boot   wait for window.load so lucide
        and GSAP (both defer) are ready
     ───────────────────────────────────────── */
-    window.addEventListener('load', () => {
+    /* ── Tips modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tipsModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  window.addEventListener('load', () => {
       Utils.loadDarkPreference();
 
-      lucide.createIcons();
+      window.lucide && lucide.createIcons();
 
       /* ── DOM refs ────────────────────────── */
       const textInput      = document.getElementById('textInput');

@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Learn how to write better prompts and get better AI responses, an interactive beginner demo." />
-  <title>Prompt Engineering, AI Concepts Playground</title>
+  <title>Prompt Engineering — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/prompt-engineering.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Prompt Engineering — AI Concepts Playground" />
+  <meta property="og:description" content="Learn how to write better prompts and get better AI responses, an interactive beginner demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/prompt-engineering.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Prompt Engineering — AI Concepts Playground" />
+  <meta name="twitter:description" content="Learn how to write better prompts and get better AI responses, an interactive beginner demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -143,39 +159,6 @@
     @keyframes responseIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
     .resp-in { animation: responseIn 0.35s ease forwards; }
 
-    /* ── Stat boxes ──────────────────────────── */
-    .stat-box {
-      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
-      text-align: center; border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
-    .stat-val {
-      font-size: 1.05rem; font-weight: 900; line-height: 1.2;
-      font-variant-numeric: tabular-nums; word-break: break-all;
-    }
-    .stat-lbl {
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
-    }
-
-    /* ── Flow ────────────────────────────────── */
-    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
-    .flow-pill-box {
-      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
-      text-align: center; border: 1.5px solid #e2e8f0; background: white;
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
-    }
-    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
-    .flow-pill-box.fp-active { background: rgba(99,102,241,0.1); border-color: #6366f1; color: #6366f1; }
-    html.dark .flow-pill-box.fp-active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-    .flow-pill-box.fp-done { background: rgba(16,185,129,0.08); border-color: #10b981; color: #059669; }
-    html.dark .flow-pill-box.fp-done { background: rgba(16,185,129,0.1); color: #34d399; }
-    .flow-pill-emoji { font-size: 0.95rem; }
-    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
-    html.dark .flow-sep { color: #334155; }
-
     /* ── Takeaway ────────────────────────────── */
     .takeaway {
       display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
@@ -201,6 +184,37 @@
       100% { background: transparent; }
     }
     .highlight-flash { animation: highlightIn 1s ease forwards; }
+    /* ── Tips button + modal ─────────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
   </style>
 </head>
 
@@ -255,12 +269,15 @@
         <div class="flex flex-col gap-5">
 
           <section class="module-card">
-            <div class="mod-label">
-              <i data-lucide="edit-3" style="width:12px;height:12px;"></i>
-              Prompt Playground
+            <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="edit-3" style="width:12px;height:12px;"></i>
+                Prompt Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Tips</button>
             </div>
 
-            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block">Your Prompt</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block" for="promptInput">Your Prompt</label>
             <textarea id="promptInput" class="pg-textarea mb-3" rows="4"
               placeholder="Type your prompt here…">Explain AI.</textarea>
 
@@ -353,104 +370,23 @@
 
       </div><!-- /pg-grid -->
 
-
       <!-- ══════════════════════════════════════
-           STATS + FLOW
+           TIPS MODAL
       ══════════════════════════════════════ -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-5">
-
-        <!-- Statistics -->
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="bar-chart-2" style="width:12px;height:12px;"></i>
-            Statistics
-          </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div class="stat-box">
-              <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statLength">: </div>
-              <div class="stat-lbl">Prompt Length</div>
+      <div class="modal-overlay" id="tipsModal" role="dialog" aria-modal="true" aria-label="Tips">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Tips</h3>
             </div>
-            <div class="stat-box">
-              <div class="stat-val text-indigo-500 dark:text-indigo-400" id="statTokens">: </div>
-              <div class="stat-lbl">Est. Tokens</div>
-            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
-          <div class="grid grid-cols-3 gap-3">
-            <div class="stat-box">
-              <div class="stat-val text-2xl font-black" id="statScore">0</div>
-              <div class="stat-lbl">Quality Score</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-val text-rose-500 dark:text-rose-400" id="statMissing">: </div>
-              <div class="stat-lbl">Missing Items</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-val text-emerald-600 dark:text-emerald-400 text-sm" id="statRespStyle">: </div>
-              <div class="stat-lbl">Response Style</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- How It Works -->
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="git-branch" style="width:12px;height:12px;"></i>
-            How It Works
-          </div>
-          <div class="flex items-start gap-0.5">
-            <div class="flow-node-wrap">
-              <div class="flow-pill-emoji">✍️</div>
-              <div class="flow-pill-box" id="fp-0">Prompt</div>
-            </div>
-            <div class="flow-sep">→</div>
-            <div class="flow-node-wrap">
-              <div class="flow-pill-emoji">🔍</div>
-              <div class="flow-pill-box" id="fp-1">Clarity<br>Check</div>
-            </div>
-            <div class="flow-sep">→</div>
-            <div class="flow-node-wrap">
-              <div class="flow-pill-emoji">✨</div>
-              <div class="flow-pill-box" id="fp-2">Better<br>Instructions</div>
-            </div>
-            <div class="flow-sep">→</div>
-            <div class="flow-node-wrap">
-              <div class="flow-pill-emoji">💬</div>
-              <div class="flow-pill-box" id="fp-3">Better<br>Response</div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-
-      
-      <!-- ══════════════════════════════════════
-           BEGINNER TIPS
-      ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsPromptEng">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">3 tips</span>
-          </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span><strong>Be specific about format</strong>, "List 3 bullet points" gives better results than "Tell me about it".</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Giving one example of the output you want (few-shot prompting) dramatically improves results.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Shorter isn't always better, a clear 50-word prompt beats a vague 5-word one every time.</span>
-          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span><strong>Be specific about format</strong>, "List 3 bullet points" gives better results than "Tell me about it".</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Giving one example of the output you want (few-shot prompting) dramatically improves results.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Shorter isn't always better, a clear 50-word prompt beats a vague 5-word one every time.</span></li>
+          </ul>
         </div>
       </div>
 
@@ -671,20 +607,6 @@
     const response = generatePromptResponse(prompt, score);
     renderResponse(response, score);
 
-    // Stats
-    const tokens = Math.ceil(prompt.length / 4);
-    const respStyle = score >= 70 ? 'Detailed' : score >= 35 ? 'Moderate' : 'Minimal';
-    const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
-    set('statLength',    prompt.length + ' chars');
-    set('statTokens',    '~' + tokens);
-    set('statScore',     score);
-    set('statMissing',   missing || 'None 🎉');
-    set('statRespStyle', respStyle);
-
-    // Score ring color in stats
-    const scoreEl = document.getElementById('statScore');
-    if (scoreEl) scoreEl.style.color = score >= 70 ? '#10b981' : score >= 40 ? '#6366f1' : '#ef4444';
-
     // Hide compare section on live typing
     const compareSection = document.getElementById('compareSection');
     if (compareSection) compareSection.style.display = 'none';
@@ -721,28 +643,8 @@
     const improveBtn = document.getElementById('improveBtn');
     if (improveBtn) improveBtn.disabled = true;
 
-    // Flow animation
-    updateFlow(0);
-    setTimeout(() => updateFlow(1), 200);
-    setTimeout(() => updateFlow(2), 500);
-    setTimeout(() => updateFlow(3), 900);
-    setTimeout(() => updateFlow(-1), 1800);
 
     updatePromptEngineeringDemo();
-  }
-
-  /* ═══════════════════════════════════════════════
-     FLOW
-  ═══════════════════════════════════════════════ */
-  function updateFlow(active) {
-    for (let i = 0; i < 4; i++) {
-      const el = document.getElementById(`fp-${i}`);
-      if (!el) continue;
-      el.classList.remove('fp-active','fp-done');
-      if (active < 0) return;
-      if      (i < active)   el.classList.add('fp-done');
-      else if (i === active) el.classList.add('fp-active');
-    }
   }
 
   /* ═══════════════════════════════════════════════
@@ -758,7 +660,6 @@
     const cs = document.getElementById('compareSection');
     if (cs) cs.style.display = 'none';
     enableImproveBtn();
-    updateFlow(-1);
     updatePromptEngineeringDemo();
   }
 
@@ -775,6 +676,18 @@
   /* ═══════════════════════════════════════════════
      INIT
   ═══════════════════════════════════════════════ */
+  /* ── Tips modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tipsModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
   window.addEventListener('load', () => {
     Utils.loadDarkPreference();
 

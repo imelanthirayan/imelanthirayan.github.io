@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Understand AI hallucinations, when AI sounds confident but may be wrong. An interactive beginner demo." />
-  <title>Hallucinations, AI Concepts Playground</title>
+  <title>Hallucinations — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/hallucinations.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Hallucinations — AI Concepts Playground" />
+  <meta property="og:description" content="Understand AI hallucinations, when AI sounds confident but may be wrong. An interactive beginner demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/hallucinations.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Hallucinations — AI Concepts Playground" />
+  <meta name="twitter:description" content="Understand AI hallucinations, when AI sounds confident but may be wrong. An interactive beginner demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -157,33 +173,6 @@
     .badge-caution      { background: rgba(245,158,11,0.10); color: #b45309; border: 1px solid rgba(245,158,11,0.3); }
     html.dark .badge-caution { color: #fbbf24; }
 
-    /* ── Stat boxes ──────────────────────────── */
-    .stat-box {
-      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
-      text-align: center; border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
-    .stat-val { font-size: 0.95rem; font-weight: 900; line-height: 1.2; word-break: break-all; }
-    .stat-lbl { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem; }
-
-    /* ── Flow diagram ────────────────────────── */
-    .flow-node-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; flex: 1; min-width: 0; }
-    .flow-pill-box {
-      width: 100%; padding: 0.45rem 0.3rem; border-radius: 0.75rem;
-      text-align: center; border: 1.5px solid #e2e8f0; background: white;
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.04em; color: #94a3b8; transition: all 0.35s;
-    }
-    html.dark .flow-pill-box { background: #1e293b; border-color: #334155; color: #475569; }
-    .flow-pill-box.fp-active { background: rgba(99,102,241,0.1); border-color: #6366f1; color: #6366f1; }
-    html.dark .flow-pill-box.fp-active { background: rgba(99,102,241,0.15); color: #a5b4fc; }
-    .flow-pill-box.fp-done { background: rgba(16,185,129,0.08); border-color: #10b981; color: #059669; }
-    html.dark .flow-pill-box.fp-done { background: rgba(16,185,129,0.1); color: #34d399; }
-    .flow-pill-emoji { font-size: 0.95rem; }
-    .flow-sep { color: #cbd5e1; font-size: 0.8rem; flex-shrink: 0; align-self: center; padding-bottom: 1rem; }
-    html.dark .flow-sep { color: #334155; }
-
     /* ── Takeaway ────────────────────────────── */
     .takeaway {
       display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
@@ -206,6 +195,37 @@
       to   { opacity:1; transform:translateY(0)   scale(1); }
     }
     .slide-in { animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    /* ── Tips button + modal ─────────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
   </style>
 </head>
 
@@ -270,19 +290,22 @@
 
           <!-- Playground card -->
           <section class="module-card">
-            <div class="mod-label">
-              <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
-              Interactive Playground
+            <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="flask-conical" style="width:12px;height:12px;"></i>
+                Interactive Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Tips</button>
             </div>
 
-            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block">Your Question</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-2 block" for="questionInput">Your Question</label>
             <textarea id="questionInput" class="pg-textarea mb-4" rows="2"
               placeholder="Ask any question…">Who invented the light bulb?</textarea>
 
             <!-- Confidence slider -->
             <div class="mb-4">
               <div class="flex items-center justify-between mb-1.5">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">AI Confidence Level</label>
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide" for="confSlider">AI Confidence Level</label>
                 <span id="confDisplay" class="text-sm font-black text-indigo-600 dark:text-indigo-400">85%</span>
               </div>
               <input id="confSlider" type="range" min="0" max="100" step="1" value="85"
@@ -399,90 +422,22 @@
 
       </div><!-- /pg-grid -->
 
-
       <!-- ══════════════════════════════════════
-           STATISTICS
+           TIPS MODAL
       ══════════════════════════════════════ -->
-      <section class="module-card mb-6">
-        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">Statistics</p>
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <div class="stat-box">
-            <div class="stat-val text-emerald-600 dark:text-emerald-400" id="statEvidence">: </div>
-            <div class="stat-lbl">Evidence</div>
+      <div class="modal-overlay" id="tipsModal" role="dialog" aria-modal="true" aria-label="Tips">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Tips</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
-          <div class="stat-box">
-            <div class="stat-val text-indigo-600 dark:text-indigo-400" id="statConfidence">85%</div>
-            <div class="stat-lbl">Confidence</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val text-amber-600 dark:text-amber-400" id="statRisk">: </div>
-            <div class="stat-lbl">Risk Level</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val text-slate-700 dark:text-slate-300" id="statAnswerType">: </div>
-            <div class="stat-lbl">Answer Type</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-val text-rose-600 dark:text-rose-400" id="statSafety">: </div>
-            <div class="stat-lbl">Recommendation</div>
-          </div>
-        </div>
-      </section>
-
-
-      <!-- ══════════════════════════════════════
-           FLOW DIAGRAM
-      ══════════════════════════════════════ -->
-      <section class="module-card mb-8">
-        <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-4">How It Works</p>
-        <div class="flex items-start gap-1 overflow-x-auto pb-1">
-          <div class="flow-node-wrap">
-            <div class="flow-pill-emoji">💬</div>
-            <div class="flow-pill-box" id="fp-0">Question</div>
-          </div>
-          <div class="flow-sep">→</div>
-          <div class="flow-node-wrap">
-            <div class="flow-pill-emoji">📚</div>
-            <div class="flow-pill-box" id="fp-1">Check<br>Evidence</div>
-          </div>
-          <div class="flow-sep">→</div>
-          <div class="flow-node-wrap">
-            <div class="flow-pill-emoji">🤖</div>
-            <div class="flow-pill-box" id="fp-2">Generate<br>Answer</div>
-          </div>
-          <div class="flow-sep">→</div>
-          <div class="flow-node-wrap">
-            <div class="flow-pill-emoji">⚖️</div>
-            <div class="flow-pill-box" id="fp-3">Verify<br>Risk</div>
-          </div>
-        </div>
-      </section>
-
-
-      
-      <!-- ══════════════════════════════════════
-           BEGINNER TIPS
-      ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsHallucinations">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
-          </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span><strong>Confidence ≠ correctness.</strong> AI sounds certain even when it's wrong. Always verify important facts from a trusted source.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Grounding (RAG) reduces hallucinations, feeding the AI real documents constrains it to answer from evidence, not imagination.</span>
-          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span><strong>Confidence ≠ correctness.</strong> AI sounds certain even when it's wrong. Always verify important facts from a trusted source.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Grounding (RAG) reduces hallucinations, feeding the AI real documents constrains it to answer from evidence, not imagination.</span></li>
+          </ul>
         </div>
       </div>
 
@@ -617,27 +572,9 @@
     const el   = id => document.getElementById(id);
 
     el('confDisplay').textContent    = conf + '%';
-    el('statConfidence').textContent = conf + '%';
 
     const risk = calculateHallucinationRisk(conf, evidenceAvailable);
     renderRiskMeter(risk);
-
-    const evStat = el('statEvidence');
-    if (evStat) {
-      evStat.textContent = evidenceAvailable ? 'Available ✅' : 'Missing ❌';
-      evStat.className   = 'stat-val ' + (evidenceAvailable
-        ? 'text-emerald-600 dark:text-emerald-400'
-        : 'text-red-500 dark:text-red-400');
-    }
-    const riskStat = el('statRisk');
-    if (riskStat) {
-      riskStat.textContent = risk.charAt(0).toUpperCase() + risk.slice(1);
-      riskStat.className   = 'stat-val ' + (risk === 'low'
-        ? 'text-emerald-600 dark:text-emerald-400'
-        : risk === 'medium'
-          ? 'text-amber-600 dark:text-amber-400'
-          : 'text-red-500 dark:text-red-400');
-    }
   }
 
   /* ═══════════════════════════════════════════════
@@ -652,20 +589,6 @@
     });
     const map = { low:'rz-low', medium:'rz-mid', high:'rz-high' };
     document.getElementById(map[risk])?.classList.add('active');
-  }
-
-  /* ═══════════════════════════════════════════════
-     FLOW DIAGRAM
-  ═══════════════════════════════════════════════ */
-  function updateFlow(active) {
-    for (let i = 0; i < 4; i++) {
-      const el = document.getElementById('fp-' + i);
-      if (!el) continue;
-      el.classList.remove('fp-active','fp-done');
-      if (active < 0) continue;
-      if      (i < active)   el.classList.add('fp-done');
-      else if (i === active) el.classList.add('fp-active');
-    }
   }
 
   /* ═══════════════════════════════════════════════
@@ -686,12 +609,6 @@
     const answer     = (isHallucination) ? example.riskyAnswer : example.safeAnswer;
     const answerType = isHallucination ? 'Possible Hallucination' : isCaution ? 'Cautious Answer' : 'Grounded Answer';
 
-    // Flow animation
-    updateFlow(0);
-    setTimeout(() => updateFlow(1), 300);
-    setTimeout(() => updateFlow(2), 700);
-    setTimeout(() => updateFlow(3), 1100);
-    setTimeout(() => updateFlow(-1), 2000);
 
     // Q card
     const pipeQ = document.getElementById('pipeQ');
@@ -751,10 +668,6 @@
             : 'This answer is supported by available evidence. It is generally reliable for this example.';
       }
 
-      // Stats
-      const el = id => document.getElementById(id);
-      el('statAnswerType').textContent = answerType;
-      el('statSafety').textContent     = isHallucination ? 'Verify ⚠️' : isCaution ? 'Check 🔍' : 'Reliable 🛡️';
 
     }, 900);
 
@@ -787,8 +700,6 @@
     const sc = document.getElementById('safetyCard');
     if (sc) sc.classList.add('hidden');
 
-    ['statAnswerType','statSafety'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = ': '; });
-    updateFlow(-1);
     updateHallucinationDemo();
   }
 
@@ -805,6 +716,18 @@
   /* ═══════════════════════════════════════════════
      INIT
   ═══════════════════════════════════════════════ */
+  /* ── Tips modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tipsModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
   window.addEventListener('load', () => {
     Utils.loadDarkPreference();
 

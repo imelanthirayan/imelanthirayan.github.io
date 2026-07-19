@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Learn how AI attention helps models focus on important words   an interactive demo." />
-  <title>Attention   AI Concepts Playground</title>
+  <title>Attention — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/attention.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Attention — AI Concepts Playground" />
+  <meta property="og:description" content="Learn how AI attention helps models focus on important words   an interactive demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/attention.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Attention — AI Concepts Playground" />
+  <meta name="twitter:description" content="Learn how AI attention helps models focus on important words   an interactive demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -56,44 +72,6 @@
       border-color: #a78bfa; background: rgba(15,23,42,0.9);
       box-shadow: 0 0 0 3px rgba(167,139,250,0.1);
     }
-
-    /* ── Stat boxes ──────────────────────────── */
-    .stat-box {
-      background: white; border-radius: 1rem; padding: 1rem 0.875rem;
-      text-align: center; border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
-    .stat-val {
-      font-size: 1.1rem; font-weight: 900; line-height: 1.2;
-      font-variant-numeric: tabular-nums; word-break: break-all;
-    }
-    .stat-lbl {
-      font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.3rem;
-    }
-
-    /* ── Flow diagram ────────────────────────── */
-    .flow-wrap { display: flex; flex-direction: column; gap: 0.625rem; }
-    .flow-step { display: flex; align-items: center; gap: 0.5rem; }
-    .flow-node {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      gap: 0.25rem; padding: 0.55rem 0.75rem; border-radius: 0.75rem; text-align: center;
-      background: rgba(124,58,237,0.07); border: 1.5px solid rgba(124,58,237,0.18);
-    }
-    .flow-node.active {
-      background: rgba(124,58,237,0.13); border-color: rgba(124,58,237,0.38);
-      box-shadow: 0 3px 12px rgba(124,58,237,0.16);
-    }
-    html.dark .flow-node { background: rgba(124,58,237,0.09); border-color: rgba(124,58,237,0.22); }
-    html.dark .flow-node.active { background: rgba(124,58,237,0.18); border-color: rgba(167,139,250,0.4); }
-    .flow-emoji { font-size: 1.1rem; line-height: 1; }
-    .flow-lbl {
-      font-size: 0.55rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 0.07em; color: #7c3aed;
-    }
-    html.dark .flow-lbl { color: #a78bfa; }
-    .flow-arrow { font-size: 0.9rem; color: #cbd5e1; flex-shrink: 0; }
 
     /* ── Token badges ────────────────────────── */
     .token-wrap {
@@ -271,6 +249,37 @@
       gap: 0.5rem; padding: 2rem; color: #94a3b8; text-align: center;
     }
     .no-focus-hint p { font-size: 0.8rem; font-weight: 600; }
+    /* ── Tips button + modal ─────────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
   </style>
 </head>
 
@@ -331,14 +340,17 @@
         <div class="flex flex-col gap-5">
 
           <section class="module-card">
-            <div class="mod-label">
-              <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
-              Interactive Playground
+            <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+                Interactive Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Tips</button>
             </div>
 
             <!-- Sentence input -->
             <div class="mb-4">
-              <label class="text-xs font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-2 block">
+              <label class="text-xs font-bold uppercase tracking-widest text-violet-600 dark:text-violet-400 mb-2 block" for="sentenceInput">
                 Sentence
               </label>
               <textarea id="sentenceInput" class="pg-textarea" rows="3"
@@ -366,7 +378,7 @@
             <!-- Controls -->
             <div class="mb-4">
               <div class="flex items-center justify-between mb-1">
-                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400" for="spreadSlider">
                   Attention Spread
                 </label>
                 <span id="spreadVal" class="text-xs font-black text-violet-600 dark:text-violet-400 tabular-nums">3</span>
@@ -437,102 +449,23 @@
       </div><!-- /pg-grid -->
 
 
-      <!-- Statistics + How It Works -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5 mt-5">
 
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="activity" style="width:12px;height:12px;"></i>
-            Statistics
-          </div>
-          <div class="grid grid-cols-3 gap-3 mb-3">
-            <div class="stat-box">
-              <div id="stWords" class="stat-val" style="color:#7c3aed;"> </div>
-              <div class="stat-lbl">Total Words</div>
-            </div>
-            <div class="stat-box">
-              <div id="stFocus" class="stat-val" style="color:#2563eb;font-size:0.85rem;text-transform:capitalize;"> </div>
-              <div class="stat-lbl">Focus Word</div>
-            </div>
-            <div class="stat-box">
-              <div id="stSpread" class="stat-val" style="color:#0d9488;">3</div>
-              <div class="stat-lbl">Attention Spread</div>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div class="stat-box">
-              <div id="stStrongest" class="stat-val" style="color:#16a34a;font-size:0.85rem;text-transform:capitalize;"> </div>
-              <div class="stat-lbl">Strongest Attention</div>
-            </div>
-            <div class="stat-box">
-              <div id="stWeakest" class="stat-val" style="color:#94a3b8;font-size:0.85rem;text-transform:capitalize;"> </div>
-              <div class="stat-lbl">Weakest Attention</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="module-card">
-          <div class="mod-label">
-            <i data-lucide="git-merge" style="width:12px;height:12px;"></i>
-            How It Works
-          </div>
-          <div class="flow-wrap">
-            <div class="flow-step">
-              <div class="flow-node" style="flex:1;">
-                <span class="flow-emoji">📝</span>
-                <span class="flow-lbl">Sentence</span>
-              </div>
-              <span class="flow-arrow">→</span>
-              <div class="flow-node" style="flex:1;">
-                <span class="flow-emoji">🔤</span>
-                <span class="flow-lbl">Tokens</span>
-              </div>
-              <span class="flow-arrow">→</span>
-              <div class="flow-node" style="flex:1;">
-                <span class="flow-emoji">👆</span>
-                <span class="flow-lbl">Focus Word</span>
-              </div>
-              <span class="flow-arrow">→</span>
-              <div class="flow-node" style="flex:1;">
-                <span class="flow-emoji">📐</span>
-                <span class="flow-lbl">Calc Attention</span>
-              </div>
-              <span class="flow-arrow">→</span>
-              <div class="flow-node active" style="flex:1;">
-                <span class="flow-emoji">✨</span>
-                <span class="flow-lbl">Highlight</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-      </div>
-
-
-      
       <!-- ══════════════════════════════════════
-           BEGINNER TIPS
+           TIPS MODAL
       ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsAttention">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+      <div class="modal-overlay" id="tipsModal" role="dialog" aria-modal="true" aria-label="Tips">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Tips</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Attention ≠ reading order. AI doesn't scan left-to-right. Click a word and watch it connect to distant words that shape its meaning.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Real models use <strong>multi-head attention</strong>, many attention patterns run simultaneously, each focusing on different aspects like grammar, context, and coreference.</span>
-          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Attention ≠ reading order. AI doesn't scan left-to-right. Click a word and watch it connect to distant words that shape its meaning.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Real models use <strong>multi-head attention</strong>, many attention patterns run simultaneously, each focusing on different aspects like grammar, context, and coreference.</span></li>
+          </ul>
         </div>
       </div>
 
@@ -881,15 +814,8 @@
       renderAttentionGraph(currentTokens, currentScores, idx);
       renderAttentionScores(currentTokens, currentScores, idx);
 
-      // Statistics
+      // Focus badge
       const tok     = currentTokens[idx];
-      const nonFoc  = currentScores.map((s, i) => ({ s, w: currentTokens[i] })).filter((_, i) => i !== idx);
-      const strongest = nonFoc.reduce((a, b) => a.s >= b.s ? a : b, { s: 0, w: ' ' });
-      const weakest   = nonFoc.reduce((a, b) => a.s <= b.s ? a : b, { s: 1, w: ' ' });
-
-      document.getElementById('stFocus').textContent    = tok || ' ';
-      document.getElementById('stStrongest').textContent = strongest.w;
-      document.getElementById('stWeakest').textContent   = weakest.w;
       document.getElementById('focusBadge').textContent  = `Focus: ${tok}`;
 
       // Animate the badge
@@ -911,11 +837,6 @@
 
       if (!currentTokens.length) return;
 
-      const spread = parseInt(document.getElementById('spreadSlider')?.value || '3', 10);
-      document.getElementById('stWords').textContent  = currentTokens.length;
-      document.getElementById('stFocus').textContent  = ' ';
-      document.getElementById('stStrongest').textContent = ' ';
-      document.getElementById('stWeakest').textContent   = ' ';
       document.getElementById('focusBadge').textContent  = 'Focus:  ';
 
       renderAttentionTokens(currentTokens, -1, []);
@@ -972,9 +893,21 @@
     /* ═══════════════════════════════════════════
        Init
     ═══════════════════════════════════════════ */
-    window.addEventListener('load', () => {
+    /* ── Tips modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tipsModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  window.addEventListener('load', () => {
       Utils.loadDarkPreference();
-      lucide.createIcons();
+      window.lucide && lucide.createIcons();
       syncDarkIcons();
 
       document.querySelectorAll('[data-dark-toggle]').forEach(btn => {
@@ -990,7 +923,6 @@
       const spreadLbl = document.getElementById('spreadVal');
       slider.addEventListener('input', () => {
         spreadLbl.textContent = slider.value;
-        document.getElementById('stSpread').textContent = slider.value;
         updateAttentionDemo();
       });
 

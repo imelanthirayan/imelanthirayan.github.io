@@ -4,7 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Learn how AI token counting affects cost   an interactive AI fundamentals demo." />
-  <title>Token Cost Estimator   AI Concepts Playground</title>
+  <title>Token Cost Estimator — AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/token-cost.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Token Cost Estimator — AI Concepts Playground" />
+  <meta property="og:description" content="Learn how AI token counting affects cost   an interactive AI fundamentals demo." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/inside-llm/token-cost.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Token Cost Estimator — AI Concepts Playground" />
+  <meta name="twitter:description" content="Learn how AI token counting affects cost   an interactive AI fundamentals demo." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%A7%A0</text></svg>">
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +35,6 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
   <style>
     /* ── Module card ─────────────────────────── */
@@ -132,43 +147,6 @@
     }
     html.dark .total-cost-card { background: linear-gradient(135deg, #164e63, #0e7490); }
 
-    /* ── Stat boxes ──────────────────────────── */
-    .stat-box {
-      background: white; border-radius: 1rem;
-      padding: 1rem 0.875rem; text-align: center;
-      border: 1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    html.dark .stat-box { background: #1e293b; border-color: rgba(255,255,255,0.06); }
-    .stat-val {
-      font-size: 1.25rem; font-weight: 900; line-height: 1.2;
-      font-variant-numeric: tabular-nums; word-break: break-all;
-    }
-    .stat-lbl {
-      font-size: 0.6rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      color: #94a3b8; margin-top: 0.3rem;
-    }
-
-    /* ── Flow diagram ────────────────────────── */
-    .flow-wrap { display:flex; align-items:center; gap:0.4rem; overflow-x:auto; padding:0.25rem 0.125rem; }
-    .flow-node {
-      display:flex; flex-direction:column; align-items:center; gap:0.35rem;
-      padding:0.65rem 0.875rem; border-radius:1rem; min-width:72px; text-align:center;
-      background:rgba(8,145,178,0.06); border:1.5px solid rgba(8,145,178,0.14); flex-shrink:0;
-    }
-    .flow-node.active {
-      background:rgba(8,145,178,0.12); border-color:rgba(8,145,178,0.4);
-      box-shadow:0 4px 14px rgba(8,145,178,0.18);
-    }
-    html.dark .flow-node { background:rgba(8,145,178,0.09); border-color:rgba(8,145,178,0.18); }
-    html.dark .flow-node.active { background:rgba(8,145,178,0.16); border-color:rgba(34,211,238,0.35); }
-    .flow-emoji { font-size:1.1rem; line-height:1; }
-    .flow-lbl { font-size:0.55rem; font-weight:800; text-transform:uppercase; letter-spacing:0.07em; color:#0891b2; }
-    html.dark .flow-lbl { color:#22d3ee; }
-    .flow-node.active .flow-emoji { animation: float 2.5s ease-in-out infinite; }
-    .flow-arrow { font-size:0.9rem; color:#cbd5e1; flex-shrink:0; }
-
     /* ── Takeaway ────────────────────────────── */
     .takeaway {
       display:flex; align-items:flex-start; gap:1rem; padding:1.5rem 1.75rem;
@@ -196,6 +174,37 @@
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-5px); }
     }
+    /* ── Tips button + modal ─────────────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); color: #6366f1;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #a5b4fc; border-color: rgba(129,140,248,0.3); background: rgba(99,102,241,0.14); }
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 460px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(99,102,241,0.5); color: #6366f1; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
   </style>
 </head>
 
@@ -243,27 +252,30 @@
 
 
       <div class="pg-grid">
-      <!-- LEFT COLUMN: Playground + Statistics + Info Card -->
+      <!-- LEFT COLUMN: Playground + Info Card -->
       <div class="flex flex-col gap-5">
       <!-- ══════════════════════════════════════
            1. INTERACTIVE PLAYGROUND
       ══════════════════════════════════════ -->
       <section class="module-card">
-        <div class="mod-label">
-          <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
-          Interactive Playground
-        </div>
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1rem;">
+              <div class="mod-label" style="margin-bottom:0;">
+                <i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>
+                Interactive Playground
+              </div>
+              <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Tips</button>
+            </div>
 
         <!-- Text areas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block">
+            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block" for="promptInput">
               📥 Prompt (Input)
             </label>
             <textarea id="promptInput" class="pg-textarea" placeholder="Enter your prompt…">Explain artificial intelligence in simple words.</textarea>
           </div>
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block">
+            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block" for="responseInput">
               📤 AI Response (Output)
             </label>
             <textarea id="responseInput" class="pg-textarea" placeholder="Enter AI response…">Artificial intelligence means making computers do tasks that usually need human thinking.</textarea>
@@ -273,7 +285,7 @@
         <!-- Controls -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block">Token Mode</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5 block" for="modeSelect">Token Mode</label>
             <select id="modeSelect" class="pg-select">
               <option value="words">Words</option>
               <option value="chars">Characters</option>
@@ -281,11 +293,11 @@
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5 block">Input cost / 1K tokens ($)</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1.5 block" for="inputCostInput">Input cost / 1K tokens ($)</label>
             <input id="inputCostInput" type="number" min="0" step="0.001" value="0.01" class="pg-number" />
           </div>
           <div>
-            <label class="text-xs font-bold uppercase tracking-widest text-green-600 dark:text-green-400 mb-1.5 block">Output cost / 1K tokens ($)</label>
+            <label class="text-xs font-bold uppercase tracking-widest text-green-600 dark:text-green-400 mb-1.5 block" for="outputCostInput">Output cost / 1K tokens ($)</label>
             <input id="outputCostInput" type="number" min="0" step="0.001" value="0.03" class="pg-number" />
           </div>
         </div>
@@ -294,44 +306,6 @@
         <div class="flex gap-2 flex-wrap">
           <button onclick="resetExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">Reset Example</button>
           <button onclick="randomExample()" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">✨ Random Example</button>
-        </div>
-      </section>
-
-      <!-- ══════════════════════════════════════
-           3. STATISTICS PANEL
-      ══════════════════════════════════════ -->
-      <section>
-        <div class="mod-label">
-          <i data-lucide="activity" style="width:12px;height:12px;"></i>
-          Statistics
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-          <div class="stat-box">
-            <div id="stInputTok" class="stat-val" style="color:#0891b2;">0</div>
-            <div class="stat-lbl">Input Tokens</div>
-          </div>
-          <div class="stat-box">
-            <div id="stOutputTok" class="stat-val" style="color:#16a34a;">0</div>
-            <div class="stat-lbl">Output Tokens</div>
-          </div>
-          <div class="stat-box">
-            <div id="stTotalTok" class="stat-val" style="color:#7c3aed;">0</div>
-            <div class="stat-lbl">Total Tokens</div>
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-3">
-          <div class="stat-box">
-            <div id="stInputCost" class="stat-val" style="color:#0891b2;font-size:1rem;">$0.00000</div>
-            <div class="stat-lbl">Input Cost</div>
-          </div>
-          <div class="stat-box">
-            <div id="stOutputCost" class="stat-val" style="color:#16a34a;font-size:1rem;">$0.00000</div>
-            <div class="stat-lbl">Output Cost</div>
-          </div>
-          <div class="stat-box">
-            <div id="stTotalCost" class="stat-val" style="color:#ea580c;font-size:1rem;">$0.00000</div>
-            <div class="stat-lbl">Total Cost</div>
-          </div>
         </div>
       </section>
 
@@ -439,30 +413,23 @@
 
         </div><!-- /pg-grid-right -->
       </div><!-- /pg-grid -->
-      
+
       <!-- ══════════════════════════════════════
-           BEGINNER TIPS
+           TIPS MODAL
       ══════════════════════════════════════ -->
-      <div class="tips-panel mb-5" id="tipsTokenCost">
-        <div class="tips-panel-header" onclick="this.closest('.tips-panel').classList.toggle('open');this.setAttribute('aria-expanded',this.closest('.tips-panel').classList.contains('open'))" role="button" aria-expanded="false">
-          <div class="flex items-center gap-2.5">
-            <span style="font-size:1.1rem;">🎓</span>
-            <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Tips</span>
-            <span class="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold">2 tips</span>
+      <div class="modal-overlay" id="tipsModal" role="dialog" aria-modal="true" aria-label="Tips">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Tips</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
-          <svg class="tips-panel-chevron w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </div>
-        <div class="tips-panel-body">
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span><strong>Output tokens are always more expensive</strong>, generating text takes more compute than reading it.</span>
-          </div>
-          <div class="tip-item">
-            <div class="tip-dot"></div>
-            <span>Shorten your system prompt, it's sent with every request. A 500-token system prompt × 1000 calls = 500,000 extra tokens billed.</span>
-          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span><strong>Output tokens are always more expensive</strong>, generating text takes more compute than reading it.</span></li>
+            <li class="flex items-start gap-2.5"><span class="text-indigo-500 mt-0.5">→</span> <span>Shorten your system prompt, it's sent with every request. A 500-token system prompt × 1000 calls = 500,000 extra tokens billed.</span></li>
+          </ul>
         </div>
       </div>
 
@@ -600,9 +567,21 @@
     /* ─────────────────────────────────────────
        Boot
     ───────────────────────────────────────── */
-    window.addEventListener('load', () => {
+    /* ── Tips modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tipsModal');
+    if (!overlay) return;
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  window.addEventListener('load', () => {
       Utils.loadDarkPreference();
-      lucide.createIcons();
+      window.lucide && lucide.createIcons();
 
       /* ── DOM refs ────────────────────────── */
       const promptInput    = document.getElementById('promptInput');
@@ -622,12 +601,6 @@
       const outputCostLabel= document.getElementById('outputCostLabel');
       const totalCostDisplay=document.getElementById('totalCostDisplay');
 
-      const stInputTok     = document.getElementById('stInputTok');
-      const stOutputTok    = document.getElementById('stOutputTok');
-      const stTotalTok     = document.getElementById('stTotalTok');
-      const stInputCost    = document.getElementById('stInputCost');
-      const stOutputCost   = document.getElementById('stOutputCost');
-      const stTotalCost    = document.getElementById('stTotalCost');
 
       /* ── Dark icons ──────────────────────── */
       function syncDarkIcons() {
@@ -669,13 +642,6 @@
         outputCostLabel.textContent = formatCurrency(outCost);
         totalCostDisplay.textContent = formatCurrency(totalCost);
 
-        // Stats
-        stInputTok.textContent  = inputTokens.length;
-        stOutputTok.textContent = outputTokens.length;
-        stTotalTok.textContent  = inputTokens.length + outputTokens.length;
-        stInputCost.textContent  = formatCurrency(inCost);
-        stOutputCost.textContent = formatCurrency(outCost);
-        stTotalCost.textContent  = formatCurrency(totalCost);
       }
 
       /* ── Example buttons ─────────────────── */
