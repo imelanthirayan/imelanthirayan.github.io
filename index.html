@@ -686,25 +686,18 @@
         </p>
       </div>
 
-      <div class="flex flex-col gap-8 max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto items-stretch">
 
-        <!-- ── 01 · ChatUI ── -->
-        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col lg:flex-row">
-          <div class="lg:w-1.5 w-full h-1.5 lg:h-auto bg-gradient-to-r lg:bg-gradient-to-b from-brand-500 to-violet-400"></div>
-          <div class="project-visual lg:w-[55%] p-5 sm:p-7 flex items-center justify-center">
-            <a href="https://github.com/imelanthirayan/ChatUI" target="_blank" rel="noopener noreferrer" class="block w-full rounded-xl overflow-hidden border border-white/10 shadow-2xl shadow-black/40 group/img">
-              <img src="assets/projects/chatui-conversation.png" alt="ChatUI: ChatGPT-style conversation interface with markdown rendering and a files panel" loading="lazy" width="1580" height="871" class="w-full aspect-[16/10] object-cover object-top transition-transform duration-700 group-hover/img:scale-[1.04]" />
-            </a>
-          </div>
-          <div class="lg:w-[45%] p-6 sm:p-8 flex flex-col justify-center">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="project-index text-4xl" style="color:#818cf8;">01</span>
-              <h3 class="text-xl sm:text-2xl font-bold text-white leading-tight">ChatUI</h3>
+        <!-- 01 · ChatUI -->
+        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col">
+          <div class="h-1.5 w-full bg-gradient-to-r from-brand-500 to-violet-400"></div>
+          <div class="p-6 sm:p-7 flex flex-col flex-1">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="project-index text-3xl" style="color:#818cf8;">01</span>
+              <h3 class="text-lg sm:text-xl font-bold text-white leading-tight">ChatUI</h3>
             </div>
-            <p class="text-sm font-semibold text-brand-300 mb-3">A production-ready, provider-agnostic AI chat framework that lets teams switch LLM providers without rebuilding the application.</p>
-            <p class="text-sm text-slate-400 leading-relaxed mb-4">
-              Instead of coupling the user interface to a single model provider, ChatUI separates the frontend from the AI backend through a configurable provider layer. Whether you're using Azure OpenAI, OpenAI, Ollama, or another compatible API, the same application can switch providers without changing the UI.
-            </p>
+            <p class="text-sm font-semibold text-brand-300 mb-3 leading-snug">A production-ready, provider-agnostic AI chat framework that lets teams switch LLM providers without rebuilding the application.</p>
+            <p class="text-sm text-slate-400 leading-relaxed mb-4">Instead of coupling the user interface to a single model provider, ChatUI separates the frontend from the AI backend through a configurable provider layer. Whether you're using Azure OpenAI, OpenAI, Ollama, or another compatible API, the same application can switch providers without changing the UI.</p>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Why it matters</p>
             <ul class="flex flex-col gap-2 mb-5">
               <li class="flex items-start gap-2 text-sm text-slate-300">
@@ -721,10 +714,9 @@
               </li>
             </ul>
             <div class="flex flex-wrap gap-1.5 mb-4">
-              <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">MIT Licensed</span>
               <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">Open Source</span>
+              <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">MIT License</span>
               <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">Production Ready</span>
-              <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">Extensible</span>
               <span class="tech-badge" style="border-color:#818cf833;color:#818cf8;background:#818cf815;">AI Infrastructure</span>
             </div>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">Tech Stack</p>
@@ -738,35 +730,16 @@
           </div>
         </article>
 
-        <!-- ── 02 · File Tracker ── -->
-        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col lg:flex-row-reverse">
-          <div class="lg:w-1.5 w-full h-1.5 lg:h-auto bg-gradient-to-r lg:bg-gradient-to-b from-amber-500 to-orange-400"></div>
-          <div class="project-visual lg:w-[55%] p-5 sm:p-7 flex items-center">
-            <div class="term w-full rounded-xl overflow-hidden">
-              <div class="term-bar flex items-center gap-1.5 px-3 py-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
-                <span class="ml-2 text-[10px] font-mono text-slate-500">file-tracker · scan</span>
-              </div>
-<pre class="p-4 text-[11px] sm:text-xs leading-relaxed overflow-x-auto"><span class="c-prompt">$</span> file-tracker scan <span class="c-flag">--config</span> config.yaml
-<span class="c-dim">Scan:</span> data/scans/scan_2026-04-14.json
-Total files:  <span class="c-num">150</span>
-  Pending:    <span class="c-num">12</span>   <span class="c-dim">← only the delta</span>
-  Processed:  <span class="c-num">138</span>
-  New:        <span class="c-add">4</span>
-  Modified:   <span class="c-mod">8</span></pre>
+        <!-- 02 · File Tracker -->
+        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col">
+          <div class="h-1.5 w-full bg-gradient-to-r from-amber-500 to-orange-400"></div>
+          <div class="p-6 sm:p-7 flex flex-col flex-1">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="project-index text-3xl" style="color:#fbbf24;">02</span>
+              <h3 class="text-lg sm:text-xl font-bold text-white leading-tight">File Tracker</h3>
             </div>
-          </div>
-          <div class="lg:w-[45%] p-6 sm:p-8 flex flex-col justify-center">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="project-index text-4xl" style="color:#fbbf24;">02</span>
-              <h3 class="text-xl sm:text-2xl font-bold text-white leading-tight">File Tracker</h3>
-            </div>
-            <p class="text-sm font-semibold text-amber-300 mb-3">Turn "reprocess everything" into "process the delta."</p>
-            <p class="text-sm text-slate-400 leading-relaxed mb-4">
-              File Tracker is an incremental processing framework that detects exactly what has changed between runs, eliminating unnecessary work in AI and data pipelines. Instead of reprocessing every document, it identifies new, modified, and unchanged files so only the delta moves through the pipeline.
-            </p>
+            <p class="text-sm font-semibold text-amber-300 mb-3 leading-snug">Turn "reprocess everything" into "process the delta."</p>
+            <p class="text-sm text-slate-400 leading-relaxed mb-4">File Tracker is an incremental processing framework that detects exactly what has changed between runs, eliminating unnecessary work in AI and data pipelines. Instead of reprocessing every document, it identifies new, modified, and unchanged files so only the delta moves through the pipeline.</p>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Why it matters</p>
             <ul class="flex flex-col gap-2 mb-5">
               <li class="flex items-start gap-2 text-sm text-slate-300">
@@ -799,33 +772,16 @@ Total files:  <span class="c-num">150</span>
           </div>
         </article>
 
-        <!-- ── 03 · FolderWatcher ── -->
-        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col lg:flex-row">
-          <div class="lg:w-1.5 w-full h-1.5 lg:h-auto bg-gradient-to-r lg:bg-gradient-to-b from-emerald-500 to-teal-400"></div>
-          <div class="project-visual lg:w-[55%] p-5 sm:p-7 flex items-center">
-            <div class="term w-full rounded-xl overflow-hidden">
-              <div class="term-bar flex items-center gap-1.5 px-3 py-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
-                <span class="ml-2 text-[10px] font-mono text-slate-500">folder-watcher · watch</span>
-              </div>
-<pre class="p-4 text-[11px] sm:text-xs leading-relaxed overflow-x-auto"><span class="c-prompt">$</span> python3 quickstart.py /data/docs
-<span class="c-add">created:</span>  /data/docs/notes.txt
-<span class="c-mod">modified:</span> /data/docs/report.pdf
-<span class="c-del">deleted:</span>  /data/docs/old.md
-<span class="c-dim">→ re-embed 2 files · remove 1 from index</span></pre>
+        <!-- 03 · FolderWatcher -->
+        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col">
+          <div class="h-1.5 w-full bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+          <div class="p-6 sm:p-7 flex flex-col flex-1">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="project-index text-3xl" style="color:#34d399;">03</span>
+              <h3 class="text-lg sm:text-xl font-bold text-white leading-tight">FolderWatcher</h3>
             </div>
-          </div>
-          <div class="lg:w-[45%] p-6 sm:p-8 flex flex-col justify-center">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="project-index text-4xl" style="color:#34d399;">03</span>
-              <h3 class="text-xl sm:text-2xl font-bold text-white leading-tight">FolderWatcher</h3>
-            </div>
-            <p class="text-sm font-semibold text-emerald-300 mb-3">Event-driven ingestion, so the system reacts to reality.</p>
-            <p class="text-sm text-slate-400 leading-relaxed mb-4">
-              FolderWatcher automatically detects file creations, modifications, deletions, and moves, triggering downstream workflows the moment changes occur. Instead of relying on scheduled scans, it enables event-driven ingestion so pipelines stay up to date while minimizing unnecessary processing.
-            </p>
+            <p class="text-sm font-semibold text-emerald-300 mb-3 leading-snug">Event-driven ingestion, so the system reacts to reality.</p>
+            <p class="text-sm text-slate-400 leading-relaxed mb-4">FolderWatcher automatically detects file creations, modifications, deletions, and moves, triggering downstream workflows the moment changes occur. Instead of relying on scheduled scans, it enables event-driven ingestion so pipelines stay up to date while minimizing unnecessary processing.</p>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Why it matters</p>
             <ul class="flex flex-col gap-2 mb-5">
               <li class="flex items-start gap-2 text-sm text-slate-300">
@@ -858,38 +814,16 @@ Total files:  <span class="c-num">150</span>
           </div>
         </article>
 
-        <!-- ── 04 · milvuslite-kit ── -->
-        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col lg:flex-row-reverse">
-          <div class="lg:w-1.5 w-full h-1.5 lg:h-auto bg-gradient-to-r lg:bg-gradient-to-b from-cyan-500 to-sky-400"></div>
-          <div class="project-visual lg:w-[55%] p-5 sm:p-7 flex items-center">
-            <div class="term w-full rounded-xl overflow-hidden">
-              <div class="term-bar flex items-center gap-1.5 px-3 py-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-amber-400/70"></span>
-                <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
-                <span class="ml-2 text-[10px] font-mono text-slate-500">config.yaml</span>
-              </div>
-<pre class="p-4 text-[11px] sm:text-xs leading-relaxed overflow-x-auto"><span class="c-key">collections:</span>
-  <span class="c-key">documents:</span>
-    <span class="c-key">columns:</span>
-      - <span class="c-key">name:</span> title
-        <span class="c-key">type:</span> text
-      - <span class="c-key">name:</span> embedding
-        <span class="c-key">type:</span> vector
-        <span class="c-key">dimension:</span> <span class="c-num">768</span>
-        <span class="c-key">metric_type:</span> COSINE
-        <span class="c-key">index:</span> { type: HNSW }</pre>
+        <!-- 04 · milvuslite-kit -->
+        <article class="project-card glass glass-hover rounded-2xl overflow-hidden flex flex-col">
+          <div class="h-1.5 w-full bg-gradient-to-r from-cyan-500 to-sky-400"></div>
+          <div class="p-6 sm:p-7 flex flex-col flex-1">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="project-index text-3xl" style="color:#22d3ee;">04</span>
+              <h3 class="text-lg sm:text-xl font-bold text-white leading-tight">milvuslite-kit</h3>
             </div>
-          </div>
-          <div class="lg:w-[45%] p-6 sm:p-8 flex flex-col justify-center">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="project-index text-4xl" style="color:#22d3ee;">04</span>
-              <h3 class="text-xl sm:text-2xl font-bold text-white leading-tight">milvuslite-kit</h3>
-            </div>
-            <p class="text-sm font-semibold text-cyan-300 mb-3">Right-size vector search: start on a file, scale to a cluster.</p>
-            <p class="text-sm text-slate-400 leading-relaxed mb-4">
-              milvuslite-kit simplifies semantic search by letting you define collections, schemas, and indexes declaratively in YAML while running on Milvus Lite. Start with a lightweight, infrastructure-free setup for development, then transition to Milvus Standalone or Distributed without changing your data model.
-            </p>
+            <p class="text-sm font-semibold text-cyan-300 mb-3 leading-snug">Right-size vector search: start on a file, scale to a cluster.</p>
+            <p class="text-sm text-slate-400 leading-relaxed mb-4">milvuslite-kit simplifies semantic search by letting you define collections, schemas, and indexes declaratively in YAML while running on Milvus Lite. Start with a lightweight, infrastructure-free setup for development, then transition to Milvus Standalone or Distributed without changing your data model.</p>
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Why it matters</p>
             <ul class="flex flex-col gap-2 mb-5">
               <li class="flex items-start gap-2 text-sm text-slate-300">
