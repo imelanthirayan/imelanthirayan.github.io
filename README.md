@@ -1,51 +1,128 @@
 <h1 align="center">Hey, I'm Elanthirayan (Ela) 👋</h1>
 
 <p align="center">
-  <b>Full Stack & AI Engineer</b> — I build cloud-native apps end to end, from the pixels you click to the services quietly humming in the cloud.
+  <b>Senior AI & Software Engineer</b><br/>
+  Building AI-powered applications, cloud-native platforms, and software architectures that solve real-world problems.
 </p>
 
 <p align="center">
-  <a href="https://imelanthirayan.github.io/">🌐 Portfolio</a> &nbsp;•&nbsp;
-  <a href="https://imelanthirayan.github.io/aiplayground/">🧠 AI Playground</a> &nbsp;•&nbsp;
-  <a href="https://elanthirayan.medium.com/">✍️ Blog</a> &nbsp;•&nbsp;
+  <a href="https://imelanthirayan.github.io/">🌐 Portfolio</a>
+  •
+  <a href="https://imelanthirayan.github.io/aiplayground/">🧠 AI Concepts Playground</a>
+  •
+  <a href="https://elanthirayan.medium.com/">✍️ Medium</a>
+  •
   <a href="https://www.linkedin.com/in/elanthirayan/">💼 LinkedIn</a>
 </p>
 
 ---
 
-### 🚀 What I'm about
+## 👨‍💻 About Me
 
-I design and ship **scalable, cloud-native solutions** that solve real problems with clean, maintainable code. My happy place is the whole stack — crafting frontends, engineering reliable backend services and APIs, wiring up cloud infrastructure, and folding in **AI/Generative AI** where it actually adds value.
+I'm passionate about building software that connects **AI, cloud, and modern software architecture** into practical solutions.
 
-Along the way I've also worked across **HPC, XR / Spatial Computing, and Digital Twins** — because building across domains is half the fun.
+I enjoy working across the entire engineering lifecycle—from designing user experiences and scalable APIs to deploying cloud-native systems and integrating Generative AI where it creates measurable value.
 
-```js
-const elanthirayan = {
-  role: "Full Stack & AI Engineer",
-  focus: [
-    "AI / Generative AI",
-    "API development",
-    "frontend",
-    "backend",
-    "cloud infrastructure",
-    "HPC",
-    "XR / Spatial Computing",
-    "Digital Twins",
+Over the years I've worked across multiple domains including:
+
+- 🤖 Generative AI & LLM Applications
+- 🏗️ Software Architecture & System Design
+- ☁️ Cloud-Native Engineering (Azure)
+- ⚡ Backend APIs & Distributed Services
+- 🌐 Full-Stack Web Applications
+- 🥽 XR / Spatial Computing
+- 🌍 Digital Twins & OpenUSD
+- 🚀 High Performance Computing (HPC)
+
+---
+
+## ⚙️ Current Focus
+
+```javascript
+const ela = {
+  role: "Senior AI & Software Engineer",
+
+  currentlyBuilding: [
+    "AI-powered applications",
+    "Agentic AI systems",
+    "Cloud-native platforms",
+    "Software architecture",
+    "Interactive AI education"
   ],
-  drivenBy: "turning cross-domain complexity into end-to-end solutions that move the business forward",
+
+  exploring: [
+    "AI Agents",
+    "LLM Infrastructure",
+    "RAG",
+    "Knowledge Graphs",
+    "Model Optimization"
+  ],
+
+  philosophy:
+    "Build practical software. Keep architectures simple. Make complex ideas easy to understand."
 };
 ```
 
-### 🧠 AI Concepts Playground
+---
 
-A side project I've been building: interactive lessons that explain how AI actually works — by letting you play with it instead of reading theory. Click through LLMs, embeddings, RAG, transformers, and AI agents at your own pace, no setup required.
+## 🧠 AI Concepts Playground
 
-**[Take a look →](https://imelanthirayan.github.io/aiplayground/)**
+One of my favorite side projects.
 
-### ✍️ I also write
+**AI Concepts Playground** is an interactive learning platform designed to help developers understand AI by experimenting with concepts instead of reading long documentation.
 
-I share notes on engineering, AI, and things I learn along the way over on Medium → **[elanthirayan.medium.com](https://elanthirayan.medium.com/)**
+Explore topics like:
 
-### 👋 Say hi
+- Transformers
+- LLM Architecture
+- Embeddings
+- Vector Search
+- RAG
+- AI Agents
+- Prompt Engineering
+- MCP
+- Fine-Tuning
 
-Happy to chat about software, system design, or AI. Find me on **[LinkedIn](https://www.linkedin.com/in/elanthirayan/)** or through **[imelanthirayan.github.io](https://imelanthirayan.github.io/)**
+No installation. No prerequisites. Just interactive learning.
+
+👉 **https://imelanthirayan.github.io/aiplayground/**
+
+---
+
+## ✍️ Writing
+
+I regularly write beginner-friendly articles covering:
+
+- Artificial Intelligence
+- LLMs
+- Software Architecture
+- Cloud Engineering
+- Modern Development
+
+📖 **https://elanthirayan.medium.com**
+
+---
+
+## 🌍 Open Source
+
+I enjoy contributing to open-source projects and building educational tools that help developers understand complex technologies through practical examples.
+
+If something I build helps you learn, that's a win.
+
+---
+
+## 🤝 Let's Connect
+
+I'm always happy to connect with people interested in:
+
+- Artificial Intelligence
+- Software Architecture
+- Cloud Engineering
+- Full-Stack Development
+- Open Source
+
+📫 **Portfolio:** https://imelanthirayan.github.io
+
+💼 **LinkedIn:** https://www.linkedin.com/in/elanthirayan
+
+✍️ **Medium:** https://elanthirayan.medium.com
