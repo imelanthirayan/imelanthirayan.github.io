@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Reducing Hallucinations — an interactive lesson on practical ways to reduce unsupported AI answers using trusted context, clear instructions, evidence, and verification, and why hallucinations cannot be fully removed." />
+  <title>Reducing Hallucinations, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/reducing-hallucinations.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Reducing Hallucinations, AI Concepts Playground" />
+  <meta property="og:description" content="Practical ways to reduce unsupported AI answers using trusted context, clear instructions, evidence, and verification." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/reducing-hallucinations.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Reducing Hallucinations, AI Concepts Playground" />
+  <meta name="twitter:description" content="Practical ways to reduce unsupported AI answers using trusted context, clear instructions, evidence, and verification." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0284c7; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #38bdf8; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0284c7; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(2,132,199,0.25); background: rgba(2,132,199,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(2,132,199,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.28); background: rgba(2,132,199,0.1); }
+
+    /* ── Playground: question chooser ────────── */
+    .q-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    @media (max-width: 620px) { .q-grid { grid-template-columns: 1fr; } }
+    .q-card {
+      cursor: pointer; text-align: left; display: flex; align-items: center; gap: 0.8rem;
+      border-radius: 1rem; padding: 0.95rem 1.05rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    html.dark .q-card { background: #0f172a; border-color: #334155; }
+    .q-card:hover { border-color: rgba(14,165,233,0.45); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14,165,233,0.1); }
+    .q-card.active { border-color: #0ea5e9; background: rgba(14,165,233,0.06); box-shadow: 0 8px 22px rgba(14,165,233,0.16); }
+    html.dark .q-card.active { background: rgba(14,165,233,0.14); border-color: #38bdf8; }
+    .q-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.22s ease; }
+    html.dark .q-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .q-card.active .q-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .q-title { font-weight: 800; font-size: 0.9rem; color: #1e293b; line-height: 1.3; }
+    html.dark .q-title { color: #f1f5f9; }
+
+    /* mode segmented control */
+    .mode-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 1rem; }
+    @media (max-width: 560px) { .mode-seg { grid-template-columns: 1fr; } }
+    .mode-btn {
+      cursor: pointer; text-align: center; padding: 0.7rem 0.6rem; border-radius: 0.85rem;
+      font-weight: 800; font-size: 0.82rem; color: #475569;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.2s ease;
+      display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    }
+    html.dark .mode-btn { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+    .mode-btn:hover { border-color: rgba(14,165,233,0.45); }
+    .mode-btn .mode-step { font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+    .mode-btn.active { border-color: #0ea5e9; background: rgba(14,165,233,0.07); color: #0369a1; box-shadow: 0 6px 16px rgba(14,165,233,0.14); }
+    html.dark .mode-btn.active { background: rgba(14,165,233,0.14); color: #7dd3fc; border-color: #38bdf8; }
+    .mode-btn.active .mode-step { color: #0ea5e9; }
+
+    /* generate button */
+    .gen-btn {
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-size: 0.9rem; font-weight: 800; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px;
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9); border: none;
+      box-shadow: 0 8px 20px rgba(14,165,233,0.32); transition: all 0.2s ease;
+    }
+    .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(14,165,233,0.42); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .gen-btn.ghost { color: #0284c7; background: white; border: 1.5px solid rgba(14,165,233,0.4); box-shadow: none; }
+    .gen-btn.ghost:hover { background: rgba(14,165,233,0.07); box-shadow: 0 6px 16px rgba(14,165,233,0.16); }
+    html.dark .gen-btn.ghost { background: #0f172a; color: #7dd3fc; border-color: rgba(56,189,248,0.35); }
+
+    /* animated flow steps in output */
+    .flow-step { opacity: 0; transform: translateY(10px); animation: stepIn 0.45s ease forwards; }
+    @keyframes stepIn { to { opacity: 1; transform: translateY(0); } }
+    .step-label { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 1.25rem 0 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+
+    /* document / context card */
+    .doc-card { border-radius: 1rem; padding: 1rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .doc-card { background: #0f172a; border-color: #334155; }
+    .doc-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.6rem; }
+    .doc-ic { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .doc-title { font-weight: 900; font-size: 0.92rem; color: #1e293b; }
+    html.dark .doc-title { color: #f1f5f9; }
+    .doc-line { font-size: 0.86rem; font-weight: 600; color: #334155; padding: 0.4rem 0; }
+    html.dark .doc-line { color: #e2e8f0; }
+    .doc-line mark { background: rgba(234,179,8,0.35); color: inherit; padding: 0.1rem 0.3rem; border-radius: 0.35rem; font-weight: 800; }
+    html.dark .doc-line mark { background: rgba(234,179,8,0.3); }
+    .doc-empty { border-style: dashed; color: #94a3b8; font-weight: 600; font-size: 0.86rem; text-align: center; padding: 1.1rem; }
+    html.dark .doc-empty { color: #64748b; }
+    .doc-instr { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed #e2e8f0; }
+    html.dark .doc-instr { border-color: #334155; }
+    .doc-instr-h { font-size: 0.62rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #0369a1; margin-bottom: 0.4rem; }
+    html.dark .doc-instr-h { color: #7dd3fc; }
+    .doc-instr-i { display: flex; align-items: flex-start; gap: 0.45rem; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem; }
+    html.dark .doc-instr-i { color: #e2e8f0; }
+    .doc-instr-i i { color: #0ea5e9; flex-shrink: 0; margin-top: 0.1rem; }
+
+    /* AI answer bubble */
+    .ai-response { display: flex; gap: 0.8rem; padding: 1.1rem 1.2rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .ai-response { background: #0f172a; border-color: #334155; }
+    .ai-avatar { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .ai-name { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.2rem; }
+    .ai-text { font-size: 0.92rem; font-weight: 600; color: #334155; line-height: 1.5; }
+    html.dark .ai-text { color: #e2e8f0; }
+
+    /* evidence / metric rows */
+    .ev-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+    @media (max-width: 520px) { .ev-list { grid-template-columns: 1fr; } }
+    .ev-row {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem;
+      border-radius: 0.75rem; border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .ev-row { background: #0f172a; border-color: #334155; }
+    .ev-row i { flex-shrink: 0; }
+    .ev-k { font-size: 0.7rem; font-weight: 700; color: #64748b; }
+    html.dark .ev-k { color: #94a3b8; }
+    .ev-v { font-size: 0.85rem; font-weight: 800; color: #1e293b; }
+    html.dark .ev-v { color: #f1f5f9; }
+    .ev-row.good { border-color: rgba(22,163,74,0.35); background: rgba(22,163,74,0.05); }
+    html.dark .ev-row.good { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); }
+    .ev-row.good i { color: #16a34a; }
+    .ev-row.bad { border-color: rgba(220,38,38,0.4); background: rgba(220,38,38,0.05); }
+    html.dark .ev-row.bad { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.35); }
+    .ev-row.bad i { color: #dc2626; }
+    .ev-row.neutral i { color: #64748b; }
+
+    /* hallucination-risk meter */
+    .risk-meter { margin-top: 0.9rem; padding: 0.85rem 1rem; border-radius: 0.9rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .risk-meter { background: #0f172a; border-color: #334155; }
+    .risk-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin-bottom: 0.55rem; }
+    .risk-cap { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; display: flex; align-items: center; gap: 0.35rem; }
+    .risk-pill { font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.03em; padding: 0.2rem 0.6rem; border-radius: 9999px; }
+    .risk-bar { display: flex; gap: 0.3rem; }
+    .risk-seg { flex: 1; height: 8px; border-radius: 9999px; background: #e2e8f0; transition: background 0.4s ease; }
+    html.dark .risk-seg { background: #334155; }
+    .risk-meter.high .risk-pill { color: #b91c1c; background: rgba(220,38,38,0.15); }
+    html.dark .risk-meter.high .risk-pill { color: #f87171; background: rgba(220,38,38,0.22); }
+    .risk-meter.high .risk-seg { background: #ef4444; }
+    .risk-meter.lower .risk-pill { color: #15803d; background: rgba(22,163,74,0.15); }
+    html.dark .risk-meter.lower .risk-pill { color: #4ade80; background: rgba(22,163,74,0.22); }
+    .risk-meter.lower .risk-seg.on { background: #22c55e; }
+
+    /* notes */
+    .chk-note { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; padding: 0.9rem 1.1rem; border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3); }
+    html.dark .chk-note { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+    .chk-note i { flex-shrink: 0; }
+    .chk-note.warn { color: #a16207; background: rgba(234,179,8,0.09); border-color: rgba(234,179,8,0.4); }
+    html.dark .chk-note.warn { color: #fde047; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.35); }
+    .chk-note.good { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.32); }
+    html.dark .chk-note.good { color: #4ade80; background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.3); }
+
+    .chk-empty { margin-top: 1.4rem; padding: 1.6rem 1rem; text-align: center; border-radius: 1rem; border: 1.5px dashed #e2e8f0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; }
+    html.dark .chk-empty { border-color: #334155; color: #64748b; }
+
+    /* ── Accordion (why-happen + pipeline) ───── */
+    .acc { display: flex; flex-direction: column; gap: 0.6rem; }
+    .acc-item {
+      border: 1.5px solid #e2e8f0; border-radius: 1rem; background: #f8fafc; overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    html.dark .acc-item { background: #0f172a; border-color: #334155; }
+    .acc-item:hover { border-color: rgba(14,165,233,0.4); }
+    .acc-item.open { border-color: #0ea5e9; background: white; box-shadow: 0 8px 22px rgba(14,165,233,0.12); }
+    html.dark .acc-item.open { background: #1e293b; border-color: #38bdf8; }
+    .acc-row { width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.85rem; padding: 0.9rem 1.1rem; text-align: left; background: transparent; border: none; }
+    .acc-ic { width: 40px; height: 40px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.25s ease; }
+    html.dark .acc-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .acc-item.open .acc-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .acc-info { flex: 1; min-width: 0; }
+    .acc-title { font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .acc-title { color: #f1f5f9; }
+    .acc-step { flex-shrink: 0; font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.16rem 0.5rem; border-radius: 9999px; color: #0369a1; background: rgba(56,189,248,0.16); margin-right: 0.2rem; }
+    html.dark .acc-step { color: #7dd3fc; background: rgba(56,189,248,0.2); }
+    .acc-chev { flex-shrink: 0; color: #94a3b8; transition: transform 0.3s ease, color 0.3s ease; }
+    .acc-item.open .acc-chev { transform: rotate(180deg); color: #0ea5e9; }
+    .acc-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .acc-item.open .acc-panel { max-height: 320px; }
+    .acc-panel-inner { padding: 0 1.1rem 1rem; }
+    .acc-desc { font-size: 0.88rem; font-weight: 600; color: #334155; line-height: 1.5; }
+    html.dark .acc-desc { color: #e2e8f0; }
+    .acc-ex { margin-top: 0.65rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .acc-chip { font-size: 0.74rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.1); border: 1.5px solid rgba(56,189,248,0.25); padding: 0.28rem 0.6rem; border-radius: 9999px; }
+    html.dark .acc-chip { color: #7dd3fc; background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.25); }
+    .acc-tip { margin-top: 0.7rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; font-weight: 700; color: #a16207; background: rgba(234,179,8,0.09); border: 1.5px solid rgba(234,179,8,0.3); padding: 0.6rem 0.8rem; border-radius: 0.75rem; }
+    html.dark .acc-tip { color: #fde047; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.3); }
+    .acc-tip i { flex-shrink: 0; }
+    .acc-arrow { text-align: center; color: #0ea5e9; font-weight: 900; font-size: 1.05rem; line-height: 1; margin: 0.15rem 0; }
+
+    /* ── Confidence vs Evidence ──────────────── */
+    .cve-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+    @media (max-width: 620px) { .cve-grid { grid-template-columns: 1fr; } }
+    .cve-card { border-radius: 1.1rem; padding: 1.15rem 1.25rem; border: 1.5px solid #e2e8f0; }
+    .cve-card.bad { background: rgba(220,38,38,0.04); border-color: rgba(220,38,38,0.3); }
+    html.dark .cve-card.bad { background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.3); }
+    .cve-card.good { background: rgba(22,163,74,0.05); border-color: rgba(22,163,74,0.32); }
+    html.dark .cve-card.good { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); }
+    .cve-head { display: flex; align-items: center; gap: 0.5rem; font-weight: 900; font-size: 0.92rem; margin-bottom: 0.7rem; }
+    .cve-card.bad .cve-head { color: #b91c1c; }
+    html.dark .cve-card.bad .cve-head { color: #f87171; }
+    .cve-card.good .cve-head { color: #15803d; }
+    html.dark .cve-card.good .cve-head { color: #4ade80; }
+    .cve-quote { font-size: 0.86rem; font-weight: 600; font-style: italic; color: #334155; line-height: 1.5; padding: 0.7rem 0.85rem; border-radius: 0.75rem; background: white; border: 1.5px solid #e2e8f0; margin-bottom: 0.7rem; }
+    html.dark .cve-quote { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .cve-meta { display: flex; flex-direction: column; gap: 0.35rem; }
+    .cve-mrow { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.8rem; }
+    .cve-mk { font-weight: 700; color: #64748b; }
+    html.dark .cve-mk { color: #94a3b8; }
+    .cve-mv { font-weight: 800; color: #1e293b; }
+    html.dark .cve-mv { color: #f1f5f9; }
+    .cve-result { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 900; }
+    .cve-card.bad .cve-result { color: #b91c1c; }
+    html.dark .cve-card.bad .cve-result { color: #f87171; }
+    .cve-card.good .cve-result { color: #15803d; }
+    html.dark .cve-card.good .cve-result { color: #4ade80; }
+
+    /* ── Limitations list ────────────────────── */
+    .lim-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .lim-row { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.7rem 0.9rem; border-radius: 0.8rem; font-size: 0.86rem; font-weight: 600; color: #334155; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .lim-row { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .lim-row i { color: #d97706; flex-shrink: 0; margin-top: 0.1rem; }
+    html.dark .lim-row i { color: #fbbf24; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(56,189,248,0.04));
+      border: 1.5px solid rgba(14,165,233,0.22); border-left: 4px solid #0ea5e9; border-radius: 1.25rem;
+    }
+    html.dark .takeaway { background: linear-gradient(135deg, rgba(14,165,233,0.06), rgba(56,189,248,0.03)); border-color: rgba(56,189,248,0.2); border-left-color: #38bdf8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.08); color: #0284c7; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(14,165,233,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.3); background: rgba(14,165,233,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 500px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(14,165,233,0.5); color: #0284c7; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-900/30">
+          <span class="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>
+          <span class="text-sky-700 dark:text-sky-400 text-xs font-bold tracking-wide">🛡️ AI Safety</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–10 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="wand-2" class="w-7 h-7 text-sky-600 dark:text-sky-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Reducing Hallucinations</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Hallucinations can be reduced by giving the AI
+          <strong class="text-slate-800 dark:text-slate-200">reliable information</strong>,
+          <strong class="text-slate-800 dark:text-slate-200">clearer instructions</strong>, and
+          <strong class="text-slate-800 dark:text-slate-200">permission to say when it does not know</strong>.
+          But reducing hallucinations does not guarantee that every answer will be correct.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Answer Grounding Simulator</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Pick a question, choose how much <strong class="text-slate-800 dark:text-slate-200">context</strong> the AI gets, then press
+          <strong class="text-slate-800 dark:text-slate-200">Generate Answer</strong>. Watch how evidence changes the
+          <strong class="text-slate-800 dark:text-slate-200">hallucination risk</strong>.
+        </p>
+
+        <!-- question chooser -->
+        <div class="q-grid" id="qGrid"></div>
+
+        <!-- mode chooser -->
+        <div class="mode-seg" id="modeSeg"></div>
+
+        <div class="mt-5">
+          <button class="gen-btn" id="genBtn">
+            <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Generate Answer
+          </button>
+        </div>
+
+        <!-- output -->
+        <div id="playOutput">
+          <div class="chk-empty">Choose a question and a context mode, then press <strong>Generate Answer</strong>.</div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHY HALLUCINATIONS HAPPEN
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Why Hallucinations Happen</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Four common reasons</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Tap a reason to see when it tends to happen.
+        </p>
+
+        <div class="acc" id="whyAcc"></div>
+
+        <div class="chk-note warn" style="margin-top:1.25rem;">
+          <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+          <span>A clear and confident response is not always a correct response.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. WAYS TO REDUCE HALLUCINATIONS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-merge" style="width:12px;height:12px;"></i>Ways to Reduce Hallucinations</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A simple grounding pipeline</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Click each stage to see what it does. Each step helps the answer stay closer to the evidence.
+        </p>
+
+        <div class="acc" id="pipeAcc"></div>
+
+        <div class="chk-note" style="margin-top:1.25rem;">
+          <i data-lucide="info" style="width:18px;height:18px;"></i>
+          <span>AI can assist with an answer, but evidence determines whether it should be trusted.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. CONFIDENCE VS EVIDENCE
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="scale" style="width:12px;height:12px;"></i>Confidence vs Evidence</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Sounding sure is not the same as being right</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Two answers to the same maintenance question — one sounds confident, the other shows its source.
+        </p>
+
+        <div class="cve-grid">
+          <div class="cve-card bad">
+            <div class="cve-head"><i data-lucide="alert-triangle" style="width:18px;height:18px;"></i> Confident but Unsupported</div>
+            <div class="cve-quote">“The equipment must be replaced every five years.”</div>
+            <div class="cve-meta">
+              <div class="cve-mrow"><span class="cve-mk">Confidence</span><span class="cve-mv">High</span></div>
+              <div class="cve-mrow"><span class="cve-mk">Evidence</span><span class="cve-mv">None</span></div>
+            </div>
+            <div class="cve-result">→ Do not trust automatically.</div>
+          </div>
+          <div class="cve-card good">
+            <div class="cve-head"><i data-lucide="check-circle-2" style="width:18px;height:18px;"></i> Cautious and Supported</div>
+            <div class="cve-quote">“The maintenance policy states inspection is required every five years. It does not say replacement is mandatory.”</div>
+            <div class="cve-meta">
+              <div class="cve-mrow"><span class="cve-mk">Confidence</span><span class="cve-mv">Moderate</span></div>
+              <div class="cve-mrow"><span class="cve-mk">Evidence</span><span class="cve-mv">Maintenance Policy, Section 4</span></div>
+            </div>
+            <div class="cve-result">→ More trustworthy.</div>
+          </div>
+        </div>
+
+        <div class="chk-note" style="margin-top:1.25rem;">
+          <i data-lucide="info" style="width:18px;height:18px;"></i>
+          <span>Confidence is how certain an answer <em>sounds</em>. Evidence is what <em>supports</em> it — and <strong>evidence matters more than confident wording</strong>.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. IMPORTANT LIMITATIONS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="shield-off" style="width:12px;height:12px;"></i>Important Limitations</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">These methods reduce risk, not remove it</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Even a grounded answer can still be wrong. Here is what can still go wrong:
+        </p>
+
+        <div class="lim-list">
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The source itself may be wrong.</div>
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The source may be outdated.</div>
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The wrong document may be retrieved.</div>
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The AI may misunderstand the context.</div>
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The answer may combine facts incorrectly.</div>
+          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> A source reference may not fully support the claim.</div>
+        </div>
+
+        <div class="chk-note warn" style="margin-top:1.25rem;">
+          <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+          <span>Grounded does not automatically mean correct.</span>
+        </div>
+        <div class="chk-note" style="margin-top:0.75rem;">
+          <i data-lucide="info" style="width:18px;height:18px;"></i>
+          <span>Retrieval-Augmented Generation can reduce unsupported answers, but it is not a complete guarantee against hallucinations.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           8. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-sky-500 dark:bg-sky-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• Give the AI <strong class="text-slate-900 dark:text-white">trusted and relevant context</strong>.</li>
+              <li>• Use <strong class="text-slate-900 dark:text-white">clear instructions</strong> that discourage guessing.</li>
+              <li>• Let the AI <strong class="text-slate-900 dark:text-white">say when information is missing</strong>.</li>
+              <li>• Ask for <strong class="text-slate-900 dark:text-white">evidence or sources</strong>.</li>
+              <li>• Do not confuse <strong class="text-slate-900 dark:text-white">confidence with correctness</strong>.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Verify important answers</strong> against the original source.</li>
+              <li>• Hallucinations can be <strong class="text-slate-900 dark:text-white">reduced, but not completely eliminated</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Generate an answer with <strong>No Context</strong> first.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Add the trusted policy document and run again.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Enable the safety instructions and compare.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Try the question whose answer is missing.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare confident wording with the actual evidence.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Notice when the safest response is “The information is not available.”</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(14,165,233,0.05),rgba(56,189,248,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Hallucinations are reduced when AI answers are grounded in trusted information, guided by clear instructions, and checked against evidence. When the facts are missing, the safest answer may be to say so.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="bias.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Bias in AI
+        </a>
+        <a href="evaluating-ai-responses.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-sky-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Evaluating AI Responses</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Safety');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Reducing Hallucinations, playground
+  ═══════════════════════════════════════════════ */
+
+  /* ── 2. Answer Grounding Simulator ── */
+  const DOC = { title: 'Orion Policy', line: 'Version 3.2 — Updated 12 September 2025' };
+
+  const MODES = [
+    { id: 'none',    step: 'Mode 1', label: 'No Context' },
+    { id: 'trusted', step: 'Mode 2', label: 'Trusted Context' },
+    { id: 'safety',  step: 'Mode 3', label: 'Trusted + Safety' },
+  ];
+
+  const QUESTIONS = [
+    {
+      id: 'q1', icon: 'calendar-clock', label: 'When was the Orion Policy last updated?',
+      answers: {
+        none: {
+          text: 'The Orion Policy was last updated in March 2024.',
+          context: 'none',
+          metrics: [
+            { k: 'Evidence',      v: 'None',        s: 'bad' },
+            { k: 'Answer status', v: 'Unsupported', s: 'bad' },
+          ],
+          risk: 'high',
+          note: 'The answer sounds confident, but no evidence was provided.', noteType: 'warn',
+        },
+        trusted: {
+          text: 'The Orion Policy was last updated on 12 September 2025.',
+          context: 'doc', highlight: true,
+          metrics: [
+            { k: 'Evidence',      v: 'Orion Policy', s: 'good' },
+            { k: 'Answer status', v: 'Supported',    s: 'good' },
+          ],
+          risk: 'lower',
+          note: 'Reliable context gives the AI something to base its answer on.', noteType: 'good',
+        },
+        safety: {
+          text: 'According to Orion Policy version 3.2, it was last updated on 12 September 2025.',
+          context: 'doc', highlight: true, instructions: true,
+          metrics: [
+            { k: 'Evidence',                 v: 'Orion Policy', s: 'good' },
+            { k: 'Source included',          v: 'Yes',          s: 'good' },
+            { k: 'Safety instruction followed', v: 'Yes',       s: 'good' },
+          ],
+          risk: 'lower',
+          note: 'The answer names its source and follows the safety rules.', noteType: 'good',
+        },
+      },
+    },
+    {
+      id: 'q2', icon: 'user-x', label: 'Who approved the latest Orion Policy?',
+      answers: {
+        none: {
+          text: 'The latest Orion Policy was approved by Director Alan Reed.',
+          context: 'none',
+          metrics: [
+            { k: 'Evidence',      v: 'None',                 s: 'bad' },
+            { k: 'Answer status', v: 'Invented (unsupported)', s: 'bad' },
+          ],
+          risk: 'high',
+          note: 'This name was invented — the AI had no document to check.', noteType: 'warn',
+        },
+        trusted: {
+          text: 'The provided document does not identify who approved the policy.',
+          context: 'doc', highlight: false, missing: true,
+          metrics: [
+            { k: 'Evidence',      v: 'Orion Policy',    s: 'good' },
+            { k: 'Answer status', v: 'Not in document', s: 'neutral' },
+          ],
+          risk: 'lower',
+          note: 'Saying “I don’t know” is safer than inventing an answer.', noteType: 'good',
+        },
+        safety: {
+          text: 'According to Orion Policy version 3.2, the document does not state who approved it.',
+          context: 'doc', highlight: false, missing: true, instructions: true,
+          metrics: [
+            { k: 'Evidence',                 v: 'Orion Policy', s: 'good' },
+            { k: 'Source included',          v: 'Yes',          s: 'good' },
+            { k: 'Safety instruction followed', v: 'Yes',       s: 'good' },
+          ],
+          risk: 'lower',
+          note: 'The safety rules told the AI to say when the answer is missing.', noteType: 'good',
+        },
+      },
+    },
+  ];
+
+  const SAFETY_INSTRUCTIONS = [
+    'Answer only from the provided document.',
+    'Mention the source.',
+    'Say when the answer is not available.',
+  ];
+
+  const qGrid     = document.getElementById('qGrid');
+  const modeSeg   = document.getElementById('modeSeg');
+  const genBtn    = document.getElementById('genBtn');
+  const playOutput = document.getElementById('playOutput');
+  let activeQ = QUESTIONS[0].id;
+  let activeMode = 'none';
+
+  function renderQuestions() {
+    qGrid.innerHTML = QUESTIONS.map(q => `
+      <button class="q-card ${q.id === activeQ ? 'active' : ''}" data-q="${q.id}">
+        <span class="q-ic"><i data-lucide="${q.icon}" style="width:20px;height:20px;"></i></span>
+        <span class="q-title">${q.label}</span>
+      </button>`).join('');
+    qGrid.querySelectorAll('.q-card').forEach(btn =>
+      btn.addEventListener('click', () => { activeQ = btn.dataset.q; renderQuestions(); clearOutput(); })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function renderModes() {
+    modeSeg.innerHTML = MODES.map(m => `
+      <button class="mode-btn ${m.id === activeMode ? 'active' : ''}" data-mode="${m.id}">
+        <span class="mode-step">${m.step}</span>${m.label}
+      </button>`).join('');
+    modeSeg.querySelectorAll('.mode-btn').forEach(btn =>
+      btn.addEventListener('click', () => { activeMode = btn.dataset.mode; renderModes(); clearOutput(); })
+    );
+  }
+
+  function clearOutput() {
+    playOutput.innerHTML = `<div class="chk-empty">Selection changed. Press <strong>Generate Answer</strong> to see the result.</div>`;
+  }
+
+  function contextBlock(a) {
+    if (a.context === 'none') {
+      return `<div class="doc-card doc-empty flow-step" style="animation-delay:60ms;"><i data-lucide="file-x" style="width:16px;height:16px;display:inline;vertical-align:-2px;"></i> No supporting document provided.</div>`;
+    }
+    const line = a.highlight
+      ? `Version 3.2 — <mark>Updated 12 September 2025</mark>`
+      : DOC.line;
+    const instr = a.instructions ? `
+      <div class="doc-instr">
+        <div class="doc-instr-h">System instructions</div>
+        ${SAFETY_INSTRUCTIONS.map(t => `<div class="doc-instr-i"><i data-lucide="check" style="width:14px;height:14px;"></i> ${t}</div>`).join('')}
+      </div>` : '';
+    const missingHint = a.missing
+      ? `<div class="doc-line" style="color:#94a3b8;font-style:italic;"><i data-lucide="search-x" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> No line in this document names an approver.</div>`
+      : '';
+    return `
+      <div class="doc-card flow-step" style="animation-delay:60ms;">
+        <div class="doc-head">
+          <div class="doc-ic"><i data-lucide="file-text" style="width:17px;height:17px;"></i></div>
+          <div class="doc-title">${DOC.title}</div>
+        </div>
+        <div class="doc-line">${line}</div>
+        ${missingHint}
+        ${instr}
+      </div>`;
+  }
+
+  function riskBlock(risk) {
+    const segs = [0,1,2].map(i => {
+      const on = (risk === 'high') || (risk === 'lower' && i === 0);
+      return `<div class="risk-seg ${on ? 'on' : ''}"></div>`;
+    }).join('');
+    const label = risk === 'high' ? 'High' : 'Lower';
+    return `
+      <div class="risk-meter ${risk} flow-step" style="animation-delay:240ms;">
+        <div class="risk-top">
+          <span class="risk-cap"><i data-lucide="gauge" style="width:14px;height:14px;"></i> Hallucination risk</span>
+          <span class="risk-pill">${label}</span>
+        </div>
+        <div class="risk-bar">${segs}</div>
+      </div>`;
+  }
+
+  function generate() {
+    const q = QUESTIONS.find(x => x.id === activeQ);
+    const a = q.answers[activeMode];
+    if (!a) return;
+
+    const metrics = a.metrics.map(m => `
+      <div class="ev-row ${m.s}">
+        <i data-lucide="${m.s === 'good' ? 'check-circle-2' : m.s === 'bad' ? 'x-circle' : 'minus-circle'}" style="width:16px;height:16px;"></i>
+        <div><div class="ev-k">${m.k}</div><div class="ev-v">${m.v}</div></div>
+      </div>`).join('');
+
+    playOutput.innerHTML = `
+      <div class="step-label" style="margin-top:1.5rem;"><i data-lucide="help-circle" style="width:12px;height:12px;"></i> Question</div>
+      <div class="doc-card flow-step" style="animation-delay:0ms;padding:0.75rem 1rem;">
+        <div class="ai-text" style="font-weight:700;">${q.label}</div>
+      </div>
+
+      <div class="step-label"><i data-lucide="folder" style="width:12px;height:12px;"></i> Context given to the AI</div>
+      ${contextBlock(a)}
+
+      <div class="step-label"><i data-lucide="bot" style="width:12px;height:12px;"></i> AI answer</div>
+      <div class="ai-response flow-step" style="animation-delay:120ms;">
+        <div class="ai-avatar"><i data-lucide="bot" style="width:20px;height:20px;"></i></div>
+        <div>
+          <div class="ai-name">AI Assistant</div>
+          <div class="ai-text">${a.text}</div>
+        </div>
+      </div>
+
+      <div class="step-label"><i data-lucide="search-check" style="width:12px;height:12px;"></i> Evidence check</div>
+      <div class="ev-list flow-step" style="animation-delay:180ms;">${metrics}</div>
+
+      ${riskBlock(a.risk)}
+
+      <div class="chk-note ${a.noteType} flow-step" style="animation-delay:300ms;">
+        <i data-lucide="${a.noteType === 'good' ? 'shield-check' : 'alert-triangle'}" style="width:18px;height:18px;"></i>
+        <span>${a.note}</span>
+      </div>`;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 3. Why Hallucinations Happen (accordion) ── */
+  const WHY = [
+    { id: 'missing',   icon: 'database',       title: 'Missing Information', desc: 'The model does not have the facts needed to answer.' },
+    { id: 'ambiguous', icon: 'help-circle',    title: 'Ambiguous Question',  desc: 'The request can be understood in more than one way.' },
+    { id: 'weak',      icon: 'file-warning',   title: 'Weak Context',        desc: 'The provided information is incomplete, outdated, or unrelated.' },
+    { id: 'pressure',  icon: 'zap',            title: 'Pressure to Answer',  desc: 'The AI tries to provide an answer even when the evidence is missing.' },
+  ];
+  const whyAcc = document.getElementById('whyAcc');
+  let openWhy = WHY[0].id;
+
+  function renderWhy() {
+    whyAcc.innerHTML = WHY.map(w => `
+      <div class="acc-item ${w.id === openWhy ? 'open' : ''}" data-why="${w.id}">
+        <button class="acc-row" aria-expanded="${w.id === openWhy}">
+          <span class="acc-ic"><i data-lucide="${w.icon}" style="width:20px;height:20px;"></i></span>
+          <span class="acc-info"><span class="acc-title">${w.title}</span></span>
+          <i data-lucide="chevron-down" class="acc-chev" style="width:18px;height:18px;"></i>
+        </button>
+        <div class="acc-panel"><div class="acc-panel-inner"><div class="acc-desc">${w.desc}</div></div></div>
+      </div>`).join('');
+    whyAcc.querySelectorAll('.acc-row').forEach(row =>
+      row.addEventListener('click', () => {
+        const id = row.parentElement.dataset.why;
+        openWhy = (openWhy === id) ? null : id;
+        renderWhy();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 4. Grounding pipeline (accordion flow) ── */
+  const PIPE = [
+    { id: 'sources', icon: 'library', title: 'Trusted Sources', desc: 'Use reliable and current information.',
+      chips: ['approved documents','verified databases','official policies','trusted repositories'] },
+    { id: 'context', icon: 'crop',    title: 'Relevant Context', desc: 'Give the AI only the information needed for the question.',
+      tip: 'More context is not always better. Irrelevant context can confuse the answer.' },
+    { id: 'instr',   icon: 'list-checks', title: 'Clear Instructions', desc: 'Tell the AI how to answer.',
+      chips: ['Use only the provided information','Do not make assumptions','Mention the source used','Say when information is missing'] },
+    { id: 'answer',  icon: 'link',    title: 'Evidence-Based Answer', desc: 'Ask the AI to connect its response to supporting evidence.',
+      chips: ['source name','document section','quoted fact','reference link'] },
+    { id: 'verify',  icon: 'shield-check', title: 'Verification', desc: 'Important answers should be checked before use.',
+      chips: ['technical decisions','legal or policy','medical information','financial decisions','safety-critical'] },
+  ];
+  const pipeAcc = document.getElementById('pipeAcc');
+  let openPipe = PIPE[0].id;
+
+  function renderPipe() {
+    pipeAcc.innerHTML = PIPE.map((p, i) => {
+      const chips = p.chips ? `<div class="acc-ex">${p.chips.map(c => `<span class="acc-chip">${c}</span>`).join('')}</div>` : '';
+      const tip = p.tip ? `<div class="acc-tip"><i data-lucide="alert-triangle" style="width:15px;height:15px;"></i> ${p.tip}</div>` : '';
+      return `
+      <div class="acc-item ${p.id === openPipe ? 'open' : ''}" data-pipe="${p.id}">
+        <button class="acc-row" aria-expanded="${p.id === openPipe}">
+          <span class="acc-ic"><i data-lucide="${p.icon}" style="width:20px;height:20px;"></i></span>
+          <span class="acc-info"><span class="acc-title">${p.title}</span></span>
+          <span class="acc-step">Step ${i + 1}</span>
+          <i data-lucide="chevron-down" class="acc-chev" style="width:18px;height:18px;"></i>
+        </button>
+        <div class="acc-panel"><div class="acc-panel-inner"><div class="acc-desc">${p.desc}</div>${chips}${tip}</div></div>
+      </div>
+      ${i < PIPE.length - 1 ? '<div class="acc-arrow">↓</div>' : ''}`;
+    }).join('');
+    pipeAcc.querySelectorAll('.acc-row').forEach(row =>
+      row.addEventListener('click', () => {
+        const id = row.parentElement.dataset.pipe;
+        openPipe = (openPipe === id) ? null : id;
+        renderPipe();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderQuestions();
+    renderModes();
+    renderWhy();
+    renderPipe();
+    genBtn.addEventListener('click', generate);
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>

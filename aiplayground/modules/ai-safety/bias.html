@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Bias in AI — a beginner-friendly interactive lesson on what AI bias means, where it comes from (data, design, usage), how similar cases can get different outcomes, and why AI results should be tested across many situations." />
+  <title>Bias in AI, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/bias.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Bias in AI, AI Concepts Playground" />
+  <meta property="og:description" content="An interactive lesson on what AI bias means, where it comes from, and why similar cases should be tested for consistent, fair outcomes." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/bias.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Bias in AI, AI Concepts Playground" />
+  <meta name="twitter:description" content="An interactive lesson on what AI bias means, where it comes from, and why similar cases should be tested for consistent, fair outcomes." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0284c7; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #38bdf8; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0284c7; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(2,132,199,0.25); background: rgba(2,132,199,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(2,132,199,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.28); background: rgba(2,132,199,0.1); }
+
+    /* ── Candidate Review Simulator ──────────── */
+    .cand-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+    @media (max-width: 620px) { .cand-grid { grid-template-columns: 1fr; } }
+    .cand-card {
+      border-radius: 1.1rem; padding: 1.1rem 1.15rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.3s ease;
+    }
+    html.dark .cand-card { background: #0f172a; border-color: #334155; }
+    .cand-head { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.85rem; }
+    .cand-avatar {
+      width: 42px; height: 42px; border-radius: 0.8rem; flex-shrink: 0; font-weight: 900; font-size: 1.05rem;
+      display: flex; align-items: center; justify-content: center; color: white;
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9);
+    }
+    .cand-name { font-weight: 900; font-size: 1rem; color: #1e293b; }
+    html.dark .cand-name { color: #f1f5f9; }
+    .cand-sub { font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
+    .cand-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+    .cand-line {
+      display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.6rem;
+      border-radius: 0.6rem; font-size: 0.83rem; font-weight: 600; color: #334155;
+      background: white; border: 1.5px solid transparent; transition: all 0.3s ease;
+    }
+    html.dark .cand-line { background: #1e293b; color: #e2e8f0; }
+    .cand-line i { color: #0ea5e9; flex-shrink: 0; }
+    /* the one detail that differs between candidates */
+    .cand-line.diff { border-color: rgba(234,179,8,0.55); background: rgba(234,179,8,0.09); color: #a16207; font-weight: 800; }
+    html.dark .cand-line.diff { background: rgba(234,179,8,0.14); color: #fde047; border-color: rgba(234,179,8,0.4); }
+    .cand-line.diff i { color: #ca8a04; }
+    html.dark .cand-line.diff i { color: #fde047; }
+    /* when relevant-skills-only is on, the irrelevant detail is ignored */
+    .cand-line.ignored { opacity: 0.55; text-decoration: line-through; border-color: transparent; background: white; color: #94a3b8; font-weight: 600; }
+    html.dark .cand-line.ignored { background: #1e293b; color: #64748b; }
+    .cand-line.ignored i { color: #94a3b8; }
+    .cand-tag {
+      margin-left: auto; font-size: 0.56rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.03em;
+      padding: 0.15rem 0.45rem; border-radius: 9999px; color: #a16207; background: rgba(234,179,8,0.2);
+    }
+    .cand-line.ignored .cand-tag { color: #64748b; background: rgba(148,163,184,0.2); }
+
+    /* result badge inside a candidate card */
+    .cand-result {
+      margin-top: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.6rem 0.8rem; border-radius: 0.75rem; font-weight: 900; font-size: 0.9rem;
+      opacity: 0; transform: translateY(8px); animation: candIn 0.45s ease forwards;
+    }
+    @keyframes candIn { to { opacity: 1; transform: translateY(0); } }
+    .cand-result.rec   { color: #15803d; background: rgba(22,163,74,0.1); border: 1.5px solid rgba(22,163,74,0.35); }
+    html.dark .cand-result.rec { color: #4ade80; background: rgba(22,163,74,0.14); border-color: rgba(22,163,74,0.3); }
+    .cand-result.not   { color: #b91c1c; background: rgba(220,38,38,0.08); border: 1.5px solid rgba(220,38,38,0.4); }
+    html.dark .cand-result.not { color: #f87171; background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.35); }
+    .cand-card.rec { border-color: rgba(22,163,74,0.35); }
+    .cand-card.not { border-color: rgba(220,38,38,0.4); }
+
+    /* toggle switch */
+    .switch-row {
+      display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem;
+      padding: 0.85rem 1.05rem; border-radius: 0.9rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .switch-row { background: #0f172a; border-color: #334155; }
+    .switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; cursor: pointer; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch .track {
+      position: absolute; inset: 0; border-radius: 9999px; background: #cbd5e1; transition: background 0.25s ease;
+    }
+    html.dark .switch .track { background: #475569; }
+    .switch .thumb {
+      position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 9999px;
+      background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: transform 0.25s ease;
+    }
+    .switch input:checked + .track { background: #0ea5e9; }
+    .switch input:checked + .track + .thumb { transform: translateX(20px); }
+    .switch-label { font-weight: 800; font-size: 0.9rem; color: #1e293b; }
+    html.dark .switch-label { color: #f1f5f9; }
+    .switch-hint { font-size: 0.72rem; font-weight: 600; color: #64748b; margin-top: 0.1rem; }
+    html.dark .switch-hint { color: #94a3b8; }
+
+    /* generate button */
+    .gen-btn {
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-size: 0.9rem; font-weight: 800; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px;
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9); border: none;
+      box-shadow: 0 8px 20px rgba(14,165,233,0.32); transition: all 0.2s ease;
+    }
+    .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(14,165,233,0.42); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .gen-btn.ghost {
+      color: #0284c7; background: white; border: 1.5px solid rgba(14,165,233,0.4); box-shadow: none;
+    }
+    .gen-btn.ghost:hover { background: rgba(14,165,233,0.07); box-shadow: 0 6px 16px rgba(14,165,233,0.16); }
+    html.dark .gen-btn.ghost { background: #0f172a; color: #7dd3fc; border-color: rgba(56,189,248,0.35); }
+
+    /* explanation note */
+    .chk-note {
+      display: flex; align-items: center; gap: 0.6rem; margin-top: 1.2rem; padding: 0.9rem 1.1rem;
+      border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700;
+      color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3);
+    }
+    html.dark .chk-note { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+    .chk-note.warn { color: #a16207; background: rgba(234,179,8,0.09); border-color: rgba(234,179,8,0.4); }
+    html.dark .chk-note.warn { color: #fde047; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.35); }
+    .chk-note.good { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.32); }
+    html.dark .chk-note.good { color: #4ade80; background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.3); }
+
+    .chk-empty { margin-top: 1.4rem; padding: 1.6rem 1rem; text-align: center; border-radius: 1rem; border: 1.5px dashed #e2e8f0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; }
+    html.dark .chk-empty { border-color: #334155; color: #64748b; }
+
+    /* ── Source-of-bias accordion (Section 3) ── */
+    .src-acc { display: flex; flex-direction: column; gap: 0.6rem; }
+    .src-item {
+      border: 1.5px solid #e2e8f0; border-radius: 1rem; background: #f8fafc; overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    html.dark .src-item { background: #0f172a; border-color: #334155; }
+    .src-item:hover { border-color: rgba(14,165,233,0.4); }
+    .src-item.open { border-color: #0ea5e9; background: white; box-shadow: 0 8px 22px rgba(14,165,233,0.12); }
+    html.dark .src-item.open { background: #1e293b; border-color: #38bdf8; }
+    .src-row {
+      width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.85rem;
+      padding: 0.95rem 1.1rem; text-align: left; background: transparent; border: none;
+    }
+    .src-ic { width: 42px; height: 42px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.25s ease; }
+    html.dark .src-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .src-item.open .src-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .src-info { flex: 1; min-width: 0; }
+    .src-title { font-weight: 900; font-size: 0.98rem; color: #1e293b; }
+    html.dark .src-title { color: #f1f5f9; }
+    .src-body { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.15rem; line-height: 1.4; }
+    html.dark .src-body { color: #94a3b8; }
+    .src-chev { flex-shrink: 0; color: #94a3b8; transition: transform 0.3s ease, color 0.3s ease; }
+    .src-item.open .src-chev { transform: rotate(180deg); color: #0ea5e9; }
+    .src-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .src-item.open .src-panel { max-height: 240px; }
+    .src-panel-inner { padding: 0 1.1rem 1.05rem; }
+    .src-example {
+      display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.8rem 0.95rem; border-radius: 0.85rem;
+      font-size: 0.86rem; font-weight: 600; color: #334155; font-style: italic;
+      border: 1.5px solid #e2e8f0; background: #f8fafc;
+    }
+    html.dark .src-example { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+    .src-example i { color: #0ea5e9; flex-shrink: 0; margin-top: 0.1rem; }
+
+    /* ── Lifecycle stages (Section 4) ────────── */
+    .life-flow { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+    .life-item {
+      width: 100%; max-width: 440px; border: 1.5px solid #e2e8f0; border-radius: 1rem;
+      background: #f8fafc; overflow: hidden;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    }
+    html.dark .life-item { background: #0f172a; border-color: #334155; }
+    .life-item:hover { border-color: rgba(14,165,233,0.4); }
+    .life-item.open { border-color: #0ea5e9; background: white; box-shadow: 0 8px 22px rgba(14,165,233,0.12); }
+    html.dark .life-item.open { background: #1e293b; border-color: #38bdf8; }
+    .life-row {
+      width: 100%; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.8rem 1rem; text-align: left; background: transparent; border: none;
+    }
+    .life-ic { width: 36px; height: 36px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.25s ease; }
+    html.dark .life-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .life-item.open .life-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .life-name { flex: 1; font-weight: 900; font-size: 0.95rem; color: #1e293b; }
+    html.dark .life-name { color: #f1f5f9; }
+    .life-step { flex-shrink: 0; font-size: 0.58rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.16rem 0.5rem; border-radius: 9999px; color: #0369a1; background: rgba(56,189,248,0.16); }
+    html.dark .life-step { color: #7dd3fc; background: rgba(56,189,248,0.2); }
+    .life-chev { flex-shrink: 0; color: #94a3b8; transition: transform 0.3s ease, color 0.3s ease; }
+    .life-item.open .life-chev { transform: rotate(180deg); color: #0ea5e9; }
+    .life-panel { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .life-item.open .life-panel { max-height: 200px; }
+    .life-panel-inner { padding: 0 1rem 0.95rem; }
+    .life-detail {
+      display: flex; align-items: center; gap: 0.55rem; padding: 0.75rem 0.9rem;
+      border-radius: 0.8rem; font-size: 0.86rem; font-weight: 700;
+      color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3);
+    }
+    html.dark .life-detail { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+    .life-detail i { flex-shrink: 0; }
+    .life-arrow { color: #0ea5e9; font-weight: 900; font-size: 1.05rem; line-height: 1; }
+
+    /* ── Before / After (Section 5) ──────────── */
+    .ba-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+    @media (max-width: 620px) { .ba-grid { grid-template-columns: 1fr; } }
+    .ba-col { border-radius: 1.1rem; padding: 1.1rem 1.2rem; border: 1.5px solid #e2e8f0; }
+    .ba-col.before { background: rgba(220,38,38,0.04); border-color: rgba(220,38,38,0.3); }
+    html.dark .ba-col.before { background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.3); }
+    .ba-col.after { background: rgba(22,163,74,0.05); border-color: rgba(22,163,74,0.32); }
+    html.dark .ba-col.after { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); }
+    .ba-head { display: flex; align-items: center; gap: 0.5rem; font-weight: 900; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.85rem; }
+    .ba-col.before .ba-head { color: #b91c1c; }
+    html.dark .ba-col.before .ba-head { color: #f87171; }
+    .ba-col.after .ba-head { color: #15803d; }
+    html.dark .ba-col.after .ba-head { color: #4ade80; }
+    .ba-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .ba-line { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; font-weight: 600; color: #334155; line-height: 1.4; }
+    html.dark .ba-line { color: #e2e8f0; }
+    .ba-line i { flex-shrink: 0; margin-top: 0.1rem; }
+    .ba-col.before .ba-line i { color: #dc2626; }
+    .ba-col.after .ba-line i { color: #16a34a; }
+
+    /* fairness comparison */
+    .fair-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 1.2rem; }
+    @media (max-width: 620px) { .fair-grid { grid-template-columns: 1fr; } }
+    .fair-card {
+      border-radius: 0.9rem; padding: 0.9rem; text-align: center;
+      border: 1.5px solid rgba(22,163,74,0.32); background: rgba(22,163,74,0.05);
+      opacity: 0; transform: translateY(10px); animation: candIn 0.45s ease forwards;
+    }
+    html.dark .fair-card { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); }
+    .fair-name { font-weight: 900; font-size: 0.9rem; color: #1e293b; margin-bottom: 0.3rem; }
+    html.dark .fair-name { color: #f1f5f9; }
+    .fair-detail { font-size: 0.72rem; font-weight: 600; color: #64748b; margin-bottom: 0.6rem; line-height: 1.35; }
+    html.dark .fair-detail { color: #94a3b8; }
+    .fair-badge { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.7rem; font-weight: 900; color: #15803d; background: rgba(22,163,74,0.15); padding: 0.25rem 0.6rem; border-radius: 9999px; }
+    html.dark .fair-badge { color: #4ade80; background: rgba(22,163,74,0.22); }
+
+    /* ── Important Clarification (Section 6) ─── */
+    .clar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+    @media (max-width: 620px) { .clar-grid { grid-template-columns: 1fr; } }
+    .clar-card { border-radius: 1.1rem; padding: 1.15rem 1.25rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .clar-card { background: #0f172a; border-color: #334155; }
+    .clar-head { display: flex; align-items: center; gap: 0.55rem; font-weight: 900; font-size: 0.95rem; margin-bottom: 0.7rem; color: #1e293b; }
+    html.dark .clar-head { color: #f1f5f9; }
+    .clar-tag { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.18rem 0.5rem; border-radius: 9999px; }
+    .clar-tag.ok  { color: #15803d; background: rgba(22,163,74,0.15); }
+    html.dark .clar-tag.ok { color: #4ade80; background: rgba(22,163,74,0.22); }
+    .clar-tag.risk { color: #a16207; background: rgba(234,179,8,0.2); }
+    html.dark .clar-tag.risk { color: #fde047; background: rgba(234,179,8,0.25); }
+    .clar-line { font-size: 0.86rem; font-weight: 600; color: #334155; line-height: 1.5; margin-bottom: 0.4rem; }
+    html.dark .clar-line { color: #e2e8f0; }
+    .clar-result { margin-top: 0.7rem; font-size: 0.82rem; font-weight: 800; }
+    .clar-card.reasonable .clar-result { color: #15803d; }
+    html.dark .clar-card.reasonable .clar-result { color: #4ade80; }
+    .clar-card.biased .clar-result { color: #a16207; }
+    html.dark .clar-card.biased .clar-result { color: #fde047; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(56,189,248,0.04));
+      border: 1.5px solid rgba(14,165,233,0.22); border-left: 4px solid #0ea5e9;
+      border-radius: 1.25rem;
+    }
+    html.dark .takeaway {
+      background: linear-gradient(135deg, rgba(14,165,233,0.06), rgba(56,189,248,0.03));
+      border-color: rgba(56,189,248,0.2); border-left-color: #38bdf8;
+    }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.08); color: #0284c7;
+      transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(14,165,233,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.3); background: rgba(14,165,233,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 480px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(14,165,233,0.5); color: #0284c7; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-900/30">
+          <span class="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>
+          <span class="text-sky-700 dark:text-sky-400 text-xs font-bold tracking-wide">🛡️ AI Safety</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="scale" class="w-7 h-7 text-sky-600 dark:text-sky-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Bias in AI</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          <strong class="text-slate-800 dark:text-slate-200">AI bias</strong> happens when an AI system produces
+          <strong class="text-slate-800 dark:text-slate-200">unfair</strong>,
+          <strong class="text-slate-800 dark:text-slate-200">unbalanced</strong>, or
+          <strong class="text-slate-800 dark:text-slate-200">inconsistent</strong> outcomes.
+          Bias does not always mean the system was <em>designed</em> to be unfair — it can appear on its own.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Candidate Review Simulator</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Two candidates have <strong class="text-slate-800 dark:text-slate-200">almost identical</strong> qualifications.
+          Press <strong class="text-slate-800 dark:text-slate-200">Run AI Review</strong> and watch the result.
+          Then turn on <strong class="text-slate-800 dark:text-slate-200">Use Relevant Skills Only</strong> and run it again.
+        </p>
+
+        <!-- candidate cards -->
+        <div class="cand-grid" id="candGrid"></div>
+
+        <!-- toggle -->
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="relevantToggle" />
+            <span class="track"></span>
+            <span class="thumb"></span>
+          </label>
+          <div>
+            <div class="switch-label">Use Relevant Skills Only</div>
+            <div class="switch-hint">Ignore details that should not affect the decision.</div>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <button class="gen-btn" id="runBtn">
+            <i data-lucide="play" style="width:16px;height:16px;"></i> Run AI Review
+          </button>
+        </div>
+
+        <!-- explanation output -->
+        <div id="reviewNote"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHERE BIAS COMES FROM
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-branch" style="width:12px;height:12px;"></i>Where Bias Comes From</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Three common sources</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Tap a source to see a simple example of how bias can slip in.
+        </p>
+
+        <div class="src-acc" id="srcAcc"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. BIAS IN THE AI LIFECYCLE
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="workflow" style="width:12px;height:12px;"></i>Bias in the AI Lifecycle</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Bias can enter at more than one stage</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+          Click each stage to see how bias could appear there.
+        </p>
+
+        <div class="life-flow" id="lifeStack"></div>
+
+        <div class="chk-note" style="margin-top:1.5rem;">
+          <i data-lucide="info" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span>Bias can enter at more than one stage — so every stage is worth checking.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. REDUCING BIAS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="sliders-horizontal" style="width:12px;height:12px;"></i>Reducing Bias</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Small changes make results fairer</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Better habits help — but bias can be <strong class="text-slate-800 dark:text-slate-200">reduced</strong>, not fully removed.
+        </p>
+
+        <div class="ba-grid">
+          <div class="ba-col before">
+            <div class="ba-head"><i data-lucide="x-circle" style="width:16px;height:16px;"></i> Before</div>
+            <div class="ba-list">
+              <div class="ba-line"><i data-lucide="minus" style="width:14px;height:14px;"></i> Use one type of test case</div>
+              <div class="ba-line"><i data-lucide="minus" style="width:14px;height:14px;"></i> Include irrelevant information</div>
+              <div class="ba-line"><i data-lucide="minus" style="width:14px;height:14px;"></i> Accept the AI output automatically</div>
+              <div class="ba-line"><i data-lucide="minus" style="width:14px;height:14px;"></i> Test only average performance</div>
+            </div>
+          </div>
+          <div class="ba-col after">
+            <div class="ba-head"><i data-lucide="check-circle-2" style="width:16px;height:16px;"></i> After</div>
+            <div class="ba-list">
+              <div class="ba-line"><i data-lucide="check" style="width:14px;height:14px;"></i> Test many realistic scenarios</div>
+              <div class="ba-line"><i data-lucide="check" style="width:14px;height:14px;"></i> Use only relevant information</div>
+              <div class="ba-line"><i data-lucide="check" style="width:14px;height:14px;"></i> Compare similar cases</div>
+              <div class="ba-line"><i data-lucide="check" style="width:14px;height:14px;"></i> Include human review</div>
+              <div class="ba-line"><i data-lucide="check" style="width:14px;height:14px;"></i> Monitor outcomes over time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <button class="gen-btn ghost" id="fairBtn">
+            <i data-lucide="scale" style="width:16px;height:16px;"></i> Compare Fairness
+          </button>
+        </div>
+
+        <div id="fairOutput"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. IMPORTANT CLARIFICATION
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Important Clarification</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Different outcomes are not always bias</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          A fair decision <em>can</em> differ when the <strong class="text-slate-800 dark:text-slate-200">relevant facts</strong> are different.
+          The question is <strong class="text-slate-800 dark:text-slate-200">what</strong> caused the difference.
+        </p>
+
+        <div class="clar-grid">
+          <div class="clar-card reasonable">
+            <div class="clar-head">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+              Relevant Difference
+              <span class="clar-tag ok" style="margin-left:auto;">Reasonable</span>
+            </div>
+            <div class="clar-line">Candidate A <strong>has</strong> the required certification.</div>
+            <div class="clar-line">Candidate B <strong>does not</strong> have it.</div>
+            <div class="clar-result">→ Different outcomes may be reasonable.</div>
+          </div>
+          <div class="clar-card biased">
+            <div class="clar-head">
+              <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 dark:text-amber-400"></i>
+              Irrelevant Difference
+              <span class="clar-tag risk" style="margin-left:auto;">Possible Bias</span>
+            </div>
+            <div class="clar-line">Both candidates have the <strong>required skills</strong>.</div>
+            <div class="clar-line">Only an <strong>unrelated personal detail</strong> changes.</div>
+            <div class="clar-result">→ Different outcomes may indicate bias.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           7. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-sky-500 dark:bg-sky-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• AI bias can create <strong class="text-slate-900 dark:text-white">unfair or inconsistent</strong> outcomes.</li>
+              <li>• Bias may come from <strong class="text-slate-900 dark:text-white">data, design, prompts, or usage</strong>.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Similar cases</strong> should be compared carefully.</li>
+              <li>• Only <strong class="text-slate-900 dark:text-white">relevant information</strong> should influence a decision.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Human review</strong> and continuous testing are important.</li>
+              <li>• Bias can be <strong class="text-slate-900 dark:text-white">reduced</strong>, but not assumed to be fully removed.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Run the candidate review and read the result.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare the two profiles — only one detail differs.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Turn on <strong>Use Relevant Skills Only</strong> and run again.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Explore where bias can enter in the lifecycle.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Think how the same issue could appear in lending, education, healthcare, or customer support.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(14,165,233,0.05),rgba(56,189,248,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>AI bias happens when irrelevant patterns or assumptions influence an outcome. Testing similar cases helps reveal whether an AI system is behaving consistently and fairly.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="what-is-ai-safety.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: What is AI Safety?
+        </a>
+        <a href="reducing-hallucinations.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-sky-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Reducing Hallucinations</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Safety');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Bias in AI, playground
+  ═══════════════════════════════════════════════ */
+
+  /* ── 2. Candidate Review Simulator ── */
+  // Both candidates share the same relevant qualifications.
+  // Only "Career break" differs — an irrelevant detail.
+  const SHARED_ROWS = [
+    { icon: 'calendar', text: '5 years of experience', relevant: true },
+    { icon: 'code',     text: 'Python and cloud skills', relevant: true },
+    { icon: 'trending-up', text: 'Strong project delivery', relevant: true },
+  ];
+  const CANDIDATES = [
+    { id: 'A', name: 'Candidate A', break: 'No',     breakText: 'Career break: No' },
+    { id: 'B', name: 'Candidate B', break: '1 year', breakText: 'Career break: 1 year' },
+  ];
+
+  const candGrid   = document.getElementById('candGrid');
+  const runBtn     = document.getElementById('runBtn');
+  const reviewNote = document.getElementById('reviewNote');
+  const relevantToggle = document.getElementById('relevantToggle');
+  let reviewed = false;
+
+  function renderCandidates() {
+    const relevantOnly = relevantToggle.checked;
+
+    candGrid.innerHTML = CANDIDATES.map(c => {
+      // shared relevant rows
+      const rows = SHARED_ROWS.map(r =>
+        `<div class="cand-line"><i data-lucide="${r.icon}" style="width:15px;height:15px;"></i> ${r.text}</div>`
+      ).join('');
+
+      // the differing (irrelevant) career-break row
+      const breakCls = relevantOnly ? 'cand-line ignored' : 'cand-line diff';
+      const breakTag = relevantOnly
+        ? '<span class="cand-tag">Ignored</span>'
+        : (c.break === 'No' ? '' : '<span class="cand-tag">Only difference</span>');
+      const breakRow = `<div class="${breakCls}"><i data-lucide="briefcase" style="width:15px;height:15px;"></i> ${c.breakText}${breakTag}</div>`;
+
+      // result (only shown after Run AI Review)
+      let resultHtml = '';
+      let cardState = '';
+      if (reviewed) {
+        // biased when irrelevant detail is used AND this candidate has a career break
+        const recommended = relevantOnly || c.break === 'No';
+        cardState = recommended ? 'rec' : 'not';
+        resultHtml = recommended
+          ? `<div class="cand-result rec"><i data-lucide="check-circle-2" style="width:17px;height:17px;"></i> Recommended</div>`
+          : `<div class="cand-result not"><i data-lucide="x-circle" style="width:17px;height:17px;"></i> Not Recommended</div>`;
+      }
+
+      return `
+        <div class="cand-card ${cardState}">
+          <div class="cand-head">
+            <div class="cand-avatar">${c.id}</div>
+            <div><div class="cand-name">${c.name}</div><div class="cand-sub">Applicant</div></div>
+          </div>
+          <div class="cand-rows">${rows}${breakRow}</div>
+          ${resultHtml}
+        </div>`;
+    }).join('');
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function runReview() {
+    reviewed = true;
+    renderCandidates();
+
+    const relevantOnly = relevantToggle.checked;
+    if (relevantOnly) {
+      reviewNote.innerHTML = `
+        <div class="chk-note good">
+          <i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span>Now only relevant skills are used — both candidates are treated the same.</span>
+        </div>`;
+    } else {
+      reviewNote.innerHTML = `
+        <div class="chk-note warn">
+          <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;"></i>
+          <span><strong>What changed?</strong> Only the career-break detail. When an irrelevant detail influences the outcome, the result may be biased.</span>
+        </div>`;
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 3. Where Bias Comes From (accordion) ── */
+  const SOURCES = [
+    { id: 'data',   icon: 'database',    title: 'Data Bias',
+      body: 'The examples used to train or test the system may be incomplete or unbalanced.',
+      example: 'Most successful examples came from only one type of background.' },
+    { id: 'design', icon: 'pen-tool',    title: 'Design Bias',
+      body: 'The rules, labels, or success criteria may reflect human assumptions.',
+      example: 'A career break is treated as a lack of ability.' },
+    { id: 'usage',  icon: 'move-right',  title: 'Usage Bias',
+      body: 'A system may be used in a situation it was not designed for.',
+      example: 'A general writing model is used to make hiring decisions.' },
+  ];
+  const srcAcc = document.getElementById('srcAcc');
+  let openSrc = SOURCES[0].id;
+
+  function renderSources() {
+    srcAcc.innerHTML = SOURCES.map(s => `
+      <div class="src-item ${s.id === openSrc ? 'open' : ''}" data-src="${s.id}">
+        <button class="src-row" aria-expanded="${s.id === openSrc}">
+          <span class="src-ic"><i data-lucide="${s.icon}" style="width:22px;height:22px;"></i></span>
+          <span class="src-info">
+            <span class="src-title">${s.title}</span>
+            <span class="src-body">${s.body}</span>
+          </span>
+          <i data-lucide="chevron-down" class="src-chev" style="width:18px;height:18px;"></i>
+        </button>
+        <div class="src-panel">
+          <div class="src-panel-inner">
+            <div class="src-example"><i data-lucide="quote" style="width:15px;height:15px;"></i> ${s.example}</div>
+          </div>
+        </div>
+      </div>`).join('');
+    srcAcc.querySelectorAll('.src-row').forEach(row =>
+      row.addEventListener('click', () => {
+        const id = row.parentElement.dataset.src;
+        openSrc = (openSrc === id) ? null : id;
+        renderSources();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 4. Bias in the AI Lifecycle ── */
+  const STAGES = [
+    { id: 'data',    icon: 'database',     name: 'Data',         detail: 'Missing or unbalanced examples may affect learning.' },
+    { id: 'model',   icon: 'cpu',          name: 'Model',        detail: 'The model may repeat patterns found in its data.' },
+    { id: 'prompt',  icon: 'message-square', name: 'Prompt',     detail: 'Leading instructions may influence the result.' },
+    { id: 'decision',icon: 'gavel',        name: 'Decision',     detail: 'AI output may be treated as a final answer instead of a suggestion.' },
+    { id: 'review',  icon: 'user-check',   name: 'Human Review', detail: 'Reviewers may accept AI output without questioning it.' },
+  ];
+  const lifeStack  = document.getElementById('lifeStack');
+  let openStage = STAGES[0].id;
+
+  function renderLifecycle() {
+    lifeStack.innerHTML = STAGES.map((s, i) => `
+      <div class="life-item ${s.id === openStage ? 'open' : ''}" data-stage="${s.id}">
+        <button class="life-row" aria-expanded="${s.id === openStage}">
+          <span class="life-ic"><i data-lucide="${s.icon}" style="width:18px;height:18px;"></i></span>
+          <span class="life-name">${s.name}</span>
+          <span class="life-step">Step ${i + 1}</span>
+          <i data-lucide="chevron-down" class="life-chev" style="width:18px;height:18px;"></i>
+        </button>
+        <div class="life-panel">
+          <div class="life-panel-inner">
+            <div class="life-detail"><i data-lucide="info" style="width:16px;height:16px;"></i> ${s.detail}</div>
+          </div>
+        </div>
+      </div>
+      ${i < STAGES.length - 1 ? '<div class="life-arrow">↓</div>' : ''}
+    `).join('');
+    lifeStack.querySelectorAll('.life-row').forEach(row =>
+      row.addEventListener('click', () => {
+        const id = row.parentElement.dataset.stage;
+        openStage = (openStage === id) ? null : id;
+        renderLifecycle();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 5. Compare Fairness ── */
+  const FAIR_CASES = [
+    { name: 'Case 1', detail: 'Same skills · lives in City A' },
+    { name: 'Case 2', detail: 'Same skills · applied on a weekend' },
+    { name: 'Case 3', detail: 'Same skills · 1-year career break' },
+  ];
+  const fairBtn = document.getElementById('fairBtn');
+  const fairOutput = document.getElementById('fairOutput');
+
+  function compareFairness() {
+    const cards = FAIR_CASES.map((f, i) => `
+      <div class="fair-card" style="animation-delay:${i * 120}ms;">
+        <div class="fair-name">${f.name}</div>
+        <div class="fair-detail">${f.detail}</div>
+        <span class="fair-badge"><i data-lucide="check" style="width:12px;height:12px;"></i> Recommended</span>
+      </div>`).join('');
+
+    fairOutput.innerHTML = `
+      <div class="fair-grid">${cards}</div>
+      <div class="chk-note good" style="margin-top:1.2rem;">
+        <i data-lucide="scale" style="width:18px;height:18px;flex-shrink:0;"></i>
+        <span>Fairness testing checks whether similar situations receive similar treatment.</span>
+      </div>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderCandidates();
+    renderSources();
+    renderLifecycle();
+    runBtn.addEventListener('click', runReview);
+    relevantToggle.addEventListener('change', () => { if (reviewed) runReview(); else renderCandidates(); });
+    fairBtn.addEventListener('click', compareFairness);
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>
