@@ -752,6 +752,7 @@
           <button class="filter-chip" data-filter="Training Fundamentals" data-group="section">Training Fundamentals</button>
           <button class="filter-chip" data-filter="Fine-Tuning" data-group="section">Fine-Tuning</button>
           <button class="filter-chip" data-filter="Model Optimization" data-group="section">Model Optimization</button>
+          <button class="filter-chip" data-filter="AI Safety" data-group="section">AI Safety</button>
           <button class="filter-chip" data-filter="Vector Index Explorer" data-group="section">Vector Index Explorer</button>
           <div class="chip-divider"></div>
           <button class="filter-chip" data-filter="Beginner" data-group="diff">Beginner</button>
@@ -948,6 +949,17 @@
       { num:6,  id:'mo-latency-throughput', title:'Latency vs Throughput', desc:'Understand the difference between speed per request and total work done.',       status:'available',   diff:'Intermediate', dur:'7–9 min',  mod:'Model Optimization', page:'modules/model-optimization/latency-vs-throughput.html',      icon:'gauge',        color:'#eab308' },
       { num:7,  id:'mo-speculative',   title:'Speculative Decoding', desc:'See how a small model drafts tokens that a big model quickly checks to speed up output.', status:'available',   diff:'Advanced',   dur:'8–10 min', mod:'Model Optimization', page:'modules/model-optimization/speculative-decoding.html',      icon:'rabbit',       color:'#eab308' },
 
+      // ── AI Safety ────────────────────────────────────────────────────
+      { num:1,  id:'as-what-is',       title:'What is AI Safety?',   desc:'Understand why AI systems need safety checks before they are trusted in real applications.', status:'available', diff:'Beginner',     dur:'6–8 min',  mod:'AI Safety', page:'modules/ai-safety/what-is-ai-safety.html', icon:'shield-check',   color:'#0ea5e9' },
+      { num:2,  id:'as-bias',          title:'Bias',                 desc:'Learn how AI systems can produce unfair or unbalanced results.',                    status:'available', diff:'Intermediate', dur:'7–9 min',  mod:'AI Safety', page:'modules/ai-safety/bias.html', icon:'scale',          color:'#0ea5e9' },
+      { num:3,  id:'as-hallucinations',title:'Reducing Hallucinations', desc:'Explore ways to reduce unsupported or incorrect AI-generated information.',       status:'available', diff:'Intermediate', dur:'7–10 min', mod:'AI Safety', page:'modules/ai-safety/reducing-hallucinations.html', icon:'wand-2',         color:'#0ea5e9' },
+      { num:4,  id:'as-evaluating',    title:'Evaluating AI Responses', desc:'Learn how AI responses can be checked for accuracy, relevance, clarity, safety, and usefulness.', status:'available', diff:'Intermediate', dur:'7–10 min', mod:'AI Safety', page:'modules/ai-safety/evaluating-ai-responses.html', icon:'clipboard-check', color:'#0ea5e9' },
+      { num:5,  id:'as-guardrails',    title:'Guardrails',           desc:'Understand how rules and checks can control AI inputs, outputs, and actions.',      status:'available', diff:'Intermediate', dur:'7–9 min',  mod:'AI Safety', page:'modules/ai-safety/guardrails.html', icon:'shield',         color:'#0ea5e9' },
+      { num:6,  id:'as-prompt-injection', title:'Prompt Injection',  desc:'Learn how hidden or harmful instructions can try to change an AI application\u2019s intended behaviour.', status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'AI Safety', page:'', icon:'syringe',        color:'#0ea5e9' },
+      { num:7,  id:'as-jailbreaks',    title:'Jailbreaks',           desc:'Understand how users may try to bypass an AI system\u2019s safety controls.',        status:'coming-soon', diff:'Advanced',     dur:'8–10 min', mod:'AI Safety', page:'', icon:'unlock',         color:'#0ea5e9' },
+      { num:8,  id:'as-data-privacy',  title:'Data Privacy',         desc:'Learn why personal, confidential, and sensitive information must be protected when using AI.', status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'AI Safety', page:'', icon:'lock',           color:'#0ea5e9' },
+      { num:9,  id:'as-content-moderation', title:'Content Moderation', desc:'Understand how AI systems check whether generated or submitted content should be allowed, blocked, or reviewed.', status:'coming-soon', diff:'Intermediate', dur:'7–9 min',  mod:'AI Safety', page:'', icon:'shield-alert',   color:'#0ea5e9' },
+
       // ── Vector Index Explorer ────────────────────────────────────────
       { num:1,  id:'vi-compare',  title:'Compare All Indexes',         desc:'Run one query against all 6 index strategies side by side. See speed and accuracy differ.',  status:'available',   diff:'Beginner',     dur:'15 min', mod:'Vector Index Explorer', page:'modules/vector-indexes/compare.html',  icon:'layers',        color:'#d97706' },
       { num:2,  id:'vi-flat',     title:'FLAT Index',                   desc:'Brute-force exact search. Every stored vector is compared, 100% accurate.',                status:'available',   diff:'Beginner',     dur:'8 min',  mod:'Vector Index Explorer', page:'modules/vector-indexes/flat.html',     icon:'search',        color:'#d97706' },
@@ -972,6 +984,7 @@
       'Training Fundamentals':                   { icon:'graduation-cap', color:'#ea580c', bg:'rgba(234,88,12,0.07)', border:'rgba(234,88,12,0.2)', iconBg:'rgba(234,88,12,0.1)' },
       'Fine-Tuning':                             { icon:'wrench',   color:'#f59e0b', bg:'rgba(245,158,11,0.07)', border:'rgba(245,158,11,0.2)',  iconBg:'rgba(245,158,11,0.1)'  },
       'Model Optimization':                      { icon:'zap',      color:'#eab308', bg:'rgba(234,179,8,0.07)',  border:'rgba(234,179,8,0.2)',   iconBg:'rgba(234,179,8,0.1)'   },
+      'AI Safety':                               { icon:'shield-check', color:'#0ea5e9', bg:'rgba(14,165,233,0.07)', border:'rgba(14,165,233,0.2)', iconBg:'rgba(14,165,233,0.1)' },
     };
 
     const DIFF_CONFIG = {
