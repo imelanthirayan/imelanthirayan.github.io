@@ -227,32 +227,10 @@
     .acc-tip i { flex-shrink: 0; }
     .acc-arrow { text-align: center; color: #0ea5e9; font-weight: 900; font-size: 1.05rem; line-height: 1; margin: 0.15rem 0; }
 
-    /* ── Confidence vs Evidence ──────────────── */
-    .cve-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
-    @media (max-width: 620px) { .cve-grid { grid-template-columns: 1fr; } }
-    .cve-card { border-radius: 1.1rem; padding: 1.15rem 1.25rem; border: 1.5px solid #e2e8f0; }
-    .cve-card.bad { background: rgba(220,38,38,0.04); border-color: rgba(220,38,38,0.3); }
-    html.dark .cve-card.bad { background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.3); }
-    .cve-card.good { background: rgba(22,163,74,0.05); border-color: rgba(22,163,74,0.32); }
-    html.dark .cve-card.good { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); }
-    .cve-head { display: flex; align-items: center; gap: 0.5rem; font-weight: 900; font-size: 0.92rem; margin-bottom: 0.7rem; }
-    .cve-card.bad .cve-head { color: #b91c1c; }
-    html.dark .cve-card.bad .cve-head { color: #f87171; }
-    .cve-card.good .cve-head { color: #15803d; }
-    html.dark .cve-card.good .cve-head { color: #4ade80; }
-    .cve-quote { font-size: 0.86rem; font-weight: 600; font-style: italic; color: #334155; line-height: 1.5; padding: 0.7rem 0.85rem; border-radius: 0.75rem; background: white; border: 1.5px solid #e2e8f0; margin-bottom: 0.7rem; }
-    html.dark .cve-quote { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-    .cve-meta { display: flex; flex-direction: column; gap: 0.35rem; }
-    .cve-mrow { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.8rem; }
-    .cve-mk { font-weight: 700; color: #64748b; }
-    html.dark .cve-mk { color: #94a3b8; }
-    .cve-mv { font-weight: 800; color: #1e293b; }
-    html.dark .cve-mv { color: #f1f5f9; }
-    .cve-result { margin-top: 0.8rem; font-size: 0.82rem; font-weight: 900; }
-    .cve-card.bad .cve-result { color: #b91c1c; }
-    html.dark .cve-card.bad .cve-result { color: #f87171; }
-    .cve-card.good .cve-result { color: #15803d; }
-    html.dark .cve-card.good .cve-result { color: #4ade80; }
+    /* ── Two-column layout ───────────────────── */
+    .rh-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
+    .rh-col { display: flex; flex-direction: column; gap: 1.25rem; }
+    @media (max-width: 860px) { .rh-two { grid-template-columns: 1fr; } }
 
     /* ── Limitations list ────────────────────── */
     .lim-list { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -383,109 +361,67 @@
 
 
       <!-- ══════════════════════════════════════
-           3. WHY HALLUCINATIONS HAPPEN
+           3+4. WHY HAPPEN  +  WAYS TO REDUCE  (2-col)
       ══════════════════════════════════════ -->
-      <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Why Hallucinations Happen</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Four common reasons</h2>
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Tap a reason to see when it tends to happen.
-        </p>
+      <div class="rh-two">
+        <!-- LEFT COLUMN -->
+        <div class="rh-col">
+          <!-- WHY HALLUCINATIONS HAPPEN -->
+          <section class="module-card">
+            <div class="mod-label"><i data-lucide="help-circle" style="width:12px;height:12px;"></i>Why Hallucinations Happen</div>
+            <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Four common reasons</h2>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+              Tap a reason to see when it tends to happen.
+            </p>
 
-        <div class="acc" id="whyAcc"></div>
+            <div class="acc" id="whyAcc"></div>
 
-        <div class="chk-note warn" style="margin-top:1.25rem;">
-          <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
-          <span>A clear and confident response is not always a correct response.</span>
-        </div>
-      </section>
-
-
-      <!-- ══════════════════════════════════════
-           4. WAYS TO REDUCE HALLUCINATIONS
-      ══════════════════════════════════════ -->
-      <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="git-merge" style="width:12px;height:12px;"></i>Ways to Reduce Hallucinations</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A simple grounding pipeline</h2>
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Click each stage to see what it does. Each step helps the answer stay closer to the evidence.
-        </p>
-
-        <div class="acc" id="pipeAcc"></div>
-
-        <div class="chk-note" style="margin-top:1.25rem;">
-          <i data-lucide="info" style="width:18px;height:18px;"></i>
-          <span>AI can assist with an answer, but evidence determines whether it should be trusted.</span>
-        </div>
-      </section>
-
-
-      <!-- ══════════════════════════════════════
-           5. CONFIDENCE VS EVIDENCE
-      ══════════════════════════════════════ -->
-      <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="scale" style="width:12px;height:12px;"></i>Confidence vs Evidence</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Sounding sure is not the same as being right</h2>
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Two answers to the same maintenance question — one sounds confident, the other shows its source.
-        </p>
-
-        <div class="cve-grid">
-          <div class="cve-card bad">
-            <div class="cve-head"><i data-lucide="alert-triangle" style="width:18px;height:18px;"></i> Confident but Unsupported</div>
-            <div class="cve-quote">“The equipment must be replaced every five years.”</div>
-            <div class="cve-meta">
-              <div class="cve-mrow"><span class="cve-mk">Confidence</span><span class="cve-mv">High</span></div>
-              <div class="cve-mrow"><span class="cve-mk">Evidence</span><span class="cve-mv">None</span></div>
+            <div class="chk-note warn" style="margin-top:1.25rem;">
+              <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+              <span>A clear and confident response is not always a correct response.</span>
             </div>
-            <div class="cve-result">→ Do not trust automatically.</div>
-          </div>
-          <div class="cve-card good">
-            <div class="cve-head"><i data-lucide="check-circle-2" style="width:18px;height:18px;"></i> Cautious and Supported</div>
-            <div class="cve-quote">“The maintenance policy states inspection is required every five years. It does not say replacement is mandatory.”</div>
-            <div class="cve-meta">
-              <div class="cve-mrow"><span class="cve-mk">Confidence</span><span class="cve-mv">Moderate</span></div>
-              <div class="cve-mrow"><span class="cve-mk">Evidence</span><span class="cve-mv">Maintenance Policy, Section 4</span></div>
+          </section>
+
+          <!-- IMPORTANT LIMITATIONS -->
+          <section class="module-card">
+            <div class="mod-label"><i data-lucide="shield-off" style="width:12px;height:12px;"></i>Important Limitations</div>
+            <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">These methods reduce risk, not remove it</h2>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+              Even a grounded answer can still be wrong — for example:
+            </p>
+
+            <div class="lim-list">
+              <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The source itself may be wrong or outdated.</div>
+              <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The wrong document may be picked.</div>
+              <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The AI may misread or mix up the facts.</div>
             </div>
-            <div class="cve-result">→ More trustworthy.</div>
-          </div>
+
+            <div class="chk-note warn" style="margin-top:1.25rem;">
+              <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+              <span><strong>Grounded does not mean correct.</strong> Methods like RAG reduce unsupported answers, but they are not a complete guarantee against hallucinations.</span>
+            </div>
+          </section>
         </div>
 
-        <div class="chk-note" style="margin-top:1.25rem;">
-          <i data-lucide="info" style="width:18px;height:18px;"></i>
-          <span>Confidence is how certain an answer <em>sounds</em>. Evidence is what <em>supports</em> it — and <strong>evidence matters more than confident wording</strong>.</span>
-        </div>
-      </section>
+        <!-- RIGHT COLUMN -->
+        <div class="rh-col">
+          <!-- WAYS TO REDUCE HALLUCINATIONS -->
+          <section class="module-card">
+            <div class="mod-label"><i data-lucide="git-merge" style="width:12px;height:12px;"></i>Ways to Reduce Hallucinations</div>
+            <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">A simple grounding pipeline</h2>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+              Click each stage to see what it does. Each step helps the answer stay closer to the evidence.
+            </p>
 
+            <div class="acc" id="pipeAcc"></div>
 
-      <!-- ══════════════════════════════════════
-           6. IMPORTANT LIMITATIONS
-      ══════════════════════════════════════ -->
-      <section class="module-card mb-5">
-        <div class="mod-label"><i data-lucide="shield-off" style="width:12px;height:12px;"></i>Important Limitations</div>
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">These methods reduce risk, not remove it</h2>
-        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Even a grounded answer can still be wrong. Here is what can still go wrong:
-        </p>
-
-        <div class="lim-list">
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The source itself may be wrong.</div>
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The source may be outdated.</div>
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The wrong document may be retrieved.</div>
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The AI may misunderstand the context.</div>
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> The answer may combine facts incorrectly.</div>
-          <div class="lim-row"><i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> A source reference may not fully support the claim.</div>
+            <div class="chk-note" style="margin-top:1.25rem;">
+              <i data-lucide="info" style="width:18px;height:18px;"></i>
+              <span>AI can assist with an answer, but evidence determines whether it should be trusted.</span>
+            </div>
+          </section>
         </div>
-
-        <div class="chk-note warn" style="margin-top:1.25rem;">
-          <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
-          <span>Grounded does not automatically mean correct.</span>
-        </div>
-        <div class="chk-note" style="margin-top:0.75rem;">
-          <i data-lucide="info" style="width:18px;height:18px;"></i>
-          <span>Retrieval-Augmented Generation can reduce unsupported answers, but it is not a complete guarantee against hallucinations.</span>
-        </div>
-      </section>
+      </div>
 
 
       <!-- ══════════════════════════════════════
@@ -571,7 +507,11 @@
   ═══════════════════════════════════════════════ */
 
   /* ── 2. Answer Grounding Simulator ── */
-  const DOC = { title: 'Orion Policy', line: 'Version 3.2 — Updated 12 September 2025' };
+  const DOC = {
+    title: 'GreenLeaf Store — Return Policy',
+    line: 'Returns are accepted within 30 days with a receipt.',
+    lineMarked: 'Returns are accepted <mark>within 30 days</mark> with a receipt.',
+  };
 
   const MODES = [
     { id: 'none',    step: 'Mode 1', label: 'No Context' },
@@ -581,10 +521,10 @@
 
   const QUESTIONS = [
     {
-      id: 'q1', icon: 'calendar-clock', label: 'When was the Orion Policy last updated?',
+      id: 'q1', icon: 'rotate-ccw', label: 'How many days do I have to return an item?',
       answers: {
         none: {
-          text: 'The Orion Policy was last updated in March 2024.',
+          text: 'You can return an item any time within 90 days.',
           context: 'none',
           metrics: [
             { k: 'Evidence',      v: 'None',        s: 'bad' },
@@ -594,22 +534,22 @@
           note: 'The answer sounds confident, but no evidence was provided.', noteType: 'warn',
         },
         trusted: {
-          text: 'The Orion Policy was last updated on 12 September 2025.',
+          text: 'You can return an item within 30 days, as long as you keep the receipt.',
           context: 'doc', highlight: true,
           metrics: [
-            { k: 'Evidence',      v: 'Orion Policy', s: 'good' },
-            { k: 'Answer status', v: 'Supported',    s: 'good' },
+            { k: 'Evidence',      v: 'Return Policy', s: 'good' },
+            { k: 'Answer status', v: 'Supported',     s: 'good' },
           ],
           risk: 'lower',
           note: 'Reliable context gives the AI something to base its answer on.', noteType: 'good',
         },
         safety: {
-          text: 'According to Orion Policy version 3.2, it was last updated on 12 September 2025.',
+          text: 'According to the GreenLeaf Return Policy, items can be returned within 30 days with a receipt.',
           context: 'doc', highlight: true, instructions: true,
           metrics: [
-            { k: 'Evidence',                 v: 'Orion Policy', s: 'good' },
-            { k: 'Source included',          v: 'Yes',          s: 'good' },
-            { k: 'Safety instruction followed', v: 'Yes',       s: 'good' },
+            { k: 'Evidence',                 v: 'Return Policy', s: 'good' },
+            { k: 'Source included',          v: 'Yes',           s: 'good' },
+            { k: 'Safety instruction followed', v: 'Yes',        s: 'good' },
           ],
           risk: 'lower',
           note: 'The answer names its source and follows the safety rules.', noteType: 'good',
@@ -617,35 +557,37 @@
       },
     },
     {
-      id: 'q2', icon: 'user-x', label: 'Who approved the latest Orion Policy?',
+      id: 'q2', icon: 'truck', label: 'Do you refund the delivery fee?',
       answers: {
         none: {
-          text: 'The latest Orion Policy was approved by Director Alan Reed.',
+          text: 'Yes, delivery fees are always fully refunded.',
           context: 'none',
           metrics: [
             { k: 'Evidence',      v: 'None',                 s: 'bad' },
             { k: 'Answer status', v: 'Invented (unsupported)', s: 'bad' },
           ],
           risk: 'high',
-          note: 'This name was invented — the AI had no document to check.', noteType: 'warn',
+          note: 'This answer was invented — the AI had no document to check.', noteType: 'warn',
         },
         trusted: {
-          text: 'The provided document does not identify who approved the policy.',
+          text: 'The policy does not say whether delivery fees are refunded.',
           context: 'doc', highlight: false, missing: true,
+          missingHint: 'No line in this document mentions delivery fees.',
           metrics: [
-            { k: 'Evidence',      v: 'Orion Policy',    s: 'good' },
+            { k: 'Evidence',      v: 'Return Policy',   s: 'good' },
             { k: 'Answer status', v: 'Not in document', s: 'neutral' },
           ],
           risk: 'lower',
           note: 'Saying “I don’t know” is safer than inventing an answer.', noteType: 'good',
         },
         safety: {
-          text: 'According to Orion Policy version 3.2, the document does not state who approved it.',
+          text: 'According to the GreenLeaf Return Policy, the document does not cover delivery fee refunds.',
           context: 'doc', highlight: false, missing: true, instructions: true,
+          missingHint: 'No line in this document mentions delivery fees.',
           metrics: [
-            { k: 'Evidence',                 v: 'Orion Policy', s: 'good' },
-            { k: 'Source included',          v: 'Yes',          s: 'good' },
-            { k: 'Safety instruction followed', v: 'Yes',       s: 'good' },
+            { k: 'Evidence',                 v: 'Return Policy', s: 'good' },
+            { k: 'Source included',          v: 'Yes',           s: 'good' },
+            { k: 'Safety instruction followed', v: 'Yes',        s: 'good' },
           ],
           risk: 'lower',
           note: 'The safety rules told the AI to say when the answer is missing.', noteType: 'good',
@@ -697,16 +639,14 @@
     if (a.context === 'none') {
       return `<div class="doc-card doc-empty flow-step" style="animation-delay:60ms;"><i data-lucide="file-x" style="width:16px;height:16px;display:inline;vertical-align:-2px;"></i> No supporting document provided.</div>`;
     }
-    const line = a.highlight
-      ? `Version 3.2 — <mark>Updated 12 September 2025</mark>`
-      : DOC.line;
+    const line = a.highlight ? DOC.lineMarked : DOC.line;
     const instr = a.instructions ? `
       <div class="doc-instr">
         <div class="doc-instr-h">System instructions</div>
         ${SAFETY_INSTRUCTIONS.map(t => `<div class="doc-instr-i"><i data-lucide="check" style="width:14px;height:14px;"></i> ${t}</div>`).join('')}
       </div>` : '';
     const missingHint = a.missing
-      ? `<div class="doc-line" style="color:#94a3b8;font-style:italic;"><i data-lucide="search-x" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> No line in this document names an approver.</div>`
+      ? `<div class="doc-line" style="color:#94a3b8;font-style:italic;"><i data-lucide="search-x" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> ${a.missingHint || 'This detail is not in the document.'}</div>`
       : '';
     return `
       <div class="doc-card flow-step" style="animation-delay:60ms;">

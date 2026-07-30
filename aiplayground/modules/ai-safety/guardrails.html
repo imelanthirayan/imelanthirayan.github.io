@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Guardrails — an interactive lesson on the checks and rules placed around an AI system to control what it receives, produces, and does." />
+  <title>Guardrails, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/guardrails.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Guardrails, AI Concepts Playground" />
+  <meta property="og:description" content="See how input, output, and action guardrails allow, block, rewrite, review, or require approval around an AI system." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/guardrails.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Guardrails, AI Concepts Playground" />
+  <meta name="twitter:description" content="See how input, output, and action guardrails allow, block, rewrite, review, or require approval around an AI system." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0284c7; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #38bdf8; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0284c7; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(2,132,199,0.25); background: rgba(2,132,199,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(2,132,199,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.28); background: rgba(2,132,199,0.1); }
+
+    /* ── Playground: request chooser ─────────── */
+    .q-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    @media (max-width: 720px) { .q-grid { grid-template-columns: 1fr; } }
+    .q-card {
+      cursor: pointer; text-align: left; display: flex; align-items: flex-start; gap: 0.7rem;
+      border-radius: 1rem; padding: 0.95rem 1.05rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    html.dark .q-card { background: #0f172a; border-color: #334155; }
+    .q-card:hover { border-color: rgba(14,165,233,0.45); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14,165,233,0.1); }
+    .q-card.active { border-color: #0ea5e9; background: rgba(14,165,233,0.06); box-shadow: 0 8px 22px rgba(14,165,233,0.16); }
+    html.dark .q-card.active { background: rgba(14,165,233,0.14); border-color: #38bdf8; }
+    .q-ic { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.22s ease; }
+    html.dark .q-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .q-card.active .q-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .q-title { font-weight: 900; font-size: 0.82rem; color: #1e293b; line-height: 1.3; }
+    html.dark .q-title { color: #f1f5f9; }
+    .q-sub { font-size: 0.72rem; font-weight: 600; color: #64748b; margin-top: 0.15rem; line-height: 1.35; }
+    html.dark .q-sub { color: #94a3b8; }
+
+    /* ── generate button ─────────────────────── */
+    .gen-btn {
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-size: 0.9rem; font-weight: 800; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px;
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9); border: none;
+      box-shadow: 0 8px 20px rgba(14,165,233,0.32); transition: all 0.2s ease;
+    }
+    .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(14,165,233,0.42); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* animated flow steps */
+    .flow-step { opacity: 0; transform: translateY(10px); animation: stepIn 0.45s ease forwards; }
+    @keyframes stepIn { to { opacity: 1; transform: translateY(0); } }
+    .step-label { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 1.25rem 0 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+
+    /* request/document card */
+    .doc-card { border-radius: 1rem; padding: 1rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .doc-card { background: #0f172a; border-color: #334155; }
+    .doc-line { font-size: 0.9rem; font-weight: 600; color: #334155; line-height: 1.55; }
+    html.dark .doc-line { color: #e2e8f0; }
+    .ai-name { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.2rem; }
+
+    /* ── Guardrail flow stages ───────────────── */
+    .gr-flow { display: flex; flex-direction: column; gap: 0; }
+    .gr-stage { display: flex; align-items: flex-start; gap: 0.85rem; padding: 0.9rem 1.05rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; border-left-width: 4px; background: #f8fafc; }
+    html.dark .gr-stage { background: #0f172a; border-color: #334155; }
+    .gr-stage.dim { opacity: 0.45; }
+    .gr-stage.st-good { border-left-color: #22c55e; } .gr-stage.st-poor { border-left-color: #ef4444; }
+    .gr-stage.st-info { border-left-color: #38bdf8; } .gr-stage.st-mid { border-left-color: #eab308; }
+    .gr-stage.st-muted { border-left-color: #cbd5e1; } html.dark .gr-stage.st-muted { border-left-color: #475569; }
+    .gr-ic { width: 38px; height: 38px; border-radius: 0.65rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; }
+    html.dark .gr-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .gr-body { flex: 1; min-width: 0; }
+    .gr-top { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; }
+    .gr-name { font-weight: 900; font-size: 0.9rem; color: #1e293b; } html.dark .gr-name { color: #f1f5f9; }
+    .gr-note { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-top: 0.25rem; line-height: 1.45; } html.dark .gr-note { color: #94a3b8; }
+    .gr-badge { font-size: 0.64rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; padding: 0.28rem 0.6rem; border-radius: 9999px; display: inline-flex; align-items: center; gap: 0.3rem; white-space: nowrap; flex-shrink: 0; }
+    .gr-badge.good { color: #15803d; background: rgba(22,163,74,0.12); } html.dark .gr-badge.good { color: #4ade80; background: rgba(22,163,74,0.16); }
+    .gr-badge.poor { color: #b91c1c; background: rgba(220,38,38,0.1); } html.dark .gr-badge.poor { color: #f87171; background: rgba(220,38,38,0.16); }
+    .gr-badge.info { color: #0369a1; background: rgba(56,189,248,0.16); } html.dark .gr-badge.info { color: #7dd3fc; background: rgba(56,189,248,0.2); }
+    .gr-badge.mid  { color: #a16207; background: rgba(234,179,8,0.16); } html.dark .gr-badge.mid  { color: #fde047; background: rgba(234,179,8,0.18); }
+    .gr-badge.muted{ color: #64748b; background: rgba(100,116,139,0.12); } html.dark .gr-badge.muted { color: #94a3b8; background: rgba(100,116,139,0.2); }
+    .gr-conn { display: flex; justify-content: center; color: #cbd5e1; padding: 0.15rem 0; } html.dark .gr-conn { color: #475569; }
+
+    .chk-empty { margin-top: 1.4rem; padding: 1.6rem 1rem; text-align: center; border-radius: 1rem; border: 1.5px dashed #e2e8f0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; }
+    html.dark .chk-empty { border-color: #334155; color: #64748b; }
+
+    .chk-note { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; padding: 0.9rem 1.1rem; border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3); }
+    html.dark .chk-note { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+    .chk-note i { flex-shrink: 0; }
+
+    /* ── Where guardrails work (clickable) ───── */
+    .where-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    @media (max-width: 720px) { .where-grid { grid-template-columns: 1fr; } }
+    .where-detail { margin-top: 1rem; border-radius: 1rem; padding: 1.15rem 1.25rem; border: 1.5px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.05); }
+    html.dark .where-detail { background: rgba(14,165,233,0.1); border-color: rgba(56,189,248,0.28); }
+    .where-detail .ai-name { color: #0369a1; } html.dark .where-detail .ai-name { color: #7dd3fc; }
+    .ex-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 0.9rem; }
+    .ex-chip { font-size: 0.75rem; font-weight: 700; color: #334155; background: white; border: 1.5px solid #e2e8f0; padding: 0.28rem 0.65rem; border-radius: 9999px; }
+    html.dark .ex-chip { color: #e2e8f0; background: #1e293b; border-color: #334155; }
+    .where-tag { font-size: 0.86rem; font-weight: 800; color: #0369a1; display: flex; align-items: center; gap: 0.45rem; }
+    html.dark .where-tag { color: #7dd3fc; }
+
+    /* ── Decision cards ──────────────────────── */
+    .dec-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.7rem; }
+    @media (max-width: 900px) { .dec-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .dec-grid { grid-template-columns: 1fr; } }
+    .dec-card { border-radius: 1rem; padding: 1.05rem 1rem; border: 1.5px solid #e2e8f0; border-top-width: 4px; background: #f8fafc; }
+    html.dark .dec-card { background: #0f172a; border-color: #334155; }
+    .dec-card.good { border-top-color: #22c55e; } .dec-card.poor { border-top-color: #ef4444; }
+    .dec-card.info { border-top-color: #38bdf8; } .dec-card.mid  { border-top-color: #eab308; }
+    .dec-ic { width: 36px; height: 36px; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 0.65rem; }
+    .dec-card.good .dec-ic { background: linear-gradient(135deg,#4ade80,#22c55e); }
+    .dec-card.poor .dec-ic { background: linear-gradient(135deg,#fb7185,#ef4444); }
+    .dec-card.info .dec-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .dec-card.mid  .dec-ic { background: linear-gradient(135deg,#fbbf24,#eab308); }
+    .dec-name { font-weight: 900; font-size: 0.92rem; color: #1e293b; } html.dark .dec-name { color: #f1f5f9; }
+    .dec-desc { font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 0.3rem; line-height: 1.45; } html.dark .dec-desc { color: #94a3b8; }
+    .dec-ex { font-size: 0.75rem; font-weight: 600; font-style: italic; color: #475569; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid #e2e8f0; line-height: 1.4; }
+    html.dark .dec-ex { color: #cbd5e1; border-color: #334155; }
+
+    /* ── Guardrails vs model (two-col) ───────── */
+    .vs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; align-items: stretch; }
+    @media (max-width: 720px) { .vs-grid { grid-template-columns: 1fr; } }
+    .vs-card { border-radius: 1.1rem; padding: 1.25rem 1.35rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .vs-card { background: #0f172a; border-color: #334155; }
+    .vs-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
+    .vs-ic { width: 38px; height: 38px; border-radius: 0.65rem; display: flex; align-items: center; justify-content: center; color: white; }
+    .vs-title { font-weight: 900; font-size: 1rem; color: #1e293b; } html.dark .vs-title { color: #f1f5f9; }
+    .vs-li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.84rem; font-weight: 600; color: #475569; line-height: 1.45; margin-bottom: 0.45rem; }
+    html.dark .vs-li { color: #cbd5e1; }
+    .vs-li i { flex-shrink: 0; margin-top: 0.15rem; color: #0ea5e9; } html.dark .vs-li i { color: #38bdf8; }
+
+    /* ── Limitations list ────────────────────── */
+    .lim-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+    @media (max-width: 620px) { .lim-list { grid-template-columns: 1fr; } }
+    .lim-item { display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.84rem; font-weight: 600; color: #475569; line-height: 1.45; padding: 0.6rem 0.8rem; border-radius: 0.7rem; border: 1.5px solid rgba(234,179,8,0.28); background: rgba(234,179,8,0.06); }
+    html.dark .lim-item { color: #cbd5e1; background: rgba(234,179,8,0.08); border-color: rgba(234,179,8,0.22); }
+    .lim-item i { flex-shrink: 0; margin-top: 0.1rem; color: #d97706; } html.dark .lim-item i { color: #fbbf24; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(56,189,248,0.04));
+      border: 1.5px solid rgba(14,165,233,0.22); border-left: 4px solid #0ea5e9; border-radius: 1.25rem;
+    }
+    html.dark .takeaway { background: linear-gradient(135deg, rgba(14,165,233,0.06), rgba(56,189,248,0.03)); border-color: rgba(56,189,248,0.2); border-left-color: #38bdf8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.08); color: #0284c7; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(14,165,233,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.3); background: rgba(14,165,233,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 500px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(14,165,233,0.5); color: #0284c7; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-900/30">
+          <span class="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>
+          <span class="text-sky-700 dark:text-sky-400 text-xs font-bold tracking-wide">🛡️ AI Safety</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–9 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="shield-check" class="w-7 h-7 text-sky-600 dark:text-sky-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Guardrails</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Guardrails are <strong class="text-slate-800 dark:text-slate-200">checks and rules placed around an AI system</strong>
+          to control what it receives, produces, or does. They do not change what the model knows —
+          they control <strong class="text-slate-800 dark:text-slate-200">how the application handles risky situations</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">AI Guardrail Simulator</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          Pick a request and press <strong class="text-slate-800 dark:text-slate-200">Run Through Guardrails</strong>.
+          Watch it move through each stage and see where it is allowed, blocked, rewritten, reviewed, or held for approval.
+        </p>
+
+        <!-- request chooser -->
+        <div class="q-grid" id="reqGrid"></div>
+
+        <!-- run button -->
+        <div class="mt-4" id="runWrap" style="display:none;">
+          <button class="gen-btn" id="runBtn"><i data-lucide="play" style="width:16px;height:16px;"></i> Run Through Guardrails</button>
+        </div>
+
+        <!-- flow output -->
+        <div id="flowArea"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. WHERE GUARDRAILS WORK
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="map-pin" style="width:12px;height:12px;"></i>Where Guardrails Work</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Three places to add a check</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          Tap a card to see what each guardrail checks and when it acts.
+        </p>
+        <div class="where-grid" id="whereGrid"></div>
+        <div id="whereDetail"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. TYPES OF GUARDRAIL DECISIONS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="git-branch" style="width:12px;height:12px;"></i>Guardrail Decisions</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Five things a guardrail can do</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          A guardrail does not only say yes or no. It can also change, pause, or escalate.
+        </p>
+        <div class="dec-grid" id="decGrid"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           5. GUARDRAILS vs MODEL BEHAVIOUR
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="split" style="width:12px;height:12px;"></i>Guardrails vs Model</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Two different jobs</h2>
+        <div class="vs-grid">
+          <div class="vs-card">
+            <div class="vs-head"><span class="vs-ic" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6);"><i data-lucide="bot" style="width:20px;height:20px;"></i></span><span class="vs-title">Model Behaviour</span></div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">The model decides what response is likely to come next.</p>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Generates text</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Follows instructions</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Uses context</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> May still make mistakes</div>
+          </div>
+          <div class="vs-card">
+            <div class="vs-head"><span class="vs-ic" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9);"><i data-lucide="shield" style="width:20px;height:20px;"></i></span><span class="vs-title">Guardrails</span></div>
+            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-3">The application checks whether the request, response, or action should be allowed.</p>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Filters unsafe inputs</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Checks outputs</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Limits tool access</div>
+            <div class="vs-li"><i data-lucide="check" style="width:15px;height:15px;"></i> Requires approval</div>
+          </div>
+        </div>
+        <div class="chk-note"><i data-lucide="info" style="width:18px;height:18px;"></i><span>The model creates the response. Guardrails control how the application handles it.</span></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           6. LIMITATIONS
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="alert-triangle" style="width:12px;height:12px;"></i>Limitations</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Guardrails reduce risk — they don't remove it</h2>
+        <div class="lim-list" id="limList"></div>
+        <div class="chk-note" style="color:#a16207;background:rgba(234,179,8,0.09);border-color:rgba(234,179,8,0.4);margin-top:1.25rem;">
+          <i data-lucide="alert-triangle" style="width:18px;height:18px;"></i>
+          <span>Guardrails control behaviour, but they do not guarantee correctness.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           7. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5" style="margin-top:1.25rem;">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-sky-500 dark:bg-sky-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• Guardrails are <strong class="text-slate-900 dark:text-white">checks placed around an AI system</strong>.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Input</strong> guardrails check user requests.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Output</strong> guardrails check AI responses.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Action</strong> guardrails control what AI can do.</li>
+              <li>• They may <strong class="text-slate-900 dark:text-white">allow, block, rewrite, review, or require approval</strong>.</li>
+              <li>• Guardrails do <strong class="text-slate-900 dark:text-white">not replace evaluation or human oversight</strong>.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Multiple layers</strong> are stronger than one rule.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Run each request through the simulator.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Notice where each request is stopped or changed.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare the input and output guardrails.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> See when human approval is required.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Think about which actions an AI should never do automatically.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(14,165,233,0.05),rgba(56,189,248,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Guardrails are rules and checks that control what an AI system receives, produces, and does. They reduce risk by blocking, changing, or reviewing unsafe situations, but they are only one part of AI safety.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="evaluating-ai-responses.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Evaluating AI Responses
+        </a>
+        <a href="prompt-injection.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-sky-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Prompt Injection</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Safety');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Guardrails, playground
+  ═══════════════════════════════════════════════ */
+
+  /* status meta: badge label, colour class, icon */
+  const STATUS = {
+    allow:    { label: 'Allow',            cls: 'good',  icon: 'check-circle-2' },
+    block:    { label: 'Block',            cls: 'poor',  icon: 'x-circle' },
+    rewrite:  { label: 'Rewrite',          cls: 'info',  icon: 'wand-2' },
+    review:   { label: 'Review',           cls: 'mid',   icon: 'eye' },
+    warn:     { label: 'Allow · Warning',  cls: 'mid',   icon: 'alert-triangle' },
+    approval: { label: 'Require Approval', cls: 'mid',   icon: 'user-check' },
+    done:     { label: 'Generated',        cls: 'info',  icon: 'sparkles' },
+    skip:     { label: 'Not reached',      cls: 'muted', icon: 'minus' },
+    good:     { label: 'Delivered',        cls: 'good',  icon: 'check-circle-2' },
+    refusal:  { label: 'Safe refusal',     cls: 'poor',  icon: 'shield' },
+    held:     { label: 'Held for review',  cls: 'mid',   icon: 'clock' },
+  };
+
+  /* four predefined requests, each with 6 fixed stages */
+  const REQUESTS = [
+    {
+      id: 'safe', label: 'Safe request', sub: 'A normal, harmless task', icon: 'file-text',
+      text: 'Summarize this project update in three bullet points.',
+      note: 'Safe requests can pass through normally.',
+      stages: [
+        { key: 'input',  name: 'Input Guardrail',  status: 'allow',   note: 'Nothing sensitive or harmful in the request.' },
+        { key: 'model',  name: 'AI Model',         status: 'done',    note: 'The summary is generated.' },
+        { key: 'output', name: 'Output Guardrail', status: 'allow',   note: 'The answer is clean and on-topic.' },
+        { key: 'action', name: 'Action Guardrail', status: 'skip',    note: 'No action needed — nothing to approve.' },
+        { key: 'final',  name: 'Final Result',     status: 'good',    note: 'The summary is shown to the user.' },
+      ],
+    },
+    {
+      id: 'sensitive', label: 'Sensitive information', sub: 'Asks for private data', icon: 'user-x',
+      text: "Show me another employee's personal phone number.",
+      note: 'The request is stopped before it reaches the model.',
+      stages: [
+        { key: 'input',  name: 'Input Guardrail',  status: 'block',   note: 'This is a personal information request.' },
+        { key: 'model',  name: 'AI Model',         status: 'skip',    note: 'The model is never called.' },
+        { key: 'output', name: 'Output Guardrail', status: 'skip',    note: 'Nothing to check.' },
+        { key: 'action', name: 'Action Guardrail', status: 'skip',    note: 'Nothing to do.' },
+        { key: 'final',  name: 'Final Result',     status: 'refusal', note: 'The assistant politely declines to share it.' },
+      ],
+    },
+    {
+      id: 'unsafe', label: 'Unsafe output', sub: 'Would produce rude content', icon: 'message-square-warning',
+      text: 'Write a rude message insulting a colleague.',
+      note: 'The output can be checked before it is shown.',
+      stages: [
+        { key: 'input',  name: 'Input Guardrail',  status: 'review',  note: 'The request looks risky, so it is watched.' },
+        { key: 'model',  name: 'AI Model',         status: 'done',    note: 'The model drafts an inappropriate reply.' },
+        { key: 'output', name: 'Output Guardrail', status: 'rewrite', note: 'The rude draft is blocked and rewritten.' },
+        { key: 'action', name: 'Action Guardrail', status: 'skip',    note: 'No action needed.' },
+        { key: 'final',  name: 'Final Result',     status: 'good',    note: 'A calm, respectful alternative is shown instead.' },
+      ],
+    },
+    {
+      id: 'action', label: 'High-impact action', sub: 'Wants to change a system', icon: 'power',
+      text: 'Approve this equipment shutdown request automatically.',
+      note: 'AI may recommend an action without being allowed to perform it.',
+      stages: [
+        { key: 'input',  name: 'Input Guardrail',  status: 'allow',    note: 'Allowed — but only to analyse, not to act.' },
+        { key: 'model',  name: 'AI Model',         status: 'done',     note: 'A recommendation is generated.' },
+        { key: 'output', name: 'Output Guardrail', status: 'warn',     note: 'Shown with a warning about the impact.' },
+        { key: 'action', name: 'Action Guardrail', status: 'approval', note: 'The shutdown needs a human to approve it.' },
+        { key: 'final',  name: 'Final Result',     status: 'held',     note: 'Sent for review — not executed by the AI.' },
+      ],
+    },
+  ];
+
+  const reqGrid  = document.getElementById('reqGrid');
+  const runWrap  = document.getElementById('runWrap');
+  const flowArea = document.getElementById('flowArea');
+  let activeReq = null;
+  let ran = false;
+
+  function renderRequests() {
+    reqGrid.innerHTML = REQUESTS.map(r => `
+      <button class="q-card ${r.id === activeReq ? 'active' : ''}" data-r="${r.id}">
+        <span class="q-ic"><i data-lucide="${r.icon}" style="width:18px;height:18px;"></i></span>
+        <span><span class="q-title">${r.label}</span><span class="q-sub">${r.sub}</span></span>
+      </button>`).join('');
+    reqGrid.querySelectorAll('.q-card').forEach(btn =>
+      btn.addEventListener('click', () => {
+        activeReq = btn.dataset.r;
+        ran = false;
+        renderRequests();
+        runWrap.style.display = 'block';
+        renderFlow();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function renderFlow() {
+    if (!activeReq) { flowArea.innerHTML = ''; return; }
+    const r = REQUESTS.find(x => x.id === activeReq);
+
+    /* the request bubble is always shown once a request is picked */
+    let html = `
+      <div class="step-label" style="margin-top:1.5rem;"><i data-lucide="message-square" style="width:12px;height:12px;"></i> User Request</div>
+      <div class="doc-card">
+        <div class="ai-name"><i data-lucide="user" style="width:12px;height:12px;display:inline;vertical-align:-1px;"></i> User</div>
+        <div class="doc-line" style="font-weight:800;">${r.text}</div>
+      </div>`;
+
+    if (ran) {
+      /* find where the flow stops (first block) so later stages dim */
+      let stopped = false;
+      const rows = r.stages.map((s, i) => {
+        const st = STATUS[s.status];
+        const dim = stopped ? ' dim' : '';
+        if (s.status === 'block') stopped = true;
+        const conn = i === 0 ? '' : `<div class="gr-conn flow-step" style="animation-delay:${i*220-110}ms;"><i data-lucide="chevron-down" style="width:18px;height:18px;"></i></div>`;
+        return `
+          ${conn}
+          <div class="gr-stage st-${st.cls}${dim} flow-step" style="animation-delay:${i*220}ms;">
+            <span class="gr-ic"><i data-lucide="${stageIcon(s.key)}" style="width:19px;height:19px;"></i></span>
+            <div class="gr-body">
+              <div class="gr-top">
+                <span class="gr-name">${s.name}</span>
+                <span class="gr-badge ${st.cls}"><i data-lucide="${st.icon}" style="width:12px;height:12px;"></i> ${st.label}</span>
+              </div>
+              <div class="gr-note">${s.note}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      html += `
+        <div class="step-label"><i data-lucide="route" style="width:12px;height:12px;"></i> Through the guardrails</div>
+        <div class="gr-flow">${rows}</div>
+        <div class="chk-note flow-step" style="animation-delay:${r.stages.length*220}ms;">
+          <i data-lucide="info" style="width:18px;height:18px;"></i><span>${r.note}</span>
+        </div>`;
+    }
+
+    flowArea.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function stageIcon(key) {
+    return key === 'input' ? 'log-in'
+         : key === 'model' ? 'bot'
+         : key === 'output' ? 'log-out'
+         : key === 'action' ? 'settings'
+         : 'flag';
+  }
+
+  document.getElementById('runBtn').addEventListener('click', () => { ran = true; renderFlow(); });
+
+  /* ── 3. Where guardrails work (clickable) ── */
+  const WHERE = [
+    {
+      id: 'input', title: 'Input Guardrails', icon: 'log-in', tag: 'Input guardrails act before the model responds.',
+      desc: 'Check what the user sends to the AI.',
+      examples: ['harmful requests', 'private information', 'unsupported file types', 'requests outside the app'],
+    },
+    {
+      id: 'output', title: 'Output Guardrails', icon: 'log-out', tag: 'Output guardrails act before the response reaches the user.',
+      desc: 'Check what the AI produces.',
+      examples: ['harmful language', 'unsupported claims', 'private information', 'wrong format'],
+    },
+    {
+      id: 'action', title: 'Action Guardrails', icon: 'settings', tag: 'Action guardrails matter most when AI can use tools.',
+      desc: 'Control what the AI is allowed to do.',
+      examples: ['send an email', 'approve a request', 'delete a record', 'make a payment'],
+    },
+  ];
+  let activeWhere = 'input';
+  const whereGrid = document.getElementById('whereGrid');
+  const whereDetail = document.getElementById('whereDetail');
+
+  function renderWhere() {
+    whereGrid.innerHTML = WHERE.map(w => `
+      <button class="q-card ${w.id === activeWhere ? 'active' : ''}" data-w="${w.id}">
+        <span class="q-ic"><i data-lucide="${w.icon}" style="width:18px;height:18px;"></i></span>
+        <span><span class="q-title">${w.title}</span></span>
+      </button>`).join('');
+    whereGrid.querySelectorAll('.q-card').forEach(btn =>
+      btn.addEventListener('click', () => { activeWhere = btn.dataset.w; renderWhere(); })
+    );
+    const w = WHERE.find(x => x.id === activeWhere);
+    whereDetail.innerHTML = `
+      <div class="where-detail">
+        <div class="ai-name">${w.desc}</div>
+        <div class="ex-list">${w.examples.map(e => `<span class="ex-chip">${e}</span>`).join('')}</div>
+        <div class="where-tag"><i data-lucide="arrow-right-circle" style="width:16px;height:16px;"></i> ${w.tag}</div>
+      </div>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  /* ── 4. Decision cards ── */
+  const DECISIONS = [
+    { name: 'Allow',   cls: 'good', icon: 'check-circle-2', desc: 'The request or response is safe to continue.',      ex: 'A normal summary request goes straight through.' },
+    { name: 'Block',   cls: 'poor', icon: 'x-circle',       desc: 'Stop the request or response completely.',           ex: 'A request for private data is refused.' },
+    { name: 'Rewrite', cls: 'info', icon: 'wand-2',         desc: 'Change unsafe content into a safer version.',        ex: 'A rude draft becomes a polite reply.' },
+    { name: 'Review',  cls: 'mid',  icon: 'eye',            desc: 'Send the content to a person or another check.',     ex: 'A borderline answer is flagged for a look.' },
+    { name: 'Require Approval', cls: 'mid', icon: 'user-check', desc: 'Do nothing until an authorized person approves.', ex: 'A shutdown waits for a human to say yes.' },
+  ];
+  function renderDecisions() {
+    document.getElementById('decGrid').innerHTML = DECISIONS.map(d => `
+      <div class="dec-card ${d.cls}">
+        <div class="dec-ic"><i data-lucide="${d.icon}" style="width:19px;height:19px;"></i></div>
+        <div class="dec-name">${d.name}</div>
+        <div class="dec-desc">${d.desc}</div>
+        <div class="dec-ex">${d.ex}</div>
+      </div>`).join('');
+  }
+
+  /* ── 6. Limitations ── */
+  const LIMITS = [
+    'A harmful request may be missed.',
+    'A safe request may be blocked incorrectly.',
+    'Users may reword requests to avoid checks.',
+    'An output may look safe but still be wrong.',
+    'Rules may not understand the full context.',
+    'Guardrails may become outdated.',
+    'Tool permissions may be set up incorrectly.',
+  ];
+  function renderLimits() {
+    document.getElementById('limList').innerHTML = LIMITS.map(l =>
+      `<div class="lim-item"><i data-lucide="alert-circle" style="width:16px;height:16px;"></i> ${l}</div>`).join('');
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderRequests();
+    renderFlow();
+    renderWhere();
+    renderDecisions();
+    renderLimits();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>

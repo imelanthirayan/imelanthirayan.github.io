@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Evaluating AI Responses — an interactive lesson on checking whether an AI answer is relevant, accurate, complete, clear, supported, and safe before it is trusted or used." />
+  <title>Evaluating AI Responses, AI Concepts Playground</title>
+  <link rel="canonical" href="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/evaluating-ai-responses.html" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="AI Concepts Playground" />
+  <meta property="og:title" content="Evaluating AI Responses, AI Concepts Playground" />
+  <meta property="og:description" content="Check whether an AI answer is relevant, accurate, complete, clear, supported, and safe before trusting it." />
+  <meta property="og:url" content="https://imelanthirayan.github.io/aiplayground/modules/ai-safety/evaluating-ai-responses.html" />
+  <meta property="og:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="AI Concepts Playground" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Evaluating AI Responses, AI Concepts Playground" />
+  <meta name="twitter:description" content="Check whether an AI answer is relevant, accurate, complete, clear, supported, and safe before trusting it." />
+  <meta name="twitter:image" content="https://imelanthirayan.github.io/aiplayground/image/og.png" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%96%B6%EF%B8%8F</text></svg>">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+    };
+  </script>
+
+  <link rel="stylesheet" href="../../css/custom.css" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <style>
+    /* ── Module card ─────────────────────────── */
+    .module-card {
+      background: white; border-radius: 1.25rem; padding: 1.75rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 18px rgba(0,0,0,0.04);
+    }
+    html.dark .module-card {
+      background: #1e293b; border-color: rgba(255,255,255,0.06);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25), 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .mod-label {
+      font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #0284c7; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    html.dark .mod-label { color: #38bdf8; }
+
+    /* ── Back button ─────────────────────────── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.875rem; font-weight: 600; color: #0284c7; text-decoration: none;
+      padding: 0.4rem 0.9rem; border-radius: 9999px;
+      border: 1px solid rgba(2,132,199,0.25); background: rgba(2,132,199,0.07);
+      transition: all 0.22s ease;
+    }
+    .back-btn:hover { background: rgba(2,132,199,0.13); transform: translateX(-2px); }
+    html.dark .back-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.28); background: rgba(2,132,199,0.1); }
+
+    /* ── Playground: response chooser ────────── */
+    .q-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+    @media (max-width: 720px) { .q-grid { grid-template-columns: 1fr; } }
+    .q-card {
+      cursor: pointer; text-align: left; display: flex; align-items: flex-start; gap: 0.7rem;
+      border-radius: 1rem; padding: 0.95rem 1.05rem;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; transition: all 0.22s ease;
+    }
+    html.dark .q-card { background: #0f172a; border-color: #334155; }
+    .q-card:hover { border-color: rgba(14,165,233,0.45); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14,165,233,0.1); }
+    .q-card.active { border-color: #0ea5e9; background: rgba(14,165,233,0.06); box-shadow: 0 8px 22px rgba(14,165,233,0.16); }
+    html.dark .q-card.active { background: rgba(14,165,233,0.14); border-color: #38bdf8; }
+    .q-ic { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(14,165,233,0.12); color: #0284c7; transition: all 0.22s ease; }
+    html.dark .q-ic { background: rgba(14,165,233,0.22); color: #7dd3fc; }
+    .q-card.active .q-ic { background: linear-gradient(135deg,#38bdf8,#0ea5e9); color: white; }
+    .q-title { font-weight: 900; font-size: 0.82rem; color: #1e293b; line-height: 1.3; }
+    html.dark .q-title { color: #f1f5f9; }
+    .q-sub { font-size: 0.72rem; font-weight: 600; color: #64748b; margin-top: 0.15rem; line-height: 1.35; }
+    html.dark .q-sub { color: #94a3b8; }
+
+    /* ── generate / ghost buttons ────────────── */
+    .gen-btn {
+      cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      font-size: 0.9rem; font-weight: 800; color: white; padding: 0.75rem 1.5rem; border-radius: 9999px;
+      background: linear-gradient(135deg,#38bdf8,#0ea5e9); border: none;
+      box-shadow: 0 8px 20px rgba(14,165,233,0.32); transition: all 0.2s ease;
+    }
+    .gen-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(14,165,233,0.42); }
+    .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .gen-btn.ghost { color: #0284c7; background: white; border: 1.5px solid rgba(14,165,233,0.4); box-shadow: none; }
+    .gen-btn.ghost:hover { background: rgba(14,165,233,0.07); box-shadow: 0 6px 16px rgba(14,165,233,0.16); }
+    html.dark .gen-btn.ghost { background: #0f172a; color: #7dd3fc; border-color: rgba(56,189,248,0.35); }
+
+    /* animated flow steps */
+    .flow-step { opacity: 0; transform: translateY(10px); animation: stepIn 0.45s ease forwards; }
+    @keyframes stepIn { to { opacity: 1; transform: translateY(0); } }
+    .step-label { font-size: 0.66rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 1.25rem 0 0.5rem; display: flex; align-items: center; gap: 0.35rem; }
+
+    /* document / source card */
+    .doc-card { border-radius: 1rem; padding: 1rem 1.1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .doc-card { background: #0f172a; border-color: #334155; }
+    .doc-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.6rem; }
+    .doc-ic { width: 34px; height: 34px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .doc-title { font-weight: 900; font-size: 0.92rem; color: #1e293b; }
+    html.dark .doc-title { color: #f1f5f9; }
+    .doc-line { font-size: 0.86rem; font-weight: 600; color: #334155; line-height: 1.55; }
+    html.dark .doc-line { color: #e2e8f0; }
+    .doc-line mark { background: rgba(34,197,94,0.28); color: inherit; padding: 0.1rem 0.3rem; border-radius: 0.35rem; font-weight: 800; }
+    html.dark .doc-line mark { background: rgba(34,197,94,0.28); }
+    .doc-line mark.bad { background: rgba(239,68,68,0.28); }
+    html.dark .doc-line mark.bad { background: rgba(239,68,68,0.3); }
+
+    /* AI answer bubble */
+    .ai-response { display: flex; gap: 0.8rem; padding: 1.1rem 1.2rem; border-radius: 1rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .ai-response { background: #0f172a; border-color: #334155; }
+    .ai-avatar { width: 38px; height: 38px; border-radius: 0.7rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; background: linear-gradient(135deg,#38bdf8,#0ea5e9); }
+    .ai-name { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.2rem; }
+    .ai-text { font-size: 0.92rem; font-weight: 600; color: #334155; line-height: 1.5; }
+    html.dark .ai-text { color: #e2e8f0; }
+
+    /* ── Score list after checking ───────────── */
+    .cmp-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.55rem; }
+    @media (max-width: 560px) { .cmp-list { grid-template-columns: 1fr; } }
+    .cmp-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.75rem; border-radius: 0.75rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .cmp-row { background: #0f172a; border-color: #334155; }
+    .cmp-row i { flex-shrink: 0; }
+    .cmp-k { font-size: 0.7rem; font-weight: 700; color: #64748b; }
+    html.dark .cmp-k { color: #94a3b8; }
+    .cmp-v { font-size: 0.84rem; font-weight: 800; }
+    .cmp-row.good { border-color: rgba(22,163,74,0.35); background: rgba(22,163,74,0.05); } .cmp-row.good i, .cmp-row.good .cmp-v { color: #16a34a; }
+    html.dark .cmp-row.good { background: rgba(22,163,74,0.1); border-color: rgba(22,163,74,0.3); } html.dark .cmp-row.good .cmp-v { color: #4ade80; }
+    .cmp-row.mid  { border-color: rgba(234,179,8,0.4); background: rgba(234,179,8,0.06); } .cmp-row.mid i, .cmp-row.mid .cmp-v { color: #a16207; }
+    html.dark .cmp-row.mid { background: rgba(234,179,8,0.1); border-color: rgba(234,179,8,0.35); } html.dark .cmp-row.mid .cmp-v { color: #fde047; }
+    .cmp-row.poor { border-color: rgba(220,38,38,0.4); background: rgba(220,38,38,0.05); } .cmp-row.poor i, .cmp-row.poor .cmp-v { color: #dc2626; }
+    html.dark .cmp-row.poor { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.35); } html.dark .cmp-row.poor .cmp-v { color: #f87171; }
+
+    /* missing points list */
+    .miss-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.7rem; }
+    .miss-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.82rem; font-weight: 600; color: #b45309; }
+    html.dark .miss-item { color: #fbbf24; }
+    .miss-item i { flex-shrink: 0; margin-top: 0.1rem; }
+
+    /* overall verdict banner */
+    .verdict { display: flex; align-items: center; gap: 0.7rem; padding: 0.9rem 1.1rem; border-radius: 0.95rem; font-weight: 900; font-size: 0.95rem; border: 1.5px solid; }
+    .verdict.good { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.35); }
+    html.dark .verdict.good { color: #4ade80; background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.3); }
+    .verdict.mid  { color: #a16207; background: rgba(234,179,8,0.1); border-color: rgba(234,179,8,0.4); }
+    html.dark .verdict.mid { color: #fde047; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.35); }
+    .verdict.poor { color: #b91c1c; background: rgba(220,38,38,0.08); border-color: rgba(220,38,38,0.4); }
+    html.dark .verdict.poor { color: #f87171; background: rgba(220,38,38,0.12); border-color: rgba(220,38,38,0.35); }
+
+    /* notes */
+    .chk-note { display: flex; align-items: center; gap: 0.6rem; margin-top: 1.1rem; padding: 0.9rem 1.1rem; border-radius: 0.9rem; font-size: 0.9rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.09); border: 1.5px solid rgba(56,189,248,0.3); }
+    html.dark .chk-note { color: #7dd3fc; background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.28); }
+    .chk-note i { flex-shrink: 0; }
+    .chk-note.warn { color: #a16207; background: rgba(234,179,8,0.09); border-color: rgba(234,179,8,0.4); }
+    html.dark .chk-note.warn { color: #fde047; background: rgba(234,179,8,0.12); border-color: rgba(234,179,8,0.35); }
+    .chk-note.good { color: #15803d; background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.32); }
+    html.dark .chk-note.good { color: #4ade80; background: rgba(22,163,74,0.12); border-color: rgba(22,163,74,0.3); }
+
+    .chk-empty { margin-top: 1.4rem; padding: 1.6rem 1rem; text-align: center; border-radius: 1rem; border: 1.5px dashed #e2e8f0; color: #94a3b8; font-size: 0.9rem; font-weight: 600; }
+    html.dark .chk-empty { border-color: #334155; color: #64748b; }
+
+    /* ── Scenario cards (context-dependent) ──── */
+    .sc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+    @media (max-width: 800px) { .sc-grid { grid-template-columns: 1fr; } }
+    .sc-card { border-radius: 1.1rem; padding: 1.15rem 1.2rem; border: 1.5px solid #e2e8f0; background: #f8fafc; }
+    html.dark .sc-card { background: #0f172a; border-color: #334155; }
+    .sc-top { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .sc-ic { width: 36px; height: 36px; border-radius: 0.6rem; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; }
+    .sc-title { font-weight: 900; font-size: 0.9rem; color: #1e293b; } html.dark .sc-title { color: #f1f5f9; }
+    .sc-q { font-size: 0.8rem; font-weight: 600; font-style: italic; color: #475569; line-height: 1.45; padding: 0.55rem 0.7rem; border-radius: 0.6rem; background: white; border: 1.5px solid #e2e8f0; margin-bottom: 0.7rem; }
+    html.dark .sc-q { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+    .sc-plabel { font-size: 0.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.4rem; }
+    .sc-chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; }
+    .sc-chip { font-size: 0.72rem; font-weight: 700; color: #0369a1; background: rgba(56,189,248,0.1); border: 1.5px solid rgba(56,189,248,0.25); padding: 0.24rem 0.55rem; border-radius: 9999px; }
+    html.dark .sc-chip { color: #7dd3fc; background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.25); }
+    .sc-note { font-size: 0.76rem; font-weight: 700; line-height: 1.4; padding: 0.5rem 0.65rem; border-radius: 0.6rem; }
+
+    /* ── Takeaway ────────────────────────────── */
+    .takeaway {
+      display: flex; align-items: flex-start; gap: 1rem; padding: 1.5rem 1.75rem;
+      background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(56,189,248,0.04));
+      border: 1.5px solid rgba(14,165,233,0.22); border-left: 4px solid #0ea5e9; border-radius: 1.25rem;
+    }
+    html.dark .takeaway { background: linear-gradient(135deg, rgba(14,165,233,0.06), rgba(56,189,248,0.03)); border-color: rgba(56,189,248,0.2); border-left-color: #38bdf8; }
+
+    /* ── Try-this pill button + modal ────────── */
+    .trythis-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; flex-shrink: 0;
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0.42rem 0.9rem; border-radius: 9999px;
+      border: 1.5px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.08); color: #0284c7; transition: all 0.2s ease;
+    }
+    .trythis-btn:hover { background: rgba(14,165,233,0.16); transform: translateY(-1px); }
+    html.dark .trythis-btn { color: #7dd3fc; border-color: rgba(56,189,248,0.3); background: rgba(14,165,233,0.14); }
+
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 100%; max-width: 500px; border-radius: 1.25rem; padding: 1.5rem 1.65rem;
+      background: white; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transform: translateY(16px) scale(0.98); transition: transform 0.25s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    html.dark .modal-box { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+    .modal-close {
+      cursor: pointer; width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1.5px solid #e2e8f0; background: white; color: #64748b; transition: all 0.2s ease;
+    }
+    .modal-close:hover { border-color: rgba(14,165,233,0.5); color: #0284c7; }
+    html.dark .modal-close { background: #0f172a; border-color: #334155; color: #cbd5e1; }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300">
+
+  <!-- ── NAV ──────────────────────────────────── -->
+  <script src="../../js/partials.js"></script>
+  <script>writeSiteNav();</script>
+
+  <main class="pt-20 pb-28">
+    <div class="max-w-5xl mx-auto px-5 md:px-8">
+
+      <!-- ── Breadcrumb ────────────────────────── -->
+      <div class="flex items-center gap-3 mt-7 mb-9 flex-wrap">
+        <a href="../../index.html" class="back-btn">
+          <i data-lucide="arrow-left" style="width:13px;height:13px;"></i>
+          Back to Home
+        </a>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-900/30">
+          <span class="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>
+          <span class="text-sky-700 dark:text-sky-400 text-xs font-bold tracking-wide">🛡️ AI Safety</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30">
+          <span class="text-amber-700 dark:text-amber-400 text-xs font-bold tracking-wide">🟡 Intermediate · 7–10 min</span>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════
+           1. OVERVIEW
+      ══════════════════════════════════════ -->
+      <header class="mb-10">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="clipboard-check" class="w-7 h-7 text-sky-600 dark:text-sky-400"></i>
+          </div>
+          <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">Evaluating AI Responses</h1>
+        </div>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Evaluation is the process of checking whether an AI response is
+          <strong class="text-slate-800 dark:text-slate-200">good enough for its intended use</strong>.
+          A response can sound clear and confident while still being
+          <strong class="text-slate-800 dark:text-slate-200">incomplete, unsupported, or incorrect</strong>.
+        </p>
+      </header>
+
+
+      <!-- ══════════════════════════════════════
+           2. MAIN INTERACTIVE PLAYGROUND
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="flex items-center justify-between gap-3" style="margin-bottom:1.25rem;">
+          <div class="mod-label" style="margin-bottom:0;"><i data-lucide="flask-conical" style="width:12px;height:12px;"></i>Interactive Playground</div>
+          <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
+        </div>
+
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">AI Response Reviewer</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+          One question, three AI answers. The trusted source is shown below. Pick an answer and press
+          <strong class="text-slate-800 dark:text-slate-200">Check this answer</strong> to see how it scores.
+        </p>
+
+        <!-- the question -->
+        <div class="doc-card" style="margin-bottom:0.75rem;">
+          <div class="ai-name" style="margin-bottom:0.35rem;"><i data-lucide="help-circle" style="width:12px;height:12px;display:inline;vertical-align:-1px;"></i> User question</div>
+          <div class="doc-line" style="font-weight:800;">Can I eat the leftover rice from last night?</div>
+        </div>
+
+        <!-- the trusted source (always visible) -->
+        <div class="doc-card" style="margin-bottom:1rem;">
+          <div class="doc-head"><div class="doc-ic"><i data-lucide="file-text" style="width:17px;height:17px;"></i></div><div class="doc-title">Home Food Safety Guide</div></div>
+          <div class="doc-line"><i data-lucide="info" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> Cooked rice can be kept in the fridge for <mark>up to 1 day</mark>, then reheated until steaming hot.</div>
+          <div class="doc-line" style="color:#b91c1c;font-weight:800;"><i data-lucide="octagon-alert" style="width:14px;height:14px;display:inline;vertical-align:-2px;"></i> If it was left out overnight or smells sour, throw it away.</div>
+        </div>
+
+        <!-- response chooser -->
+        <div class="q-grid" id="respGrid"></div>
+
+        <!-- selected answer + result -->
+        <div id="reviewArea"></div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           3. EVALUATION IS CONTEXT-DEPENDENT
+      ══════════════════════════════════════ -->
+      <section class="module-card mb-5">
+        <div class="mod-label"><i data-lucide="layers" style="width:12px;height:12px;"></i>Context Matters</div>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">The same answer, judged differently</h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
+          The same answer may be fine in one situation and unsuitable in another. What you check depends on the task.
+        </p>
+        <div class="sc-grid" id="scGrid"></div>
+        <div class="chk-note" style="margin-top:1.25rem;">
+          <i data-lucide="info" style="width:18px;height:18px;"></i>
+          <span>Evaluation criteria should match the risk of the task.</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════
+           4. KEY TAKEAWAYS
+      ══════════════════════════════════════ -->
+      <section class="mb-5" style="margin-top:1.25rem;">
+        <div class="takeaway">
+          <div class="w-11 h-11 rounded-xl bg-sky-500 dark:bg-sky-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="key-round" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black mb-2 text-slate-900 dark:text-white">Key Takeaways</h3>
+            <ul class="space-y-1.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+              <li>• AI responses should be <strong class="text-slate-900 dark:text-white">checked before they are trusted</strong>.</li>
+              <li>• A good response is <strong class="text-slate-900 dark:text-white">relevant, accurate, complete, clear, supported, and safe</strong>.</li>
+              <li>• Confident wording <strong class="text-slate-900 dark:text-white">does not prove correctness</strong>.</li>
+              <li>• Evaluation depends on the <strong class="text-slate-900 dark:text-white">purpose and risk</strong> of the task.</li>
+              <li>• High-impact responses require <strong class="text-slate-900 dark:text-white">stronger checks</strong>.</li>
+              <li>• <strong class="text-slate-900 dark:text-white">Human review remains important</strong>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ TRY-THIS MODAL ═════ -->
+      <div class="modal-overlay" id="tryModal" role="dialog" aria-modal="true" aria-label="Try this">
+        <div class="modal-box">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">💡</span>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white">Try this</h3>
+            </div>
+            <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+          </div>
+          <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Check all three leftover-rice answers.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Read the source and see which conditions each answer keeps.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Notice which important conditions are missing.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare the confident answer with the supported one.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare evaluation priorities across different use cases.</li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════ SUMMARY ═════ -->
+      <section class="module-card mb-5" style="border-color:rgba(14,165,233,0.3);background:linear-gradient(135deg,rgba(14,165,233,0.05),rgba(56,189,248,0.03));">
+        <div class="mod-label"><i data-lucide="check-circle-2" style="width:12px;height:12px;"></i>Summary</div>
+        <p class="text-slate-700 dark:text-slate-200 text-lg leading-relaxed">
+          <strong>Evaluating an AI response means checking whether it is relevant, accurate, complete, clear, supported, and safe for the task. A response should be trusted because it passes these checks, not because it sounds confident.</strong>
+        </p>
+      </section>
+
+
+      <!-- ══════════════════════════════════════ FINAL NAVIGATION ═════ -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center gap-4">
+        <a href="reducing-hallucinations.html" class="btn-secondary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1">
+          <i data-lucide="arrow-left" style="width:15px;height:15px;margin-right:4px;"></i>
+          Previous: Reducing Hallucinations
+        </a>
+        <a href="guardrails.html" class="btn-primary text-sm px-6 py-3 w-full sm:w-auto text-center flex items-center justify-center gap-1 ring-2 ring-sky-400/50 ring-offset-2 ring-offset-transparent">
+          <strong>Next: Guardrails</strong>
+          <i data-lucide="arrow-right" style="width:15px;height:15px;margin-left:4px;"></i>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+
+  <!-- ── FOOTER ────────────────────────────────── -->
+  <script>writeSiteFooter('AI Safety');</script>
+
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/animations.js"></script>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     Evaluating AI Responses, playground
+  ═══════════════════════════════════════════════ */
+
+  /* rating dimensions shown in the score card */
+  const DIMS = [
+    { id: 'relevant', label: 'Relevant', icon: 'target' },
+    { id: 'accurate', label: 'Accurate', icon: 'check-check' },
+    { id: 'complete', label: 'Complete', icon: 'list-checks' },
+    { id: 'clear',    label: 'Clear',    icon: 'eye' },
+    { id: 'supported',label: 'Supported',icon: 'link' },
+    { id: 'safe',     label: 'Safe',     icon: 'shield' },
+  ];
+  const V_LABEL = { good: 'Good', mid: 'Needs work', poor: 'Poor' };
+
+  /* ── the three responses ── */
+  const RESPONSES = [
+    {
+      id: 'A', tag: 'Response A', sub: 'Confident but incorrect', icon: 'thumbs-up',
+      text: 'Leftover rice is always fine — just microwave it and eat it.',
+      suggested: { relevant:'good', accurate:'poor', complete:'poor', clear:'good', supported:'poor', safe:'poor' },
+      verdict: { type:'poor', label:'Unsafe response' },
+      missing: ['Ignores the 1-day limit', 'Ignores reheating until hot', 'Ignores the throw-it-away warning'],
+    },
+    {
+      id: 'B', tag: 'Response B', sub: 'Partly correct', icon: 'circle-slash',
+      text: 'You can keep cooked rice in the fridge for 1 day.',
+      suggested: { relevant:'good', accurate:'mid', complete:'poor', clear:'good', supported:'mid', safe:'mid' },
+      verdict: { type:'mid', label:'Incomplete response' },
+      missing: ['Reheating until steaming hot', 'The “smells sour” check', 'The left-out-overnight warning'],
+    },
+    {
+      id: 'C', tag: 'Response C', sub: 'Supported and complete', icon: 'badge-check',
+      text: 'According to the Home Food Safety Guide, keep cooked rice for up to 1 day and reheat it until steaming hot. Throw it away if it was left out overnight or smells sour.',
+      suggested: { relevant:'good', accurate:'good', complete:'good', clear:'good', supported:'good', safe:'good' },
+      verdict: { type:'good', label:'Strong response' },
+      missing: [],
+    },
+  ];
+
+  const respGrid  = document.getElementById('respGrid');
+  const reviewArea = document.getElementById('reviewArea');
+  let activeResp = null;
+  let checked = false;
+
+  function renderResponses() {
+    respGrid.innerHTML = RESPONSES.map(r => `
+      <button class="q-card ${r.id === activeResp ? 'active' : ''}" data-r="${r.id}">
+        <span class="q-ic"><i data-lucide="${r.icon}" style="width:18px;height:18px;"></i></span>
+        <span><span class="q-title">${r.tag}</span><span class="q-sub">${r.sub}</span></span>
+      </button>`).join('');
+    respGrid.querySelectorAll('.q-card').forEach(btn =>
+      btn.addEventListener('click', () => {
+        activeResp = btn.dataset.r;
+        checked = false;
+        renderResponses(); renderReview();
+      })
+    );
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function renderReview() {
+    if (!activeResp) {
+      reviewArea.innerHTML = `<div class="chk-empty">Pick a response above to check it.</div>`;
+      return;
+    }
+    const r = RESPONSES.find(x => x.id === activeResp);
+
+    reviewArea.innerHTML = `
+      <div class="step-label" style="margin-top:1.5rem;"><i data-lucide="bot" style="width:12px;height:12px;"></i> ${r.tag}</div>
+      <div class="ai-response flow-step" style="animation-delay:0ms;">
+        <div class="ai-avatar"><i data-lucide="bot" style="width:20px;height:20px;"></i></div>
+        <div><div class="ai-name">AI Assistant</div><div class="ai-text">${r.text}</div></div>
+      </div>
+
+      <div class="mt-4">
+        <button class="gen-btn" id="checkBtn"><i data-lucide="scan-search" style="width:16px;height:16px;"></i> Check this answer</button>
+      </div>
+
+      <div id="resultBox">${checked ? resultCard(r) : ''}</div>`;
+
+    document.getElementById('checkBtn').addEventListener('click', () => { checked = true; renderReview(); });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  function resultCard(r) {
+    const rows = DIMS.map((d, i) => {
+      const sv = r.suggested[d.id];
+      return `
+        <div class="cmp-row ${sv} flow-step" style="animation-delay:${i*70}ms;">
+          <i data-lucide="${sv==='good'?'check-circle-2':sv==='poor'?'x-circle':'alert-circle'}" style="width:16px;height:16px;"></i>
+          <div style="flex:1;"><div class="cmp-k">${d.label}</div><div class="cmp-v">${V_LABEL[sv]}</div></div>
+        </div>`;
+    }).join('');
+
+    const miss = r.missing.length
+      ? `<div class="ai-name" style="margin:0.9rem 0 0.2rem;">What it misses</div>
+         <div class="miss-list">${r.missing.map(m => `<div class="miss-item"><i data-lucide="minus-circle" style="width:15px;height:15px;"></i> ${m}</div>`).join('')}</div>`
+      : `<div class="chk-note good" style="margin-top:0.9rem;"><i data-lucide="shield-check" style="width:18px;height:18px;"></i><span>This answer covers every condition in the source.</span></div>`;
+
+    return `
+      <div class="step-label"><i data-lucide="scale" style="width:12px;height:12px;"></i> How it scores</div>
+      <div class="cmp-list">${rows}</div>
+      ${miss}
+      <div class="verdict ${r.verdict.type} flow-step" style="margin-top:1rem;">
+        <i data-lucide="${r.verdict.type==='good'?'shield-check':r.verdict.type==='mid'?'alert-circle':'alert-triangle'}" style="width:20px;height:20px;"></i>
+        <span>Overall: ${r.verdict.label}</span>
+      </div>
+      <div class="chk-note flow-step" style="margin-top:0.9rem;">
+        <i data-lucide="info" style="width:18px;height:18px;"></i>
+        <span>A good response must do more than sound convincing.</span>
+      </div>`;
+  }
+
+  /* ── 3. Context-dependent scenarios ── */
+  const SCENARIOS = [
+    { icon:'lightbulb', color:'linear-gradient(135deg,#a78bfa,#8b5cf6)', title:'Brainstorming', q:'Suggest names for a fictional product.',
+      chips:['creativity','relevance','variety'], noteType:'ok', note:'Small factual errors may not matter much.' },
+    { icon:'file-check', color:'linear-gradient(135deg,#38bdf8,#0ea5e9)', title:'Policy Question', q:'What approval is required for this design change?',
+      chips:['accuracy','completeness','current source','traceability'], noteType:'mid', note:'Unsupported assumptions are not acceptable.' },
+    { icon:'alert-octagon', color:'linear-gradient(135deg,#fb7185,#ef4444)', title:'Safety-Critical', q:'Is this leftover food safe to eat?',
+      chips:['accuracy','safety','conditions','human review'], noteType:'poor', note:'The bar for acceptance must be much higher.' },
+  ];
+  function renderScenarios() {
+    const toneStyle = { ok:'color:#15803d;background:rgba(22,163,74,0.1);', mid:'color:#a16207;background:rgba(234,179,8,0.12);', poor:'color:#b91c1c;background:rgba(220,38,38,0.1);' };
+    document.getElementById('scGrid').innerHTML = SCENARIOS.map(s => `
+      <div class="sc-card">
+        <div class="sc-top"><span class="sc-ic" style="background:${s.color};"><i data-lucide="${s.icon}" style="width:19px;height:19px;"></i></span><span class="sc-title">${s.title}</span></div>
+        <div class="sc-q">${s.q}</div>
+        <div class="sc-plabel">Evaluation priority</div>
+        <div class="sc-chips">${s.chips.map(c => `<span class="sc-chip">${c}</span>`).join('')}</div>
+        <div class="sc-note" style="${toneStyle[s.noteType]}">${s.note}</div>
+      </div>`).join('');
+  }
+
+  /* ── Try-this modal wiring ── */
+  (function () {
+    const overlay = document.getElementById('tryModal');
+    const open = () => overlay.classList.add('open');
+    const close = () => overlay.classList.remove('open');
+    document.querySelectorAll('[data-trythis-open]').forEach(b => b.addEventListener('click', open));
+    overlay.querySelectorAll('[data-trythis-close]').forEach(b => b.addEventListener('click', close));
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  })();
+
+  /* ── Init ── */
+  window.addEventListener('load', () => {
+    Utils.loadDarkPreference();
+
+    function syncDarkIcons() {
+      const dark = Utils.isDark();
+      document.querySelectorAll('.icon-sun').forEach(el  => el.classList.toggle('hidden',  dark));
+      document.querySelectorAll('.icon-moon').forEach(el => el.classList.toggle('hidden', !dark));
+    }
+    syncDarkIcons();
+    document.querySelectorAll('[data-dark-toggle]').forEach(btn =>
+      btn.addEventListener('click', () => { Utils.toggleDark(); syncDarkIcons(); })
+    );
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    renderResponses();
+    renderReview();
+    renderScenarios();
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (typeof gsap !== 'undefined') {
+      gsap.from('header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' });
+    }
+  });
+  </script>
+</body>
+</html>

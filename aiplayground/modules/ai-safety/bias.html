@@ -399,11 +399,11 @@
           <button class="trythis-btn" data-trythis-open><i data-lucide="lightbulb" style="width:13px;height:13px;"></i> Try this</button>
         </div>
 
-        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Candidate Review Simulator</h2>
+        <h2 class="text-2xl font-black mb-3 text-slate-900 dark:text-white">Loan Approval Simulator</h2>
         <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-5">
-          Two candidates have <strong class="text-slate-800 dark:text-slate-200">almost identical</strong> qualifications.
+          Two people apply for the same loan. Their <strong class="text-slate-800 dark:text-slate-200">money details are identical</strong> — only one unrelated thing is different.
           Press <strong class="text-slate-800 dark:text-slate-200">Run AI Review</strong> and watch the result.
-          Then turn on <strong class="text-slate-800 dark:text-slate-200">Use Relevant Skills Only</strong> and run it again.
+          Then turn on <strong class="text-slate-800 dark:text-slate-200">Use Money Details Only</strong> and run it again.
         </p>
 
         <!-- candidate cards -->
@@ -417,7 +417,7 @@
             <span class="thumb"></span>
           </label>
           <div>
-            <div class="switch-label">Use Relevant Skills Only</div>
+            <div class="switch-label">Use Money Details Only</div>
             <div class="switch-hint">Ignore details that should not affect the decision.</div>
           </div>
         </div>
@@ -526,8 +526,8 @@
               Relevant Difference
               <span class="clar-tag ok" style="margin-left:auto;">Reasonable</span>
             </div>
-            <div class="clar-line">Candidate A <strong>has</strong> the required certification.</div>
-            <div class="clar-line">Candidate B <strong>does not</strong> have it.</div>
+            <div class="clar-line">Applicant A <strong>has</strong> a steady income.</div>
+            <div class="clar-line">Applicant B <strong>has no income</strong> yet.</div>
             <div class="clar-result">→ Different outcomes may be reasonable.</div>
           </div>
           <div class="clar-card biased">
@@ -536,8 +536,8 @@
               Irrelevant Difference
               <span class="clar-tag risk" style="margin-left:auto;">Possible Bias</span>
             </div>
-            <div class="clar-line">Both candidates have the <strong>required skills</strong>.</div>
-            <div class="clar-line">Only an <strong>unrelated personal detail</strong> changes.</div>
+            <div class="clar-line">Both applicants have the <strong>same income and payment history</strong>.</div>
+            <div class="clar-line">Only an <strong>unrelated detail</strong> (like their email) changes.</div>
             <div class="clar-result">→ Different outcomes may indicate bias.</div>
           </div>
         </div>
@@ -578,9 +578,9 @@
             <button class="modal-close" data-trythis-close aria-label="Close"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
           </div>
           <ul class="flex flex-col gap-2.5 text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Run the candidate review and read the result.</li>
-            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare the two profiles — only one detail differs.</li>
-            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Turn on <strong>Use Relevant Skills Only</strong> and run again.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Run the loan review and read the result.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Compare the two applicants — only the email differs.</li>
+            <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Turn on <strong>Use Money Details Only</strong> and run again.</li>
             <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Explore where bias can enter in the lifecycle.</li>
             <li class="flex items-start gap-2.5"><span class="text-sky-500 mt-0.5">→</span> Think how the same issue could appear in lending, education, healthcare, or customer support.</li>
           </ul>
@@ -624,17 +624,17 @@
      Bias in AI, playground
   ═══════════════════════════════════════════════ */
 
-  /* ── 2. Candidate Review Simulator ── */
-  // Both candidates share the same relevant qualifications.
-  // Only "Career break" differs — an irrelevant detail.
+  /* ── 2. Loan Approval Simulator ── */
+  // Both applicants have identical money details.
+  // Only their email provider differs — an irrelevant detail.
   const SHARED_ROWS = [
-    { icon: 'calendar', text: '5 years of experience', relevant: true },
-    { icon: 'code',     text: 'Python and cloud skills', relevant: true },
-    { icon: 'trending-up', text: 'Strong project delivery', relevant: true },
+    { icon: 'wallet',     text: 'Monthly income: $4,000' },
+    { icon: 'briefcase',  text: 'Steady job: 6 years' },
+    { icon: 'check-circle-2', text: 'Bills always paid on time' },
   ];
-  const CANDIDATES = [
-    { id: 'A', name: 'Candidate A', break: 'No',     breakText: 'Career break: No' },
-    { id: 'B', name: 'Candidate B', break: '1 year', breakText: 'Career break: 1 year' },
+  const APPLICANTS = [
+    { id: 'A', name: 'Applicant A', flagged: false, detailText: 'Email: alex@brightmail.com' },
+    { id: 'B', name: 'Applicant B', flagged: true,  detailText: 'Email: sam@oldbox.net' },
   ];
 
   const candGrid   = document.getElementById('candGrid');
@@ -646,38 +646,38 @@
   function renderCandidates() {
     const relevantOnly = relevantToggle.checked;
 
-    candGrid.innerHTML = CANDIDATES.map(c => {
+    candGrid.innerHTML = APPLICANTS.map(c => {
       // shared relevant rows
       const rows = SHARED_ROWS.map(r =>
         `<div class="cand-line"><i data-lucide="${r.icon}" style="width:15px;height:15px;"></i> ${r.text}</div>`
       ).join('');
 
-      // the differing (irrelevant) career-break row
-      const breakCls = relevantOnly ? 'cand-line ignored' : 'cand-line diff';
-      const breakTag = relevantOnly
+      // the differing (irrelevant) email row
+      const diffCls = relevantOnly ? 'cand-line ignored' : 'cand-line diff';
+      const diffTag = relevantOnly
         ? '<span class="cand-tag">Ignored</span>'
-        : (c.break === 'No' ? '' : '<span class="cand-tag">Only difference</span>');
-      const breakRow = `<div class="${breakCls}"><i data-lucide="briefcase" style="width:15px;height:15px;"></i> ${c.breakText}${breakTag}</div>`;
+        : (c.flagged ? '<span class="cand-tag">Only difference</span>' : '');
+      const diffRow = `<div class="${diffCls}"><i data-lucide="mail" style="width:15px;height:15px;"></i> ${c.detailText}${diffTag}</div>`;
 
       // result (only shown after Run AI Review)
       let resultHtml = '';
       let cardState = '';
       if (reviewed) {
-        // biased when irrelevant detail is used AND this candidate has a career break
-        const recommended = relevantOnly || c.break === 'No';
-        cardState = recommended ? 'rec' : 'not';
-        resultHtml = recommended
-          ? `<div class="cand-result rec"><i data-lucide="check-circle-2" style="width:17px;height:17px;"></i> Recommended</div>`
-          : `<div class="cand-result not"><i data-lucide="x-circle" style="width:17px;height:17px;"></i> Not Recommended</div>`;
+        // biased when the irrelevant detail is used AND this applicant is the flagged one
+        const approved = relevantOnly || !c.flagged;
+        cardState = approved ? 'rec' : 'not';
+        resultHtml = approved
+          ? `<div class="cand-result rec"><i data-lucide="check-circle-2" style="width:17px;height:17px;"></i> Approved</div>`
+          : `<div class="cand-result not"><i data-lucide="x-circle" style="width:17px;height:17px;"></i> Declined</div>`;
       }
 
       return `
         <div class="cand-card ${cardState}">
           <div class="cand-head">
             <div class="cand-avatar">${c.id}</div>
-            <div><div class="cand-name">${c.name}</div><div class="cand-sub">Applicant</div></div>
+            <div><div class="cand-name">${c.name}</div><div class="cand-sub">Loan applicant</div></div>
           </div>
-          <div class="cand-rows">${rows}${breakRow}</div>
+          <div class="cand-rows">${rows}${diffRow}</div>
           ${resultHtml}
         </div>`;
     }).join('');
@@ -694,13 +694,13 @@
       reviewNote.innerHTML = `
         <div class="chk-note good">
           <i data-lucide="check-circle-2" style="width:18px;height:18px;flex-shrink:0;"></i>
-          <span>Now only relevant skills are used — both candidates are treated the same.</span>
+          <span>Now only the money details are used — both applicants are treated the same.</span>
         </div>`;
     } else {
       reviewNote.innerHTML = `
         <div class="chk-note warn">
           <i data-lucide="alert-triangle" style="width:18px;height:18px;flex-shrink:0;"></i>
-          <span><strong>What changed?</strong> Only the career-break detail. When an irrelevant detail influences the outcome, the result may be biased.</span>
+          <span><strong>What changed?</strong> Only the email provider — which has nothing to do with paying back a loan. When an irrelevant detail influences the outcome, the result may be biased.</span>
         </div>`;
     }
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -788,9 +788,9 @@
 
   /* ── 5. Compare Fairness ── */
   const FAIR_CASES = [
-    { name: 'Case 1', detail: 'Same skills · lives in City A' },
-    { name: 'Case 2', detail: 'Same skills · applied on a weekend' },
-    { name: 'Case 3', detail: 'Same skills · 1-year career break' },
+    { name: 'Case 1', detail: 'Same finances · different email' },
+    { name: 'Case 2', detail: 'Same finances · applied on a weekend' },
+    { name: 'Case 3', detail: 'Same finances · lives in another city' },
   ];
   const fairBtn = document.getElementById('fairBtn');
   const fairOutput = document.getElementById('fairOutput');
@@ -800,7 +800,7 @@
       <div class="fair-card" style="animation-delay:${i * 120}ms;">
         <div class="fair-name">${f.name}</div>
         <div class="fair-detail">${f.detail}</div>
-        <span class="fair-badge"><i data-lucide="check" style="width:12px;height:12px;"></i> Recommended</span>
+        <span class="fair-badge"><i data-lucide="check" style="width:12px;height:12px;"></i> Approved</span>
       </div>`).join('');
 
     fairOutput.innerHTML = `
