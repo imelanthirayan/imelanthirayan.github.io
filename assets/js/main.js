@@ -490,27 +490,57 @@ document.querySelectorAll('.testimonial-toggle').forEach(btn => {
 // ANIMATIONS
 // ════════════════════════════════════════════
 
-// ── Typewriter effect for hero role title ──
+// ── Typewriter effect for hero role title (rotates through roles) ──
 (function initTypewriter() {
   const el = document.getElementById('hero-role');
   if (!el) return;
-  const text = el.textContent.trim();
+  const inner = el.querySelector('#role-rotator');
+  let roles = null;
+  try { roles = inner ? JSON.parse(inner.dataset.roles) : null; } catch (e) { roles = null; }
+  if (!Array.isArray(roles) || !roles.length) roles = [el.textContent.trim()];
+
   el.textContent = '';
-  let i = 0;
-  const speed = 60;
-  function type() {
-    if (i < text.length) {
-      el.textContent += text[i++];
-      setTimeout(type, speed);
+  const typeSpeed = 60, deleteSpeed = 35, holdFull = 1800, holdEmpty = 400, startDelay = 1250;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let r = 0;
+
+  // Reduced motion: no typing/deleting, just swap text.
+  if (reduceMotion) {
+    el.textContent = roles[0];
+    if (roles.length > 1) {
+      setInterval(() => { r = (r + 1) % roles.length; el.textContent = roles[r]; }, 3000);
+    }
+    return;
+  }
+
+  let i = 0, deleting = false;
+  function tick() {
+    const word = roles[r];
+    if (!deleting) {
+      el.textContent = word.slice(0, ++i);
+      if (i === word.length) {
+        if (roles.length === 1) { el.classList.remove('typing-active'); return; }
+        deleting = true;
+        setTimeout(tick, holdFull);
+        return;
+      }
+      setTimeout(tick, typeSpeed);
     } else {
-      el.classList.remove('typing-active'); // remove cursor when done
+      el.textContent = word.slice(0, --i);
+      if (i === 0) {
+        deleting = false;
+        r = (r + 1) % roles.length;
+        setTimeout(tick, holdEmpty);
+        return;
+      }
+      setTimeout(tick, deleteSpeed);
     }
   }
   // Start after hero fade-in completes (hero-d4: 0.42s delay + 0.72s duration)
   setTimeout(() => {
     el.classList.add('typing-active');
-    type();
-  }, 1250);
+    tick();
+  }, startDelay);
 })();// ── Animated counters ──
 (function initCounters() {
   const els = document.querySelectorAll('[data-count-to]');
