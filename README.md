@@ -1,128 +1,47 @@
 <h1 align="center">Hey, I'm Elanthirayan (Ela) 👋</h1>
 
 <p align="center">
-  <b>Senior AI & Software Engineer</b><br/>
-  Building AI-powered applications, cloud-native platforms, and software architectures that solve real-world problems.
+  <b>Senior AI Engineer & Forward Deployed Engineer (FDE)</b>: I build production-ready AI systems and cloud-native applications, taking ideas from a whiteboard all the way to production.
 </p>
 
 <p align="center">
-  <a href="https://imelanthirayan.github.io/">🌐 Portfolio</a>
-  •
-  <a href="https://imelanthirayan.github.io/aiplayground/">🧠 AI Concepts Playground</a>
-  •
-  <a href="https://elanthirayan.medium.com/">✍️ Medium</a>
-  •
+  <i>Engineer who thinks like a researcher: probing frontier AI, validating with evidence, and shipping it to production.</i>
+</p>
+
+<p align="center">
+  <a href="https://imelanthirayan.github.io/">🌐 Portfolio</a> &nbsp;•&nbsp;
+  <a href="https://imelanthirayan.github.io/aiplayground/">🧠 AI Playground</a> &nbsp;•&nbsp;
+  <a href="https://elanthirayan.medium.com/">✍️ Blog</a> &nbsp;•&nbsp;
   <a href="https://www.linkedin.com/in/elanthirayan/">💼 LinkedIn</a>
+</p>
+
+<p align="center">
+  <img alt="Years of experience" src="https://img.shields.io/badge/experience-11%2B%20years-0ea5e9?style=flat-square" />
+  <img alt="Technical papers" src="https://img.shields.io/badge/technical%20papers-6%2B-38bdf8?style=flat-square" />
+  <img alt="Blogs published" src="https://img.shields.io/badge/blogs-80%2B-f59e0b?style=flat-square" />
+  <img alt="Open to opportunities" src="https://img.shields.io/badge/status-open%20to%20opportunities-brightgreen?style=flat-square" />
 </p>
 
 ---
 
-## 👨‍💻 About Me
+### 🚀 What I'm about
 
-I'm passionate about building software that connects **AI, cloud, and modern software architecture** into practical solutions.
+Most software doesn't break in the code; it breaks in the **seams between systems**. I've spent the last **11+ years** building across those seams.
 
-I enjoy working across the entire engineering lifecycle—from designing user experiences and scalable APIs to deploying cloud-native systems and integrating Generative AI where it creates measurable value.
+I design and ship **production-ready AI systems** and **cloud-native applications**, owning the architecture and engineering end to end, not just individual components. I work like a researcher: I read the frontier AI literature, reproduce and benchmark new methods, run controlled experiments, and let evidence, not hype, decide the architecture. Before committing to an approach, I evaluate emerging AI techniques against **business value, performance, cost, and long-term maintainability**.
 
-Over the years I've worked across multiple domains including:
+When the right tool doesn't exist, I build it. When it can help others, I open-source it. My work spans **applied AI research and production engineering**, and I've also delivered across **HPC, XR / Spatial Computing, and Digital Twins** along the way, because building across domains is half the fun.
 
-- 🤖 Generative AI & LLM Applications
-- 🏗️ Software Architecture & System Design
-- ☁️ Cloud-Native Engineering (Azure)
-- ⚡ Backend APIs & Distributed Services
-- 🌐 Full-Stack Web Applications
-- 🥽 XR / Spatial Computing
-- 🌍 Digital Twins & OpenUSD
-- 🚀 High Performance Computing (HPC)
+### 🧠 AI Concepts Playground
 
----
+A project I'm building: interactive lessons that explain how AI actually works by letting you play with it instead of reading theory. Click through LLMs, embeddings, RAG, MCP, transformers, AI agents, model optimization, and AI safety at your own pace, no setup required.
 
-## ⚙️ Current Focus
+**[Take a look →](https://imelanthirayan.github.io/aiplayground/)**
 
-```javascript
-const ela = {
-  role: "Senior AI & Software Engineer",
+### ✍️ I also write & share
 
-  currentlyBuilding: [
-    "AI-powered applications",
-    "Agentic AI systems",
-    "Cloud-native platforms",
-    "Software architecture",
-    "Interactive AI education"
-  ],
+I've published **80+ articles** on engineering, AI, and things I learn along the way over on Medium → **[elanthirayan.medium.com](https://elanthirayan.medium.com/)**, and share videos on **[YouTube](https://www.youtube.com/@ElanthirayanMadhavan)**.
 
-  exploring: [
-    "AI Agents",
-    "LLM Infrastructure",
-    "RAG",
-    "Knowledge Graphs",
-    "Model Optimization"
-  ],
+### 👋 Say hi
 
-  philosophy:
-    "Build practical software. Keep architectures simple. Make complex ideas easy to understand."
-};
-```
-
----
-
-## 🧠 AI Concepts Playground
-
-One of my favorite side projects.
-
-**AI Concepts Playground** is an interactive learning platform designed to help developers understand AI by experimenting with concepts instead of reading long documentation.
-
-Explore topics like:
-
-- Transformers
-- LLM Architecture
-- Embeddings
-- Vector Search
-- RAG
-- AI Agents
-- Prompt Engineering
-- MCP
-- Fine-Tuning
-
-No installation. No prerequisites. Just interactive learning.
-
-👉 **https://imelanthirayan.github.io/aiplayground/**
-
----
-
-## ✍️ Writing
-
-I regularly write beginner-friendly articles covering:
-
-- Artificial Intelligence
-- LLMs
-- Software Architecture
-- Cloud Engineering
-- Modern Development
-
-📖 **https://elanthirayan.medium.com**
-
----
-
-## 🌍 Open Source
-
-I enjoy contributing to open-source projects and building educational tools that help developers understand complex technologies through practical examples.
-
-If something I build helps you learn, that's a win.
-
----
-
-## 🤝 Let's Connect
-
-I'm always happy to connect with people interested in:
-
-- Artificial Intelligence
-- Software Architecture
-- Cloud Engineering
-- Full-Stack Development
-- Open Source
-
-📫 **Portfolio:** https://imelanthirayan.github.io
-
-💼 **LinkedIn:** https://www.linkedin.com/in/elanthirayan
-
-✍️ **Medium:** https://elanthirayan.medium.com
+Happy to chat about software, system design, or AI. Find me on **[LinkedIn](https://www.linkedin.com/in/elanthirayan/)** or through **[imelanthirayan.github.io](https://imelanthirayan.github.io/)**
