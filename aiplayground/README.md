@@ -184,6 +184,20 @@ It uses plain English, live interactions, and step-by-step animations so beginne
 </details>
 
 <details>
+<summary><b>🛡️ AI Safety</b> — how AI systems are checked, guarded, and kept trustworthy in real applications</summary>
+
+- What is AI Safety?
+- Bias
+- Reducing Hallucinations
+- Evaluating AI Responses
+- Guardrails
+- Prompt Injection
+- Jailbreaks
+- Data Privacy
+- Content Moderation
+</details>
+
+<details>
 <summary><b>🗂️ Vector Index Explorer</b> — compare how vector databases trade speed for accuracy</summary>
 
 - Compare All Indexes
