@@ -44,4 +44,4 @@ I've published **80+ articles** on engineering, AI, and things I learn along the
 
 ### 👋 Say hi
 
-Happy to chat about software, system design, or AI. Find me on **[LinkedIn](https://www.linkedin.com/in/elanthirayan/)** or through **[imelanthirayan.github.io](https://imelanthirayan.github.io/)**
+Happy to chat about AI, Emerging digital tech, Spatial Computing, etc.., Find me on **[LinkedIn](https://www.linkedin.com/in/elanthirayan/)** or through **[imelanthirayan.github.io](https://imelanthirayan.github.io/)**
