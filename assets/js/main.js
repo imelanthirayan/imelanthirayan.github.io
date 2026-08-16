@@ -70,7 +70,7 @@ if (moreToggle && moreDropdown) {
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 const moreBtn  = document.querySelector('.more-btn');
-const MORE_SECTIONS = new Set(['blog', 'media', 'github']);
+const MORE_SECTIONS = new Set(['blog', 'github']);
 // Sections not in nav; map to the nearest nav item to highlight
 const NAV_ALIAS = { hobbies: 'contact' };
 
@@ -254,90 +254,6 @@ fadeEls.forEach(el => {
     .catch(() => {
       loading.classList.add('hidden');
       error.classList.remove('hidden');
-    });
-})();
-
-// ════════════════════════════════════════════
-// YOUTUBE FEED
-// Uses rss2json.com to bypass CORS on the YouTube RSS feed.
-// Channel: @ElanthirayanMadhavan  |  ID: UCGxrfvamHDZuyq2E5ZV1H0w
-// ════════════════════════════════════════════
-(function loadYouTubeVideos() {
-  const YT_FEED = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCGxrfvamHDZuyq2E5ZV1H0w';
-  const YT_API  = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(YT_FEED)}`;
-
-  const ytGrid    = document.getElementById('yt-grid');
-  const ytLoading = document.getElementById('yt-loading');
-  const ytError   = document.getElementById('yt-error');
-
-  function ytFormatDate(dateStr) {
-    try { return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
-    catch { return ''; }
-  }
-
-  function extractVideoId(link) {
-    const m = (link || '').match(/[?&]v=([^&]+)/);
-    return m ? m[1] : null;
-  }
-
-  function buildVideoCard(item) {
-    const title = item.title || 'Untitled';
-    const link  = item.link  || '#';
-    const date  = ytFormatDate(item.pubDate);
-    const vidId = extractVideoId(link);
-    const thumb = vidId
-      ? `https://i.ytimg.com/vi/${vidId}/hqdefault.jpg`
-      : (item.thumbnail || '');
-
-    return `
-    <article class="glass glass-hover rounded-2xl overflow-hidden flex flex-col group">
-      <a href="${link}" target="_blank" rel="noopener noreferrer" class="relative block overflow-hidden" aria-label="Watch: ${title}">
-        <img src="${thumb}" alt="${title}" loading="lazy"
-             class="w-full aspect-video object-cover transition-transform duration-500 group-hover:scale-105" />
-        <div class="absolute inset-0 bg-gradient-to-t from-white/30 via-white/10 to-transparent"></div>
-        <div class="absolute inset-0 flex items-center justify-center">
-          <div class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center shadow-lg
-                      transition-transform duration-300 group-hover:scale-110 group-hover:bg-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          </div>
-        </div>
-        <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-rose-400
-                    scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-      </a>
-      <div class="p-4 flex flex-col flex-1">
-        ${date ? `<time class="text-xs text-slate-600 font-mono mb-1.5">${date}</time>` : ''}
-        <h3 class="text-sm font-semibold text-slate-200 leading-snug line-clamp-2 group-hover:text-red-300 transition-colors flex-1">
-          ${title}
-        </h3>
-        <a href="${link}" target="_blank" rel="noopener noreferrer"
-           class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-red-400 hover:text-red-300 transition-colors group/link">
-          Watch on YouTube
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 transition-transform group-hover/link:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-        </a>
-      </div>
-    </article>`;
-  }
-
-  fetch(YT_API)
-    .then(r => { if (!r.ok) throw new Error('Network error'); return r.json(); })
-    .then(data => {
-      ytLoading.classList.add('hidden');
-      if (data.status !== 'ok' || !data.items || data.items.length === 0) throw new Error('No items');
-      ytGrid.innerHTML = data.items.slice(0, 6).map(v => buildVideoCard(v)).join('');
-      ytGrid.classList.remove('hidden');
-      ytGrid.querySelectorAll('article').forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
-        fadeObserver.observe(el);
-      });
-      document.getElementById('yt-show-more').style.display = 'block';
-    })
-    .catch(() => {
-      ytLoading.classList.add('hidden');
-      ytError.classList.remove('hidden');
     });
 })();
 
