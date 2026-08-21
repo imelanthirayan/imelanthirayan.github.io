@@ -1,7 +1,7 @@
 <h1 align="center">Hey, I'm Elanthirayan (Ela) 👋</h1>
 
 <p align="center">
-  <b>Senior AI Engineer & Forward Deployed Engineer (FDE)</b>: I build production-ready AI systems and cloud-native applications, taking ideas from a whiteboard all the way to production.
+  <b>Senior Applied AI Engineer & Forward Deployed Engineer (FDE)</b>: I build production-ready AI systems and cloud-native applications, taking ideas from a whiteboard all the way to production.
 </p>
 
 <p align="center">
